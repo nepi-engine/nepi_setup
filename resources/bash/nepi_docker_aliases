@@ -126,7 +126,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD) >/dev/null 2>&1
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == 'nepi_engine_ws' || "$par_folder" == 'nepi_engine_ws'  || "$(pwd)" == *"nepi_engine_ws/setup"* ]]; then
+    if [[ "$cur_folder" == 'nepi_engine_ws' || "$par_folder" == 'nepi_engine_ws' ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
@@ -473,14 +473,14 @@ fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/system_cfg
 ucfg = /mnt/nepi_storage/user_cfg"
 
-export SETUPN="/home/${USER}/nepi_engine_ws/setup"
+export SETUPN="/home/${USER}/nepi_engine_ws/nepi_setup/scripts"
 alias setupn="cd ${SETUPN}"
 
 HELPN="${HELPN}
 ################################
 ## NEPI folder shortcuts ##
 ################################
-setupn = /home/${USER}/nepi_engine_ws/setup"
+setupn = /home/${USER}/nepi_engine_ws/nepi_setup/scripts"
 
 
 # Print out the nepi shortcuts
