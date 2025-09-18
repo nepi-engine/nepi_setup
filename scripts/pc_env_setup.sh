@@ -50,7 +50,6 @@ done
 
 
 
-
 #################################
 # Install Software Requirments
 
@@ -60,14 +59,11 @@ sudo apt install vim-gtk3 -y
 #sudo update-alternatives --config vim
 vim --version | grep clipboard
 
-
-
-
 #Install yq
 #https://mikefarah.gitbook.io/yq/v3.x
-sudo add-apt-repository ppa:rmescandon/yq
-sudo apt update
-sudo apt install yq -y
+# sudo add-apt-repository ppa:rmescandon/yq
+# sudo apt update
+# sudo apt install yq -y
 
 sudo apt install git -y
 sudo apt install gitk -y
