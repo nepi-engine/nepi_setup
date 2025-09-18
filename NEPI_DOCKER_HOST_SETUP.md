@@ -54,6 +54,10 @@ Setup docker bash:
     ./setup/scripts/docker_bash_setup.sh
     source ~/.bashrc
 
+See nepi docker functions menu:
+
+    nepihelp
+
 ### Docker Storage Setup
 Run:
 
@@ -66,9 +70,14 @@ Setup docker environment:
 
     ./setup/scripts/docker_env_setup.sh
 
-When prompted to add keyring select `yes`
+NOTE: You can switch between your original systems configuration and nepi docker configurations anytime by typing:
+
+    nepidisable
+    nepienable
 
 ### Docker Config Setup
 Setup docker configuration:
 
     ./setup/scripts/docker_config_setup.sh
+
+

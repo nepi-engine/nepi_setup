@@ -38,6 +38,9 @@ Setup NEPI PC bash:
     ./setup/scripts/pc_bash_setup.sh
     source ~/.bashrc
 
+See nepi PC functions menu:
+
+    nepihelp
 
 ### NEPI PC Environment Setup
 Setup NEPI PC environment:
