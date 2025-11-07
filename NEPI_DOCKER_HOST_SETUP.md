@@ -72,8 +72,6 @@ Clone the NEPI setup repo:
 
 
 
-
-
 ### NEPI Docker User Setup
 This step creates and configures NEPI Docker requried user accounts.
 The "nepihost" user account password will be updated to the NEPI_HOST_PW value set in the previous step.
@@ -87,7 +85,7 @@ then
     /home/nepihost/nepi_setup/scripts/docker_user_setup.sh
 
 
-POWER CYCLE YOUR SYSTEM WHEN COMPLETE
+*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
 
 ### NEPI Docker Bash Setup
 Log back into `nepihost` using password 'nepi'
@@ -100,7 +98,7 @@ Setup NEPI docker bash (sudo password is now 'nepi'):
 
     source /home/${USER}/nepi_setup/scripts/docker_bash_setup.sh
 
-POWER CYCLE YOUR SYSTEM WHEN COMPLETE
+*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
 
 
 ### NEPI Docker Folder Setup
@@ -127,7 +125,7 @@ If prompted enter: `y` or 'yes' :
     /home/${USER}/nepi_setup/scripts/docker_env_setup.sh
     
 
-POWER CYCLE YOUR SYSTEM WHEN COMPLETE
+*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
 
 
 ### NEPI Docker Config Setup
@@ -146,7 +144,7 @@ NOTE:  After this process, both network IP addresses, internet connections, and 
 
     ninet # Enable internet connection and sync clocks on connection
 
-POWER CYCLE YOUR SYSTEM WHEN COMPLETE
+*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
 
 ### NEPI User Storage Setup
 
@@ -296,7 +294,8 @@ Enable the container to start on boot:
 
 NOTE: You can disable the NEPI Docker service with the command: sudo systemctl disable nepi_docker
 
-POWER CYCLE YOUR SYSTEM WHEN COMPLETE
+*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+
 Log back into `nepihost` using password 'nepi' 
 
 Check that your NEPI Container is running:
