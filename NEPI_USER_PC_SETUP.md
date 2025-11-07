@@ -40,13 +40,13 @@ Clone the NEPI setup repo:
 
 
 
-### NEPI PC Bash Setup
-Setup NEPI PC bash:
+### NEPI PC Setup
+This step configures a network connected PC to communicate with a NEPI Device:
 
     source /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
     source ~/.bashrc
 
-See nepi PC functions menu:
+See the NEPI PC command line shortcuts menu:
 
     nepihelp
 

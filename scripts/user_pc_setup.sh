@@ -142,11 +142,11 @@ echo "Updating Bash Files"
 echo ""
 
 echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
-BASHRC=/home/${CONFIG_USER}/.bashrc
+BASHRC=/home/${USER}/.bashrc
 
 
 NEPI_UTILS_SOURCE=$(dirname "$(pwd)")/resources/bash/nepi_bash_utils
-NEPI_UTILS_DEST=${HOME}/.nepi_bash_utils
+NEPI_UTILS_DEST=/home/${USER}/.nepi_bash_utils
 echo "Installing NEPI utils file ${NEPI_UTILS_DEST} "
 if [ -f "$NEPI_UTILS_DEST" ]; then
     sudo rm $NEPI_UTILS_DEST
@@ -155,7 +155,7 @@ sudo cp $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_DEST
 
 NEPI_ALIASES_SOURCE=$(dirname "$(pwd)")/resources/bash/nepi_pc_aliases
-NEPI_ALIASES_DEST=${HOME}/.nepi_pc_aliases
+NEPI_ALIASES_DEST=/home/${USER}/.nepi_pc_aliases
 echo "Installing NEPI aliases file ${NEPI_ALIASES_DEST} "
 if [ -f "$NEPI_ALIASES_DEST" ]; then
     sudo rm $NEPI_ALIASES_DEST
