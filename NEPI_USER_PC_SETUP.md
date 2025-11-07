@@ -25,26 +25,25 @@ Verify your installation:
 
     yq --version
 
-### Clone the NEPI Engine Repo
-Clone the 'main' branch:
+### Clone the NEPI SETUP Repo
+This step will clone the NEPI Setup github repo to the nepihost user home folder.
 
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout main
-    git submodule update --init --recursive
 
-Or, clone the 'development' branch:
+Update Git application (sudo password is #Nsetup4You):
 
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout develop
-    git submodule update --init --recursive
+    sudo apt update && sudo apt install -y git
+
+Clone the NEPI setup repo:
+
+    cd /home/${USER}
+    git clone https://github.com/nepi-engine/nepi_setup.git
+
 
 
 ### NEPI PC Bash Setup
 Setup NEPI PC bash:
 
-    source /home/${USER}/nepi_engine_ws/nepi_setup/scripts/user_pc_setup.sh
+    source /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
     source ~/.bashrc
 
 See nepi PC functions menu:
