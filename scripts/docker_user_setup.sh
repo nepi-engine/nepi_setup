@@ -50,11 +50,12 @@ fi
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "Configuring NEPI Host User account $CONFIG_USER"
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    sudo usermod -aG $CONFIG_USER $CONFIG_USER
     sudo usermod -aG sudo $CONFIG_USER
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER}
     sudo usermod -aG tty ${CONFIG_USER}
-    sudo usermod -aG $user $user
+   
 
 
 
