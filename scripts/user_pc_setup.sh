@@ -145,7 +145,7 @@ echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
 BASHRC=/home/${USER}/.bashrc
 
 
-NEPI_UTILS_SOURCE=$(dirname "$(pwd)")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 NEPI_UTILS_DEST=/home/${USER}/.nepi_bash_utils
 echo "Installing NEPI utils file from ${NEPI_UTILS_SOURCE} to  ${NEPI_UTILS_DEST} "
 if [ -f "$NEPI_UTILS_DEST" ]; then
@@ -154,7 +154,7 @@ fi
 sudo cp $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST
 sudo chown -R ${USER}:${USER} $NEPI_UTILS_DEST
 
-NEPI_ALIASES_SOURCE=$(dirname "$(pwd)")/resources/bash/nepi_pc_aliases
+NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
 NEPI_ALIASES_DEST=/home/${USER}/.nepi_pc_aliases
 echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
 if [ -f "$NEPI_ALIASES_DEST" ]; then
@@ -252,7 +252,7 @@ NEPI_SSH_FILE=nepi_engine_default_private_ssh_key
 # Add nepi ssh key if not there
 echo "Checking nepi ssh key file"
 NEPI_SSH_PATH=${NEPI_SSH_DIR}/${NEPI_SSH_FILE}
-NEPI_SSH_SOURCE=${SCRIPT_FOLDER}/resources/ssh_keys/${NEPI_SSH_FILE}
+NEPI_SSH_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/ssh_keys/${NEPI_SSH_FILE}
 if [ -e $NEPI_SSH_PATH ]; then
     echo "Found NEPI ssh private key ${NEPI_SSH_PATH} "
 else
