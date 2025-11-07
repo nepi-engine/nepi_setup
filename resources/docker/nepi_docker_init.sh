@@ -107,15 +107,9 @@ fi
 
 if [[ "$success" -eq 0 ]]; then
 
-#############
+
 echo ""
 echo "--------------------------"
 echo "NEPI Image Initialization Complete"
 echo ""
 dimg
-
-else
-  echo ""
-  echo "--------------------------"
-  echo "NEPI DOCKER INIT FAILED"
-fi

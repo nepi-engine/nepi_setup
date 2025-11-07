@@ -44,33 +44,38 @@ Or, clone the 'development' branch:
 ### NEPI PC Bash Setup
 Setup NEPI PC bash:
 
-    ./setup/scripts/pc_bash_setup.sh
+    source /home/${USER}/nepi_engine_ws/nepi_setup/scripts/user_pc_setup.sh
     source ~/.bashrc
 
 See nepi PC functions menu:
 
     nepihelp
 
-### NEPI PC Environment Setup
-Setup NEPI PC environment:
-
-    ./setup/scripts/pc_env_setup.sh
-
-
-
-### NEPI PC Config Setup
-Setup NEPI PC configuration:
-
-    ./setup/scripts/pc_config_setup.sh
-
-
-NEPI USER PC SETUP COMPLETE
-
-
 # NEPI Development PC Setup
 
 If you want set up your PC for NEPI software development,
 see the instructions "NEPI_DEV_PC_SETUP"
+
+
+### NEPI Docker Remote PC Connections
+
+Start your NEPI container running:
+
+    nepistart
+
+Check that the Container is running
+
+    dps
+
+If the container is running:
+
+Test that you can connect to your running conatiner from a network connected PC.
+See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
+
+Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
+See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+
+
 
 
 

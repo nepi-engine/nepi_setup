@@ -92,8 +92,11 @@ else
     fi
 
     DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
-    ${nepi_fs}:${nepi_fs_tag} /bin/bash \
-    -c 'service supervisor start'"
+    ${nepi_fs}:${nepi_fs_tag} /bin/bash "
+
+
+    # ${nepi_fs}:${nepi_fs_tag} /bin/bash \
+    # -c 'service supervisor start'"
 
     ########################
     # Run NEPI Docker

@@ -180,9 +180,7 @@ Initialize NEPI docker image on your system:
     nepiinit
 
 
-Comfrim import:
-
-    dimg
+After the initialization script completes, it will print the current installed NEPI Docker Images installed. 
 
 
 ### NEPI Docker Testing
@@ -191,9 +189,7 @@ Start your NEPI container running:
 
     nepistart
 
-Check that the Container is running
-
-    dps
+The start script will let you know if the installed NEPI Image started successfully. 
 
 NOTE: Some additional NEPI Docker command line shortcuts are:
     nepistart = Start the NEPI docker container
@@ -215,6 +211,26 @@ NOTE: Some additional NEPI Docker command line shortcuts are:
     nepiupdate = Run update process on NEPI Docker config file
     nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings
 
+**********************
+DEBUGGING
+**********************
+
+If you NEPI Image failed to start, you can try to run it in a dev mode without any NEPI services started
+
+    nepidev
+
+    # Then log into to the running NEPI container check NEPI process statuses by typing:
+
+    nepilogin
+
+    # Once Inside the container, start the NEPI services running:
+
+        /nepi_start_all
+
+Then follow the DEBUGGING notes in the next section "NEPI Software Testing"
+
+**********************
+
 ### NEPI Software Testing
 
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
@@ -223,30 +239,51 @@ Check that the NEPI Resident User Interface (RUI) is running by opening the Chro
 
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
 
+**********************
+DEBUGGING
+**********************
 
-DEBUGGING: If you run into any issues, you can debug any issues by loging into to the running NEPI container and restarting the NEPI software by typing:
+If you run into any issues, you can debug any issues by loging into to the running NEPI container and restarting the NEPI software by typing:
 
     nepilogin
 
     # Once Inside the container, start and stop the NEPI software to visually look for boot and/or run errors:
 
+        nepi_status
+
+        # Check if any of the nepi services are not running in the printout. If any are not running, 
+        # you can examine the process messages by running one of the following status commants:
+
+        nepi_status_engine
+
+        nepi_status_rui
+
+        nepi_status_license
+
+        nepi_status_ssh
+
+        # To bug issues with the core NEPI Engine software process, you can start and stop NEPI Engine by typing:
+
         nepistop
         nepistart
 
-    NOTE: Some additional NEPI Software command line shortcuts are:
-        nepihome = change to nepi home dir
-        nepistart = start the nepi processes
-        nepistop = stop the nepi processe
-        nepiconfig = Configure NEPI System Settings
-        nepibld = Build and deploy all nepi repos and RUI
-        codebld = Build and deploy all nepi repos
-        ruibld = Build and deploy rui system
-        nepi_status = Print running status of all NEPI processes
-        nepi_status_engine = Print tail of nepi_engine process
-        nepi_status_rui = Print tail of nepi_rui process
-        nepi_status_license = Print tail of nepi_license process
-        nepi_status_ssh = Print tail of nepi_ssh process
+        # You can follow the NEPI Engine processes looking for any errors.
 
+        NOTE: Some additional NEPI Software command line shortcuts are:
+            nepihome = change to nepi home dir
+            nepistart = start the nepi processes
+            nepistop = stop the nepi processe
+            nepiconfig = Configure NEPI System Settings
+            nepibld = Build and deploy all nepi repos and RUI
+            codebld = Build and deploy all nepi repos
+            ruibld = Build and deploy rui system
+            nepi_status = Print running status of all NEPI processes
+            nepi_status_engine = Print tail of nepi_engine process
+            nepi_status_rui = Print tail of nepi_rui process
+            nepi_status_license = Print tail of nepi_license process
+            nepi_status_ssh = Print tail of nepi_ssh process
+
+**********************
 
 
 ### Enable NEPI Docker Service

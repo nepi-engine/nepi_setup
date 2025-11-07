@@ -58,7 +58,7 @@ echo ""
 echo "##################################"
 echo 'NEPI Docker Config Setup Complete'
 echo "##################################"
-# echo ""
-# echo "*** REBOOT YOUR DEVICE ***"
+echo ""
+echo "*** REBOOT YOUR DEVICE ***"
 
 

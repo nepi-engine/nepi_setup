@@ -1,27 +1,44 @@
 {
-   "checksum": "b602c0deb64dfcf99a6333c90e34b245",
+   "checksum": "e316825cc8ab9eed240826d86440161c",
+   "checksum_sha256": "b3e2886f0ed74a909ed377891cf7968a97d1891f821307e89bb459914f336c6d",
    "roots": {
       "bookmark_bar": {
          "children": [ {
             "date_added": "13406483521505530",
             "date_last_used": "0",
             "guid": "fd936beb-23cb-412d-8153-6bba60ce4700",
-            "id": "5",
+            "id": "2",
             "name": "RUI App",
             "type": "url",
             "url": "http://localhost:5003/"
          }, {
-            "date_added": "13406483664118868",
+            "date_added": "13407011366721992",
             "date_last_used": "0",
+            "guid": "cee5cd60-8711-4dbf-897a-525b775d0b36",
+            "id": "8",
+            "name": "Home - NEPI",
+            "type": "url",
+            "url": "https://nepi.com/"
+         }, {
+            "date_added": "13406483664118868",
+            "date_last_used": "13407011309346129",
             "guid": "919ef653-7810-431f-b5ba-7b994126ea37",
-            "id": "6",
+            "id": "3",
             "name": "nepi-engine · GitHub",
             "type": "url",
             "url": "https://github.com/nepi-engine"
+         }, {
+            "date_added": "13407011326794161",
+            "date_last_used": "0",
+            "guid": "11ae0103-fdea-4828-a321-828cef62319a",
+            "id": "7",
+            "name": "nepi_setup/NEPI_DOCKER_HOST_SETUP.md at main · nepi-engine/nepi_setup · GitHub",
+            "type": "url",
+            "url": "https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_DOCKER_HOST_SETUP.md"
          } ],
          "date_added": "13406483504298536",
          "date_last_used": "0",
-         "date_modified": "13406483664118868",
+         "date_modified": "13407011366721992",
          "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
          "id": "1",
          "name": "Bookmarks bar",
@@ -33,7 +50,7 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
-         "id": "2",
+         "id": "4",
          "name": "Other bookmarks",
          "type": "folder"
       },
@@ -43,7 +60,7 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
-         "id": "3",
+         "id": "5",
          "name": "Mobile bookmarks",
          "type": "folder"
       }

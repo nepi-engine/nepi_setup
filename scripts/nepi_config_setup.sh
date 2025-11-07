@@ -651,6 +651,7 @@ if [[ -n "$DISPLAY" ]]; then
     gsettings set org.gnome.desktop.screensaver lock-enabled false
     gsettings set org.gnome.desktop.session idle-delay 0
 
+    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
     gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
@@ -704,6 +705,6 @@ echo "##################################"
 echo 'NEPI Config Setup Complete'
 echo "##################################"
 
-echo ""
-echo "*** REBOOT YOUR DEVICE ***"
+# echo ""
+# echo "*** REBOOT YOUR DEVICE ***"
 
