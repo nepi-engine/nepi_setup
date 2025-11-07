@@ -121,6 +121,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} /media/${CONFIG_USER}
 
 
 # Copy instructions to desktop
+SOURCE_INSTR_PATH=$(dirname "$SCRIPT_PATH")
 instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
 sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
 
