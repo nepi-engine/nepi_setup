@@ -1,0 +1,1219 @@
+#!/bin/bash
+
+##
+## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
+##
+## This file is part of nepi-engine
+## (see https://github.com/nepi-engine).
+##
+## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
+##
+
+
+# This file contains nepi bash utility functions
+
+#echo "########################"
+#echo "STARTING NEPI Bash Utils"
+#echo "########################"
+
+
+utilsn=""
+
+
+
+###################################
+# System Check Functions
+###################################
+
+
+
+function is_valid_uid() {
+    local input=$1
+
+    # Regular expression for a common Linux username format
+    # Starts with a lowercase letter or underscore, followed by 0-31 lowercase letters, numbers, hyphens, or underscores.
+    USERNAME_REGEX="^[a-z_][a-z0-9_-]{0,31}$"
+
+    if [[ ! "$input" =~ $USERNAME_REGEX ]]; then
+        echo "Variable '$input' is NOT a valid Linux username format."
+    fi
+    return 0
+    }
+export -f is_valid_uid
+
+function is_valid_pw() {
+    local input=$1
+
+    if [ -z "$input" ]; then
+        echo "Passwords can not be blank string."
+        return 1
+    fi
+  case "$input" in
+      *[[:space:]]*|*/*|*\\*)
+          echo "Passwords can not contain spaces or slashes."
+          ;;
+      *)
+  esac
+    return 0
+    }
+export -f is_valid_pw
+
+
+function is_valid_did() {
+    local input=$1
+
+    # Check for empty string
+    if [ -z "$input" ]; then
+        echo "NEPI Device ID's can not be blank string."
+        return 1
+    fi
+    # Check that first char is a letter
+    if [[ ! "$input" =~ ^[a-zA-Z] ]]; then
+        echo "The first character or NEPI Device ID must be a letter."
+        return 1
+    fi
+    # Check if input is only letters numbers and underscores with no spaces
+    if [[ ! "$input" =~ ^[a-zA-Z0-9_]+$ ]]; then
+        echo "NEPI Device ID's must be only letters, numbers, and underscores with no spaces."
+        return 1
+    fi
+    return 0
+    }
+export -f is_valid_did
+
+function is_valid_string() {
+    local input=$1
+
+    # Check for empty string
+    if [ -z "$input" ]; then
+        echo "NEPI Model Name can not be blank string."
+        return 1
+    fi
+    return 0
+    }
+export -f is_valid_string
+
+function is_valid_sn() {
+    local input=$1
+    # Check for empty string
+    if [ -z "$input" ]; then
+        echo "NEPI Serial Numbers can not be blank string."
+        return 1
+    fi
+    # Check if serial number is valid 6 digit number
+    if [[ ! "$input" =~ ^[0-9]{6}$ ]]; then
+        echo "'$input' is NOT a 6-digit number."
+        return 1
+    fi
+
+    if [[ ! "$input" =~ ^[1-9][0-9]* ]]; then
+        echo "'NEPI Serial Numbers must start with non-zero number."
+        return 1
+    fi
+
+    return 0
+    }
+export -f is_valid_sn
+
+function is_valid_ipv4() {
+    local input=$1
+
+    # Check if the format matches a general IP pattern (e.g., 1.2.3.4)
+    if ! [[ $input =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        echo "Not a valid IP Address format #.#.#.#"
+        return 1 # Invalid format
+    fi
+
+    # Split the IP address into octets and check their values
+    IFS='.' read -r -a octets <<< "$input"
+    for octet in "${octets[@]}"; do
+        if (( octet < 0 || octet > 255 )); then
+            return 1 # Octet out of range
+        fi
+    done
+
+    return 0 # Valid IP address
+}
+export -f is_valid_ipv4
+
+function is_valid_path() {
+    local input=$1
+    if [[ ! -e "$input" ]]; then
+        echo "'Path ${input} not found."
+        return 1
+    fi
+    return 0 # Valid folder
+}
+export -f is_valid_path
+
+function is_valid_folder() {
+    local input=$1
+    if [[ ! -d "$input" ]]; then
+        echo "'Path ${input} not found."
+        return 1
+    fi
+    return 0 # Valid folder
+}
+export -f is_valid_folder
+
+function is_valid_file() {
+    local input=$1
+    if [[ ! -f "$input" ]]; then
+        echo "'Path ${input} not found."
+        return 1
+    fi
+    return 0 # Valid folder
+}
+export -f is_valid_file
+
+function is_valid_bool() {
+    local input=$1
+    if [[ "$input" != "1" && "$input" != "0" ]]; then
+        echo "'Input not valid. Enter a 1 or 0"
+        return 1
+    fi
+    return 0 # Valid Bool
+}
+export -f is_valid_bool
+
+
+
+function is_valid_internet(){
+    if ! ping -c 2 google.com; then
+        echo "No Internet Connection"
+        return 1
+    else
+        echo "Internet Connected"
+        return 0
+    fi
+}
+export -f is_valid_internet
+
+
+function is_valid_arm64(){
+    arch_check="arm64"
+    arch_val=$(uname -m)
+    if [[ "$arch_val" == "aarch64" ]]; then
+        echo "System Arch is ${arch_check}"
+        return 0
+    else
+        return 1
+    fi
+}
+export -f is_valid_arm64
+
+
+function is_valid_jetson(){
+if [ -f /etc/nv_tegra_release ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+export -f is_valid_jetson
+
+function is_valid_amd64(){
+    arch_check="amd64"
+    arch_val=$(uname -m)
+    if [[ "$arch_val" == "x86_64" ]]; then
+        echo "System Arch is ${arch_check}"
+        return 0
+    else
+        return 1
+    fi
+}
+export -f is_valid_amd64
+
+
+function is_valid_cuda(){
+    lspci | grep -i nvidia >/dev/null 2>&1
+    if [[ "$?" -eq 0 ]]; then
+      return 0
+    else
+        return 1
+    fi
+}
+export -f is_valid_cuda
+
+
+function is_space_avail_mb(){
+    local check_path=$1
+    local req_space=$2
+    if ! is_valid_folder $check_path; then
+      #echo "Not a valid folder ${check_path}"
+      return 1
+    else
+      avail_space=$(path_space_mb $check_path)
+      #echo "Aval Space: ${avail_space}"
+      #echo "Req Space: ${req_space}"
+      if [[ "$avail_space" -lt "$req_space" ]]; then
+        #echo "Not enough space ${check_path}"
+        return 1
+      else
+        return 0
+      fi
+    fi
+}
+export -f is_space_avail_mb
+
+function is_space_avail_gb(){
+    local check_path=$1
+    local req_space=$2
+    if ! is_valid_folder $check_path; then
+      #echo "Not a valid folder ${check_path}"
+      return 1
+    else
+      avail_space=$(path_space_gb $check_path)
+      #echo "Aval Space: ${avail_space}"
+      #echo "Req Space: ${req_space}"
+      if [[ "$avail_space" -lt "$req_space" ]]; then
+        #echo "Not enough space ${check_path}"
+        return 1
+      else
+        return 0
+      fi
+    fi
+}
+export -f is_space_avail_gb
+
+
+
+
+utilsn="${utilsn}
+################################
+### SYSTEM CHECK FUNCTIONS
+################################
+*** These checks return 0 error value if true ***
+is_valid_uid = Check for valid user id name
+is_valid_pw = Check for valid use password
+is_valid_did = Check for valid device id name
+is_valid_string = Check that string is not empty
+is_valid_sn = Check for valid nepi serial number
+is_valid_ipv4 = Check for valid ip address
+is_valid_path = Check for path
+is_valid_folder = Check for folder
+is_valid_file = Check for file
+is_valid_bool = Check for valid bash bool - 0 or 1
+is_valid_internet = Check for internet connection
+is_valid_jetson = Check if device is an NVIDIA Jetson system
+is_valid_arm64 = Check if device is arm64 arch
+is_valid_amd64 = Check if device is amd64 arch
+is_valid_cuda = Check if system has CUDA
+is_space_avail_mb = Check SOURCE_FOLDER for REQ_SPACE in MB
+is_space_avail_gb = Check SOURCE_FOLDER for REQ_SPACE in GB"
+
+
+
+###################################
+# System Util Functions
+###################################
+
+# echo variable value
+function echovar(){
+    local var_name="$1"
+    echo "$var_name: ${!var_name}"
+}
+export -f echovar
+
+# ping internet
+function pingi(){
+    if ! ping -c 2 google.com; then
+        echo "No Internet Connection"
+        return 1
+    else
+        echo "Internet Connected"
+    fi
+}
+export -f pingi
+
+# ping nepi
+function pingn(){
+  ping ${NEPI_IP}
+}
+export -f pingn
+
+# source bashrc
+function sbrc(){
+    source /home/${USER}/.bashrc
+}
+export -f sbrc
+
+
+function ask_yes_no {
+    read -p "$1 ([y]es or [N]o): " choice
+    case "$(echo "$choice" | tr '[:upper:]' '[:lower:]')" in
+        y|yes) echo "yes" ;;
+        *) echo "no" ;;
+    esac
+}
+export -f ask_yes_no
+
+
+
+
+function cuda_version(){
+    lspci | grep -i nvidia >/dev/null 2>&1
+    if [[ "$?" -eq 0 ]]; then
+        #echo "System has CUDA"
+        #Check version
+        #ls -l /usr/local | grep cuda
+        if nvcc --version  >/dev/null 2>&1; then
+          string=$(nvcc --version) 
+          key=release
+          value=$(echo "$string" | grep "${key}" | awk '{print $NF}' | cut -d'.' -f1-2)
+          echo "${value#V}"
+        echo
+          return 1
+        fi
+    else
+        return 1
+    fi
+}
+export -f cuda_version
+
+function nipa(){
+  sudo -v
+  file=/etc/network/interfaces.d/nepi_static_ip
+  if [ ! -f "$file" ]; then
+      return 2
+  else
+    addr=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file" | head -n 1)
+    if [[ -n "$addr" ]]; then
+      echo $addr
+    else
+      return 1
+    fi
+  fi 
+
+}
+export -f nipa
+
+
+function naipa(){
+  sudo -v
+  file=/etc/network/interfaces.d/nepi_user_ip_aliases
+  if [ ! -f "$file" ]; then
+      return 2
+  else
+    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
+    if [[ -n "$addrs" ]]; then
+      echo $addrs
+    else
+      return 1
+    fi
+  fi 
+
+}
+export -f naipa
+
+function nnipa(){
+  sudo -v
+  file=/etc/chrony/chrony.conf
+  if [ ! -f "$file" ]; then
+      return 1
+  else
+    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
+    if [[ -n "$addrs" ]]; then
+      echo $addrs
+    else
+      return 1
+    fi
+  fi 
+
+}
+export -f nnipa
+
+function nnet(){
+  sudo -v
+    nepi_ip=$(nipa)
+    if [[ -z "$nepi_ip" ]]; then
+      return 1
+    else
+      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo "Can't ping NEPI IP address: ${nepi_ip}"
+
+        echo "Restarting Network"
+        sudo systemctl restart networking
+        wait
+        ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+          echo "Failed to connect NEPI IP address: ${nepi_ip}"
+        fi
+      fi
+    fi
+}
+export -f nnet
+
+function ndhcp(){
+  sudo -v
+  if nnet; then
+    # This file sets up nepi bash aliases and util functions
+    # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+    # -c 1: Send only one ping packet
+    # -W 1: Wait for 1 second for a response
+    ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+
+    # Check the exit status of the ping command
+    # 0 indicates success (internet connection)
+    # Non-zero indicates failure (no internet connection)
+    if [ $? -ne 0 ]; then
+      echo "No internet connection detected. Will try and connect"
+      nnet # Restart network
+      wait
+      echo "Enabling DHCP internet connection"
+      echo "Killing existing DHCP clients"
+      sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+      echo "Renewing dhclient"
+      sudo dhclient -nw
+      sleep 2
+      if ! pingi; then
+        return 1
+      fi
+    fi
+  fi
+}
+export -f ndhcp
+
+
+function nclock(){
+  sudo -v
+  if [[ "$(date +%Y)" -lt 2025 ]]; then
+
+    if nnet; then
+      # This file sets up nepi bash aliases and util functions
+      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+      # -c 1: Send only one ping packet
+      # -W 1: Wait for 1 second for a response
+      ping -c 1 -W 1 $(nnipa) > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "No Internet or NTP Server connection detected. Can't sync clocks"
+            return 1 # Exit with a non-zero status to indicate an error
+        fi
+      fi
+      sudo systemctl restart chronyd
+      echo "Waiting for clock to synchronize..."
+      #chronyc waitsync 1
+      sleep 1
+      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
+        echo "Clock synchronization complete."}
+      else
+        echo "Clock Failed to Synchronize."}
+        return 1
+      fi
+    fi
+  fi
+}
+export -f nclock
+
+
+function ninet(){
+  sudo -v
+  if ndhcp; then # Enable DHCP internet connection if needed
+    wait
+    if ! nclock; then # Connect to NTP server
+      return 1
+    fi
+  else
+    return 1
+  fi
+
+}
+export function ninet
+
+
+utilsn="${utilsn}
+################################
+### SYSTEM UTIL FUNCTIONS
+################################
+pingi = ping internet test
+nipa= Echo NEPI set IP address
+naipa= Echo NEPI set IP alias addresses
+nnipa= Echo NEPI set NTP IP addresses
+nnet = Restart the network
+ndhcp = Enable DHCP Internet Client
+nclock = Sync clock
+ninet = Restart network, connect to internet, and sync clock
+sbrc = Source the current users bashrc file
+cuda_version = Echo Cuda version number if cuda availble"
+
+###################################
+# File Util Functions
+###################################
+
+# Function to search for text
+# Example call: find 'nepi_sdk.parse_header_msg'
+function ftext(){
+grep -r "$@" ./*
+}
+export -f ftext
+
+# Function to search for text
+# Example call: find 'nepi_sdk.parse_header_msg'
+function ffile(){
+find ./* -iname  "*$@*" 
+}
+export -f ffile
+
+function update_text_value(){
+  FILE=$1
+  KEY=$2
+  UPDATE=$3
+  if [ -f "$FILE" ]; then
+    if grep -q "$KEY" "$FILE"; then
+      sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    else
+      echo "$UPDATE" | sudo tee -a $FILE
+    fi
+  else
+    echo "File not found ${FILE}"
+  fi
+}
+export -f update_text_value
+
+
+
+function update_yaml_value(){
+    export UPDATE_YAML_KEY=$1
+    #echo $UPDATE_YAML_KEY
+    export UPDATE_YAML_VAL=$2
+    #echo $UPDATE_YAML_VAL
+    export UPDATE_YAML_FILE=$3
+    #echo $UPDATE_YAML_FILE
+
+    yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
+}
+export -f update_yaml_value
+
+function export_yaml_value(){
+    KEY=$1
+    #echo $KEY
+    VARIABLE=$2
+    #echo=$VARIABLE
+    FILE=$3
+    #echo=$FILE
+    verbose=0
+    value=$(yq e '.'"$KEY"'' $FILE)
+    export ${VARIABLE}=$value
+    #Secho "${VARIABLE}=${value}"
+}
+export -f export_yaml_value
+
+function sync_yaml_files(){
+    SOURCE_FILE=$1
+    TARGET_FILE=$2
+    REPLACE_ENTRIES=0
+    if [[ -n "$3" ]]; then
+      REPLACE_ENTRIES=$3
+    fi
+
+    if [[ ! -f "$SOURCE_FILE" ]]; then
+        echo "Source file does not exist: ${SOURCE_FILE}"
+        return 1
+    fi
+
+    if [[ ! -f "$TARGET_FILE" ]]; then
+        echo "Target file does not exist: ${TARGET_FILE}"
+        return 2
+    fi
+
+    keys=($(yq e 'keys | .[]' ${SOURCE_FILE}))
+    for key in "${keys[@]}"; do
+        KEY_NAME="${key}" # The path to the key you want to add
+        #echo "Check if the key exists for key ${KEY_NAME} in file ${TARGET_FILE}"
+        if yq eval ". | has(\"$KEY_NAME\")" "$TARGET_FILE" | grep -q "false"; then
+            echo "Key ${KEY_NAME} is missing. Adding it to ${TARGET_FILE} "
+            KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
+            update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
+            #echo "Key added successfully."
+        elif [[ "$REPLACE_ENTRIES" -eq 1 ]]; then # Update the value
+            #echo "Key ${KEY_NAME} exists. Will update"
+            KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
+            update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
+        fi        
+    done
+
+}
+export -f sync_yaml_files
+
+
+function load_config_file(){
+    config_file=$1
+    echo $config_file
+    if [ -f "$config_file" ]; then
+        keys=($(yq e 'keys | .[]' ${config_file}))
+        for key in "${keys[@]}"; do
+            export_yaml_value "${key}" "${key}" "$config_file" 
+        done
+    else
+        echo "Config file not found ${config_file}"
+        return 1
+    fi
+}
+export -f load_config_file
+
+function print_config_file(){
+    echo $1
+    config_file=$1
+    if [ -f "$config_file" ]; then
+        CONFIGN="#############################
+        ## NEPI Config Settings ##
+        #############################
+        FILE=${config_file}"
+
+        keys=($(yq e 'keys | .[]' ${config_file}))
+        for key in "${keys[@]}"; do
+            value=$(yq e '.'"$key"'' $config_file)
+            echo "${key}=${value}"
+            CONFIGN="${CONFIGN}
+            ${key}=${!key}"
+        done
+        echo $CONFIG
+    else
+        echo "Config file not found ${config_file}"
+        return 1
+    fi
+}
+
+export -f print_config_file
+
+
+function path_backup(){
+    source_path=$1
+    #echo $source_path
+    backup_path=${1}.bak
+    if [[ -n "$2" ]]; then
+      backup_path=$2
+    fi  
+    #echo $backup_path
+
+    overwrite=0
+    if [[ -n "$3" ]]; then
+      overwrite=$3
+    fi
+    #echo $overwrite
+
+    if [[ -d "$source_path" || -f "$source_path" ]]; then
+        if [[ -d "$source_path" ]]; then
+          if find "$source_path" -maxdepth 0 -empty | read; then
+            echo "Source folder is empty, nothing to backup ${source_path}"
+            return 3
+          elif [[ ! -d "${backup_path}" ]]; then
+              echo "Creating  ${source_path} path copy at ${backup_path}"
+              sudo mkdir -p ${backup_path}
+              sudo cp -R -a ${source_path} ${backup_path}
+          elif [[ -d "${backup_path}" && "overwrite" -eq 1 ]]; then
+              echo "Copying ${source_path} to ${backup_path}"
+              sudo rm -r $backup_path
+              sudo cp -R -a $source_path $backup_path
+          fi
+        elif [[ -f "$source_path" ]]; then
+          if [ ! -f "${backup_path}" ]; then
+              echo "Creating  ${source_path} path copy at ${backup_path}"
+              sudo cp -R -a ${source_path} ${backup_path}
+          elif [[ -f "${backup_path}"  && "overwrite" -eq 1 ]]; then
+            echo "Copying ${source_path} to ${backup_path}"
+            sudo rm -r ${backup_path}
+            sudo cp -R -a ${source_path} ${backup_path}
+          fi
+    
+        else
+          echo "Failed to backup path ${backup_path}"
+          return 2
+        fi
+    else
+      echo "Failed to find source path ${source_path}"
+      return 1
+    fi
+    if [[ -d "$backup_path" || -f "$backup_path" ]]; then
+        echo "Created ${source_path} path copy at ${backup_path}"
+    else
+        echo "Failed to backup path ${backup_path}"
+        return 1
+    fi
+}
+export -f path_backup
+
+
+function path_sync(){
+    source_path=$1
+    target_path=$2
+    delete=1
+    if [[ -n "$3" ]]; then
+    	delete=$3
+    fi
+    if [[ -d "$source_path" ]]; then
+      if find "$source_folder" -maxdepth 0 -empty | read; then
+          echo "Source folder is empty, nothing to sync ${source_folder}"
+          return 3
+      else
+        if [[ ! -d "${target_path}" ]]; then
+          echo "Creating target path ${target_path}"
+          sudo mkdir -p ${target_path}
+        fi
+        if [[ -d "${target_path}" ]]; then
+          echo "Syncing Folder ${source_path} to ${target_path}"
+          if [[ "$delete" -eq 1 ]]; then
+          	sudo rsync -avhr ${source_path}/ ${target_path}/ --delete
+          else
+          	sudo rsync -avhr ${source_path}/ ${target_path}/
+          fi
+        else
+          echo "Failed to create target path ${target_path}"
+          return 2
+        fi
+      fi
+    elif [[ -f "$source_path" ]]; then
+      echo "Syncing File ${source_path} to ${target_path}"
+      sudo rsync -avhr ${source_path} ${target_path}
+    elif [[ -L "$source_path" ]]; then
+      echo "Syncing Symlink ${source_path} to ${target_path}"
+      if [[ -d "${target_path}" ]]; then
+          echo "Deleting existing target file ${target_path}"
+          sudo rm ${target_path}
+      fi
+      echo "Copying Symlink ${source_path} to ${target_path}"
+      sudo cp -a ${source_path} ${target_path}
+    else
+      echo "Failed to find source path ${source_path}"
+      return 1
+    fi
+    echo echo "Sync complete ${source_path} to ${target_path}"
+}
+export -f path_sync
+
+function path_delete(){
+    source_path=$1
+    if [[ -z "$source_path" ]]; then
+      source_path=$(pwd)
+    fi
+    if [[ -d "$source_path" || -f "$source_path" || -L "$source_path" ]]; then
+          echo "Deleting path ${source_folder}"
+          sudo rm -r $source_path
+    else
+      echo "Path not found: ${source_path}"
+      return 1
+    fi
+}
+export -f path_delete
+
+
+
+
+function path_space_mb(){
+    source_path=$1
+    if [[ -z "$source_path" ]]; then
+      source_path=$(pwd)
+    fi
+    if is_valid_folder $source_path >/dev/null 2>&1; then
+      if space=$(sudo df -BM --output=avail "$source_path" | tail -n1 | sed 's/M//'); then
+        avail_space=$space
+      fi
+    fi
+    if [[ -n "$avail_space" ]]; then
+      echo $avail_space
+    else
+      echo 0
+      return 1
+    fi
+}
+export -f path_space_mb
+
+
+function path_space_gb(){
+    source_path=$1
+    if [[ -z "$source_path" ]]; then
+      source_path=$(pwd)
+    fi
+    if [[ ! $source_path == /* ]]; then
+      source_path=$(pwd)/${source_path}
+    fi
+    if is_valid_folder $source_path >/dev/null 2>&1; then
+      if space=$(sudo df -BG --output=avail "$source_path" | tail -n1 | sed 's/M//'); then
+        avail_space=${space%?}
+      fi
+    fi
+    if [[ -n "$avail_space" ]]; then
+      echo $avail_space
+    else
+      echo 0
+      return 1
+    fi
+}
+export -f path_space_gb
+
+function path_size_kb(){
+    source_path=$1
+    if [[ -z "$source_path" ]]; then
+      source_path=$(pwd)
+    fi
+    if [[ ! $source_path == /* ]]; then
+      source_path=$(pwd)/${source_path}
+    fi
+
+    if is_valid_folder $source_path >/dev/null 2>&1; then
+      path_size=$(sudo du -s "$source_path" | awk '{print $1}')
+    fi
+    if is_valid_file $source_path >/dev/null 2>&1; then
+      path_size=$(sudo stat -c %s "$source_path")
+      path_size=$((path_size / 1024))
+    fi
+
+    if [[ -n "$path_size" ]]; then
+      path_size=$((path_size + 1))
+      echo $path_size
+    else
+      echo 0
+      return 1
+    fi
+}
+export -f path_size_kb
+
+
+function path_size_mb(){
+    source_path=$1
+    path_size=$(path_size_kb $source_path)
+    
+    if [[ -n "$path_size" ]]; then
+      path_size=$((path_size / 1000))
+      echo $path_size
+    else
+      echo 0
+      return 1
+    fi
+}
+export -f path_size_mb
+
+
+function path_size_gb(){
+    source_path=$1
+    path_size=$(path_size_mb $source_path)
+
+    if [[ -n "$path_size" ]]; then
+      path_size=$((path_size / 1000))
+      echo $path_size
+    else
+      echo 0
+      return 1
+    fi
+}
+export -f path_size_gb
+
+
+
+
+
+function select_file_from_folder() {
+    local folder_path="$1"
+    local selected_file=""
+
+    # Check if the folder path is provided
+    if [[ -z "$folder_path" ]]; then
+        echo "Error: Please provide a folder path."
+        return 1
+    fi
+
+    # Check if the folder exists
+    if [[ ! -d "$folder_path" ]]; then
+        echo "Error: Folder '$folder_path' not found."
+        return 1
+    fi
+
+    # Change to the specified directory
+    pushd "$folder_path" > /dev/null || return 1
+
+    declare -a files
+    for file in "$folder_path"/*; do
+        if [[ -f "$file" ]]; then # Check if the item is a regular file
+            filename=$(basename "$file")
+            files+=( "$filename" ) # Add it to the array
+            echo $filename
+        fi
+    done
+
+    # Check if there are any files
+    if [[ ${#files[@]} -eq 0 ]]; then
+        popd > /dev/null
+        return 1
+    fi
+
+    # Check if one file
+    if [[ ${#files[@]} -eq 1 ]]; then
+        echo "${files[0]}"
+        popd > /dev/null
+        return 0
+    fi
+    echo ""
+    echo "Select a file from "${folder_path}":"
+    echo "--------------------"
+    echo ""
+    select filename in "${files[@]}"; do
+        if [[ -n "$filename" ]]; then
+            selected_file="$filename"
+            break
+        else
+            echo "Invalid selection. Please try again."
+        fi
+    done
+    echo "You selected ${selected_file}"
+    
+    # Return to the original directory
+    popd > /dev/null
+
+    # Output the full path of the selected file
+    if [[ -n "$selected_file" ]]; then
+        echo "${selected_file}"
+    fi
+}
+export -f select_file_from_folder
+
+function sync_to_config_folder() {
+    if [[ -n "$1" && -n "$2" ]]; then
+
+        source_config_path=$2
+        source_etc_path=${source_config_path}/etc
+        source_sys_config_file=${source_etc_path}/nepi_system_config.yaml
+
+        if [[ "$1" == 'nepi_cfg' ]]; then
+            update_config_path=/opt/nepi
+            update_etc_path=${update_config_path}/etc
+            update_config_file=${update_etc_path}/nepi_system_config.yaml
+        else
+            update_folder=$1
+            update_config_path=/mnt/nepi_config/${1}
+            update_etc_path=${update_config_path}/etc
+            update_config_file=${update_etc_path}/nepi_system_config.yaml
+        fi
+        
+        echo "Syncing NEPI Config Folder from ${source_etc_path} to  ${update_etc_path} "
+
+        if [[ ! -d "$update_etc_path" ]]; then
+            sudo mkdir -p $update_etc_path
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $update_etc_path
+        fi
+
+        # Update from dest
+        if [[ -n "$source_etc_path" && "$source_etc_path" != "/etc" && -d "$source_etc_path" ]]; then
+
+            # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+            # sudo chmod -R 0775 /mnt/nepi_config
+
+            SOURCE_PATH=$source_etc_path
+            UPDATE_PATH=$update_etc_path
+            #echo "Syncing ETC Folder from ${SOURCE_PATH} to ${UPDATE_PATH}"
+            #echo "Excluding nepi_system_config.yaml file"
+            sudo rsync -arh --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+            if [[ ! -f "$update_config_file" ]]; then
+                sudo cp -r -p $source_sys_config_file $update_config_file
+            fi
+
+            if yq eval "$update_config_file" > /dev/null; then
+                : # Do Nothing
+            else
+                echo "YAML file '$update_config_file' is invalid. Will replace"
+                sudo cp -r -p $source_sys_config_file $update_config_file
+            fi
+
+            SOURCE_PATH=${source_sys_config_file}
+            UPDATE_PATH=${update_config_file}
+            #echo "Syncing NEPI System Config File from ${SOURCE_PATH} to ${UPDATE_PATH}"
+            sync_yaml_files $SOURCE_PATH $UPDATE_PATH
+
+        fi
+    fi
+}
+export -f sync_to_config_folder
+
+function process_count(){
+  pname=$1
+  pcount=$(ps aux | grep "${pname}" | grep -v grep | wc -l)
+  echo $pname
+}
+export -f process_count
+
+
+#### Update Help Test
+utilsn="${utilsn}
+################################
+### NEPI FILE UTIL FUNCTIONS
+################################
+ftext = Find text in files recursively
+ffile = Find filenames with text match recursively
+update_text_value = Adds or Replaces value in text file given FILE KEY UPDATE_STRING FILE
+update_yaml_value = Update entry in yaml file given KEY VAL FILE
+export_yaml_value = Exports the value of yaml entry to system variable given KEY VARIBLE FILE
+sync_yaml_files = Sync missing keys between given SOURCE_FILE TARGET_FILE. Add '1' to replace existing values 
+load_config_file = Exports all of the yaml entries to system variables in given FILE
+print_config_file = Prints all of the yaml entries in given FILE
+path_backup = Backup SOURCE_PATH TARGET_PATH with safe checks. Optional 0 or 1 to overwrite if exists. 
+path_sync = Sync SOURCE_PATH to TARGET_PATH with safe checks. Optional 0 or 1 to delete files.
+path_delete = Deletes TARGET_PATH with safe checks
+path_space_mb = Echos available MB space for SOURCE_PATH. Echos 0 if path not vald folder
+path_space_gb = Echos available GB space for SOURCE_PATH. Echos 0 if path not vald folder
+path_size_kb = Echos size of path (file or folder) in KB space for SOURCE_PATH. Echos 0 if path not vald folder
+path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. Echos 0 if path not vald folder
+path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
+select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echos selected path name
+sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config
+process_count = Echos number of processes running for provide PROCESS_NAME"
+
+
+
+
+
+###################################
+# Command Line Confi Util Functions
+###################################
+
+# user_color=01;32m
+# if [[ "$USER" == "nepi" ]]; then
+#   user_color=01;33m # Green
+# elif [[ "$USER" == "nepi_admin" ]]; then
+#   user_color=01;35m # Purple
+# elif [[ "$USER" == "nepihost" ]]; then
+#   user_color=01;34m # Blue
+# fi
+# export USER_COLOR=$user_color
+
+
+head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+  export PS1="\u@\h \[\e[32m\]\w \[\e[91m\]\$(parse_git_branch)\[\e[00m\]$ "
+
+  #GIT Command Line Branch Display
+  parse_git_branch() {
+      git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+  }
+fi
+
+###################################
+# ROS Util Functions
+###################################
+NROS=/opt/nepi/nepi_engine/setup.bash
+ROS=/opt/ros/noetic/setup.bash
+HAS_ROS=$(dpkg -l | grep ros-)
+if [ 1 ]; then # [[ -z "$HAS_ROS" ]]; then
+
+    export NEEDS_ROS=1
+
+    # Function to search for topic containing string
+    function sros(){
+      # Source ROS Env
+      if [[ -f "$NROS" ]]; then
+        echo "Sourcing ros bash ${NROS}"
+        source ${NROS}
+      elif [[ -f "$ROS" ]]; then
+        echo "Sourcing ros bash ${ROS}" 
+        source ${ROS}
+      else
+        echo "No Ros Setup File Found"
+      fi
+      export NEEDS_ROS=0
+    }
+
+    export -f sros
+
+    # Function to search for topic containing string
+    function ftopic(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sros
+      wait
+    fi
+    rostopic list | grep "$@" 
+    }
+
+    # Function to print all topics out
+    function ltopics(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rostopic list
+    }
+
+    # Function to listen to topic
+    function etopic(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rostopic echo "$@" 
+    }
+
+    # Function to search for service containing string
+    function fservice(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rosservice list | grep "$@" 
+    }
+
+    # Function to print all services out
+    function lservices(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rosservice list
+    }
+
+    # to call service
+    function cservice(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rosservice call "$@"
+    }
+
+utilsn="${utilsn}
+###########################
+### NEPI ROS UTIL FUNCTIONS
+###########################
+sros = source ros bash setup
+snros = source nepi ros bash setup
+ltopics = List all active topics
+ftopic = Find topics containing provided string
+etopic = Echo to provided topic
+lservices = List all active services
+fservice = Find services containing provided string
+cservice = Call service"
+
+fi
+
+###################################
+# Docker Util Functions
+###################################
+
+if which docker &> /dev/null; then
+  function dimg(){
+    sudo docker images
+  }
+
+  function dps(){
+    sudo docker ps -a
+  }
+
+  
+utilsn="${utilsn}
+###########################
+### Docker UTIL FUNCTIONS
+###########################
+dimg = sudo docker images
+dps = sudo docker ps -a"
+
+fi
+
+
+
+
+
+
+export UTILSN=${utilsn}
+
+
+

@@ -1,0 +1,31 @@
+[Added Associations]
+text/x-python=code_code.desktop;code.desktop;org.gnome.gedit.desktop;idle.desktop;
+application/pdf=libreoffice-draw.desktop;chromium_chromium.desktop;
+text/x-python3=code_code.desktop;idle.desktop;org.gnome.gedit.desktop;code.desktop;
+application/octet-stream=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
+application/javascript=code.desktop;org.gnome.gedit.desktop;idle.desktop;code_code.desktop;
+text/html=org.gnome.gedit.desktop;code.desktop;
+text/x-c++src=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
+text/x-c++hdr=org.gnome.gedit.desktop;
+application/x-shellscript=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
+text/x-cmake=code.desktop;org.gnome.gedit.desktop;
+text/x-chdr=code.desktop;org.gnome.gedit.desktop;
+text/plain=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
+application/xml=code.desktop;
+image/png=org.gnome.eog.desktop;
+application/x-yaml=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
+text/x-makefile=org.gnome.gedit.desktop;
+text/x-matlab=code_code.desktop;code.desktop;
+text/csv=org.gnome.gedit.desktop;
+text/markdown=code_code.desktop;
+audio/vnd.dts=code_code.desktop;
+
+[Default Applications]
+text/html=chromium_chromium.desktop
+x-scheme-handler/http=chromium_chromium.desktop
+x-scheme-handler/https=chromium_chromium.desktop
+x-scheme-handler/about=chromium_chromium.desktop
+x-scheme-handler/unknown=chromium_chromium.desktop
+text/x-python=code_code.desktop
+application/javascript=code_code.desktop
+application/x-shellscript=code_code.desktop

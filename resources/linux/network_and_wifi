@@ -1,0 +1,259 @@
+
+###############
+# Wired Static IP In Container
+
+INTERFACE="${NEPI_IP_INTERFACE}" # Replace with your actual network interface name (e.g., eth0, enp0s3)
+IP_ADDRESS="${NEPI_IP}"
+NETMASK_CIDR="24" # e.g., 24 for 255.255.255.0
+if [[ "$NEPI_IP_GATEWAY" == "NONE" ||  "$NEPI_IP_GATEWAY" == "None" ]]; then
+    GATEWAY=${IP_ADDRESS%.*}.1
+else
+    GATEWAY=$NEPI_IP_GATEWAY
+fi
+
+GATEWAY="" # Leave Blank "${NEPI_IP%.*}"
+if [[ "$NEPI_DHCP_ON_START" -eq 1 ]]; then
+    DNS_SERVER="8.8.8.8"
+else
+    DNS_SERVER=""
+fi
+
+if ip link show ${NEPI_WIRED_INTERFACE} &>/dev/null; then
+    echo "${NEPI_WIRED_INTERFACE} exists."
+
+    # Update up static IP addr if needed
+    static_check=$(ip -4 address show ${NEPI_WIRED_INTERFACE})
+    if [[ "$?" -eq 0 ]]; then
+        nmcli connection add type ethernet ifname ${NEPI_WIRED_INTERFACE} con-name "${NEPI_IP_INTERFACE}"
+
+        nmcli connection show
+        echo "Modify the connection to use a static IP ${IP_ADDRESS}"
+        sudo nmcli connection modify "$INTERFACE" \
+            ipv4.method "manual" \
+            ipv4.addresses "$IP_ADDRESS/$NETMASK_CIDR" \
+            ipv4.gateway "$GATEWAY" \
+            ipv4.dns "$DNS_SERVER"
+
+
+        #### TODO: Edit conf file with NEPI_ALIAS_IPS ########## 
+        ### Check to see to see if ! None
+        if [[ "$NEPI_ALIAS_IPS" != "NONE" &&  "$NEPI_ALIAS_IPS" != "None" ]]; then
+            # update with correct ip address
+            nmcli connection modify "$INTERFACE" ipv4.addresses $NEPI_ALIAS_IPS
+            nmcli connection modify "$INTERFACE" ipv4.method manual
+        fi
+
+        # Bring the connection down and then up to apply changes
+        sudo nmcli connection down "$INTERFACE"
+        sudo nmcli connection up "$INTERFACE"
+
+        echo "Static IP address set for $INTERFACE to $IP_ADDRESS"
+    fi
+
+
+###############
+# Wired Static IP NEPI Device
+echo "Updating Network Interfaces"
+if [ -f "${ETC_FOLDER}/network/interfaces" ]; then
+    if [ -f "/etc/network/interfaces" ]; then
+        sudo rm /etc/network/interfaces
+    fi
+    sudo cp -a -r ${ETC_FOLDER}/network/interfaces /etc/network/interfaces
+else
+    echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network/interfaces"
+fi
+
+if ip link show ${NEPI_WIRED_INTERFACE} &>/dev/null; then
+    echo "${NEPI_WIRED_INTERFACE} exists."
+
+    # Update up static IP addr if needed
+    static_check=$(ip -4 address show ${NEPI_WIRED_INTERFACE})
+    if [[ "$?" -eq 0 ]]; then
+        
+        echo "Updating Wired Static IP Address"
+        file=${ETC_FOLDER}/network/interfaces.d/nepi_static_ip
+        sudo cat /dev/null > $file
+        echo 'auto '${NEPI_WIRED_INTERFACE} | sudo tee -a $file
+        echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
+        echo '    address '${NEPI_IP}'/24' | sudo tee -a $file
+        echo '    gateway '${NEPI_IP%.*}'.1' | sudo tee -a $file
+
+        # Update Network ETC Files
+        echo "Updating Network interfaces.d"
+        if [ -d "${ETC_FOLDER}/network/interfaces.d" ]; then
+            if [ -d "/etc/network/interfaces.d" ]; then
+                sudo rm -r /etc/network/interfaces.d
+            fi
+            sudo cp -a -r ${ETC_FOLDER}/network/interfaces.d /etc/network/
+        else
+            echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network/interfaces.d"
+        fi
+
+    fi
+    sudo ifdown ${NEPI_WIRED_INTERFACE}
+    sudo ip addr flush ${NEPI_WIRED_INTERFACE}
+    sudo ifup ${NEPI_WIRED_INTERFACE}
+fi
+
+###############
+# Wired IP List Check
+sudo ip addr list dev ${NEPI_WIRED_INTERFACE}
+
+
+###############
+# Wired Alias IP In Container
+
+
+###############
+# Wired Alias IP NEPI Device
+
+
+
+###############
+# Wired DHCP In Container
+NEPI_WIRED_INTERFACE=eth0
+
+echo "Killing existing DHCP clients"
+sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+
+echo "Reseting Wired DHCP Client"
+sudo dhclient ${NEPI_WIRED_INTERFACE}
+
+echo "Renewiung Wired DHCP Client"
+sudo dhclient ${NEPI_WIRED_INTERFACE} -nw
+
+
+
+
+###############
+# Wired DHCP NEPI Device
+NEPI_WIRED_INTERFACE=eth0
+
+echo "Killing existing DHCP clients"
+sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+
+echo "Reseting Wired DHCP Client"
+sudo dhclient ${NEPI_WIRED_INTERFACE}
+
+echo "Renewiung Wired DHCP Client"
+sudo dhclient ${NEPI_WIRED_INTERFACE} -nw
+
+
+###############
+# WiFi Enable
+NEPI_WIFI_INTERFACE=wlan0
+
+echo "Killing existing DHCP clients"
+sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+
+echo "Disabling WiFi Connection"
+sudo ip link set ${NEPI_WIFI_INTERFACE} down        
+
+
+echo "Enabling WiFi Client"
+sudo ip link set ${NEPI_WIFI_INTERFACE} up 
+
+echo "Scanning WiFi Networks"
+sudo iw dev ${NEPI_WIFI_INTERFACE} scan
+
+###############
+# WiFi Client Credentials Update
+NEPI_WIFI_INTERFACE=wlan0
+WPA_SUPPLICANT_CONF_PATH=/etc/wpa_supplicant/wpa_supplicant.conf
+
+
+# echo "Killing Current Client Connections"
+# sudo killall wpa_supplicant
+
+
+
+       
+
+
+###############
+# WiFi Client Connect Update
+NEPI_WIFI_INTERFACE=wlan0
+NEPI_WIFI_CLIENT_ID=Plutarski_Lab
+NEPI_WIFI_CLIENT_PW=2065255002
+
+WPA_SUPPLICANT_CONF_PATH=/etc/wpa_supplicant/wpa_supplicant.conf
+
+# echo "Checking Client Network Availability"
+# sudo iw dev ${NEPI_WIFI_INTERFACE} scan
+
+echo "Updating Client Connection Credetials"
+UPDATE=$(wpa_passphrase $NEPI_WIFI_CLIENT_ID $NEPI_WIFI_CLIENT_PW)
+#echo $UPDATE
+cat /dev/null > $WPA_SUPPLICANT_CONF_PATH
+if [[ "$NEPI_WIFI_CLIENT_ID" == "" ]]; then
+    NEPI_WIFI_CLIENT_ID="None"
+fi
+if [[ "$NEPI_WIFI_CLIENT_PW" == "None" || "$NEPI_WIFI_CLIENT_PW" == "" ]]; then
+    sudo "network={ \n\tssid=${NEPI_WIFI_CLIENT_ID} \n\tkey_mgmt=NONE \n}" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
+else
+    sudo wpa_passphrase "$NEPI_WIFI_CLIENT_ID" "$NEPI_WIFI_CLIENT_PW" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
+fi
+#sudo vi $WPA_SUPPLICANT_CONF_PATH
+
+echo "Killing existing DHCP clients"
+sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+
+echo "Disabling WiFi Connection"
+sudo ip link set ${NEPI_WIFI_INTERFACE} down        
+wait
+
+echo "Enabling WiFi Client"
+sudo ip link set ${NEPI_WIFI_INTERFACE} up 
+wait
+
+echo "Killing Existing Client Connections"
+sudo killall wpa_supplicant
+wait
+
+echo "Updatig WPA Supplicant Settings"
+sudo wpa_supplicant -B -i ${NEPI_WIFI_INTERFACE} -c $WPA_SUPPLICANT_CONF_PATH #>/dev/null 2>&1
+wait
+sleep 2
+
+
+echo "Reseting WiFi Service"
+sudo systemctl restart wpa_supplicant.service
+#wait
+#sudo systemctl status wpa_supplicant.service
+
+# echo "Checking Client Connection Status"
+# sudo iw ${NEPI_WIFI_INTERFACE} link
+
+# echo "Reseting WiFi DHCP Client"
+# sudo dhclient ${NEPI_WIFI_INTERFACE}
+
+# echo "Renewiung WiFi DHCP Client"
+# sudo dhclient ${NEPI_WIFI_INTERFACE} -nw
+
+
+
+
+###############
+# WiFi Adapter Check
+sudo iw dev
+
+###############
+# WiFi Client Network Scan
+NEPI_WIFI_INTERFACE=wlan0
+
+
+
+###############
+# WiFi Client Connection Test
+NEPI_WIFI_INTERFACE=wlan0
+WPA_SUPPLICANT_CONF_PATH=/etc/wpa_supplicant/wpa_supplicant.conf
+
+sudo wpa_supplicant -i ${NEPI_WIFI_INTERFACE} -c $WPA_SUPPLICANT_CONF_PATH
+
+###############
+# WiFi Client Network Connected Test
+NEPI_WIFI_INTERFACE=wlan0
+
+sudo iw ${NEPI_WIFI_INTERFACE} link
+
+

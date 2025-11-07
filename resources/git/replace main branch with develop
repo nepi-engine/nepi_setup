@@ -1,0 +1,4 @@
+git checkout main
+git reset --hard develop
+git push --force
+git checkout develop

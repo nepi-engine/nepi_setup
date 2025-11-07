@@ -1,0 +1,9 @@
+
+ntag=3.2.0-RC4
+
+# Tag the repo
+git tag -a $ntag -m "${ntag}"
+
+
+#To create a release in github
+git push origin $ntag

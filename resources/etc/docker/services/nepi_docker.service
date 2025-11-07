@@ -1,0 +1,14 @@
+[Unit]
+Description=Start NEPI Docker Container Management Service
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/mnt/nepi_config/docker_cfg
+ExecStart=/mnt/nepi_config/docker_cfg/nepi_docker.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

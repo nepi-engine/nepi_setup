@@ -1,0 +1,295 @@
+#!/bin/bash
+
+##
+## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
+##
+## This file is part of nepi-engine
+## (see https://github.com/nepi-engine).
+##
+## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
+##
+
+
+# This file installs the NEPI Engine File System installation
+
+
+if ! [ $(id -u) = 0 ]; then
+   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   exit 1
+fi
+
+echo "########################"
+echo "NEPI DOCKER USER SETUP"
+echo "########################"
+
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+
+###########################
+# RUN USER SETUP PROCESSES
+
+CONFIG_USER=nepihost
+CONFIG_USER_PW=nepi  
+
+echo "###################################"
+echo "Setting up nepi host account: ${CONFIG_USER}"
+echo "###################################"
+
+
+if id -u "$CONFIG_USER" >/dev/null 2>&1; then
+    echo "User $CONFIG_USER exists."
+    
+else
+    echo "User $CONFIG_USER does not exist, creating"
+    #sudo useradd -m ${CONFIG_USER}
+    sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+fi    
+if id -u "$CONFIG_USER" >/dev/null 2>&1; then
+    echo "Configuring NEPI Host User account $CONFIG_USER"
+    echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    sudo usermod -aG sudo $CONFIG_USER
+    sudo adduser ${CONFIG_USER} dialout
+    sudo usermod -aG dialout ${CONFIG_USER}
+    sudo usermod -aG tty ${CONFIG_USER}
+    sudo usermod -aG $user $user
+
+
+
+else
+    echo "Failed to create user account $CONFIG_USER"
+    echo "Manual create an Adminstrator user account name ${CONFIG_USER}"
+    echo "Then rerun this script"
+    exit 1
+fi
+
+
+###################################
+# Configure NEPI System Accounts
+
+function new_system_user(){
+    user=$1
+    password=$2
+    echo ""
+    echo "###################################"
+    echo "Setting up nepi system account: ${user}"
+    echo "###################################"
+    # if grep -q "\b${user}\b" /etc/group;  then
+    #         sudo groupdel $user
+    # fi
+    if id -u "$user" >/dev/null 2>&1; then
+        echo "User $user exists."
+        
+    else
+        echo "User $user does not exist, creating"
+        sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${password})" ${user}
+    fi    
+    if id -u "$user" >/dev/null 2>&1; then
+        echo "Configuring NEPI System User account $user"
+        echo "${user}:${password}" | sudo chpasswd
+        sudo usermod -aG $user $user
+        sudo usermod -aG sudo $user
+        sudo usermod -aG $CONFIG_USER $user
+        sudo usermod -aG $user $CONFIG_USER 
+        sudo usermod -s /sbin/nologin $user
+        
+    else
+        echo "Failed to create user account $user"
+        echo "Manual create an Adminstrator user account name ${user}"
+        echo "Then rerun this script"
+        exit 1
+    fi
+
+}
+
+new_system_user nepi nepi
+new_system_user nepiadmin nepiadmin
+
+
+echo "###################################"
+echo "Changing Non-NEPI user IDs and Groups"
+echo "###################################"
+
+cur_users=$(awk -F':' '1000 <= $3 && $3 <= 2000 {print $1, $3}' /etc/passwd)
+echo "Current Users:"
+echo $cur_users
+
+OLD_UID_START=1000
+OLD_UID_END=1999
+NEW_UID_START=2000
+
+# Require root privileges
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+
+function update_text_value(){
+  FILE=$1
+  KEY=$2
+  UPDATE=$3
+  if [ -f "$FILE" ]; then
+    if grep -q "$KEY" "$FILE"; then
+      sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    else
+      echo "$UPDATE" | sudo tee -a $FILE
+    fi
+  else
+    echo "File not found ${FILE}"
+  fi
+}
+export -f update_text_value
+
+
+# Function to update user and group IDs
+update_user_and_group() {
+    local username=$1
+    local old_uid=$2
+    local old_gid=$3
+    local new_uid=$4
+    local new_gid=$5
+
+    echo "Updating user '$username' (UID $old_uid -> $new_uid, GID $old_gid -> $new_gid)..."
+
+    file=/etc/passwd
+    key="${username}:"
+    fline=$(cat $file | grep ${key})
+    fline=${fline//${uid}/${new_uid}}
+    fline=${fline//${gid}/${new_gid}}
+    echo "Updating etc passwd file with ${fline}"
+    update_text_value $file $key $fline
+
+    file=/etc/group
+    key="${username}:x:"
+    fline=$(cat $file | grep ${key})
+    fline=${fline//${gid}/${new_gid}}
+    echo "Updating etc group file with ${fline}"
+    update_text_value $file $key $fline
+    # # Step 3: Update file ownership on the entire filesystem
+    echo "Updating file ownership across in ${username} home folder."
+    sudo chown -R ${new_uid}:${new_gid} /home/${username}
+
+    echo "User '$username' updated successfully."
+}
+
+# Read /etc/passwd and process users
+while IFS=':' read -r username _ uid gid _ _ _; do
+
+    # Check if the UID is within the 1000-1999 range and is not a system user
+    if [[ $uid -ge $OLD_UID_START && $uid -le $OLD_UID_END ]]; then
+        echo "Checking user ${username} against nepi users"
+        if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
+            is_nepi_user=1
+        else
+            is_nepi_user=0
+        fi
+        if [[  "$is_nepi_user" -eq 0 ]]; then
+            # Calculate the new UID by adding 1000 to the old UID
+            new_uid=$((uid + 1000))
+            new_gid=$new_uid
+
+            echo "Updating Non-NEPI user account ${username} ID and Group from ${uid} to ${new_uid}"
+            echo "Updating Non-NEPI user account ${username} ID and Group from ${gid} to ${new_gid}"
+            # Check if the group ID is the same as the user ID
+            # This is the default behavior on many modern Linux systems
+            update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+        fi
+    fi
+done < /etc/passwd
+
+echo "All Non-NEPI users have been updated."
+cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
+echo "Updated User:"
+echo $cur_users
+
+
+echo "###################################"
+echo "Changing NEPI user IDs and Groups"
+echo "###################################"
+
+echo ""
+echo "Updating NEPI User IDs and Groups if Needed"
+
+# Read /etc/passwd and process users
+username=nepihost
+uid=$(id -u "$username")
+gid=$(id -g "$username")
+new_uid=1000
+new_gid=$new_uid
+if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+fi
+
+username=nepi
+uid=$(id -u "$username")
+gid=$(id -g "$username")
+new_uid=1001
+new_gid=$new_uid
+if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+fi
+
+username=nepiadmin
+uid=$(id -u "$username")
+gid=$(id -g "$username")
+new_uid=1002
+new_gid=$new_uid
+if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+fi
+
+
+# echo "###################################"
+# echo "Adding NEPI users to existing groups"
+# echo "###################################"
+
+# UID_START=1000
+# UID_END=1999
+# # Read /etc/passwd and process users
+# while IFS=':' read -r username _ uid gid _ _ _; do
+#     if [[ $uid -ge $UID_START && $uid -le $UID_END ]]; then
+#         if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
+#             is_nepi_user=1
+#         else
+#             is_nepi_user=0
+#         fi
+#         if [[  "$is_nepi_user" -eq 0 ]]; then
+#             sudo usermod -aG $username nepihost 
+#             sudo usermod -aG $username nepi 
+#             sudo usermod -aG $username nepiadmin 
+#         fi
+#     fi
+# done < /etc/passwd
+
+
+
+# cat /etc/sudoers
+# echo "###################################"
+# echo "Adding NEPI users to sudo users"
+# echo "###################################"
+# echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+# echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+# echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+# cat /etc/sudoers
+
+
+echo "All NEPI user IDs have been processed."
+cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
+echo "Updated User:"
+echo $cur_users
+
+
+echo "########################"
+echo "NEPI User Account Setup Complete"
+echo "########################"
+
+echo ""
+echo "*** REBOOT YOUR DEVICE ***"
+
+
+
+
+
+

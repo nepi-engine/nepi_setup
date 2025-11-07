@@ -1,0 +1,163 @@
+#!/bin/bash
+
+##
+## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
+##
+## This file is part of nepi-engine
+## (see https://github.com/nepi-engine).
+##
+## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
+##
+
+
+# This file exports the running fs to a tar file
+sudo -v
+
+CONFIG_USER=nepihost
+source /home/${CONFIG_USER}/.nepi_bash_utils
+wait
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+###############################
+# Load NEPI Config File
+file=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$file" ]]; then
+    echo "Loading System Config File from ${file}"
+    source $file
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${file}"
+    fi
+else
+    echo "Failed to find ${file}"
+fi
+
+########################
+# Update Docker Config
+echo ""
+echo "Updating Docker Config File"
+bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+wait
+########################
+# Load NEPI DOCKER
+CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
+source ${SCRIPT_FOLDER}/load_docker_config.sh
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed to load ${CONFIG_SOURCE}"
+
+else
+
+    ########################
+    # Start Processes
+    EXPORT_FILENAME=$1
+
+    # Export Running Container
+    if [[ $NEPI_RUNNING_ID != 0 && "$NEPI_RUNNING" -eq 1 ]]; then
+        
+        # ##################
+        # # Check available space
+        # NEPI_EXPORT_PATH=/mnt/nepi_storage/nepi_images
+        # NEPI_EXPORT_SPACE=$(path_space_gb $NEPI_EXPORT_PATH)
+        # NEPI_GB_CONTAINER=$(sudo docker ps --size --filter "id=${NEPI_RUNNING_ID}")
+        # check_drive=$NEPI_DOCKER
+        # check_space=$NEPI_GB_CONTAINER
+        # if ! is_space_avail_gb $check_drive $check_space; then
+        #     echo "Can't install Image file ${INSTALL_NAME}"
+        #     echo "Not enough free space in folder: ${NEPI_DOCKER}"
+        #     echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_EXPORT_SPACE}GB is aviable"
+        # else
+
+
+
+
+        ##################
+        if [[ -z "$EXPORT_FILENAME" ]]; then # FILE PATH Provided
+            
+            IFS='-' read -ra TAG_ARRAY <<< "$NEPI_RUNNING_TAG"
+            
+            NEW_NAME=nepi
+
+            #echo "NEPI_VERSION = ${NEPI_VERSION}"
+            NEW_VERSION=$NEPI_VERSION
+            if [[ -z "$NEW_VERSION" ]]; then
+                NEW_VERSION="${TAG_ARRAY[1]}"
+                if [[ -z "$NEW_VERSION" ]]; then
+                    NEW_VERSION="unknown"
+                fi
+            fi
+
+            NEW_HW_TYPE=$NEPI_HW_TYPE
+            if [[ -z "$NEW_HW_TYPE" ]]; then
+                NEW_HW_TYPE="${TAG_ARRAY[2]}"
+                if [[ -z "$NEW_HW_TYPE" ]]; then
+                    NEW_HW_TYPE="unknown"
+                fi
+            fi
+
+            NEW_SW_DESC=$NEPI_SW_DESC
+            if [[ -z "$NEW_SW_DESC" ]]; then
+                NEW_SW_DESC="${TAG_ARRAY[3]}"
+                if [[ -z "$NEW_SW_DESC" ]]; then
+                    NEW_SW_DESC="unknown"
+                fi
+            fi
+
+            NEW_DATE=$(date +%Y%m%d-%H%M)
+    
+    
+            EXPORT_NAME="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
+
+            # NEW_DESC="${TAG_ARRAY[5]}"
+            # if [[ -n "$NEW_DESC" ]]; then
+            #     EXPORT_NAME="${EXPORT_NAME}-${NEW_DESC}"
+            # fi
+        
+            EXPORT_NAME=${EXPORT_NAME,,}
+        fi
+
+        if [[ -z "$EXPORT_NAME" ]]; then
+            EXPORT_NAME=$NEPI_RUNNING_ID
+        fi
+         echo "Got Export Name: ${EXPORT_NAME}"
+        
+        EXPORT_FILE_PATH=/mnt/nepi_storage/nepi_images/${EXPORT_NAME}
+        parent_path=$(dirname "$EXPORT_FILE_PATH")
+        if [[ ${parent_path:0:1} != '.' && ${parent_path:0:1} != '/' && ! -d "${parent_path}" ]]; then
+            echo "Export Parent Path Not Found ${parent_path}"
+        else
+        
+            EXPORT_FILE_PATH="${EXPORT_FILE_PATH%.*}"
+            TAR_EXPORT_PATH="${EXPORT_FILE_PATH}.tar"
+            if [[ -f $TAR_EXPORT_PATH ]]; then
+                TAR_EXPORT_PATH="${TAR_EXPORT_PATH%.*}"
+                TAR_EXPORT_PATH=$TAR_EXPORT_PATH"-$(date +%S)"
+                TAR_EXPORT_PATH="${TAR_EXPORT_PATH}.tar"
+            fi
+            TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
+            echo "Exporting FS to: ${TAR_EXPORT_PATH}"
+            update_yaml_value "NEPI_EXPORT_PATH" ${TAR_EXPORT_PATH} "${CONFIG_SOURCE}"
+            update_yaml_value "NEPI_EXPORTING" 1 "${CONFIG_SOURCE}"
+            sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
+            if [[ "$?" -eq 0 ]]; then
+                echo ""
+                echo "--------------------------"
+                echo "NEPI Image Export Complete"
+                echo ""
+                ls /mnt/nepi_storage/nepi_images
+
+            else
+                echo ""
+                echo "--------------------------"
+                echo "NEPI Image Failed to Export: ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG}"
+                echo "  to file ${EXPORT_FILE_PATH}"
+            fi
+
+        fi
+    else
+        echo "No Running NEPI Container to Export"
+    fi
+    update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${CONFIG_SOURCE}"
+    update_yaml_value "NEPI_EXPORTING" 0 "${CONFIG_SOURCE}"
+    update_yaml_value "NEPI_FS_EXPORT" 0 "${CONFIG_SOURCE}"
+
+fi

@@ -1,0 +1,3 @@
+THIS DEVICE IS RUNNING AN UNLICENSED VERSION OF NEPI.
+-----------------------------------------------------------------------------------
+Failed to validate commercial license: License file not found: /mnt/nepi_storage/license/nepi_license_3c6d662bd373.gpg
