@@ -39,22 +39,6 @@ if [[ "$?" -ne 0 ]]; then
 fi 
 
 
-min_docker_gb=$((NEPI_GB_CONTAINER * 3))
-
-check_drive=/mnt/nepi_config/docker_cfg
-check_space=$min_docker_gb
-if is_space_avail_gb $check_drive $check_space; then
-    if [[ "$NEPI_AB_FS" -eq 1 ]]; then
-        echo "Would you like to enable NEPI AB Backup/Recovery file system support"
-        enable_ab=$(ask_yes_no)
-        if [[ "$enable_ab" == 'yes' ]]; then
-            export NEPI_AB_FS=1
-        else
-            export NEPI_AB_FS=0
-        fi
-    fi
-fi
-
 
 nepistop
 
@@ -181,6 +165,34 @@ sudo chmod +x ${UPDATE_PATH}/*
 
 echo "Updating NEPI Config File Settings"
 
+# min_docker_gb=$((NEPI_GB_CONTAINER * 3))
+
+# check_drive=/mnt/nepi_config/docker_cfg
+# check_space=$min_docker_gb
+# if is_space_avail_gb $check_drive $check_space; then
+#     if [[ "$NEPI_AB_FS" -nq 1 ]]; then
+#         echo "Would you like to enable NEPI AB Backup/Recovery file system support"
+#         enable_ab=$(ask_yes_no)
+#         if [[ "$enable_ab" == 'yes' ]]; then
+#             export NEPI_AB_FS=1
+#         else
+#             export NEPI_AB_FS=0
+#         fi
+#     fi
+# fi
+
+if [[ -z $NEPI_AB_FS ]]; then
+    NEPI_AB_FS=0
+fi
+update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $BASE_DOCKER_CONFIG_FILE
+
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
+    export NEPI_IN_CONTAINER=0
+    update_yaml_value "NEPI_IN_CONTAINER" 0 $BASE_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_IN_CONTAINER" 0 $USER_SYS_CONFIG_FILE
+fi
+
 export NEPI_MANAGES_HOSTNAME=1
 update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $BASE_SYS_CONFIG_FILE
 update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $USER_SYS_CONFIG_FILE
@@ -210,10 +222,7 @@ update_yaml_value "NEPI_MANAGES_DOCKER" 1 $BASE_SYS_CONFIG_FILE
 update_yaml_value "NEPI_MANAGES_DOCKER" 1 $USER_SYS_CONFIG_FILE
 
 
-if [[ -z $NEPI_AB_FS ]]; then
-    NEPI_AB_FS=0
-fi
-update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $BASE_DOCKER_CONFIG_FILE
+
 
 
 ################
