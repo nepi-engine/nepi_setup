@@ -68,9 +68,10 @@ echo "Installing NEPI required software packages"
 echo "######################################"
 sudo add-apt-repository ppa:rmescandon/yq -y
 sudo apt update
+# sudo apt-get install --fix-broken -y
 sudo apt install yq -y
 
-sudo apt install apt-utils -y
+# sudo apt install apt-utils -y
 sudo apt install git -y
 sudo apt install gitk -y
 sudo apt install htop -y
