@@ -162,13 +162,8 @@ Come back to this
     Then, unzip and copy the folders from unzipped folder to the 'nepi_storage' shared drive.  Select 'Merge' if asked
 
 
-### NEPI User Storage Setup
-This step will initialize your NEPI's User Storage folders. The 
-
-
-Enable internet connection and sync clocks on connection:
-
-    ninet
+### NEPI Docker Initialization Setup
+This step will initialize the NEPI Docker System.  
 
 Initialize NEPI docker image on your system:
 
