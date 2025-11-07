@@ -152,7 +152,7 @@ if [ -f "$NEPI_UTILS_DEST" ]; then
     sudo rm $NEPI_UTILS_DEST
 fi
 sudo cp $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_DEST
+sudo chown -R ${USER}:${USER} $NEPI_UTILS_DEST
 
 NEPI_ALIASES_SOURCE=$(dirname "$(pwd)")/resources/bash/nepi_pc_aliases
 NEPI_ALIASES_DEST=/home/${USER}/.nepi_pc_aliases
@@ -161,17 +161,17 @@ if [ -f "$NEPI_ALIASES_DEST" ]; then
     sudo rm $NEPI_ALIASES_DEST
 fi
 sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
+sudo chown -R ${USER}:${USER} $NEPI_ALIASES_DEST
 
 #############
 echo "Updating user bashrc files"
-### Backup CONFIG_USER BASHRC file if needed
+### Backup USER BASHRC file if needed
 file=$BASHRC
 bfile=${BASHRC}.org
 path_backup $file $bfile
 
 sudo cp $bfile $BASHRC
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
+sudo chown ${USER}:${USER} $BASHRC
 sudo chmod 755 $BASHRC
 
 # Add additional user bashrc statements
@@ -194,7 +194,7 @@ else
     echo 'fi' | sudo tee -a $BASHRC
 fi
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
+sudo chown ${USER}:${USER} ~/.bashrc
 sudo chmod 0644 ~/.bashrc
 
 echo ""
@@ -209,8 +209,8 @@ echo "################################# "
 echo "Clearing Known Hosts"
 echo ""
 
-ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
-ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
+ssh-keygen -f "/home/${USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
+ssh-keygen -f "/home/${USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
 
 
@@ -246,7 +246,7 @@ echo "################################# "
 echo "Updating SSH Keys"
 echo ""
 
-NEPI_SSH_DIR=/home/${CONFIG_USER}/ssh_keys
+NEPI_SSH_DIR=/home/${USER}/ssh_keys
 NEPI_SSH_FILE=nepi_engine_default_private_ssh_key
 
 # Add nepi ssh key if not there
@@ -257,12 +257,12 @@ if [ -e $NEPI_SSH_PATH ]; then
     echo "Found NEPI ssh private key ${NEPI_SSH_PATH} "
 else
     echo "Installing NEPI ssh private key ${NEPI_SSH_PATH} "
-    mkdir $NEPI_SSH_DIR
+    mkdir -p $NEPI_SSH_DIR
     cp $NEPI_SSH_SOURCE $NEPI_SSH_PATH
 fi
 sudo chmod 600 $NEPI_SSH_PATH
 sudo chmod 700 $NEPI_SSH_DIR
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_DIR
+sudo chown -R ${USER}:${USER} $NEPI_SSH_DIR
 
 echo " "
 echo "################################# "
