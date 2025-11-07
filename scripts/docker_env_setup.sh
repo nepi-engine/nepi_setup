@@ -66,8 +66,11 @@ echo ""
 echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
+sudo add-apt-repository ppa:rmescandon/yq -y
 sudo apt update
 sudo apt-get install --fix-broken -y
+sudo apt install yq -y
+
 sudo apt install apt-utils -y
 sudo apt install git -y
 sudo apt install gitk -y
@@ -158,7 +161,14 @@ echo "Installing Docker Required Software"
 echo "######################################"
 
 
+ echo "Stopping Docker Service"
+SERVICE_NAME=docker
+if systemctl is-active --quiet "$SERVICE_NAME"; then
+    echo "Stopping ${SERVICE_NAME} Service"
+    sudo systemctl stop $SERVICE_NAME
+fi
 
+SERVICE_NAME=docker.socket
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "Stopping ${SERVICE_NAME} Service"
     sudo systemctl stop $SERVICE_NAME

@@ -301,9 +301,9 @@ if [[ "$?" -eq 0 ]]; then
     echo "Configuring Samba Service"
 
     if [[ "$CONFIG_USER" == "nepihost" ]]; then
-        samba_file=${ETC_SOURCE_PATH}/docker/samba/smb.conf
+        samba_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
     else
-        samba_file=${ETC_SOURCE_PATH}/samba/smb.conf
+        samba_file=${SOURCE_ETC_PATH}/samba/smb.conf
     fi
 
     if [[ -f "$samba_file" ]]; then 
@@ -670,7 +670,7 @@ if [[ -n "$DISPLAY" ]]; then
     echo "Updating Chrome settings for user ${CONFIG_USER}"
     #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
     #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
-    sudo cp -rf ${SOURCE_ETC_PATH}user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
+    sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
 
     sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
     sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
@@ -703,7 +703,7 @@ echo ""
 echo "##################################"
 echo 'NEPI Config Setup Complete'
 echo "##################################"
-# echo ""
-# echo "*** REBOOT YOUR DEVICE ***"
 
+echo ""
+echo "*** REBOOT YOUR DEVICE ***"
 
