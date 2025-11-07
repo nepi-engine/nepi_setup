@@ -182,6 +182,7 @@ Start your NEPI container running:
 The start script will let you know if the installed NEPI Image started successfully. 
 
 NOTE: Some additional NEPI Docker command line shortcuts are:
+
     nepistart = Start the NEPI docker container
     nepidev = Start the NEPI docker container in a dev mode with no processes running
     nepistop = Stop the running NEPI docker container
