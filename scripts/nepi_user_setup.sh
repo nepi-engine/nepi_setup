@@ -113,7 +113,13 @@ function new_system_user(){
 
 }
 
-new_system_user nepi nepi
+
+if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+    new_system_user nepi nepi
+else
+    new_system_user nepihost nepi
+fi
+
 new_system_user nepiadmin nepiadmin
 
 

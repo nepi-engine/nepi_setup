@@ -73,6 +73,8 @@ NEPI_STORAGE=/mnt/nepi_storage
 cd $NEPI_STORAGE
 
 
+wget https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0
+
 
 
 cd $CURRENT_FOLDER
