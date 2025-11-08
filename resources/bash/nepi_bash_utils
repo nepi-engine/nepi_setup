@@ -493,10 +493,13 @@ function nclock(){
             return 1 # Exit with a non-zero status to indicate an error
         fi
       fi
+      echo "Restarting chrony time service"
       sudo systemctl restart chronyd
       echo "Waiting for clock to synchronize..."
-      #chronyc waitsync 1
+      
       sleep 1
+      sudo chronyc -a makestep
+      #chronyc waitsync 1
       if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
         echo "Clock synchronization complete."}
       else
