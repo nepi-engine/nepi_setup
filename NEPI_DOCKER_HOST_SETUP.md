@@ -1,10 +1,10 @@
 # NEPI Docker Host Setup Instructions
 This tutorial will walk you through setting up, configuring, and running a NEPI Docker production installation on a suitable edge processor.
 
-NOTE: NEPI Docker production installation will make significant changes to your device's operating system configuration.  
+**NOTE:** NEPI Docker production installation will make significant changes to your device's operating system configuration.  
 If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.
 
-NOTE: NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
+**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
 
 For a detailed tutorial on this process see the "NEPI Docker Host Setup" tutorial under the "NEPI Installation" section at:
@@ -15,7 +15,7 @@ For additional support, visit the NEPI software community forum at:
 
 
 ################################################################
-### Create NEPIHOST User Account
+### Create NEPI Docker User Account
 
 This step will create the 'nepihost' user account on your device
 
@@ -34,7 +34,7 @@ Create the following user with the following inputs:
   PASSWORD: #Nsetup4You (Temporary - the actual password will be updated later to "nepi")
 
 
-*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 
@@ -69,7 +69,7 @@ then
     /home/nepihost/nepi_setup/scripts/docker_user_setup.sh
 
 
-*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 
@@ -87,7 +87,7 @@ If prompted enter: `y` or 'yes' :
     /home/${USER}/nepi_setup/scripts/docker_env_setup.sh
     
 
-*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 
@@ -103,17 +103,17 @@ Log into the `nepihost` user using password  'nepi'
 
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
-NOTE: All non-NEPI user accounts and home folders will be removed during this configuration process.  
+**NOTE:** All non-NEPI user accounts and home folders will be removed during this configuration process.  
 Ownership of any non-NEPI files in the system will be owned by 'nepihost' user.
 
 
     /home/${USER}/nepi_setup/scripts/docker_config_setup.sh
 
 
-NOTE:  After this process, both network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
+**NOTE:**  After this process, both network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
 
 
-*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 
@@ -127,7 +127,7 @@ Enable internet connection and sync clocks on connection:
 
     ninet
 
-NOTE: Some additional NEPI Docker command line shortcuts are:
+**NOTE:** Some additional NEPI Docker command line shortcuts are:
 
     pingi = ping internet test
     nipa= Echo NEPI set IP address
@@ -168,7 +168,7 @@ Start your NEPI container running:
 
 The start script will let you know if the installed NEPI Image started successfully. 
 
-NOTE: Some additional NEPI Docker command line shortcuts are:
+**NOTE:** Some additional NEPI Docker command line shortcuts are:
 
     nepistart = Start the NEPI docker container
     nepidev = Start the NEPI docker container in a dev mode with no processes running
@@ -189,14 +189,14 @@ NOTE: Some additional NEPI Docker command line shortcuts are:
     nepiupdate = Run update process on NEPI Docker config file
     nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings
 
-*** OPEN CHROMIUM WEB BROSWER ***
+**OPEN CHROMIUM WEB BROSWER**
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
 
     localhost:5003 
 
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
 
-NOTE:  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service which will be installed in the next section.
+**NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service which will be installed in the next section.
 
 
 **********************
@@ -235,7 +235,7 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
             nepistop
             nepistart
 
-            NOTE: Some additional NEPI Software command line shortcuts are:
+            **NOTE:** Some additional NEPI Software command line shortcuts are:
 
                 nepihome = change to nepi home dir
                 nepistart = start the nepi processes
@@ -262,9 +262,9 @@ Enable the container to start on boot:
 
     sudo systemctl enable nepi_docker
 
-NOTE: You can disable the NEPI Docker service with the command: sudo systemctl disable nepi_docker
+**NOTE:** You can disable the NEPI Docker service with the command: sudo systemctl disable nepi_docker
 
-*** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 Log back into `nepihost` using password 'nepi' 
 
@@ -305,13 +305,13 @@ See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-a
 ###############################################################
 # NEPI Docker Installation Notes
 
-NOTE: The NEPI Docker system provides a full-featured AI and automation software environment that installs on top of your host device's native operating system.  To achieve this, the NEPI Docker solution interacts with the device's configuration. While the NEPI Docker installation privdes functions for reverting back to your orignal system configurations, it is recommended that you create a backup of your current device's hardrive to a seperate backup SSD card to ensure you are able to recover your original system if issues arise.  This can be done using a low cost SSD cloning device such as [Rosewill SSD Cloner](https://www.amazon.com/Duplicator-Enclosure-Clone-RS-N2-CL-PC-Mac-Android/dp/B0F51MMN7Q/?th=1) as long as you are cloning to the same SSD card type.
+**NOTE:** The NEPI Docker system provides a full-featured AI and automation software environment that installs on top of your host device's native operating system.  To achieve this, the NEPI Docker solution interacts with the device's configuration. While the NEPI Docker installation privdes functions for reverting back to your orignal system configurations, it is recommended that you create a backup of your current device's hardrive to a seperate backup SSD card to ensure you are able to recover your original system if issues arise.  This can be done using a low cost SSD cloning device such as [Rosewill SSD Cloner](https://www.amazon.com/Duplicator-Enclosure-Clone-RS-N2-CL-PC-Mac-Android/dp/B0F51MMN7Q/?th=1) as long as you are cloning to the same SSD card type.
 
 
 ### Check Available Disk Space
 Before proceeding, make sure you device has the minimum free space (60 GB) required for NEPI Docker installation and run-time processes.  
 
-NOTE: If you don't have the minimum required free space to proceed, there are several options available:
+**NOTE:** If you don't have the minimum required free space to proceed, there are several options available:
 1) Delete unneeded files and clean your current file system to open up additional free space.
 3) Upgrade to a larger SSD by cloning your current SSD to a larger SSD hard drive using an SSD clone device that support's cloning to larger disks such as [StarTech SSD Cloner](https://www.amazon.com/StarTech-com-Duplicator-90GBpm-Standalone-Dual-Bay/dp/B0D37ZJFND/ref=sr_1_2_sspa).
 Then run gparted to increase your file systems available space
