@@ -68,42 +68,70 @@ if [[ "$?" -eq 0 ]]; then
 fi
 
 #################################
+# Disable Apport Error Messaging
+
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
+    SYSTEMD_SERVICE_PATH=/etc/systemd/system
+
+    echo ""
+    echo "########"
+    echo "Disable apport to avoid crash reports on a display"
+    sudo systemctl disable apport
+    sudo systemctl stop apport
+fi
+
+#################################
 # Install Software Requirments
 
 echo ""
 echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
-echo ""
-
-sudo add-apt-repository ppa:rmescandon/yq -y
-sudo add-apt-repository ppa:apt-fast/stable -y
 sudo apt update
+sudo apt-get install --fix-broken -y
+sudo apt install apt-utils -y
+sudo apt install git -y
+sudo apt install gitk -y
+sudo apt install htop -y
+sudo apt install ncdu -y
+sudo apt install snap -y
+sudo apt install curl -y
 
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install aria2
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
-
-
-sudo apt-fast install -y yq git gitk htop ncdu snap curl python3-pip \
-hostapd \ 
-chrony \
-ifupdown \
-net-tools \ 
-iproute2 \
-isc-dhcp-client \
-wpasupplicant \
-nmap \
-samba \
-smbclient 
-
+sudo apt install python3-pip -y
 #sudo apt install usbmount -y
-#sudo apt install netplan.io -y
 
-echo ""
+
+
+echo "######################################"
+echo "Installing NEPI required python packages"
+echo "######################################"
+
+
+
+
+
+###################################
+# Install NEPI Managed Services Apps
+###################################
+
+echo "######################################"
+echo "Installing Hostname Apps"
+echo "######################################"
+sudo apt install hostapd -y # WiFi access point setup
+
+
+echo "######################################"
+echo "Installing Time Apps"
+echo "######################################"
+echo "Installing NEPI TIME Management Software"
+sudo apt-get install chrony -y
+
 echo "######################################"
 echo "Installing SSH Apps"
 echo "######################################"
-echo ""
+
+echo "Installing NEPI SSH Management Software"
 
 echo "Installing NEPI SSH Management Software"
 #sudo apt install --reinstall openssh-server
@@ -118,8 +146,30 @@ fi
 sudo chmod 0755 /run/sshd
 sudo chown root:root /run/sshd
 
+echo "######################################"
+echo "Installing Network Apps"
+echo "######################################"
+
+#sudo apt install netplan.io -y
+sudo apt install ifupdown -y
+sudo apt install net-tools -y 
+sudo apt install iproute2 -y
+sudo apt install isc-dhcp-client -y
+sudo apt install wpasupplicant -y
+sudo apt install nmap -y
+
+
+echo "######################################"
+echo "Installing Shared Drive Apps"
+echo "######################################"
+sudo apt install samba -y
+sudo apt install smbclient -y
+
+
+
+
 sudo apt-get update
-sudo apt  install --fix-broken
+sudo apt sudo apt  install --fix-broken
 
 
 #################################
