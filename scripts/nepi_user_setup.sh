@@ -286,11 +286,11 @@ fi
 
 ####################
 # Remove the repo
-if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-    rm -r /home/nepihost/nepi_setup
-else
-    rm -r /home/nepi/nepi_setup
-fi
+# if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+#     rm -r /home/nepihost/nepi_setup
+# else
+#     rm -r /home/nepi/nepi_setup
+# fi
 
 
 
@@ -304,8 +304,8 @@ if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then
 else
     echo ' ' | sudo tee -a $file
     echo '##### NEPI SUDO USERS #####' | sudo tee -a $file
-    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
     echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
     echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
 fi
 cat $file
