@@ -85,8 +85,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
 
 
 sudo apt-fast install -y yq git gitk htop ncdu snap curl python3-pip \
-hostapd \
-chrony 
+hostapd \ 
+chrony \
 ifupdown \
 net-tools \ 
 iproute2 \
@@ -96,7 +96,6 @@ nmap \
 samba \
 smbclient 
 
-exit 1
 #sudo apt install usbmount -y
 #sudo apt install netplan.io -y
 

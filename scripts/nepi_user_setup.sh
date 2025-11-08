@@ -10,7 +10,7 @@
 ##
 
 
-# This file installs the NEPI Engine File System installation
+# This file sets up NEPI users
 
 if ! [ $(id -u) = 0 ]; then
    echo 'This scripts must be run as root user. Type "sudo su" and retry'
@@ -18,25 +18,9 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-export CONFIG_USER=$SUDO_USER
-CONFIG_USER_PW=nepi  
-
-if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-    sys_user_1=nepi
-else
-    sys_user_1=nepihost
-fi
-sys_user_1_pw=nepi
-
-sys_user_2=nepiadmin
-sys_user_2_pw=nepiadmin
 
 ################
 # Check Valid User
-if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
-    exit 1
-fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -51,6 +35,7 @@ echo "NEPI USER SETUP"
 echo "########################"
 
 
+CONFIG_USER=nepi
 
 echo "###################################"
 echo "Setting up user account: ${CONFIG_USER}"
@@ -62,8 +47,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     
 else
     echo "User $CONFIG_USER does not exist, creating"
-    #sudo useradd -m ${CONFIG_USER}
-    sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+    sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 nepi)" ${CONFIG_USER}
 fi    
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "Configuring NEPI Host User account $CONFIG_USER"
@@ -122,9 +106,11 @@ function new_system_user(){
 
 }
 
+new_system_user nepihost nepi
+new_system_user nepiadmin nepiadmin
 
-new_system_user $sys_user_1 $sys_user_1_pw
-new_system_user $sys_user_2  $sys_user_2_pw
+
+
 
 
 echo "###################################"
@@ -232,7 +218,7 @@ echo ""
 echo "Updating NEPI User IDs and Groups if Needed"
 
 # Read /etc/passwd and process users
-username=$CONFIG_USER
+username=nepi
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1000
@@ -241,7 +227,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=$sys_user_1
+username=nepihost
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1001
@@ -250,7 +236,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=$sys_user_2
+username=nepiadmin
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1002
