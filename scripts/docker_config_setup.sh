@@ -166,7 +166,6 @@ if [[ "$check_failed" -eq 1 ]]; then
 fi
 
 echo ""
-echo ""
 echo "*** REBOOT YOUR DEVICE ***"
 
 

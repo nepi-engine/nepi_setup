@@ -26,6 +26,12 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
+
+if ! is_valid_internet; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+    exit 1
+fi
+
 echo "########################"
 echo "NEPI ENVIRONMENT SETUP"
 echo "########################"
@@ -118,6 +124,17 @@ sudo apt install snapd -y
 sudo apt install xz-utils
 
 #sudo apt install -y lsyncd rsync
+
+    #########
+    # Install Driver Support Libs
+
+#https://www.stereolabs.com/developers/release/4.1
+wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons
+sudo sudo apt install zstd -y
+
+
+
+
 
 #######################################################
 sudo apt install nvidia-utils-515 -y

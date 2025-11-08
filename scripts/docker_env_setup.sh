@@ -14,14 +14,7 @@
 
 sudo -v
 
-echo "########################"
-echo "NEPI DOCKER ENVIRONMENT SETUP"
-echo "########################"
-
-
-echo "Running Intitialization Scripts"
-
-export CONFIG_USER=$(id -un 1000)
+CONFIG_USER=$(id -un 1000)
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
    echo "Current user is ${CONFIG_USER}. This scripts must be run as nepihost user."
@@ -32,6 +25,16 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+
+if ! is_valid_internet; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+    exit 1
+fi
+
+echo "########################"
+echo "NEPI DOCKER ENVIRONMENT SETUP"
+echo "########################"
 
 
 
@@ -77,26 +80,23 @@ sudo add-apt-repository ppa:rmescandon/yq -y
 sudo add-apt-repository ppa:apt-fast/stable -y
 sudo apt update
 
-sudo apt-get install aria2
-sudo apt-get install apt-fast
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install aria2
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install apt-fast
 
 
 sudo apt-fast install -y yq git gitk htop ncdu snap curl python3-pip \
-# Install Hostname Apps
 hostapd \
-#Install Time Apps
 chrony 
-# Install Network Apps"
 ifupdown \
 net-tools \ 
 iproute2 \
 isc-dhcp-client \
 wpasupplicant \
 nmap \
-# Install Shared Drive Apps
 samba \
-smbclient \
+smbclient 
 
+exit 1
 #sudo apt install usbmount -y
 #sudo apt install netplan.io -y
 

@@ -59,7 +59,7 @@ fi
 
 ################
 # Sync NEPI Config Files
-SOURCE_CONFIG_FOLDER=$(dirname "$SCRIPT_FOLDER")/config
+SOURCE_CONFIG_FOLDER=$(dirname "$SCRIPT_FOLDER")/etc
 SOURCE_CONFIG_FILE=${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_CONFIG_FOLDER
 
