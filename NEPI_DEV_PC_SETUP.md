@@ -14,4 +14,19 @@ Make sure your PC has internet access
 
 
 
+### Clone the NEPI Engine Repo
+Clone the 'main' branch:
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
+Or, clone the 'development' branch:
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout develop
+    git submodule update --init --recursive
+
 

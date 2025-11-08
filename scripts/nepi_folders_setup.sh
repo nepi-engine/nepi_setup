@@ -10,17 +10,11 @@
 ##
 
 
-# This file installs the NEPI Engine File System installation
+# This file sets up nepi bash aliases and util functions
 
+sudo -v
 
-if ! [ $(id -u) = 0 ]; then
-   echo 'This scripts must be run as root user. Type "sudo su" and retry'
-   exit 1
-fi
-
-echo "########################"
-echo "NEPI DOCKER USER SETUP"
-echo "########################"
+export CONFIG_USER=$(id -un 1000)
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -28,14 +22,17 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-###########################
-# RUN USER SETUP PROCESSES
 
-####################################
-# Run NEPI User Setup Script
 
-script_file=nepi_user_setup.sh
-script_path=${SCRIPT_PATH}/${script_file}
+
+echo "########################"
+echo "NEPI FOLDERS SETUP"
+echo "########################"
+echo ""
+
+ETC_SCRIPTS_FOLDER=$(dirname "${SCRIPT_FOLDER}")/resources/etc/scripts
+script_file=check_config_folders.sh
+script_path=${ETC_SCRIPTS_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
 	echo ""
 	echo "Running ${script_file} script"

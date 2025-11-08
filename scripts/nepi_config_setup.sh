@@ -13,108 +13,186 @@
 # This file installs the NEPI Engine File System installation
 
 sudo -v
-export CONFIG_USER=$USER
+
+export CONFIG_USER=$(id -un 1000)
+
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+
 
 echo "########################"
 echo "NEPI CONFIG SETUP"
 echo "########################"
 
-echo "Running Intitialization Scripts"
-
-SCRIPT_PATH=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
-if [[ "$CONFIG_USER" == "nepihost" ]]; then
-    NEPI_UTILS_SOURCE=/home/nepihost/.nepi_docker_aliases
-else
-    NEPI_UTILS_SOURCE=/home/nepi/.nepi_system_aliases
+echo "Checking Requirements"
+
+################
+# Check Valid User
+if [[ "$CONFIG_USER" != 'nepi' || "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "This script must be run by user 'nepi' or 'nepihost'"
+    exit 1
 fi
 
-source $NEPI_UTILS_SOURCE
-
-. ${SCRIPT_PATH}/script_setup.sh
-if [[ "$?" -ne 0 ]]; then
-    echo "Script Setup Failed. Exiting"
+################
+# Check Valid Software
+if command -v yq &>/dev/null; then
+    : # Do nothing here
+elif is_valid_internet; then
+    echo "Installing yq software"
+    sudo add-apt-repository ppa:rmescandon/yq -y
+    sudo apt update
+    sudo apt install yq -y
+fi
+if command -v yq &>/dev/null; then
+    : # Do nothing here
+else
+    echo "EXITING"
+    echo "yq application is not installed"
+    echo "Connect to internet and rerun this script"
     exit 1
-fi 
+fi
+
+
+################
+# Sync NEPI Config Files
+SOURCE_CONFIG_FOLDER=$(dirname "$SCRIPT_FOLDER")/config
+SOURCE_CONFIG_FILE=${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_CONFIG_FOLDER
+
+NEPI_CONFIG_FOLDER=/opt/nepi/etc
+NEPI_SYS_CONFIG_FILE=${NEPI_CONFIG_FOLDER}/nepi_system_config.yaml
+NEPI_CONFIG_LOAD_FILE=${NEPI_CONFIG_FOLDER}/load_system_config.sh
+NEPI_CONFIG_EDIT_FILE=${NEPI_CONFIG_FOLDER}/nepi_system_config.sh
+
+
+if [[ ! -d "$NEPI_CONFIG_FOLDER" ]]; then
+    sudo mkdir -p $NEPI_CONFIG_FOLDER
+fi
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FOLDER
+
+if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
+    sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
+else
+    sync_yaml_files ${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
+fi
+sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/load_system_config.sh" ${NEPI_CONFIG_LOAD_FILE}
+sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/nepi_system_config.sh" ${NEPI_CONFIG_EDIT_FILE}
+
+
+source $NEPI_CONFIG_LOAD_FILE
+if [[ "$1" -ne 0 ]]; then
+    echo "Failed to find load config file at: ${NEPI_CONFIG_LOAD_FILE}"
+    exit 1
+fi
+
+###################
+#  Upated NEPI Config Settings
 
 
 
+export NEPI_MANAGES_HOSTNAME=1
+update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $NEPI_SYS_CONFIG_FILE
+
+
+export NEPI_MANAGES_NETWORK=1
+update_yaml_value "NEPI_MANAGES_NETWORK" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_TIME=1
+update_yaml_value "NEPI_MANAGES_TIME" 1 $NEPI_SYS_CONFIG_FILE
+
+
+export NEPI_MANAGES_SSH=1
+update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SHARE=1
+update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SOFTWARE=1
+update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_DOCKER=1
+update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
+
+
+
+################
+# Stop Any Running NEPI Containers
 nepistop
 
-# #####################################
-# NEPI CONFIG INITIALIZATION
-# #####################################
+
+####################################
 
 echo ""
 echo "########################"
-echo "Initializing NEPI Config System"
+echo "NEPI CONFIG SETUP"
 echo "########################"
 
 #############
 # Define Folders
-SOURCE_INSTR_PATH=$(dirname "$SCRIPT_PATH")
-SOURCE_CONFIG_PATH=$(dirname "$SCRIPT_PATH")/config
-SOURCE_SYS_CONFIG_FILE=${SOURCE_CONFIG_PATH}/nepi_system_config.yaml
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_CONFIG_PATH
-sudo chmod -R +x $SOURCE_CONFIG_PATH
+SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
+SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
+sudo chmod -R +x $SOURCE_ETC_PATH
 
-SOURCE_ETC_PATH=$(dirname "${SCRIPT_PATH}")/resources/etc
-SOURCE_NEPI_SCRIPTS_PATH=$(dirname "$SCRIPT_PATH")/resources/scripts
+SOURCE_NEPI_SCRIPTS_PATH=$(dirname "$SCRIPT_FOLDER")/resources/scripts
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_NEPI_SCRIPTS_PATH
+sudo chmod -R +x $SOURCE_NEPI_SCRIPTS_PATH
 
-SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "$SCRIPT_PATH")/resources/docker
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_CONFIG_PATH
-sudo chmod -R +x $SOURCE_CONFIG_PATH
+SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "$SCRIPT_FOLDER")/resources/docker
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_DOCKER_SCRIPTS_PATH
+sudo chmod -R +x $SOURCE_DOCKER_SCRIPTS_PATH
 
 
-BASE_CONFIG_PATH=/opt/nepi
+NEPI_CONFIG_PATH=/opt/nepi
 
-BASE_ETC_PATH=${BASE_CONFIG_PATH}/etc
-BASE_SYS_CONFIG_FILE=${BASE_ETC_PATH}/nepi_system_config.yaml
+NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
+NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
-BASE_SCRIPTS_PATH=${BASE_CONFIG_PATH}/scripts
+NEPI_SCRIPTS_PATH=${NEPI_CONFIG_PATH}/scripts
 
-BASE_DOCKER_CONFIG_PATH=${BASE_CONFIG_PATH}/docker_cfg
-BASE_DOCKER_CONFIG_FILE=${BASE_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
+NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
+NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 
-USER_SYS_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
 
 ############
 echo ""
 echo "###########"
-echo "Updating NEPI Base Config Folders"
+echo "Updating NEPI Config Folders"
 echo ""
 
-if [[ ! -d "$BASE_CONFIG_PATH" ]]; then
-    sudo mkdir -p $BASE_CONFIG_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${BASE_CONFIG_PATH}
+if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
+    sudo mkdir -p $NEPI_CONFIG_PATH 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_CONFIG_PATH}
 fi
 
 #############
 
-if [[ ! -d "$BASE_ETC_PATH" ]]; then
-    sudo mkdir -p $BASE_ETC_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${BASE_ETC_PATH}
+if [[ ! -d "$NEPI_ETC_PATH" ]]; then
+    sudo mkdir -p $NEPI_ETC_PATH 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_ETC_PATH}
 fi
 
 
-if [[ ! -f "$BASE_SYS_CONFIG_FILE" ]]; then
-    sudo cp -p $SOURCE_SYS_CONFIG_FILE $BASE_SYS_CONFIG_FILE
+if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
+    sudo cp -p $SOURCE_SYS_CONFIG_FILE $NEPI_SYS_CONFIG_FILE
 fi
 SOURCE_PATH=${SOURCE_SYS_CONFIG_FILE}
-UPDATE_PATH=${BASE_SYS_CONFIG_FILE}
+UPDATE_PATH=${NEPI_SYS_CONFIG_FILE}
 echo "Syncing NEPI System Config YAML File from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_PATH $UPDATE_PATH
 
-# Update from source
-echo "Copying NEPI System Config Scripts Files from ${SOURCE_CONFIG_PATH} to ${BASE_ETC_PATH}"
-sudo cp -p ${SOURCE_CONFIG_PATH}/nepi_system_config.sh ${BASE_ETC_PATH}/nepi_system_config.sh
-sudo cp -p ${SOURCE_CONFIG_PATH}/load_system_config.sh ${BASE_ETC_PATH}/load_system_config.sh
 
 if [[ "$SOURCE_ETC_PATH" != "/etc" && -n "$SOURCE_ETC_PATH" ]]; then
 
     SOURCE_PATH=$SOURCE_ETC_PATH
-    UPDATE_PATH=$BASE_ETC_PATH
+    UPDATE_PATH=$NEPI_ETC_PATH
 
     echo "Syncing ETC Folder from ${SOURCE_PATH} to ${UPDATE_PATH}"
     echo "Excluding nepi_system_config.yaml file"
@@ -125,9 +203,9 @@ fi
 
 # Install NEPI Sciprts
 
-if [[ ! -d "$BASE_SCRIPTS_PATH" ]]; then
-    sudo mkdir -p $BASE_SCRIPTS_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${BASE_SCRIPTS_PATH}
+if [[ ! -d "$NEPI_SCRIPTS_PATH" ]]; then
+    sudo mkdir -p $NEPI_SCRIPTS_PATH 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_SCRIPTS_PATH}
 fi
 
 SOURCE_PATH=${SOURCE_NEPI_SCRIPTS_PATH}
@@ -144,9 +222,9 @@ sudo chmod +x ${UPDATE_PATH}/*
 
 # Install Docker Sciprts
 
-if [[ ! -d "$BASE_SCRIPTS_PATH" ]]; then
-    sudo mkdir -p $BASE_SCRIPTS_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${BASE_SCRIPTS_PATH}
+if [[ ! -d "$NEPI_SCRIPTS_PATH" ]]; then
+    sudo mkdir -p $NEPI_SCRIPTS_PATH 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_SCRIPTS_PATH}
 fi
 
 SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
@@ -184,48 +262,7 @@ echo "Updating NEPI Config File Settings"
 if [[ -z $NEPI_AB_FS ]]; then
     NEPI_AB_FS=0
 fi
-update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $BASE_DOCKER_CONFIG_FILE
-
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
-    export NEPI_IN_CONTAINER=0
-    update_yaml_value "NEPI_IN_CONTAINER" 0 $BASE_SYS_CONFIG_FILE
-    update_yaml_value "NEPI_IN_CONTAINER" 0 $USER_SYS_CONFIG_FILE
-fi
-
-export NEPI_MANAGES_HOSTNAME=1
-update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_NETWORK=1
-update_yaml_value "NEPI_MANAGES_NETWORK" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_NETWORK" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_TIME=1
-update_yaml_value "NEPI_MANAGES_TIME" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_NETWORK" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SSH=1
-update_yaml_value "NEPI_MANAGES_SSH" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_SSH" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SHARE=1
-update_yaml_value "NEPI_MANAGES_SHARE" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_SHARE" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SOFTWARE=1
-update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $USER_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_DOCKER=1
-update_yaml_value "NEPI_MANAGES_DOCKER" 1 $BASE_SYS_CONFIG_FILE
-update_yaml_value "NEPI_MANAGES_DOCKER" 1 $USER_SYS_CONFIG_FILE
-
-
-
-
-
-################
+update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
 
 
 
@@ -429,7 +466,7 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$CONFIG_USER" == "nepihost" &&  "$NEPI_MANAGES_DOCKER" -eq 1 ]]; then
         echo ""
         echo "########"
-        echo "Updating Docker service config"
+        echo "Updating Docker Service Config"
         echo ""
 
         if [[ ! -f "/etc/docker/daemon.json.org" ]]; then

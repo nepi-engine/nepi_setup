@@ -17,9 +17,9 @@ if ! [ $(id -u) = 0 ]; then
    exit 1
 fi
 
-echo "########################"
-echo "NEPI USER SETUP"
-echo "########################"
+
+export CONFIG_USER=$(id -un 1000)
+CONFIG_USER_PW=nepi  
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -27,14 +27,16 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-###########################
-# RUN USER SETUP PROCESSES
 
-CONFIG_USER=nepi
-CONFIG_USER_PW=nepi  
+
+echo "########################"
+echo "NEPI USER SETUP"
+echo "########################"
+
+
 
 echo "###################################"
-echo "Setting up nepi host account: ${CONFIG_USER}"
+echo "Setting up user account: ${CONFIG_USER}"
 echo "###################################"
 
 
@@ -212,7 +214,7 @@ echo ""
 echo "Updating NEPI User IDs and Groups if Needed"
 
 # Read /etc/passwd and process users
-username=nepi
+username=$CONFIG_USER
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1000
@@ -221,7 +223,12 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=nepihost
+
+if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+    username=nepi
+else
+    username=nepihost
+fi
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1001
@@ -264,14 +271,22 @@ fi
 
 
 
-# cat /etc/sudoers
-# echo "###################################"
-# echo "Adding NEPI users to sudo users"
-# echo "###################################"
-# echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
-# echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
-# echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
-# cat /etc/sudoers
+
+echo "###################################"
+echo "Adding NEPI users to sudo users"
+echo "###################################"
+
+if grep -qnw $BASHRC -e "##### NEPI SUDO USERS #####" ; then
+    : #echo "Already Done"
+else
+    echo ' ' | sudo tee -a $BASHRC
+    echo '##### NEPI SUDO USERS #####' | sudo tee -a $BASHRC
+    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+    echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+    echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+fi
+cat /etc/sudoers
+
 
 
 echo "All NEPI user IDs have been processed."

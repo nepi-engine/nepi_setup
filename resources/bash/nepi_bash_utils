@@ -536,7 +536,7 @@ nnet = Restart the network
 ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
-sbrc = Source the current users bashrc file
+sbrc = Source the current user's bashrc files
 cuda_version = Echo Cuda version number if cuda availble"
 
 ###################################

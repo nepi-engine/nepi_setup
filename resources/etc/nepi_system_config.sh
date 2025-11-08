@@ -86,6 +86,28 @@ if [ $? -eq 1 ]; then
     exit 1
 fi
 
+###################
+#  Upated NEPI Config Settings
+
+systemctl&> /dev/null
+if [[ "$?" -eq 1  && "$CONFIG_USER" == 'nepihost' ]]; then
+    export NEPI_IN_CONTAINER=1
+else
+    export NEPI_IN_CONTAINER=0
+fi
+update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $NEPI_SYS_CONFIG_FILE
+
+
+if is_valid_cuda; then
+    export NEPI_HAS_CUDA=1
+    export NEPI_CUDA_VERSION=$(cuda_version)
+else
+    export NEPI_HAS_CUDA=0
+    export NEPI_CUDA_VERSION=0
+fi
+update_yaml_value "NEPI_HAS_CUDA" $NEPI_HAS_CUDA $NEPI_SYS_CONFIG_FILE
+update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $NEPI_SYS_CONFIG_FILE
+
 
 
 # ########################################
@@ -571,14 +593,9 @@ echo ""
 
 #############
 # Define Folders
-SOURCE_CONFIG_PATH=$(dirname "$SCRIPT_PATH")/config
-SOURCE_SYS_CONFIG_FILE=${SOURCE_CONFIG_PATH}/nepi_system_config.yaml
-SOURCE_ETC_PATH=$(dirname "${SCRIPT_PATH}")/resources/etc
-
-BASE_CONFIG_PATH=/opt/nepi
-
-BASE_ETC_PATH=${BASE_CONFIG_PATH}/etc
-BASE_SYS_CONFIG_FILE=${BASE_ETC_PATH}/nepi_system_config.yaml
+NEPI_CONFIG_PATH=/opt/nepi
+NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
+NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
 FACTORY_CONFIG_PATH=/mnt/nepi_config/factory_cfg
 FACTORY_ETC_PATH=${FACTORY_CONFIG_PATH}/etc
@@ -608,7 +625,7 @@ source ${ETC_FOLDER}/scripts/update_etc_users.sh $LOAD_NEPI_CONFIG
 echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
 source ${SYSTEM_ETC_PATH}/update_etc_files.sh
 # if [ $? -eq 1 ]; then
-#     echo "Failed to update ETC folder ${ETC_BASE_PATH}"
+#     echo "Failed to update ETC folder ${ETC_NEPI_PATH}"
 #     exit 1
 # fi
 

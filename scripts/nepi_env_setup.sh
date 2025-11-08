@@ -14,24 +14,38 @@
 
 sudo -v
 
-echo "########################"
-echo "NEPI ENVIRONMENT SETUP"
-echo "########################"
+export CONFIG_USER=$(id -un 1000)
 
-echo "Running Intitialization Scripts"
-
-export CONFIG_USER=nepi
+if ! [ {$CONFIG_USER} = 'nepi' ]; then
+   echo 'This scripts must be run as nepi user.'
+   exit 1
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-. ${SCRIPT_FOLDER}/script_setup.sh
-if [[ "$?" -ne 0 ]]; then
-    echo "Script Setup Failed. Exiting"
+echo "########################"
+echo "NEPI ENVIRONMENT SETUP"
+echo "########################"
+
+
+
+##########################
+NEPI_ARCH=unknown
+if is_valid_jetson; then
+    NEPI_ARCH=arm64
+elif is_valid_arm64; then
+    NEPI_ARCH=arm64
+elif is_valid_amd64; then
+    NEPI_ARCH=amd64
+else
+    arch_val=$(uname -m)
+    echo "Arch ${arch_val} not supported yet"
     exit 1
-fi 
+fi
+
 
 #######################################
 ## Configure NEPI Software Requirements

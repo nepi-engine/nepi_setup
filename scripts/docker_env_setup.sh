@@ -21,7 +21,12 @@ echo "########################"
 
 echo "Running Intitialization Scripts"
 
-export CONFIG_USER=nepihost
+export CONFIG_USER=$(id -un 1000)
+
+if ! [ {$CONFIG_USER} = 'nepihost' ]; then
+   echo 'This scripts must be run as nepihost user.'
+   exit 1
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 

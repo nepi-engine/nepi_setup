@@ -31,32 +31,6 @@ load_nepi_config=0
 . ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
 
 
-######################################
-## Update USER Config file
-
-echo "Updating USER Config File"
-SOURCE_PATH=/opt/nepi/etc/nepi_system_config.yaml
-UPDATE_PATH=/home/${CONFIG_USER}/nepi_system_config.yaml
-
-
-if [[ -f ${SOURCE_PATH} ]]; then
-    if [[ ! -f "$UPDATE_PATH" ]]; then
-        sudo cp -r -p $ $UPDATE_PATH
-    fi
-
-    if yq eval "$UPDATE_PATH" > /dev/null; then
-        : # Do nothin
-    else
-        echo "YAML file '$UPDATE_PATH' is invalid. Will replace:"
-        sudo cp -r -p $SOURCE_PATH $UPDATE_PATH
-    fi
-
-    sync_yaml_files $UPDATE_PATH $SOURCE_PATH  # This should be reversed to first capture missing entries
-
-    sudo cp $SOURCE_PATH $UPDATE_PATH
-fi
-
-
 
 #############
 # Sync to Config Folders
@@ -65,7 +39,7 @@ source_config_path=/opt/nepi
 
 sync_to_config_folder 'system_cfg' $source_config_path
 sync_to_config_folder 'factory_cfg' $source_config_path
-sync_to_config_folder 'recovery_cfg' $source_config_path
+#sync_to_config_folder 'recovery_cfg' $source_config_path
 
 
 #############################
