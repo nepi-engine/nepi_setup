@@ -28,7 +28,7 @@ echo "########################"
 
 
 
-SCRIPT_PATH=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 
@@ -37,7 +37,7 @@ SCRIPT_PATH=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 script_file=nepi_bash_setup.sh
-script_path=${SCRIPT_PATH}/${script_file}
+script_path=${SCRIPT_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
 	echo ""
 	echo "Running ${script_file} script"
@@ -50,7 +50,7 @@ fi
 # Run NEPI Folder Setup Script
 
 script_file=nepi_folders_setup.sh
-script_path=${SCRIPT_PATH}/${script_file}
+script_path=${SCRIPT_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
 	echo ""
 	echo "Running ${script_file} script"
@@ -64,7 +64,7 @@ fi
 # Run NEPI Config Setup Script
 
 script_file=nepi_config_setup.sh
-script_path=${SCRIPT_PATH}/${script_file}
+script_path=${SCRIPT_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
 	echo ""
 	echo "Running ${script_file} script"

@@ -271,7 +271,7 @@ sudo rm /var/crash/* 2>/dev/null
 
 ####################################
 script_file=docker_bash_setup.sh
-script_path=${SCRIPT_PATH}/${script_file}
+script_path=${SCRIPT_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
 	echo ""
 	echo "Running ${script_file} script"
