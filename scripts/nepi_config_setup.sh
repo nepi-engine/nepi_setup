@@ -17,6 +17,11 @@ sudo -v
 export CONFIG_USER=$(id -un 1000)
 
 
+if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
+    exit 1
+fi
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
@@ -31,13 +36,6 @@ echo "########################"
 
 
 echo "Checking Requirements"
-
-################
-# Check Valid User
-if [[ "$CONFIG_USER" != 'nepi' || "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "This script must be run by user 'nepi' or 'nepihost'"
-    exit 1
-fi
 
 ################
 # Check Valid Software
