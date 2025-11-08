@@ -294,21 +294,21 @@ fi
 
 
 
-echo "###################################"
-echo "Adding NEPI users to sudo users"
-echo "###################################"
+# echo "###################################"
+# echo "Adding NEPI users to sudo users"
+# echo "###################################"
 
-file=/etc/sudoers
-if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then
-    : #echo "Already Done"
-else
-    echo ' ' | sudo tee -a $file
-    echo '##### NEPI SUDO USERS #####' | sudo tee -a $file
-    echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-    echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-fi
-cat $file
+# file=/etc/sudoers
+# if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then
+#     : #echo "Already Done"
+# else
+#     echo ' ' | sudo tee -a $file
+#     echo '##### NEPI SUDO USERS #####' | sudo tee -a $file
+#     echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+#     echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+#     echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+# fi
+# cat $file
 
 
 
