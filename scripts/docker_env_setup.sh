@@ -149,7 +149,7 @@ sudo apt install smbclient -y
 
 
 sudo apt-get update
-sudo apt sudo apt  install --fix-broken
+sudo apt  install --fix-broken
 
 
 
@@ -282,12 +282,9 @@ echo "########################"
 
 sudo apt update
 sudo apt-get install --fix-broken -y
-# sudo apt-get clean
-# sudo apt-get autoremove -y
-# sudo apt-get autoclean -y
 sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
 sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
-sudo rm -r * /tmp/* 2>/dev/null
+sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 
 
