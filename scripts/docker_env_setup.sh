@@ -23,8 +23,8 @@ echo "Running Intitialization Scripts"
 
 export CONFIG_USER=$(id -un 1000)
 
-if [[ ! {$CONFIG_USER} == 'nepihost' ]]; then
-   echo 'This scripts must be run as nepihost user.'
+if [[ {$CONFIG_USER} != 'nepihost' ]]; then
+   echo "Current user is ${CONFIG_USER}. This scripts must be run as nepihost user."
    exit 1
 fi
 
