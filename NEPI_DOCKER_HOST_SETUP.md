@@ -54,7 +54,7 @@ Update Git application (sudo password is #Nsetup4You):
 
     sudo apt update && sudo apt install -y git
 
-Clone the NEPI setup repo:
+Clone the NEPI Setup repo:
 
     cd /home/${USER}
     git clone https://github.com/nepi-engine/nepi_setup.git
@@ -79,6 +79,11 @@ then
 This step will setup NEPI Docker required software environment.
 
 Log into the `nepihost` user using password  'nepi'
+
+Reclone the NEPI Setup repo:
+
+    cd /home/${USER}
+    git clone https://github.com/nepi-engine/nepi_setup.git
 
 Run the NEPI Docker environment setup script (sudo password is now 'nepi')
 

@@ -241,9 +241,6 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-
-
-
 username=$sys_user_1
 uid=$(id -u "$username")
 gid=$(id -g "$username")
@@ -287,6 +284,15 @@ fi
 
 
 
+####################
+# Remove the repo
+if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+    rm -r /home/nepihost/nepi_setup
+else
+    rm -r /home/nepi/nepi_setup
+fi
+
+
 
 echo "###################################"
 echo "Adding NEPI users to sudo users"
@@ -303,6 +309,7 @@ else
     echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
 fi
 cat $file
+
 
 
 echo ""
