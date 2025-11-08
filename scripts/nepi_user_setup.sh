@@ -19,8 +19,17 @@ fi
 
 
 export CONFIG_USER=$SUDO_USER
-
 CONFIG_USER_PW=nepi  
+
+if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+    sys_user_1=nepi
+else
+    sys_user_1=nepihost
+fi
+sys_user_1_pw=nepi
+
+sys_user_2=nepiadmin
+sys_user_2_pw=nepiadmin
 
 ################
 # Check Valid User
@@ -114,13 +123,8 @@ function new_system_user(){
 }
 
 
-if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-    new_system_user nepi nepi
-else
-    new_system_user nepihost nepi
-fi
-
-new_system_user nepiadmin nepiadmin
+new_system_user $sys_user_1 $sys_user_1_pw
+new_system_user $sys_user_2  $sys_user_2_pw
 
 
 echo "###################################"
@@ -238,11 +242,9 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
 fi
 
 
-if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-    username=nepi
-else
-    username=nepihost
-fi
+
+
+username=$sys_user_1
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1001
@@ -251,7 +253,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=nepiadmin
+username=$sys_user_2
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1002
@@ -303,7 +305,7 @@ fi
 cat $file
 
 
-
+echo ""
 echo "All NEPI user IDs have been processed."
 cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
 echo "Updated User:"
