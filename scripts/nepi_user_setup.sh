@@ -19,12 +19,13 @@ fi
 
 
 export CONFIG_USER=$SUDO_USER
+
 CONFIG_USER_PW=nepi  
 
 ################
 # Check Valid User
 if [[ "$CONFIG_USER" != 'nepi' || "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "This script must be run by user 'nepi' or 'nepihost'"
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
     exit 1
 fi
 
