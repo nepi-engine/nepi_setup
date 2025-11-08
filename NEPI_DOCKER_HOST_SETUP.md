@@ -110,7 +110,7 @@ Ownership of any non-NEPI files in the system will be owned by 'nepihost' user.
     /home/${USER}/nepi_setup/scripts/docker_config_setup.sh
 
 
-**NOTE:**  After this process, both network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
+**NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**

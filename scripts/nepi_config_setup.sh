@@ -350,13 +350,13 @@ if [[ "$?" -eq 0 ]]; then
         samba_file=${SOURCE_ETC_PATH}/samba/smb.conf
     fi
 
-    if [[ -f "$samba_file" ]]; then 
-        echo "Updating Samba ETC config file"
-        if [ -f "/etc/samba/smb.conf" ]; then
-            sudo rm -r /etc/samba/smb.conf
-        fi
-        sudo cp -d ${samba_file} /etc/samba/smb.conf
+
+    echo "Updating Samba ETC config file"
+    if [ -f "/etc/samba/smb.conf" ]; then
+        sudo rm -r /etc/samba/smb.conf
     fi
+    sudo cp -d ${samba_file} /etc/samba/smb.conf
+
 
     echo "Restarting Samba Service"
 

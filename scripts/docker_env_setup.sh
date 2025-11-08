@@ -169,7 +169,7 @@ sudo apt install smbclient -y
 
 
 sudo apt-get update
-sudo apt sudo apt  install --fix-broken
+sudo apt install --fix-broken
 
 
 #################################
