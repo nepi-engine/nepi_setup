@@ -71,52 +71,40 @@ echo ""
 echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
+echo ""
+
 sudo add-apt-repository ppa:rmescandon/yq -y
+sudo add-apt-repository ppa:apt-fast/stable -y
 sudo apt update
-# sudo apt-get install --fix-broken -y
-sudo apt install yq -y
 
-# sudo apt install apt-utils -y
-sudo apt install git -y
-sudo apt install gitk -y
-sudo apt install htop -y
+sudo apt-get install aria2
+sudo apt-get install apt-fast
 
-sudo apt install ncdu -y
+
+sudo apt-fast install -y yq git gitk htop ncdu snap curl python3-pip \
+# Install Hostname Apps
+hostapd \
+#Install Time Apps
+chrony 
+# Install Network Apps"
+ifupdown \
+net-tools \ 
+iproute2 \
+isc-dhcp-client \
+wpasupplicant \
+nmap \
+# Install Shared Drive Apps
+samba \
+smbclient \
+
 #sudo apt install usbmount -y
-sudo apt install snap -y
-sudo apt install curl -y
+#sudo apt install netplan.io -y
 
-sudo apt install python3-pip -y
-
-echo "######################################"
-echo "Installing NEPI required python packages"
-echo "######################################"
-
-
-
-
-
-###################################
-# Install NEPI Managed Services Apps
-###################################
-
-echo "######################################"
-echo "Installing Hostname Apps"
-echo "######################################"
-sudo apt install hostapd -y # WiFi access point setup
-
-
-echo "######################################"
-echo "Installing Time Apps"
-echo "######################################"
-echo "Installing NEPI TIME Management Software"
-sudo apt-get install chrony -y
-
+echo ""
 echo "######################################"
 echo "Installing SSH Apps"
 echo "######################################"
-
-echo "Installing NEPI SSH Management Software"
+echo ""
 
 echo "Installing NEPI SSH Management Software"
 #sudo apt install --reinstall openssh-server
@@ -131,42 +119,20 @@ fi
 sudo chmod 0755 /run/sshd
 sudo chown root:root /run/sshd
 
-echo "######################################"
-echo "Installing Network Apps"
-echo "######################################"
-
-#sudo apt install netplan.io -y
-sudo apt install ifupdown -y
-sudo apt install net-tools -y 
-sudo apt install iproute2 -y
-sudo apt install isc-dhcp-client -y
-sudo apt install wpasupplicant -y
-sudo apt install nmap -y
-
-
-echo "######################################"
-echo "Installing Shared Drive Apps"
-echo "######################################"
-sudo apt install samba -y
-sudo apt install smbclient -y
-
-
-
-
 sudo apt-get update
 sudo apt  install --fix-broken
-
 
 
 #################################
 # Install docker if not present
 
+echo ""
 echo "######################################"
 echo "Installing Docker Required Software"
 echo "######################################"
+echo ""
 
-
- echo "Stopping Docker Service"
+echo "Stopping Docker Service"
 SERVICE_NAME=docker
 if systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "Stopping ${SERVICE_NAME} Service"
@@ -191,6 +157,7 @@ if [[ "$NEPI_ARCH" == 'arm64' ]]; then
     echo "######################################"
     echo "Installing Docker"
     echo "######################################"
+    echo ""
     # Update Package Lists and Install Prerequisites.
     sudo apt update
     sudo 
@@ -220,10 +187,12 @@ sudo apt-get install --fix-broken -y
 #################################
 # Install NVIDIA Toolkit
 if is_valid_cuda; then
-
+    echo ""
     echo "######################################"
     echo "Installing NVIDIA Toolkit "
     echo "######################################"
+    echo ""
+
     if dpkg --get-selections | grep nvidia-container-toolkit; then
 
 
@@ -249,6 +218,13 @@ fi
 
 sudo apt-get update
 sudo apt-get install --fix-broken -y
+
+
+echo "######################################"
+echo "Installing NEPI required python packages"
+echo "######################################"
+
+
 
 echo "########################"
 echo "Installing Utility Apps"
