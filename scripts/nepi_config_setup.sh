@@ -611,10 +611,10 @@ fi
 
 
 
-echo ""
-echo "########################"
-echo "Cleaning Config System"
-echo "########################"
+# echo ""
+# echo "########################"
+# echo "Cleaning Config System"
+# echo "########################"
 
 sudo apt update
 sudo apt-get install --fix-broken -y
@@ -652,6 +652,8 @@ if [[ -n "$DISPLAY" ]]; then
             echo "Desktop folder cleaned"
         fi
     fi
+    xdg-user-dirs-update --set DESKTOP "$dfolder"
+
 
     gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
         'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \

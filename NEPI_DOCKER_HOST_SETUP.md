@@ -139,10 +139,7 @@ Setup NEPI docker configuration (sudo password is now 'nepi'):
 
     /home/${USER}/nepi_setup/scripts/docker_config_setup.sh
 
-NOTE:  After this process, both network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes.
-       If you need to connect to the internet you can run the command line shortcut:
-
-    ninet # Enable internet connection and sync clocks on connection
+NOTE:  After this process, both network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
 
 *** POWER CYCLE YOUR SYSTEM WHEN COMPLETE ***
 
@@ -165,13 +162,8 @@ Come back to this
     Then, unzip and copy the folders from unzipped folder to the 'nepi_storage' shared drive.  Select 'Merge' if asked
 
 
-### NEPI User Storage Setup
-This step will initialize your NEPI's User Storage folders. The 
-
-
-Enable internet connection and sync clocks on connection:
-
-    ninet
+### NEPI Docker Initialization Setup
+This step will initialize the NEPI Docker System.  
 
 Initialize NEPI docker image on your system:
 
@@ -190,6 +182,7 @@ Start your NEPI container running:
 The start script will let you know if the installed NEPI Image started successfully. 
 
 NOTE: Some additional NEPI Docker command line shortcuts are:
+
     nepistart = Start the NEPI docker container
     nepidev = Start the NEPI docker container in a dev mode with no processes running
     nepistop = Stop the running NEPI docker container
@@ -231,6 +224,10 @@ Then follow the DEBUGGING notes in the next section "NEPI Software Testing"
 
 ### NEPI Software Testing
 
+Enable internet connection and sync clocks on connection:
+
+    ninet
+
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
 
     localhost:5003 
@@ -268,6 +265,7 @@ If you run into any issues, you can debug any issues by loging into to the runni
         # You can follow the NEPI Engine processes looking for any errors.
 
         NOTE: Some additional NEPI Software command line shortcuts are:
+
             nepihome = change to nepi home dir
             nepistart = start the nepi processes
             nepistop = stop the nepi processe
@@ -305,16 +303,6 @@ Check that your NEPI Container is running:
 
 ### NEPI Docker Remote PC Connections
 
-Start your NEPI container running:
-
-    nepistart
-
-Check that the Container is running
-
-    dps
-
-If the container is running:
-
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
 
@@ -325,9 +313,7 @@ Configure NEPI through the RUI interface.
 See a tutorial at [NEPI Configuration](https:///)
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
-See a tutorial at [NEPI SSH SETUP](https:///)
-
-
+See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 ### NEPI DOCKER INSTALLATION COMPLETE
 
