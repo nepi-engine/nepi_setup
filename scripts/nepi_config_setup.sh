@@ -636,21 +636,6 @@ fi
 
 
 
-# echo ""
-# echo "########################"
-# echo "Cleaning Config System"
-# echo "########################"
-
-sudo apt update
-sudo apt-get install --fix-broken -y
-# sudo apt-get clean
-# sudo apt-get autoremove -y
-# sudo apt-get autoclean -y
-sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
-sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
-sudo rm -r /tmp/* 2>/dev/null
-sudo rm /var/crash/* 2>/dev/null
-
 
 if [[ -n "$DISPLAY" ]]; then
 
@@ -735,6 +720,17 @@ sync_to_config_folder 'recovery_cfg' $source_config_path
 
 source /opt/nepi/etc/scripts/sync_from_configs.sh
 
+
+echo ""
+echo "########################"
+echo "Cleaning Config System"
+echo "########################"
+
+
+sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
+sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
+sudo rm -r /tmp/* 2>/dev/null
+sudo rm /var/crash/* 2>/dev/null
 
 echo ""
 echo "##################################"
