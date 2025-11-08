@@ -18,8 +18,15 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-export CONFIG_USER=$(id -un 1000)
+export CONFIG_USER=$USER
 CONFIG_USER_PW=nepi  
+
+################
+# Check Valid User
+if [[ "$CONFIG_USER" != 'nepi' || "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "This script must be run by user 'nepi' or 'nepihost'"
+    exit 1
+fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -55,7 +62,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER}
     sudo usermod -aG tty ${CONFIG_USER}
-    sudo usermod -aG $user $user
+    sudo usermod -aG $CONFIG_USER $CONFIG_USER
 
 
 
@@ -276,16 +283,17 @@ echo "###################################"
 echo "Adding NEPI users to sudo users"
 echo "###################################"
 
-if grep -qnw $BASHRC -e "##### NEPI SUDO USERS #####" ; then
+file=/etc/sudoers
+if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then
     : #echo "Already Done"
 else
-    echo ' ' | sudo tee -a $BASHRC
-    echo '##### NEPI SUDO USERS #####' | sudo tee -a $BASHRC
-    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
-    echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
-    echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a /etc/sudoers
+    echo ' ' | sudo tee -a $file
+    echo '##### NEPI SUDO USERS #####' | sudo tee -a $file
+    echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+    echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a $file
+    echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
 fi
-cat /etc/sudoers
+cat $file
 
 
 
