@@ -57,71 +57,6 @@ else
 fi
 
 
-################
-# Sync NEPI Config Files
-SOURCE_CONFIG_FOLDER=$(dirname "$SCRIPT_FOLDER")/etc
-SOURCE_CONFIG_FILE=${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_CONFIG_FOLDER
-
-NEPI_CONFIG_FOLDER=/opt/nepi/etc
-NEPI_SYS_CONFIG_FILE=${NEPI_CONFIG_FOLDER}/nepi_system_config.yaml
-NEPI_CONFIG_LOAD_FILE=${NEPI_CONFIG_FOLDER}/load_system_config.sh
-NEPI_CONFIG_EDIT_FILE=${NEPI_CONFIG_FOLDER}/nepi_system_config.sh
-
-
-if [[ ! -d "$NEPI_CONFIG_FOLDER" ]]; then
-    sudo mkdir -p $NEPI_CONFIG_FOLDER
-fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FOLDER
-
-if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
-    sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
-else
-    sync_yaml_files ${SOURCE_CONFIG_FOLDER}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
-fi
-sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/load_system_config.sh" ${NEPI_CONFIG_LOAD_FILE}
-sudo cp -r -p "${SOURCE_CONFIG_FOLDER}/nepi_system_config.sh" ${NEPI_CONFIG_EDIT_FILE}
-
-
-source $NEPI_CONFIG_LOAD_FILE
-if [[ "$1" -ne 0 ]]; then
-    echo "Failed to find load config file at: ${NEPI_CONFIG_LOAD_FILE}"
-    exit 1
-fi
-
-###################
-#  Upated NEPI Config Settings
-
-
-
-export NEPI_MANAGES_HOSTNAME=1
-update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $NEPI_SYS_CONFIG_FILE
-
-
-export NEPI_MANAGES_NETWORK=1
-update_yaml_value "NEPI_MANAGES_NETWORK" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_TIME=1
-update_yaml_value "NEPI_MANAGES_TIME" 1 $NEPI_SYS_CONFIG_FILE
-
-
-export NEPI_MANAGES_SSH=1
-update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SHARE=1
-update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SOFTWARE=1
-update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_DOCKER=1
-update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
-
-
-
-################
-# Stop Any Running NEPI Containers
-nepistop
 
 
 ####################################
@@ -157,6 +92,24 @@ NEPI_SCRIPTS_PATH=${NEPI_CONFIG_PATH}/scripts
 
 NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
 NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
+
+
+
+###################
+#  Sync and Load NEPI Config File
+
+if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
+    sudo mkdir -p $NEPI_CONFIG_PATH
+fi
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_PATH
+
+if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
+    sudo cp -r -p "${SOURCE_ETC_PATH}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
+else
+    sync_yaml_files ${SOURCE_ETC_PATH}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
+fi
+
+
 
 
 ############
@@ -241,6 +194,42 @@ sudo chmod +x ${UPDATE_PATH}/*
 
 echo "Updating NEPI Config File Settings"
 
+
+
+source $NEPI_CONFIG_LOAD_FILE
+if [[ "$1" -ne 0 ]]; then
+    echo "Failed to find load config file at: ${NEPI_CONFIG_LOAD_FILE}"
+    exit 1
+fi
+
+###################
+#  Upated NEPI Config File
+
+echo "Updating NEPI Config File"
+
+export NEPI_MANAGES_HOSTNAME=1
+update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $NEPI_SYS_CONFIG_FILE
+
+
+export NEPI_MANAGES_NETWORK=1
+update_yaml_value "NEPI_MANAGES_NETWORK" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_TIME=1
+update_yaml_value "NEPI_MANAGES_TIME" 1 $NEPI_SYS_CONFIG_FILE
+
+
+export NEPI_MANAGES_SSH=1
+update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SHARE=1
+update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SOFTWARE=1
+update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_DOCKER=1
+update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
+
 # min_docker_gb=$((NEPI_GB_CONTAINER * 3))
 
 # check_drive=/mnt/nepi_config/docker_cfg
@@ -324,7 +313,7 @@ sudo cp -r ${SOURCE_ETC_PATH}/opt/baumer /opt/baumer
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/baumer
 
 # Set up the shared object links in case they weren't copied properly when this repo was moved to target
-NEPI_BAUMER_PATH=${NEPI_ETC}/opt/baumer/gentl_producers
+NEPI_BAUMER_PATH=${NEPI_ETC_PATH}/opt/baumer/gentl_producers
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_usb.cti
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14
@@ -467,16 +456,17 @@ if [[ "$?" -eq 0 ]]; then
         echo "Updating Docker Service Config"
         echo ""
 
+
+        echo "Stopping Docker Service"
+        sudo systemctl stop docker
+        sudo systemctl stop docker.socket       
+
         if [[ ! -f "/etc/docker/daemon.json.org" ]]; then
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
         fi
         
         sudo nvidia-ctk runtime configure --runtime=docker
 
-
-        echo "Stopping Docker Service"
-        sudo systemctl stop docker
-        sudo systemctl stop docker.socket
 
         # Set docker service root location
         #https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
@@ -552,8 +542,8 @@ else
     echo "Setting up Supervisor"
     echo ""
 
-    sudo chmod +x ${NEPI_ETC}/supervisor/conf.d/supervisord_nepi.conf
-    sudo cp -a ${NEPI_ETC}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
+    sudo chmod +x ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf
+    sudo cp -a ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
 
     echo "Restarting Supervisor Process"
     sudo supervisorctl reread
@@ -608,7 +598,7 @@ if [[ "$?" -eq 0 ]]; then
         echo "Setting Up NEPI Docker Service"
         echo ""
         
-        sudo cp -a ${NEPI_ETC}/docker/services/nepi_docker.service ${SYSTEMD_SERVICE_PATH}/nepi_docker.service
+        sudo cp -a ${NEPI_ETC_PATH}/docker/services/nepi_docker.service ${SYSTEMD_SERVICE_PATH}/nepi_docker.service
 
         # sudo systemctl enable nepi_docker
         # sudo systemctl restart nepi_docker
@@ -618,9 +608,9 @@ if [[ "$?" -eq 0 ]]; then
         echo "############"
         echo "Setting Up NEPI Engine Service"
 
-        echo "Cofiguring NEPI Engine Service from ${NEPI_ETC}/services"
-        sudo chmod +x ${NEPI_ETC}/services/*
-        sudo cp -a ${NEPI_ETC}/services/* ${SYSTEMD_SERVICE_PATH}/
+        echo "Cofiguring NEPI Engine Service from ${NEPI_ETC_PATH}/services"
+        sudo chmod +x ${NEPI_ETC_PATH}/services/*
+        sudo cp -a ${NEPI_ETC_PATH}/services/* ${SYSTEMD_SERVICE_PATH}/
         sudo systemctl enable nepi_engine
 
         echo ""
