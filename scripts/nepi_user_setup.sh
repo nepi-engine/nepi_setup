@@ -18,7 +18,7 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-export CONFIG_USER=$USER
+export CONFIG_USER=$SUDO_USER
 CONFIG_USER_PW=nepi  
 
 ################
