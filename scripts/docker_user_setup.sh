@@ -239,6 +239,7 @@ new_uid=1001
 new_gid=$new_uid
 if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+    sudo usermod -s /sbin/nologin $username
 fi
 
 username=nepiadmin
@@ -248,6 +249,7 @@ new_uid=1002
 new_gid=$new_uid
 if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+    sudo usermod -s /sbin/nologin $username
 fi
 
 
