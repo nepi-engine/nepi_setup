@@ -51,7 +51,7 @@ else
     #sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
     #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -
     sudo groupdel "$CONFIG_USER" >/dev/null 2>&1
-    sudo adduser --gecos "$CONFIG_USER" --disabled-password "$CONFIG_USER_PW"
+    sudo adduser --gecos "$CONFIG_USER" --disabled-password "$CONFIG_USER"
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 fi    
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
