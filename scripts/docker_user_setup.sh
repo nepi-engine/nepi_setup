@@ -62,7 +62,9 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
-        sudo cp -r /home/${SUDO_USER}/* /home/${CONFIG_USER}/
+        if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
+            sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
+        fi
     fi
 
 
