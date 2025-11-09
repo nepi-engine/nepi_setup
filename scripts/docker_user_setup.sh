@@ -73,6 +73,8 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG dialout ${CONFIG_USER}
     sudo usermod -aG tty ${CONFIG_USER}
     sudo usermod -aG $CONFIG_USER $CONFIG_USER
+    su $CONFIG_USER -c 'sudo snap install mdview'
+
 
     
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
