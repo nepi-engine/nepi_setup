@@ -29,14 +29,18 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-
 echo "########################"
 echo "NEPI USER SETUP"
 echo "########################"
 
-
 CONFIG_USER=nepi
 CONFIG_USER_PW=nepi
+
+SYS_USER_1=nepihost
+SYS_USER_1_PW=nepi
+
+SYS_USER_1=nepiadmin
+SYS_USER_1_PW=nepiadmin
 
 echo "###################################"
 echo "Setting up user account: ${CONFIG_USER}"
@@ -48,10 +52,19 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     
 else
     echo "User $CONFIG_USER does not exist, creating"
-    sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+    #sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+    #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -
+    sudo groupdel "$CONFIG_USER" >/dev/null 2>&1
+    sudo adduser --gecos "$CONFIG_USER" --disabled-password "$CONFIG_USER"
+    echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 fi    
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
-    echo "Configuring NEPI Host User account $CONFIG_USER"
+    echo "Configuring NEPI Base User account $CONFIG_USER"
+    # sudo rm -r /home/${CONFIG_USER}
+    # sudo mkdir -p /home/${CONFIG_USER}
+    # sudo cp -r /etc/skel/. /home/${CONFIG_USER}/
+    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /
+
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
     sudo usermod -aG sudo $CONFIG_USER
     sudo adduser ${CONFIG_USER} dialout
@@ -59,6 +72,12 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG tty ${CONFIG_USER}
     sudo usermod -aG $CONFIG_USER $CONFIG_USER
 
+    
+    if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
+        if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
+            sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
+        fi
+    fi
 
 
 else
@@ -107,8 +126,8 @@ function new_system_user(){
 
 }
 
-new_system_user nepihost nepi
-new_system_user nepiadmin nepiadmin
+new_system_user ${SYS_USER_1} ${SYS_USER_1_PW}
+new_system_user ${SYS_USER_2} ${SYS_USER_2_PW}
 
 
 
@@ -219,7 +238,7 @@ echo ""
 echo "Updating NEPI User IDs and Groups if Needed"
 
 # Read /etc/passwd and process users
-username=nepi
+username=${CONFIG_USER}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1000
@@ -228,22 +247,24 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=nepihost
+username=${SYS_USER_1}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1001
 new_gid=$new_uid
 if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+    sudo usermod -s /sbin/nologin $username
 fi
 
-username=nepiadmin
+username=${SYS_USER_2}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1002
 new_gid=$new_uid
 if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+    sudo usermod -s /sbin/nologin $username
 fi
 
 
@@ -312,4 +333,3 @@ echo "########################"
 
 echo ""
 echo "*** REBOOT YOUR DEVICE ***"
-

@@ -28,15 +28,20 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-
+SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 
 echo "########################"
 echo "NEPI USER SETUP"
 echo "########################"
 
-
 CONFIG_USER=nepihost
 CONFIG_USER_PW=nepi
+
+SYS_USER_1=nepi
+SYS_USER_1_PW=nepi
+
+SYS_USER_1=nepiadmin
+SYS_USER_1_PW=nepiadmin
 
 echo "###################################"
 echo "Setting up user account: ${CONFIG_USER}"
@@ -74,6 +79,32 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
             sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
         fi
     fi
+
+    # Updated the Desktop
+    dfolder=/home/${CONFIG_USER}/Desktop
+    if [[ -d "$dfolder" ]]; then
+        if find "$dfolder" -maxdepth 0 -empty | read; then
+            echo "Desktop folder cleaned"
+        else
+            sudo rm ${dfolder}/*
+            echo "Desktop folder cleaned"
+        fi
+    fi
+    xdg-user-dirs-update --set DESKTOP "$dfolder"
+
+
+    gsettings set org.gnome.desktop.screensaver lock-enabled false
+    gsettings set org.gnome.desktop.session idle-delay 0
+
+    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+
+    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+
+    # Copy instructions to desktop
+    instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
+    sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
 
 else
@@ -122,8 +153,8 @@ function new_system_user(){
 
 }
 
-new_system_user nepi nepi
-new_system_user nepiadmin nepiadmin
+new_system_user ${SYS_USER_1} ${SYS_USER_1_PW}
+new_system_user ${SYS_USER_2} ${SYS_USER_2_PW}
 
 
 
@@ -234,7 +265,7 @@ echo ""
 echo "Updating NEPI User IDs and Groups if Needed"
 
 # Read /etc/passwd and process users
-username=nepihost
+username=${CONFIG_USER}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1000
@@ -243,7 +274,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 
-username=nepi
+username=${SYS_USER_1}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1001
@@ -253,7 +284,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     sudo usermod -s /sbin/nologin $username
 fi
 
-username=nepiadmin
+username=${SYS_USER_2}
 uid=$(id -u "$username")
 gid=$(id -g "$username")
 new_uid=1002

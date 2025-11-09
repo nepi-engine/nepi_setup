@@ -17,7 +17,7 @@ application/x-yaml=code_code.desktop;code.desktop;org.gnome.gedit.desktop;
 text/x-makefile=org.gnome.gedit.desktop;
 text/x-matlab=code_code.desktop;code.desktop;
 text/csv=org.gnome.gedit.desktop;
-text/markdown=code_code.desktop;
+text/markdown=code_code.desktop;mdview.desktop;
 audio/vnd.dts=code_code.desktop;
 
 [Default Applications]

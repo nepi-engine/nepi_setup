@@ -29,7 +29,7 @@ Make sure your system has internet access by running the following command:
 
 Update Git application (sudo password is #Nsetup4You):
 
-    sudo apt update && sudo apt install -y git
+    sudo apt update && sudo apt install -y git snap && sudo snap install mdview
 
 Clone the NEPI Setup repo:
 

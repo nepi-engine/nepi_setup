@@ -647,7 +647,7 @@ if [[ -n "$DISPLAY" ]]; then
     echo ""
 
 
-    # Clear the Desktop
+    # Updated the Desktop
     dfolder=/home/${CONFIG_USER}/Desktop
     if [[ -d "$dfolder" ]]; then
         if find "$dfolder" -maxdepth 0 -empty | read; then
@@ -660,10 +660,6 @@ if [[ -n "$DISPLAY" ]]; then
     xdg-user-dirs-update --set DESKTOP "$dfolder"
 
 
-    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
-        'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
-        'gnome-control-center.desktop']"
-
     gsettings set org.gnome.desktop.screensaver lock-enabled false
     gsettings set org.gnome.desktop.session idle-delay 0
 
@@ -671,19 +667,24 @@ if [[ -n "$DISPLAY" ]]; then
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
 
+    # Copy instructions to desktop
+    instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
+    sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
     gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
+
 
     echo "Updating Desktop Folder Bookmarks settings for user ${CONFIG_USER}"
     sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
 
+    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
+    'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
+    'gnome-control-center.desktop']"
 
-    # ninet
-    # echo "Installing Chromium Browser"
-    # sudo snap remove --purge chromium
-    # sudo snap install chromium
-    # #sudo apt install chromium-browser -y
-    # #chromium-browser --disable-features=DnsOverHttps
+    ###################
 
     echo "########"
     echo "Updating Chrome settings for user ${CONFIG_USER}"
@@ -694,10 +695,6 @@ if [[ -n "$DISPLAY" ]]; then
     sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
     sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
 
-
-    # Copy instructions to desktop
-    instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
-    sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
 fi
 
 # #####################################
