@@ -101,6 +101,10 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
 
+    sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
+    gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
+
+
     # Copy instructions to desktop
     instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
     sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/

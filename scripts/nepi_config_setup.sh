@@ -671,7 +671,7 @@ if [[ -n "$DISPLAY" ]]; then
     instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
     sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
 
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
     gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
@@ -683,6 +683,8 @@ if [[ -n "$DISPLAY" ]]; then
     gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
     'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
     'gnome-control-center.desktop']"
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
     ###################
 
