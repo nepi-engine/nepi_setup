@@ -46,30 +46,36 @@ fi
 echo ""
 echo "UPDATING ETC USERS"
 
+pw_changed=0
+
 echo ""
 echo "########"
 echo "Updating nepi user passwords"
-echo "${NEPI_USER}:${NEPI_USER_PW}" | sudo chpasswd
-echo "${NEPI_HOST_USER}:${NEPI_HOST_PW}" | sudo chpasswd
-echo "${NEPI_ADMIN_USER}:${NEPI_ADMIN_PW}" | sudo chpasswd
+
+function update_password() {
+        username=$1
+        password=$2
+
+        OLD_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+
+        echo "${username}:${password}" | sudo chpasswd
+
+        # After chpasswd
+        NEW_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+
+        if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+            return 0
+        else
+            return 1
+        fi
+}
 
 
-# Update ETC files if systemd is running (Not in Container)
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
-        echo ""
-        echo "########"
-        echo "Configuring nepi Samba passwords"
-        echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+if update_password $NEPI_USER $NEPI_USER_PW; then pw_changed=1 fi
+if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then pw_changed=1 fi
+if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then pw_changed=1 fi
 
-        echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
 
-        echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null 2>&1
-
-fi
 
 
 if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
@@ -116,3 +122,30 @@ if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
     echo $cur_users
 
 fi
+
+
+
+# Update ETC files if systemd is running (Not in Container)
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
+        echo ""
+        echo "########"
+        echo "Configuring nepi Samba passwords"
+        echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+
+        echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
+        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+        echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null 2>&1
+
+        if [[ "$pw_changed" -eq 1 ]]; then
+                sudo systemctl restart sshd
+        fi
+
+fi
+
+
+
+

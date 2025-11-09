@@ -43,6 +43,9 @@ if [[ -f "$script_path" ]]; then
 	echo "Running ${script_file} script"
 	source $script_path
 	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
 fi
 
 
@@ -56,6 +59,9 @@ if [[ -f "$script_path" ]]; then
 	echo "Running ${script_file} script"
 	source $script_path
 	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
 fi
 
 
@@ -70,6 +76,9 @@ if [[ -f "$script_path" ]]; then
 	echo "Running ${script_file} script"
 	source $script_path
 	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
 fi
 
 ####################################

@@ -28,19 +28,27 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
+SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_INSTR_PATH=$(dirname "${SCRIPT_FOLDER}")
 
 echo "########################"
 echo "NEPI USER SETUP"
 echo "########################"
 
-CONFIG_USER=nepi
+
+if [[ -z "$CONFIG_USER "]]; then
+    CONFIG_USER=nepi
+fi 
+
+if [[ -z "$SYS_USER_1 "]]; then
+    SYS_USER_1=nepihost
+fi 
+
+SYS_USER_2=nepiadmin
+
 CONFIG_USER_PW=nepi
-
-SYS_USER_1=nepihost
 SYS_USER_1_PW=nepi
-
-SYS_USER_1=nepiadmin
-SYS_USER_1_PW=nepiadmin
+SYS_USER_2_PW=nepiadmin
 
 echo "###################################"
 echo "Setting up user account: ${CONFIG_USER}"
@@ -72,12 +80,29 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG tty ${CONFIG_USER}
     sudo usermod -aG $CONFIG_USER $CONFIG_USER
 
-    
+        
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
         if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
             sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
         fi
     fi
+
+    # Updated the Desktop
+    dfolder=/home/${CONFIG_USER}/Desktop
+    if [[ -d "$dfolder" ]]; then
+        if find "$dfolder" -maxdepth 0 -empty | read; then
+            echo "Desktop folder cleaned"
+        else
+            sudo rm ${dfolder}/*
+            echo "Desktop folder cleaned"
+        fi
+    fi
+
+    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+    sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+
 
 
 else

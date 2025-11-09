@@ -25,7 +25,12 @@ HELPN="${UTILSN}"
 
 CURRENT_DIR=$(pwd)
 
-export NEPI_SSH_KEY_PATH=~/ssh_keys/nepi_engine_default_private_ssh_key
+if [[ -z "$NEPI_SSH_KEY_FILE" ]]; then
+  export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+fi
+
+export NEPI_SSH_KEY_PATH=/home/${USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+
 
 export NEPI_REMOTE_SETUP=1
 export NEPI_TARGET_IP=$NEPI_IP

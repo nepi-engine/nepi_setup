@@ -412,36 +412,14 @@ if [[ "$?" -eq 0 ]]; then
             sudo cp ${SOURCE_ETC_PATH}/ssh/sshd_config /etc/ssh/sshd_config
         fi
 
-        echo "Installing nepi ssh key files for user ${CONFIG_USER}"
-        if [ ! -d "/home/${CONFIG_USER}/.ssh" ]; then
-            sudo mkdir /home/${CONFIG_USER}/.ssh
-        fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${CONFIG_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${CONFIG_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${CONFIG_USER}/.ssh
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.ssh
-
-        echo "Installing nepi ssh key files for user ${NEPI_USER}"
-        if [ ! -d "/home/${NEPI_USER}/.ssh" ]; then
-            sudo mkdir /home/${NEPI_USER}/.ssh
-        fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${NEPI_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${NEPI_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${NEPI_USER}/.ssh
-        sudo chown -R ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER}/.ssh
-
-        echo "Installing nepi ssh key files for user ${NEPI_ADMIN_USER}"
-        if [ ! -d "/home/${NEPI_ADMIN_USER}/.ssh" ]; then
-            sudo mkdir /home/${NEPI_ADMIN_USER}/.ssh
-        fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${NEPI_ADMIN_USER}/.ssh
-        sudo chown -R ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}/.ssh
-
+        echo "Enabling ssh service"
         sudo systemctl enable sshd
-        sudo systemctl restart sshd
-   
+        wait
+        sleep 2
+        source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
+
+        sudo systemctl start sshd
+
     fi
 
 

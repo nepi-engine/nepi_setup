@@ -117,8 +117,226 @@ update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $NEPI_SYS_CONFIG_FILE
 
 
 
-# ########################################
-# # Update NEPI System Config if needed
+########################################
+# Update NEPI System Config if needed
+
+#####################################
+# Config Setup
+
+NEPI_USER_CONFIGS=(
+NEPI_IP_INTERFACE \
+NEPI_DEVICE_ID \
+NEPI_DEVICE_MD \
+NEPI_DEVICE_SN \
+NEPI_IP \
+NEPI_ALIAS_IPS \
+NEPI_NTP_IPS \
+NEPI_DHCP_ON_START \
+NEPI_AB_FS \
+NEPI_RECOVERY_ENABLED \
+NEPI_BOOT_TIME \
+NEPI_IMPORT_PATH \
+NEPI_EXPORT_PATH
+)
+
+
+CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
+CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
+CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
+CURRENT_NEPI_IP="$NEPI_IP"
+CURRENT_NEPI_ALIAS_IPS="$NEPI_ALIAS_IPS"
+CURRENT_NEPI_NTP_IPS="$NEPI_NTP_IPS"
+CURRENT_NEPI_AB_FS="$NEPI_AB_FS"
+CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
+CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
+
+function print_user_config(){
+    config_file=${CONFIG_FILE}
+    if [ -f "$config_file" ]; then
+        CONFIGN="#############################
+        ## NEPI Config Settings ##
+        #############################
+        FILE=${config_file}"
+
+        keys=($(yq e 'keys | .[]' ${config_file}))
+        for key in "${keys[@]}"; do
+
+            IF key in NEPI_USER_CONFIGS then
+
+                value=$(yq e '.'"$key"'' $config_file)
+                echo "${key}=${value}"
+                CONFIGN="${CONFIGN}
+                ${key}=${!key}"
+        done
+        echo $CONFIG
+    else
+        echo "Config file not found ${config_file}"
+    fi
+}
+
+function print_current_config(){
+    echo ""
+    echo "######################"
+    echo "Current Settings"
+    echo "######################"
+    echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
+    echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
+    echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
+    echo "NEPI_IP: ${CURRENT_NEPI_IP}"
+    echo "NEPI_ALIAS_IPS: ${CURRENT_NEPI_ALIAS_IPS}"
+    echo "NEPI_NTP_IPS: ${CURRENT_NEPI_NTP_IPS}"
+    echo "NEPI_AB_FS: ${CURRENT_NEPI_AB_FS}"
+    echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
+    echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
+    echo ""
+    echo "Select Config to Update:"
+}
+
+function udpate_config_file(){
+
+    update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $CONFIG_FILE
+    update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $CONFIG_FILE
+    update_yaml_value "NEPI_ALIAS_IPS" $CURRENT_NEPI_ALIAS_IPS $CONFIG_FILE
+    update_yaml_value "NEPI_NTP_IPS" $CURRENT_NEPI_NTP_IPS $CONFIG_FILE
+    update_yaml_value "NEPI_AB_FS" $CURRENT_NEPI_AB_FS $CONFIG_FILE
+    update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $CONFIG_FILE
+    update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $CONFIG_FILE
+
+}
+
+#####################################
+# Update NEPI System Config if needed
+#####################################
+
+if [ -f "$CONFIG_FILE" ]; then
+    print_current_config
+    
+    select opt in  "VIEW SETTINGS" "APPLY SETTINGS" "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" "Update NEPI_IP" "Update NEPI_ALIAS_IPS" "Update NEPI_NTP_IPS" "Update NEPI_AB_FS" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "QUIT"; do
+        case $opt in
+            "VIEW SETTINGS")
+                print_config_file $CONFIG_FILE
+                ;;
+            "APPLY SETTINGS")
+                udpate_config_file
+                break
+                ;;
+            "Update NEPI_DEVICE_ID")
+                read -p "Enter a new Device ID Name: " USER_INPUT
+                if is_valid_did "$USER_INPUT"; then
+                    CURRENT_NEPI_DEVICE_ID=$USER_INPUT
+                else
+                    echo "Not A Valid Device ID"
+                fi           
+                print_current_config
+            ;;
+            "Update NEPI_DEVICE_MD")
+                read -p "Enter a new Device Model Name: " USER_INPUT
+                if is_valid_string "$USER_INPUT"; then
+                    CURRENT_NEPI_DEVICE_MD=$USER_INPUT
+                else
+                    echo "Not A Valid Device Model Name"
+                fi           
+                print_current_config
+            ;;
+           "Update NEPI_DEVICE_SN")
+                read -p "Enter a new 6 digit Serial Number: " USER_INPUT
+                if is_valid_ipv4 "$USER_INPUT"; then
+                    CURRENT_NEPI_IP=$USER_INPUT
+                else
+                    echo "Not A Valid IP Format"
+                fi
+                print_current_config
+                ;;
+            "Update NEPI_IP")
+                read -p "Enter a new Static IP Address: " USER_INPUT
+                if is_valid_ipv4 "$USER_INPUT"; then
+                    CURRENT_NEPI_IP=$USER_INPUT
+                else
+                    echo "Not A Valid IP Format"
+                fi
+
+                ;;
+            "Update NEPI_ALIAS_IPS")
+                read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
+                if [[ "${USER_INPUT}" == "" ]]; then
+                    USER_INPUT=None
+                fi
+                if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    CURRENT_NEPI_ALIAS_IPS=$USER_INPUT
+                else
+                    echo "Not A Valid IP Format"
+                fi
+                print_current_config
+                ;;
+            "Update NEPI_NTP_IPS")
+                read -p "Enter a new NTP Source IP Address, or Empty Line to Clear: " USER_INPUT
+                if [[ "${USER_INPUT}" == "" ]]; then
+                    USER_INPUT=None
+                fi
+                if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    CURRENT_NEPI_NTP_IPS=$USER_INPUT
+                else
+                    echo "Not A Valid IP Format"
+                fi
+                print_current_config
+                ;;
+
+            "Update NEPI_AB_FS")
+                read -p "Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
+                if is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    CURRENT_NEPI_AB_FS=$USER_INPUT
+                else
+                    echo "Not A Valid Input"
+                fi
+                print_current_config
+                ;;
+
+            "Update NEPI_IMPORT_PATH")
+                read -p "Enter a Valid NEPI image Import path: " USER_INPUT
+                if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
+                else
+                    echo "Not A Valid Input"
+                fi
+                print_current_config
+                ;;
+            "Update NEPI_EXPORT_PATH")
+                read -p "Enter a Valid NEPI image Export path: " USER_INPUT
+                if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
+                else
+                    echo "Not A Valid Input"
+                fi
+                print_current_config
+                ;;
+            "QUIT")
+                exit 0
+                ;;
+            *)
+                print_current_config
+                ;;
+        esac
+    done
+else
+    echo "${CONFIG_FOLDER} Is Not a Directory"
+    # sudo mkdir -p $CONFIG_FOLDER
+    # sudo cp ${NEPI_SYSTEM_CONFIG_SOURCE} ${CONFIG_FILE}
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # min_docker_gb=$((NEPI_GB_CONTAINER * 3))
@@ -407,211 +625,6 @@ update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $NEPI_SYS_CONFIG_FILE
 
 
 
-# #####################################
-# # Config Setup
-
-# NEPI_USER_CONFIGS=(
-# NEPI_IP_INTERFACE \
-# NEPI_DEVICE_ID \
-# NEPI_DEVICE_MD \
-# NEPI_DEVICE_SN \
-# NEPI_IP \
-# NEPI_ALIAS_IPS \
-# NEPI_NTP_IPS \
-# NEPI_DHCP_ON_START \
-# NEPI_AB_FS \
-# NEPI_RECOVERY_ENABLED \
-# NEPI_BOOT_TIME \
-# NEPI_IMPORT_PATH \
-# NEPI_EXPORT_PATH
-# )
-
-
-# CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
-# CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
-# CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
-# CURRENT_NEPI_IP="$NEPI_IP"
-# CURRENT_NEPI_ALIAS_IPS="$NEPI_ALIAS_IPS"
-# CURRENT_NEPI_NTP_IPS="$NEPI_NTP_IPS"
-# CURRENT_NEPI_AB_FS="$NEPI_AB_FS"
-# CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
-# CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-
-# function print_user_config(){
-#     config_file=${CONFIG_FILE}
-#     if [ -f "$config_file" ]; then
-#         CONFIGN="#############################
-#         ## NEPI Config Settings ##
-#         #############################
-#         FILE=${config_file}"
-
-#         keys=($(yq e 'keys | .[]' ${config_file}))
-#         for key in "${keys[@]}"; do
-
-#             IF key in NEPI_USER_CONFIGS then
-
-#                 value=$(yq e '.'"$key"'' $config_file)
-#                 echo "${key}=${value}"
-#                 CONFIGN="${CONFIGN}
-#                 ${key}=${!key}"
-#         done
-#         echo $CONFIG
-#     else
-#         echo "Config file not found ${config_file}"
-#     fi
-# }
-
-# function print_current_config(){
-#     echo ""
-#     echo "######################"
-#     echo "Current Settings"
-#     echo "######################"
-#     echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
-#     echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
-#     echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
-#     echo "NEPI_IP: ${CURRENT_NEPI_IP}"
-#     echo "NEPI_ALIAS_IPS: ${CURRENT_NEPI_ALIAS_IPS}"
-#     echo "NEPI_NTP_IPS: ${CURRENT_NEPI_NTP_IPS}"
-#     echo "NEPI_AB_FS: ${CURRENT_NEPI_AB_FS}"
-#     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
-#     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
-#     echo ""
-#     echo "Select Config to Update:"
-# }
-
-# function udpate_config_file(){
-
-#     update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $CONFIG_FILE
-#     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $CONFIG_FILE
-#     update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $CONFIG_FILE
-#     update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $CONFIG_FILE
-#     update_yaml_value "NEPI_ALIAS_IPS" $CURRENT_NEPI_ALIAS_IPS $CONFIG_FILE
-#     update_yaml_value "NEPI_NTP_IPS" $CURRENT_NEPI_NTP_IPS $CONFIG_FILE
-#     update_yaml_value "NEPI_AB_FS" $CURRENT_NEPI_AB_FS $CONFIG_FILE
-#     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $CONFIG_FILE
-#     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $CONFIG_FILE
-
-# }
-
-# #####################################
-# # Update NEPI System Config if needed
-# #####################################
-
-# if [ -f "$CONFIG_FILE" ]; then
-#     print_current_config
-    
-#     select opt in  "VIEW SETTINGS" "APPLY SETTINGS" "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" "Update NEPI_IP" "Update NEPI_ALIAS_IPS" "Update NEPI_NTP_IPS" "Update NEPI_AB_FS" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "QUIT"; do
-#         case $opt in
-#             "VIEW SETTINGS")
-#                 print_config_file $CONFIG_FILE
-#                 ;;
-#             "APPLY SETTINGS")
-#                 udpate_config_file
-#                 break
-#                 ;;
-#             "Update NEPI_DEVICE_ID")
-#                 read -p "Enter a new Device ID Name: " USER_INPUT
-#                 if is_valid_did "$USER_INPUT"; then
-#                     CURRENT_NEPI_DEVICE_ID=$USER_INPUT
-#                 else
-#                     echo "Not A Valid Device ID"
-#                 fi           
-#                 print_current_config
-#             ;;
-#             "Update NEPI_DEVICE_MD")
-#                 read -p "Enter a new Device Model Name: " USER_INPUT
-#                 if is_valid_string "$USER_INPUT"; then
-#                     CURRENT_NEPI_DEVICE_MD=$USER_INPUT
-#                 else
-#                     echo "Not A Valid Device Model Name"
-#                 fi           
-#                 print_current_config
-#             ;;
-#            "Update NEPI_DEVICE_SN")
-#                 read -p "Enter a new 6 digit Serial Number: " USER_INPUT
-#                 if is_valid_ipv4 "$USER_INPUT"; then
-#                     CURRENT_NEPI_IP=$USER_INPUT
-#                 else
-#                     echo "Not A Valid IP Format"
-#                 fi
-#                 print_current_config
-#                 ;;
-#             "Update NEPI_IP")
-#                 read -p "Enter a new Static IP Address: " USER_INPUT
-#                 if is_valid_ipv4 "$USER_INPUT"; then
-#                     CURRENT_NEPI_IP=$USER_INPUT
-#                 else
-#                     echo "Not A Valid IP Format"
-#                 fi
-
-#                 ;;
-#             "Update NEPI_ALIAS_IPS")
-#                 read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
-#                 if [[ "${USER_INPUT}" == "" ]]; then
-#                     USER_INPUT=None
-#                 fi
-#                 if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-#                     CURRENT_NEPI_ALIAS_IPS=$USER_INPUT
-#                 else
-#                     echo "Not A Valid IP Format"
-#                 fi
-#                 print_current_config
-#                 ;;
-#             "Update NEPI_NTP_IPS")
-#                 read -p "Enter a new NTP Source IP Address, or Empty Line to Clear: " USER_INPUT
-#                 if [[ "${USER_INPUT}" == "" ]]; then
-#                     USER_INPUT=None
-#                 fi
-#                 if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-#                     CURRENT_NEPI_NTP_IPS=$USER_INPUT
-#                 else
-#                     echo "Not A Valid IP Format"
-#                 fi
-#                 print_current_config
-#                 ;;
-
-#             "Update NEPI_AB_FS")
-#                 read -p "Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
-#                 if is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-#                     CURRENT_NEPI_AB_FS=$USER_INPUT
-#                 else
-#                     echo "Not A Valid Input"
-#                 fi
-#                 print_current_config
-#                 ;;
-
-#             "Update NEPI_IMPORT_PATH")
-#                 read -p "Enter a Valid NEPI image Import path: " USER_INPUT
-#                 if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-#                     CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
-#                 else
-#                     echo "Not A Valid Input"
-#                 fi
-#                 print_current_config
-#                 ;;
-#             "Update NEPI_EXPORT_PATH")
-#                 read -p "Enter a Valid NEPI image Export path: " USER_INPUT
-#                 if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-#                     CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
-#                 else
-#                     echo "Not A Valid Input"
-#                 fi
-#                 print_current_config
-#                 ;;
-#             "QUIT")
-#                 exit 0
-#                 ;;
-#             *)
-#                 print_current_config
-#                 ;;
-#         esac
-#     done
-# else
-#     echo "${CONFIG_FOLDER} Is Not a Directory"
-#     # sudo mkdir -p $CONFIG_FOLDER
-#     # sudo cp ${NEPI_SYSTEM_CONFIG_SOURCE} ${CONFIG_FILE}
-# fi
-
 
 
 
@@ -649,10 +662,7 @@ if [ $? -eq 1 ]; then
     exit 1
 fi
 
-###########################################
-# USERS UPDATES
-echo "Updating User Configurations"
-source ${ETC_FOLDER}/scripts/update_etc_users.sh $LOAD_NEPI_CONFIG
+
 
 echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
 source ${SYSTEM_ETC_PATH}/update_etc_files.sh

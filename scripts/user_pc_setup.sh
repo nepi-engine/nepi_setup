@@ -61,6 +61,11 @@ function udpate_config_file(){
 }
 
 
+
+
+
+
+
 #####################################
 # Update NEPI System Config if needed
 
@@ -135,6 +140,79 @@ if [[ -f "$USER_CONFIG_FILE" ]]; then
 fi
 
 
+echo " "
+echo "################################# "
+echo "Updating SSH Keys"
+echo ""
+
+NEPI_SSH_DIR=/home/${USER}/ssh_keys
+
+###################
+# Check for default key
+NEPI_SSH_FILE=nepi_engine_default_private_ssh_key
+echo "Checking nepi ssh key file"
+NEPI_SSH_PATH=${NEPI_SSH_DIR}/${NEPI_SSH_FILE}
+NEPI_SSH_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/ssh_keys/${NEPI_SSH_FILE}
+if [ -e $NEPI_SSH_PATH ]; then
+    : # Do Nothing
+else
+    echo "Installing NEPI default ssh private key ${NEPI_SSH_PATH} "
+    mkdir -p $NEPI_SSH_DIR
+    cp $NEPI_SSH_SOURCE $NEPI_SSH_PATH
+fi
+sudo chmod 600 $NEPI_SSH_PATH
+
+###############
+# Check for other key options
+sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DIR | tail -n 1)
+if [[ -n "$sel_ssh_file"  ]]; then
+    sel_ssh_path=${NEPI_SSH_DIR}/${sel_ssh_file}
+    if [[ -f "$sel_ssh_path" ]]; then
+        NEPI_SSH_FILE=$sel_ssh_file
+        NEPI_SSH_PATH=$sel_ssh_path
+    fi
+fi
+echo "Using SSH Key file: ${NEPI_SSH_PATH}"
+export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
+sudo chmod 600 $NEPI_SSH_PATH
+
+
+#################
+# Update Key Path
+sudo chmod 700 $NEPI_SSH_DIR
+sudo chown -R ${USER}:${USER} $NEPI_SSH_DIR
+
+
+
+
+
+echo " "
+echo "################################# "
+echo "Updating ETC Hosts File"
+echo ""
+
+file=/etc/hosts
+bfile=${file}.org
+if [[ ! -f "$bfile" ]]; then
+    path_backup $file $bfile
+fi
+
+sudo cp -a $bfile $file
+
+echo "Updating NEPI IP in ${file}"
+
+echo "${NEPI_IP} ${NEPI_USER}" | sudo tee -a $file
+echo "${NEPI_IP} ${NEPI_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} ${NEPI_ADMIN_USER}" | sudo tee -a $file
+echo "${NEPI_IP} ${NEPI_ADMIN_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
+echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+
+
+
+
+
+
 #####################################
 echo " "
 echo "################################# "
@@ -183,6 +261,8 @@ echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
 echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
+echo 'export NEPI_SSH_KEY_FILE='${NEPI_SSH_KEY_FILE} | sudo tee -a $BASHRC
+
 
 if grep -qnw $BASHRC -e "##### Source NEPI Aliases #####" ; then
     : #echo "Already Done"
@@ -241,50 +321,6 @@ fi
 
 
 
-echo " "
-echo "################################# "
-echo "Updating SSH Keys"
-echo ""
-
-NEPI_SSH_DIR=/home/${USER}/ssh_keys
-NEPI_SSH_FILE=nepi_engine_default_private_ssh_key
-
-# Add nepi ssh key if not there
-echo "Checking nepi ssh key file"
-NEPI_SSH_PATH=${NEPI_SSH_DIR}/${NEPI_SSH_FILE}
-NEPI_SSH_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/ssh_keys/${NEPI_SSH_FILE}
-if [ -e $NEPI_SSH_PATH ]; then
-    echo "Found NEPI ssh private key ${NEPI_SSH_PATH} "
-else
-    echo "Installing NEPI ssh private key ${NEPI_SSH_PATH} "
-    mkdir -p $NEPI_SSH_DIR
-    cp $NEPI_SSH_SOURCE $NEPI_SSH_PATH
-fi
-sudo chmod 600 $NEPI_SSH_PATH
-sudo chmod 700 $NEPI_SSH_DIR
-sudo chown -R ${USER}:${USER} $NEPI_SSH_DIR
-
-echo " "
-echo "################################# "
-echo "Updating ETC Hosts File"
-echo ""
-
-file=/etc/hosts
-bfile=${file}.org
-if [[ ! -f "$bfile" ]]; then
-    path_backup $file $bfile
-fi
-
-sudo cp -a $bfile $file
-
-echo "Updating NEPI IP in ${file}"
-
-echo "${NEPI_IP} ${NEPI_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_ADMIN_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_ADMIN_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 echo " "
 echo "################################# "

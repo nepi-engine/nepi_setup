@@ -191,11 +191,10 @@ export -f nepiinit
 function nepiimport(){
     import_path=/mnt/nepi_storage/nepi_images
     selected=$(select_file_from_folder $import_path | tail -n 1)
-    selected
     if [[ -n "$selected" ]]; then
       if [[ "${selected##*.}" == "tar"  ]]; then
         echo "Importing NEPI Image file ${selected}"
-          image_path="${import_path}/${selected}"
+        image_path="${import_path}/${selected}"
         bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
       else
         echo "Selected file is not a tar file: ${import_path}"
