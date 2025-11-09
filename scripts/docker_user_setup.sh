@@ -98,11 +98,11 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
-    xdg-user-dirs-update --set DESKTOP "$dfolder"
-    gsettings set org.gnome.desktop.screensaver lock-enabled false
-    gsettings set org.gnome.desktop.session idle-delay 0
-    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
-    gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
+    # xdg-user-dirs-update --set DESKTOP "$dfolder"
+    # gsettings set org.gnome.desktop.screensaver lock-enabled false
+    # gsettings set org.gnome.desktop.session idle-delay 0
+    # gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+    # gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
 
 else
