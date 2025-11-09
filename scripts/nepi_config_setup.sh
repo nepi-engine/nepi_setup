@@ -657,34 +657,27 @@ if [[ -n "$DISPLAY" ]]; then
             echo "Desktop folder cleaned"
         fi
     fi
-    xdg-user-dirs-update --set DESKTOP "$dfolder"
 
 
-    gsettings set org.gnome.desktop.screensaver lock-enabled false
-    gsettings set org.gnome.desktop.session idle-delay 0
-
-    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-
-    # Copy instructions to desktop
-    instr_file=${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md
-    sudo cp -p $instr_file /home/${CONFIG_USER}/Desktop/
-
-
-
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
+    sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
+    sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+
+    xdg-user-dirs-update --set DESKTOP "$dfolder"
+    gsettings set org.gnome.desktop.screensaver lock-enabled false
+    gsettings set org.gnome.desktop.session idle-delay 0
+    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
     gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
-
-    echo "Updating Desktop Folder Bookmarks settings for user ${CONFIG_USER}"
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
 
     gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
     'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
     'gnome-control-center.desktop']"
 
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
     ###################
 
