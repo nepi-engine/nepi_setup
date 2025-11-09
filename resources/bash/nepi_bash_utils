@@ -497,15 +497,15 @@ function nclock(){
       echo "Forcing clock sync"
       sudo chronyc -a makestep
 
-      #echo "Waiting for clock to synchronize..."
-      sleep 1
-      #chronyc waitsync 1
-      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-        echo "Clock synchronization complete."}
-      else
-        #echo "Clock Failed to Synchronize."}
-        return 1
-      fi
+      # #echo "Waiting for clock to synchronize..."
+      # sleep 1
+      # #chronyc waitsync 1
+      # if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
+      #   echo "Clock synchronization complete."}
+      # else
+      #   #echo "Clock Failed to Synchronize."}
+      #   return 1
+      # fi
     fi
 
 }
