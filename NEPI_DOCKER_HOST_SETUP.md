@@ -39,11 +39,12 @@ Clone the NEPI Setup repo:
 
 Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
+    cd /home/${USER}/nepi_setup/scripts
     sudo su 
 
 then
 
-    /home/${USER}/nepi_setup/scripts/docker_user_setup.sh
+    ./docker_user_setup.sh
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
