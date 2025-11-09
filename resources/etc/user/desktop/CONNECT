@@ -1,0 +1,6 @@
+    [Desktop Entry]
+    Name=CONNECT_INTERNET
+    Exec=/bin/bash -c "ninet"
+    Type=Application
+    Terminal=true
+    Icon=/usr/share/icons/LoginIcons/apps/64/computer.svg

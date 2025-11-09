@@ -93,16 +93,10 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     fi
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
     sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
 
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
-    # xdg-user-dirs-update --set DESKTOP "$dfolder"
-    # gsettings set org.gnome.desktop.screensaver lock-enabled false
-    # gsettings set org.gnome.desktop.session idle-delay 0
-    # gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
-    # gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
 
 else

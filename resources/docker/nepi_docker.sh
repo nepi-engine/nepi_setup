@@ -148,10 +148,14 @@ function nclock(){
             return 1 # Exit with a non-zero status to indicate an error
         fi
       fi
-      echo "Restarting chrony time service"
-      systemctl restart chronyd
-      echo "Forcing clock sync"
-      chronyc -a makestep
+      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
+        : # Do Nothing
+      else
+        echo "Restarting chrony time service"
+        systemctl restart chronyd
+        echo "Forcing clock sync"
+        chronyc -a makestep
+     fi
 
       # #echo "Waiting for clock to synchronize..."
       # sleep 1
