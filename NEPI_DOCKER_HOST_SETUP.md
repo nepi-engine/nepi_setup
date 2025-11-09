@@ -43,7 +43,7 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    /home/nepihost/nepi_setup/scripts/docker_user_setup.sh
+    /home/${USER}/nepi_setup/scripts/docker_user_setup.sh
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
@@ -61,7 +61,7 @@ Run the NEPI Docker environment setup script (sudo password is now 'nepi')
 
 If prompted enter: `y` or 'yes' :
 
-    /home/${USER}/nepi_setup/scripts/docker_env_setup.sh
+    /home/nepihost/nepi_setup/scripts/docker_env_setup.sh
     
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
@@ -81,7 +81,7 @@ Log into the `nepihost` user using password  'nepi'
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
 
-    /home/${USER}/nepi_setup/scripts/docker_config_setup.sh
+    /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
 
 
 **NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
@@ -97,7 +97,7 @@ This section will initialize the NEPI Docker User Storage folder (/mnt/nepi_stor
 
 Log back into `nepihost` using password 'nepi' 
 
-Enable internet connection and sync clocks on connection:
+Enable internet connection and sync clocks:
 
     ninet
 
