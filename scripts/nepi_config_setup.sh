@@ -630,6 +630,24 @@ if [[ "$?" -eq 0 ]]; then
 fi
 
 
+# #####################################
+# SYNC FROM SYSTEM CONFIG
+# #####################################
+echo ""
+echo "########################"
+echo "Syncing Config Files and Folders"
+echo "########################"
+echo ""
+############
+# Update Config Folders
+
+source_config_path=/mnt/nepi_config/system_cfg
+sync_to_config_folder 'factory_cfg' $source_config_path
+sync_to_config_folder 'recovery_cfg' $source_config_path
+
+source /opt/nepi/etc/scripts/sync_from_configs.sh
+
+
 
 
 if [[ -n "$DISPLAY" ]]; then
@@ -658,8 +676,6 @@ if [[ -n "$DISPLAY" ]]; then
         fi
     fi
 
-
-
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
     sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
@@ -686,29 +702,13 @@ if [[ -n "$DISPLAY" ]]; then
     #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
     #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
     sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
-
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
     sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
     sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
 
     xdg-settings set default-web-browser chromium-browser.desktop
+    
 fi
-
-# #####################################
-# SYNC FROM SYSTEM CONFIG
-# #####################################
-echo ""
-echo "########################"
-echo "Syncing Config Files and Folders"
-echo "########################"
-echo ""
-############
-# Update Config Folders
-
-source_config_path=/mnt/nepi_config/system_cfg
-sync_to_config_folder 'factory_cfg' $source_config_path
-sync_to_config_folder 'recovery_cfg' $source_config_path
-
-source /opt/nepi/etc/scripts/sync_from_configs.sh
 
 
 echo ""
@@ -717,8 +717,8 @@ echo "Cleaning Config System"
 echo "########################"
 
 
-sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
-sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
+sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/info/ 2>/dev/null 
+sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/files/ 2>/dev/null
 sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 
