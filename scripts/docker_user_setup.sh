@@ -48,7 +48,8 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     
 else
     echo "User $CONFIG_USER does not exist, creating"
-    sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+    #sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
+    sudo useradd $CONFIG_USER -s /bin/bash -g sudo -m
 fi    
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "Configuring NEPI Host User account $CONFIG_USER"
@@ -61,7 +62,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
-        sudo cp -r "/home/${SUDO_USER}/*" "/home/${CONFIG_USER}/"
+        sudo cp -r /home/${SUDO_USER}/* /home/${CONFIG_USER}/
     fi
 
 
