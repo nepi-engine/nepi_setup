@@ -11,7 +11,7 @@
 
 # This script is the NEPI Docker Container Management Service
 if ! [ $(id -u) = 0 ]; then
-   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   echo 'This scripts must be run as root user. Type "su" and retry'
    exit 1
 fi
 
@@ -25,11 +25,10 @@ source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 ########################
-# Redefine any nepi_bash_util functions that require sudo without sudo
-
+# Redefine any nepi_bash_util functions that require without sudo
 
 function nipa(){
-
+  
   file=/etc/network/interfaces.d/nepi_static_ip
   if [ ! -f "$file" ]; then
       return 2
@@ -43,11 +42,11 @@ function nipa(){
   fi 
 
 }
-
+export -f nipa
 
 
 function naipa(){
-
+  
   file=/etc/network/interfaces.d/nepi_user_ip_aliases
   if [ ! -f "$file" ]; then
       return 2
@@ -61,10 +60,10 @@ function naipa(){
   fi 
 
 }
-
+export -f naipa
 
 function nnipa(){
-
+  
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
       return 1
@@ -78,10 +77,10 @@ function nnipa(){
   fi 
 
 }
-
+export -f nnipa
 
 function nnet(){
-
+  
     nepi_ip=$(nipa)
     if [[ -z "$nepi_ip" ]]; then
       return 1
@@ -100,10 +99,10 @@ function nnet(){
       fi
     fi
 }
-
+export -f nnet
 
 function ndhcp(){
-
+  
   if nnet; then
     # This file sets up nepi bash aliases and util functions
     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -130,14 +129,13 @@ function ndhcp(){
     fi
   fi
 }
-
+export -f ndhcp
 
 
 function nclock(){
-
+  
   if [[ "$(date +%Y)" -lt 2025 ]]; then
 
-    if nnet; then
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
@@ -150,24 +148,28 @@ function nclock(){
             return 1 # Exit with a non-zero status to indicate an error
         fi
       fi
+      echo "Restarting chrony time service"
       systemctl restart chronyd
-      echo "Waiting for clock to synchronize..."
-      #chronyc waitsync 1
-      sleep 1
-      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-        echo "Clock synchronization complete."}
-      else
-        echo "Clock Failed to Synchronize."}
-        return 1
-      fi
-    fi
-  fi
-}
+      echo "Forcing clock sync"
+      chronyc -a makestep
 
+      # #echo "Waiting for clock to synchronize..."
+      # sleep 1
+      # #chronyc waitsync 1
+      # if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
+      #   echo "Clock synchronization complete."}
+      # else
+      #   #echo "Clock Failed to Synchronize."}
+      #   return 1
+      # fi
+    fi
+
+}
+export -f nclock
 
 
 function ninet(){
-
+  
   if ndhcp; then # Enable DHCP internet connection if needed
     wait
     if ! nclock; then # Connect to NTP server
@@ -178,9 +180,10 @@ function ninet(){
   fi
 
 }
+export function ninet
 
 ########################
-# Redefine any nepi docker processes as functions that require sudo without sudo
+# Redefine any nepi docker processes as functions that require without sudo
 
 function load_docker_config() {
     FILE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
