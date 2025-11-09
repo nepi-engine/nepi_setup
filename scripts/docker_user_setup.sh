@@ -49,7 +49,8 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 else
     echo "User $CONFIG_USER does not exist, creating"
     #sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
-    #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -m
+    #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -
+    sudo groupdel "$CONFIG_USER" >/dev/null 2>&1
     sudo adduser --gecos "New User Account" --disabled-password "$CONFIG_USER"
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 fi    
