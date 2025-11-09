@@ -82,7 +82,7 @@ if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
     echo "Current Users:"
     echo $cur_users
 
-    OLD_UID_START=2000
+    OLD_UID_START=1000
     OLD_UID_END=2999
 
     # Function to update user and group IDs

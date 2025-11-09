@@ -27,6 +27,13 @@ source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 
+SHOW_CONFIG_MENU=0
+if [[ "$1" -eq 1 ]]; then
+    SHOW_CONFIG_MENU=1
+fi
+
+
+
 
 ######################################
 echo ""
@@ -112,6 +119,31 @@ update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $NEPI_SYS_CONFIG_FILE
 
 # ########################################
 # # Update NEPI System Config if needed
+
+
+# min_docker_gb=$((NEPI_GB_CONTAINER * 3))
+
+# check_drive=/mnt/nepi_config/docker_cfg
+# check_space=$min_docker_gb
+# if is_space_avail_gb $check_drive $check_space; then
+#     if [[ "$NEPI_AB_FS" -nq 1 ]]; then
+#         echo "Would you like to enable NEPI AB Backup/Recovery file system support"
+#         enable_ab=$(ask_yes_no)
+#         if [[ "$enable_ab" == 'yes' ]]; then
+#             export NEPI_AB_FS=1
+#         else
+#             export NEPI_AB_FS=0
+#         fi
+#     fi
+# fi
+
+# if [[ -z $NEPI_AB_FS ]]; then
+#     NEPI_AB_FS=0
+# fi
+# update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
+
+
+
 
 # update_settings=0
 

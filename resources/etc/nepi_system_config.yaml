@@ -12,7 +12,7 @@ NEPI_HOST_PW: nepi
 # Set NEPI_ALLOWS_USERS to 1 to allow non-NEPI user accounts
 # NOTE: if set to 0, all none-nepi user accounts will be removed
 #  during etc update processing
-NEPI_ALLOWS_USERS: 0
+NEPI_ALLOWS_USERS: 1
 
 ####################################################
 # NEPI SYSTEM SETTINGS

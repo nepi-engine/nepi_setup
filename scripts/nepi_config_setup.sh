@@ -37,7 +37,6 @@ echo "########################"
 
 echo "Checking Requirements"
 
-################
 # Check Valid Software
 if command -v yq &>/dev/null; then
     : # Do nothing here
@@ -57,16 +56,12 @@ else
 fi
 
 
-
-
-####################################
-
+#######################################################################################
 echo ""
-echo "########################"
-echo "NEPI CONFIG SETUP"
-echo "########################"
+echo "#########"
+echo " Updating NEPI Config Files"
+echo ""
 
-#############
 # Define Folders
 SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
 SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc

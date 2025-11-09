@@ -59,6 +59,12 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG tty ${CONFIG_USER}
     sudo usermod -aG $CONFIG_USER $CONFIG_USER
 
+    
+    if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
+        if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
+            sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
+        fi
+    fi
 
 
 else

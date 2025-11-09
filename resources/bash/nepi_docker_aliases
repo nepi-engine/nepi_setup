@@ -214,9 +214,15 @@ function nepiexport(){
 export -f nepiexport
 
 function nepiconfig(){
-  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
+  SHOW_CONFIG_MENU=1
+  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
 }
 export -f nepiconfig
+
+function nepiupdate(){
+  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
+}
+export -f nepiupdate
 
 function nepistatus(){
   sudo systemctl status nepi_docker
@@ -245,7 +251,7 @@ export -f nepidisable
 function nepireset(){
   bash /opt/nepi/etc/scripts/sync_to_configs.sh
 }
-export -f nepiconfig
+export -f nepireset
 
 
 function nepirestart(){
@@ -282,7 +288,8 @@ nepicommit = Commit the running NEPI container
 nepiinit = Reset, clear, and import new NEPI Image
 nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
-nepiconfig = Configure NEPI System Settings
+nepiconfig = Configure NEPI System settings
+nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
 nepienable = Enable NEPI Docker service on next boot
 nepidisable = Disable NEPI Docker service on next boot
 nepirestart = Restart NEPI docker service
