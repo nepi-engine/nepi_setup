@@ -41,8 +41,8 @@ CONFIG_USER_PW=nepi
 SYS_USER_1=nepi
 SYS_USER_1_PW=nepi
 
-SYS_USER_1=nepiadmin
-SYS_USER_1_PW=nepiadmin
+SYS_USER_2=nepiadmin
+SYS_USER_2_PW=nepiadmin
 
 echo "###################################"
 echo "Setting up user account: ${CONFIG_USER}"
