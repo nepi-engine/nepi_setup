@@ -29,6 +29,7 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_INSTR_PATH=$(dirname "${SCRIPT_FOLDER}")
 
 echo "########################"
 echo "NEPI USER SETUP"
