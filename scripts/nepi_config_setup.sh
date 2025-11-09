@@ -672,6 +672,8 @@ if [[ -n "$DISPLAY" ]]; then
     gsettings set org.gnome.desktop.screensaver lock-enabled false
     gsettings set org.gnome.desktop.session idle-delay 0
 
+    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
