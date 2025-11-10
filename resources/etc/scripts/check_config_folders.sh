@@ -114,7 +114,16 @@ sudo chown root:root $NEPI_DOCKER
 # echo "---------------------------"
 
 ## NEPI CONFIG FOLDER
-NEPI_CONFIG=/mnt/nepi_config
+NEPI_CONFIG=/mnt/
+
+dconfig=${NEPI_CONFIG}/docker_cfg
+if [ ! -d "${dconfig}" ]; then
+    echo "Creating NEPI Folder: ${dconfig}"
+    sudo mkdir "${dconfig}"
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $dconfig
+fi
+
+
 
 dconfig=${NEPI_CONFIG}/docker_cfg
 if [ ! -d "${dconfig}" ]; then
@@ -160,8 +169,15 @@ fi
 
 NEPI_STORAGE=/mnt/nepi_storage
 
-declare -a rfolders=( 
-"${NEPI_STORAGE}" 
+
+sfolder=${NEPI_STORAGE}
+if [ ! -d "${sfolder}" ]; then
+    echo "Creating NEPI Folder: ${sfolder}"
+    sudo mkdir "${sfolder}"
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $sfolder
+fi
+
+declare -a rfolders=(  
 "${NEPI_STORAGE}/ai_models" 
 "${NEPI_STORAGE}/data" 
 "${NEPI_STORAGE}/install" 

@@ -82,6 +82,13 @@ Log into the `nepihost` user using password  'nepi'
 (sudo password is 'nepi')
 
 
+**NOTE:** IF YOU WANT TO HAVE REMOTE ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
+          USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
+          CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
+            1) /mnt/nepi_config -> 200 MB Minimum
+            2) /mnt/nepi_storage -> 20 GB Minimum
+            
+
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
     source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
