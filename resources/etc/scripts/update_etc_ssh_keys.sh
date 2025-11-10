@@ -11,23 +11,22 @@
 
 # This script updates etc user settings
 
-
 export CONFIG_USER=$(id -un 1000)
 
-if [[ -f "/home/nepi/.nepi_system_aliases" ]]; then
+if [[ "$CONFIG_USER" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
     ufile=/homenepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/nepihost/.nepi_docker_aliases" ]]; then
+elif [[ "$CONFIG_USER" == 'nepihost'  ]]; then
     CONFIG_USER=nepihost
     bfile=/home/nepihost/.bashrc
     ufile=/home/nepihost/.nepi_bash_utils
     afile=/home/nepihost/.nepi_docker_aliases
-elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
-    bfile=/home/${CONFIG_USER}/.bashrc
-    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+# elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
+#     bfile=/home/${CONFIG_USER}/.bashrc
+#     ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+#     afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 else
     echo "NEPI Aliases bash file not found"
     exit 1
@@ -48,7 +47,7 @@ if [[ -n "$1" ]]; then
     LOAD_NEPI_CONFIG=$1
 fi
 
-if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
+if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v CONFIG_USER ]]; then
     # Load System Config File
     source ${ETC_FOLDER}/load_system_config.sh
     if [ $? -eq 1 ]; then
@@ -57,14 +56,14 @@ if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
     fi
 fi
 
-
+################################
 echo ""
 echo "UPDATING ETC SSH KEYS"
 
 
 update_keys=0
-ssh_key_source=${SOURCE_ETC_PATH}/ssh/authorized_keys
-ssh_key_dest=/home/${NEPI_USER}/.ssh/authorized_keys
+ssh_key_source=${ETC_FOLDER}/ssh/authorized_keys
+ssh_key_dest=/home/${CONFIG_USER}/.ssh/authorized_keys
 if [[ ! -f "${ssh_key_dest}" ]]; then
     update_keys=1
 elif cmp -s ${ssh_key_source} ${ssh_key_dest}; then
@@ -73,38 +72,38 @@ else
     update_keys=1
 fi
 
-if [[ "$update_keys" -eq 1 ]]; then
+if [[ "$update_keys" -eq 1  ]]; then
         ###############
-        echo "Installing nepi ssh key files for user ${NEPI_USER}"
-        if [ ! -d "/home/${NEPI_USER}/.ssh" ]; then
-            sudo mkdir /home/${NEPI_USER}/.ssh
+        echo "Installing nepi ssh key files for user ${CONFIG_USER}"
+        if [ ! -d "/home/${CONFIG_USER}/.ssh" ]; then
+            sudo mkdir /home/${CONFIG_USER}/.ssh
         fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${NEPI_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${NEPI_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${NEPI_USER}/.ssh
-        sudo chown -R ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER}/.ssh
+        sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${CONFIG_USER}/.ssh/authorized_keys
+        sudo chmod 0600 /home/${CONFIG_USER}/.ssh/authorized_keys
+        sudo chmod 0700 /home/${CONFIG_USER}/.ssh
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.ssh
 
 
-        ###############
-        echo "Installing nepi ssh key files for user ${NEPI_HOST_USER}"
-        if [ ! -d "/home/${NEPI_HOST_USER}/.ssh" ]; then
-            sudo mkdir /home/${NEPI_HOST_USER}/.ssh
-        fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${NEPI_HOST_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${NEPI_HOST_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${NEPI_HOST_USER}/.ssh
-        sudo chown -R ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER}/.ssh
+        # ###############
+        # echo "Installing nepi ssh key files for user ${NEPI_HOST_USER}"
+        # if [ ! -d "/home/${NEPI_HOST_USER}/.ssh" ]; then
+        #     sudo mkdir /home/${NEPI_HOST_USER}/.ssh
+        # fi 
+        # sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${NEPI_HOST_USER}/.ssh/authorized_keys
+        # sudo chmod 0600 /home/${NEPI_HOST_USER}/.ssh/authorized_keys
+        # sudo chmod 0700 /home/${NEPI_HOST_USER}/.ssh
+        # sudo chown -R ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER}/.ssh
 
 
-        ################
-        echo "Installing nepi ssh key files for user ${NEPI_ADMIN_USER}"
-        if [ ! -d "/home/${NEPI_ADMIN_USER}/.ssh" ]; then
-            sudo mkdir /home/${NEPI_ADMIN_USER}/.ssh
-        fi 
-        sudo cp ${SOURCE_ETC_PATH}/ssh/authorized_keys /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        sudo chmod 0600 /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        sudo chmod 0700 /home/${NEPI_ADMIN_USER}/.ssh
-        sudo chown -R ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}/.ssh
+        # ################
+        # echo "Installing nepi ssh key files for user ${NEPI_ADMIN_USER}"
+        # if [ ! -d "/home/${NEPI_ADMIN_USER}/.ssh" ]; then
+        #     sudo mkdir /home/${NEPI_ADMIN_USER}/.ssh
+        # fi 
+        # sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
+        # sudo chmod 0600 /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
+        # sudo chmod 0700 /home/${NEPI_ADMIN_USER}/.ssh
+        # sudo chown -R ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}/.ssh
 
         sudo systemctl restart sshd
 fi

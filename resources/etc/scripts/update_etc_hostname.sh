@@ -11,23 +11,22 @@
 
 # This script updates etc hostname and hosts files and processes
 
-
 export CONFIG_USER=$(id -un 1000)
 
-if [[ -f "/home/nepi/.nepi_system_aliases" ]]; then
+if [[ "$CONFIG_USER" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
     ufile=/homenepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/nepihost/.nepi_docker_aliases" ]]; then
+elif [[ "$CONFIG_USER" == 'nepihost'  ]]; then
     CONFIG_USER=nepihost
     bfile=/home/nepihost/.bashrc
     ufile=/home/nepihost/.nepi_bash_utils
     afile=/home/nepihost/.nepi_docker_aliases
-elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
-    bfile=/home/${CONFIG_USER}/.bashrc
-    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+# elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
+#     bfile=/home/${CONFIG_USER}/.bashrc
+#     ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+#     afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 else
     echo "NEPI Aliases bash file not found"
     exit 1
