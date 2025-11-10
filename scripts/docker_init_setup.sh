@@ -53,10 +53,19 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
 
 
+NEPI_INSTALL=${NEPI_STORAGE}/install
+
+if [[ ! -d "$NEPI_INSTALL" ]]; then
+    echo "Creating NEPI Folder: ${NEPI_INSTALL}"
+    sudo mkdir -p $NEPI_INSTALL
+fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_INSTALL
+
+
 ####################################
 # Download Storage Extras
 
-cd $NEPI_STORAGE
+cd $NEPI_INSTALL
 
 storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
 storage_latest_zip=nepi_storage-latest.zip
@@ -67,7 +76,7 @@ if [[ ! -f ${storage_latest_zip} ]]; then
 fi
 if [[ -f ${storage_latest_zip} ]]; then
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
-    sudo unzip -o ${storage_latest_zip}
+    sudo unzip -o ${storage_latest_zip} -d ${NEPI_INSTALL}
     if [ $? -eq 0 ]; then
         sudo rm ${storage_latest_zip}
     else
@@ -77,10 +86,12 @@ else
     echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
 fi
 
+
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
 sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
 
 cd $CURRENT_FOLDER
 
