@@ -28,7 +28,7 @@ source $NEPI_UTILS_SOURCE
 
 ninet > /dev/null 2>&1
 
-if ! is_valid_internet; then
+if ! is_valid_internet > /dev/null; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
     exit 1
 fi
