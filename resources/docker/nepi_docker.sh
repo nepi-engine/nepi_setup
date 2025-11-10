@@ -122,7 +122,6 @@ function ndhcp(){
       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
       dhclient -nw
-      sleep 2
       if ! pingi; then
         return 1
       fi
@@ -174,9 +173,9 @@ export -f nclock
 
 function ninet(){
   
-  if ndhcp; then # Enable DHCP internet connection if needed
+  if ndhcp > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
-    if ! nclock; then # Connect to NTP server
+    if ! nclock > /dev/null 2>&1; then # Connect to NTP server
       return 1
     fi
   else
