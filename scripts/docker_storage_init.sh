@@ -33,10 +33,11 @@ if ! is_valid_internet; then
     exit 1
 fi
 
+echo ""
 echo "########################"
 echo "NEPI DOCKER INITIALIZATION SETUP"
 echo "########################"
-
+echo ""
 
 
 
@@ -64,6 +65,11 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_INSTALL
 
 ####################################
 # Download Storage Extras
+
+echo ""
+echo "########################"
+echo "Initializing NEPI Storage Folders"
+echo ""
 
 success_storage=0
 
@@ -117,6 +123,11 @@ cd $CURRENT_FOLDER
 
 ####################################
 # Download NEPI Image
+
+echo ""
+echo "########################"
+echo "Installing Latest NEPI Image File"
+echo ""
 
 success_image=0
 
@@ -184,13 +195,13 @@ cd $CURRENT_FOLDER
 
 if [[ "$success_storage" -eq 0 ]]; then
     echo ""
-    echo "NEPI Docker Storage Install Failed"
+    echo "NEPI Storage Install Failed"
     echo ""
 fi
 
 if [[ "$success_image_storage" -eq 0 ]]; then
     echo ""
-    echo "NEPI Docker Image Install Failed"
+    echo "NEPI Image Install Failed"
     echo ""
 fi
 
