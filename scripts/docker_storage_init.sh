@@ -152,8 +152,14 @@ if [[ "$UPDATE_NEPI_IMAGE" == 'yes' ]]; then
     fi
 
 
-    if [[ ! -f ${nepi_latest_zip} ]]; then
+    if [[ ! -f ${storagenepi_latest_zip_latest_zip} ]]; then
         sudo wget ${nepi_latest_link} -O ${nepi_latest_zip}
+        if [[ "$?" -ne 0 ]]; then
+            echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+            sudo rm ${nepi_latest_zip}
+        fi
+    else
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
     fi
 
     if [[ -f ${nepi_latest_zip} ]]; then
