@@ -64,17 +64,17 @@ sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
 ####################################
 # Run User Checks
 
-
-
 ##################
 ## NEPI Image Check
 
 success_image=1
 cd $NEPI_STORAGE/nepi_images
 
-SKIP_NEPI_IMAGE=no
+
 sudo rm *.zip > /dev/null 2>&1
 
+
+SKIP_NEPI_IMAGE=no
 echo ""
 tar_files=$(find ./ -name "*.tar")
 if [[ -n "$tar_files" ]]; then
@@ -100,23 +100,13 @@ success_storage=1
 cd $NEPI_STORAGE
 
 UPDATE_NEPI_STORAGE=yes
-
-echo ""
-echo "Cleaning NEPI Image folder"
-sudo rm *.zip
-
-echo ""
-echo "Checking for Existing Files"
-echo ""
-tar_files=$(find ./ -name "*.tar")
-if [[ -n "$tar_files" ]]; then
-    echo "Existing NEPI Image files found"
-    echo "-------------------------------"
-    find ./ -name "*.tar"
     echo ""
-    echo "Do you want to install NEPI Demo AI Models and Data?"
+    echo "-------------------------------"
+    echo ""
+    echo " Do you want to install NEPI Demo AI Models and Data?"
     UPDATE_NEPI_STORAGE=$(ask_yes_no)
     echo ""
+    echo "-------------------------------"
 fi
 
 cd $CURRENT_FOLDER
