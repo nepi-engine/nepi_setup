@@ -66,6 +66,7 @@ echo ""
 SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
 SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
+
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
 sudo chmod -R +x $SOURCE_ETC_PATH
 
@@ -82,11 +83,13 @@ NEPI_CONFIG_PATH=/opt/nepi
 
 NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
 NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
+NEPI_SYS_CONFIG_LOAD=${NEPI_ETC_PATH}/load_system_config.sh
 
 NEPI_SCRIPTS_PATH=${NEPI_CONFIG_PATH}/scripts
 
 NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
 NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
+
 
 
 
@@ -191,9 +194,9 @@ echo "Updating NEPI Config File Settings"
 
 
 
-source $NEPI_CONFIG_LOAD_FILE
+source $NEPI_SYS_CONFIG_LOAD
 if [[ "$1" -ne 0 ]]; then
-    echo "Failed to find load config file at: ${NEPI_CONFIG_LOAD_FILE}"
+    echo "Failed to find load config file at: ${NEPI_SYS_CONFIG_LOAD}"
     exit 1
 fi
 
