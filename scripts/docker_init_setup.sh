@@ -66,8 +66,8 @@ if [[ ! -f ${storage_latest_zip} ]]; then
     sudo wget ${storage_latest_link} -O ${storage_latest_zip}
 fi
 if [[ -f ${storage_latest_zip} ]]; then
-    chown -R ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
-    unzip -o ${storage_latest_zip}
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
+    sudo unzip -o ${storage_latest_zip}
     if [ $? -eq 0 ]; then
         sudo rm ${storage_latest_zip}
     else
