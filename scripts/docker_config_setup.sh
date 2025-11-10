@@ -25,6 +25,7 @@ fi
 echo "########################"
 echo "NEPI DOCKER CONFIG SETUP"
 echo "########################"
+echo ""
 
 
 
@@ -50,6 +51,9 @@ fi
 
 ####################################
 # Stop any running containers
+echo ""
+echo "########################"
+echo "Stopping Running NEPI Containers"
 echo ""
 nepistop
 echo ""
