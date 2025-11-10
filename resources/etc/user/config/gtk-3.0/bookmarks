@@ -1,7 +1,9 @@
 file:///mnt/nepi_storage
-file:///home/nepihost/nepi_setup
+file:///mnt/nepi_storage/data
+file:///mnt/nepi_storage/nepi_images
 file:///mnt/nepi_config/system_cfg
 file:///mnt/nepi_config/docker_cfg
+file:///home/nepihost/nepi_setup
 file:///home/nepihost/Documents
 file:///home/nepihost/Music
 file:///home/nepihost/Pictures

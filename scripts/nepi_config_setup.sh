@@ -686,7 +686,7 @@ if [[ -n "$DISPLAY" ]]; then
     sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
     sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
 
-    xdg-settings set default-web-browser chromium-browser.desktop
+
     
 fi
 

@@ -351,14 +351,13 @@ if [[ -n "$DISPLAY" ]]; then
 
     echo "########"
     echo "Updating Chrome settings for user ${CONFIG_USER}"
+    xdg-settings set default-web-browser chromium-browser.desktop
     #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
     #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
-    sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
     sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
     sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
 
-    xdg-settings set default-web-browser chromium-browser.desktop
+    
     
 fi
 
