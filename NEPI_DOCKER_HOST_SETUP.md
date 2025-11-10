@@ -146,10 +146,9 @@ Check for internet connection
 
     pingi
 
-Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker storage initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_init_setup.sh
-
+    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
 
 Initialize NEPI docker image installation by typing:
 
@@ -226,7 +225,7 @@ Check that your NEPI Container is running after reboot:
         nepirestart
         nepistatus
         nepilogs
-        
+
 
 ################################################################
 ### NEPI Docker Remote PC Connections
