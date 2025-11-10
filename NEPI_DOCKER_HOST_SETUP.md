@@ -98,7 +98,7 @@ Check for internet connection
 
     pingi
 
-**NOTE:** Some additional NEPI UTIL command line shortcuts are:
+**NOTE:** Some additional NEPI utility command line shortcuts are:
 
     pingi = ping internet test
     nipa= Echo NEPI set IP address
@@ -108,8 +108,9 @@ Check for internet connection
     ndhcp = Enable DHCP Internet Client
     nclock = Sync clock
     ninet = Restart network, connect to internet, and sync clock
+    cuda_version = Echo Cuda version number if cuda availble
+    fix_chromium = Fix any Chromium config issues
     sbrc = Source the current user's bashrc files
-    cuda_version = Echo Cuda version number if cuda availble"
 
     # Type **nepihelp** to see all NEPI Docker command line shortcuts
 
