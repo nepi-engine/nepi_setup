@@ -63,7 +63,8 @@ Run the NEPI Docker environment setup script (sudo password is now 'nepi')
 If prompted enter: `y` or 'yes' :
 
     /home/nepihost/nepi_setup/scripts/docker_env_setup.sh
-    
+
+Scroll up through the process messages looking for any errors and correct.  Rerun again if needed.
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -85,8 +86,7 @@ Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
     /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
 
 
-**NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut 'ninet'
-
+**NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut **ninet**
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -114,6 +114,8 @@ Enable internet connection and sync clocks:
     ninet = Restart network, connect to internet, and sync clock
     sbrc = Source the current user's bashrc files
     cuda_version = Echo Cuda version number if cuda availble
+
+    # Type **nepihelp** to see all NEPI Docker command line shortcuts
 
 Come back to this
 
@@ -168,7 +170,7 @@ The start script will let you know if the installed NEPI Image started successfu
     nepiupdate = Run update process on NEPI Docker config file
     nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings
 
-    #You can see all available NEPI Docker command line shortcut tools by typing: nepihelp
+    # Type **nepihelp** to see all NEPI Software command line shortcuts
 
 **OPEN CHROMIUM WEB BROSWER**
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
