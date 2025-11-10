@@ -716,7 +716,8 @@ else
     sudo chmod 600 $NEPI_SSH_PKEY_SOURCE/*
     sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST/
 fi
-sudo chown 0600 ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST/*
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
+sudo chmod 600 $NEPI_SSH_PKEY_DEST/*
 
 
 #################################################
