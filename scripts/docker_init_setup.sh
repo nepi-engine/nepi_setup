@@ -79,18 +79,22 @@ storage_latest_zip=nepi_storage-latest.zip
 
 if [[ ! -f ${storage_latest_zip} ]]; then
     sudo wget ${storage_latest_link} -O ${storage_latest_zip}
+    if [[ "$?" -ne 0 ]]; then
+        echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+        sudo rm ${storage_latest_zip}
+    fi
 fi
 if [[ -f ${storage_latest_zip} ]]; then
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
     echo "Unzipping storage folders from ${storage_latest_zip}"
-    sudo unzip -o ./${storage_latest_zip}
+    sudo unzip -o $storage_latest_zip
     if [ $? -eq 0 ]; then
         : #sudo rm ${storage_latest_zip}
     else
         echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
     fi
 else
-    echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+    echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
 fi
 
 
