@@ -82,10 +82,11 @@ if [[ ! -f ${storage_latest_zip} ]]; then
     if [[ "$?" -ne 0 ]]; then
         echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
         sudo rm ${storage_latest_zip}
-    fi
-fi
-if [[ -f ${storage_latest_zip} ]]; then
+else
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
+fi
+
+if [[ -f ${storage_latest_zip} ]]; then
     echo "Unzipping storage folders from ${storage_latest_zip}"
     sudo unzip -o $storage_latest_zip
     if [ $? -eq 0 ]; then
