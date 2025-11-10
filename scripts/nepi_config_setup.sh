@@ -261,7 +261,6 @@ echo ""
 echo "Running Sync to Configs Script"
 source /opt/nepi/etc/scripts/sync_to_configs.sh
 
-exit 1
 
 #######################################################################################
 
