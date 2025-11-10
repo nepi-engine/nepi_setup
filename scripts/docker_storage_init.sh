@@ -160,11 +160,11 @@ if [[ "$UPDATE_NEPI_IMAGE" == 'yes' ]]; then
         chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_zip}
         unzip -o ${nepi_latest_zip}
         if [ $? -eq 0 ]; then
-            sudo rm ${nepi_latest_zip}
+            sudo rm ${nepi_latest_zip} > /dev/null 2>&1
             success_image=1
         else
             echo "Failed to unzip NEPI Image file: ${nepi_latest_zip}"
-            sudo rm ${nepi_latest_zip}
+            sudo rm ${nepi_latest_zip} > /dev/null 2>&1
         fi
     else
         echo "Failed to download NEPI Image from link: ${nepi_latest}"
@@ -217,11 +217,11 @@ if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
         echo "Unzipping storage folders from ${storage_latest_zip}"
         sudo unzip -o -q $storage_latest_zip
         if [ $? -eq 0 ]; then
-            #sudo rm ${storage_latest_zip}
+            sudo rm ${storage_latest_zip} > /dev/null 2>&1
             success_storage=1
         else
             echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
-            sudo rm ${storage_latest_zip}
+            sudo rm ${storage_latest_zip} > /dev/null 2>&1
         fi
     else
         echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
