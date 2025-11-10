@@ -12,18 +12,33 @@
 # This script updates etc wifi wired dhcp files and processes
 
 
-if [[ -f "/home/nepi/.nepi_bash_utils" ]]; then
+export CONFIG_USER=$(id -un 1000)
+
+if [[ -f "/home/nepi/.nepi_system_aliases" ]]; then
     CONFIG_USER=nepi
-    source /home/nepi/.nepi_bash_utils
-    wait
-elif [[ -f "/home/nepihost/.nepi_bash_utils" ]]; then
+    bfile=/home/nepi/.bashrc
+    ufile=/homenepi/.nepi_bash_utils
+    afile=/home/nepi/.nepi_system_aliases
+elif [[ -f "/home/nepihost/.nepi_docker_aliases" ]]; then
     CONFIG_USER=nepihost
-    source /home/nepihost/.nepi_bash_utils
-    wait
+    bfile=/home/nepihost/.bashrc
+    ufile=/home/nepihost/.nepi_bash_utils
+    afile=/home/nepihost/.nepi_docker_aliases
+elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 else
-    echo ".nepi_bash_utils file not found"
+    echo "NEPI Aliases bash file not found"
     exit 1
-fi 
+fi
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
+fi
 
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})

@@ -34,36 +34,50 @@ if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
     fi
 fi
 
-if [[ -f "/home/nepi/.nepi_bash_utils" ]]; then
+export CONFIG_USER=$(id -un 1000)
+
+if [[ -f "/home/nepi/.nepi_system_aliases" ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
+    ufile=/homenepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
-
-elif [[ -f "/home/nepihost/.nepi_bash_utils" ]]; then
+elif [[ -f "/home/nepihost/.nepi_docker_aliases" ]]; then
     CONFIG_USER=nepihost
-    bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
-    afile=/home/nepi/.nepi_docker_aliases
-
+    bfile=/home/nepihost/.bashrc
+    ufile=/home/nepihost/.nepi_bash_utils
+    afile=/home/nepihost/.nepi_docker_aliases
+elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 else
-    echo ".nepi_bash_utils file not found"
+    echo "NEPI Aliases bash file not found"
     exit 1
-fi 
-source $ufile
-
-
-echo ""
-echo "UPDATING BASH VARIABLES"
-
-if is_valid_did $NEPI_DEVICE_ID; then
-    update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
-fi
-if is_valid_ipv4 $NEPI_IP; then
-    update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${NEPI_IP}"
 fi
 
-sudo cp $bfile /root/.bashrc
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
+fi
+
+
+if [[ -f "$bfile" ]]; then
+    echo ""
+    echo "UPDATING BASH VARIABLES"
+    if is_valid_did $NEPI_DEVICE_ID; then
+        update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
+    fi
+    if is_valid_ipv4 $NEPI_IP; then
+        update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${NEPI_IP}"
+    fi
+    sudo cp $bfile /root/.bashrc
+else
+    echo "NEPI Bashrc file not found at: ${bfile}"
+    exit 1
+fi
+
 
 
 

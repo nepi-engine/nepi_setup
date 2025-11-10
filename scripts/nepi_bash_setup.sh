@@ -65,7 +65,7 @@ sudo chmod 755 $NEPI_ALIASES_DEST
 echo "Updating user bashrc files"
 BASHRC=/home/${CONFIG_USER}/.bashrc
 
-rm /home/${CONFIG_USER}/${BASHRC}
+rm $BASHRC
 cp /etc/skel/.bashrc $BASHRC
 
 if [[ -z "$NEPI_IP" ]]; then

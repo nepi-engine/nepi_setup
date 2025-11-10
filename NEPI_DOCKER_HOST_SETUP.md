@@ -64,6 +64,8 @@ If prompted enter: `y` or 'yes' :
 
     /home/nepihost/nepi_setup/scripts/docker_env_setup.sh
 
+**NOTE:** If you get a popup window 'System program problem detected', just hit 'Cancle'
+
 Scroll up through the process messages looking for any errors and correct.  Rerun again if needed.
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
