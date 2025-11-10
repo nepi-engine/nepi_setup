@@ -530,6 +530,21 @@ function ninet(){
 }
 export function ninet
 
+function fix_chromium(){
+  sudo -v
+  sudo rm -rf ~/.config/chromium/Singleton* > /dev/null 2>&1
+  sudo rm -rf ~/.config/chromium/chommon/Singleton* > /dev/null 2>&1
+  sudo rm -rf ~/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
+
+
+  sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
+  sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
+  
+  #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
+  #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
+}
+export function fix_chromium
+
 
 utilsn="${utilsn}
 ################################
@@ -544,7 +559,8 @@ ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
 sbrc = Source the current user's bashrc files
-cuda_version = Echo Cuda version number if cuda availble"
+cuda_version = Echo Cuda version number if cuda availble
+fix_chromium = Fix any Chromium config issues" 
 
 ###################################
 # File Util Functions
