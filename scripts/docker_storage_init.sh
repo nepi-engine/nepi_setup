@@ -74,7 +74,7 @@ cd $NEPI_STORAGE/nepi_images
 sudo rm *.zip > /dev/null 2>&1
 
 
-UPDATE_NEPI_IMAGE=no
+UPDATE_NEPI_IMAGE=yes
 echo ""
 tar_files=$(find ./ -name "*.tar")
 if [[ -n "$tar_files" ]]; then
@@ -186,54 +186,55 @@ cd $CURRENT_FOLDER
 ####################################
 # Download Storage Extras
 
+success_storage=1
 
 
-if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
+# if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
 
-    echo ""
-    echo "########################"
-    echo "Initializing NEPI Storage Folders"
-    echo ""
+#     echo ""
+#     echo "########################"
+#     echo "Initializing NEPI Storage Folders"
+#     echo ""
 
-    success_storage=0
-    cd $NEPI_STORAGE
-
-
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
-    sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
-
-    storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
-    storage_latest_zip=nepi_storage-latest.zip
+#     success_storage=0
+#     cd $NEPI_STORAGE
 
 
-    if [[ ! -f ${storage_latest_zip} ]]; then
-        sudo wget ${storage_latest_link} -O ${storage_latest_zip}
-        if [[ "$?" -ne 0 ]]; then
-            echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
-            sudo rm ${storage_latest_zip}
-        fi
-    else
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
-    fi
+#     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
+#     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
+#     sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
+#     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
+#     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
 
-    if [[ -f ${storage_latest_zip} ]]; then
-        echo "Unzipping storage folders from ${storage_latest_zip}"
-        sudo unzip -o -q $storage_latest_zip
-        if [ $? -eq 0 ]; then
-            #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-            success_storage=1
-        else
-            echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
-            #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-        fi
-    else
-        echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
-    fi
+#     storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+#     storage_latest_zip=nepi_storage-latest.zip
 
-fi
+
+#     if [[ ! -f ${storage_latest_zip} ]]; then
+#         sudo wget ${storage_latest_link} -O ${storage_latest_zip}
+#         if [[ "$?" -ne 0 ]]; then
+#             echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+#             sudo rm ${storage_latest_zip}
+#         fi
+#     else
+#         sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
+#     fi
+
+#     if [[ -f ${storage_latest_zip} ]]; then
+#         echo "Unzipping storage folders from ${storage_latest_zip}"
+#         sudo unzip -o -q $storage_latest_zip
+#         if [ $? -eq 0 ]; then
+#             #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+#             success_storage=1
+#         else
+#             echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
+#             #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+#         fi
+#     else
+#         echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
+#     fi
+
+# fi
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1

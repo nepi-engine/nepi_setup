@@ -49,8 +49,6 @@ then
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
-
-
 ################################################################
 ### NEPI Docker Environment Setup
 
@@ -64,13 +62,11 @@ If prompted enter: `y` or 'yes' :
 
     /home/nepihost/nepi_setup/scripts/docker_env_setup.sh
 
-**NOTE:** If you get a popup window 'System program problem detected', just hit 'Cancle'
+**NOTE:** If you get a popup window 'System program problem detected', just hit 'Cancel'
 
 Scroll up through the process messages looking for any errors and correct.  Rerun again if needed.
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
-
-
 
 ################################################################
 ### NEPI Docker Config Setup
@@ -153,7 +149,7 @@ Check for internet connection
 
     pingi
 
-Run the NEPI Docker storage initialization script (sudo password is now 'nepi'):
+Run the NEPI Docker storage initialization script (sudo password is now 'nepi'). If prompted enter: `y` or 'yes' :
 
     source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
 
