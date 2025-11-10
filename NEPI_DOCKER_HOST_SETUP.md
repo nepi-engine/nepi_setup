@@ -85,7 +85,7 @@ Log into the `nepihost` user using password  'nepi'
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
 
-    /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
 
 
 **NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut **ninet**
@@ -94,21 +94,11 @@ Test that you can reconnect to the internet and sync clocks:
 
     ninet
 
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
+Check for internet connection
 
+    pingi
 
-
-################################################################
-### NEPI Docker Storage Setup
-This section will initialize the NEPI Docker User Storage folder (/mnt/nepi_storage). 
-
-Log back into `nepihost` using password 'nepi' 
-
-Enable internet connection and sync clocks:
-
-    ninet
-
-**NOTE:** Some additional NEPI Docker command line shortcuts are:
+**NOTE:** Some additional NEPI UTIL command line shortcuts are:
 
     pingi = ping internet test
     nipa= Echo NEPI set IP address
@@ -119,25 +109,25 @@ Enable internet connection and sync clocks:
     nclock = Sync clock
     ninet = Restart network, connect to internet, and sync clock
     sbrc = Source the current user's bashrc files
-    cuda_version = Echo Cuda version number if cuda availble
+    cuda_version = Echo Cuda version number if cuda availble"
 
     # Type **nepihelp** to see all NEPI Docker command line shortcuts
 
-Come back to this
-
-    1) Download the lastest nepi_storage demo file to your PC from:
-
-    drive
-    wget https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=aanpc7ah&dl=0
-
-
-    Then, unzip and copy the folders from unzipped folder to the 'nepi_storage' shared drive.  Select 'Merge' if asked
-
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 ################################################################
-### NEPI Docker Initialization Setup
+### NEPI Docker Init Setup
 This section will initialize and test your NEPI Docker solution.  
+
+Log back into `nepihost` using password 'nepi' 
+
+Enable internet connection and sync clocks:
+
+    ninet
+
+
+
 
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
 see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
