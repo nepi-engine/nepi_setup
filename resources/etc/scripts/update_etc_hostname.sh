@@ -52,10 +52,6 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_HOSTNAME" -eq 1 ]]; then
 
-        
-
-
-
         cur_hostname=$(hostname)
         echo "Checking current Hostname ${cur_hostname} against set Hostname ${NEPI_DEVICE_ID}"
         

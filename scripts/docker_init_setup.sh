@@ -12,12 +12,14 @@
 
 # This file installs the NEPI Engine File System installation
 
+sudo -v
+
 export CONFIG_USER=$(id -un 1000)
 
-if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
-    exit 1
-fi
+# if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
+#     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
+#     exit 1
+# fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -35,52 +37,117 @@ echo "NEPI DOCKER INITIALIZATION SETUP"
 echo "########################"
 
 
-##########################
-NEPI_ARCH=unknown
-if is_valid_jetson; then
-    NEPI_ARCH=arm64
-elif is_valid_arm64; then
-    NEPI_ARCH=arm64
-elif is_valid_amd64; then
-    NEPI_ARCH=amd64
-else
-    arch_val=$(uname -m)
-    echo "Arch ${arch_val} not supported yet"
-    exit 1
-fi
-
 
 
 ####################################
-# Run NEPI Folder Setup Script
+# Check NEPI Storage Folder
 
-script_file=nepi_folders_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if [[ -f "$script_path" ]]; then
-	echo ""
-	echo "Running ${script_file} script"
-	source $script_path
-	wait
+CURRENT_FOLDER=$(pwd)
+NEPI_STORAGE=/mnt/nepi_storage
+
+if [[ ! -d "$NEPI_STORAGE" ]]; then
+    echo "Creating NEPI Folder: ${NEPI_STORAGE}"
+    sudo mkdir -p $NEPI_STORAGE
 fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
+
+
+####################################
+# Download Storage Extras
+
+cd $NEPI_STORAGE
+
+storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+storage_latest_name=nepi_storage-latest.zip
+
+
+if [[ ! -f ${storage_latest_name} ]]; then
+    sudo wget ${storage_latest_link} -O ${storage_latest_name}
+fi
+if [[ -f ${storage_latest_name} ]]; then
+    chown -R ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_name}
+    unzip -o ${storage_latest_name}
+    if [ $? -eq 0 ]; then
+        sudo rm ${storage_latest_name}
+    else
+        echo "Failed to unzip NEPI Storage file: ${storage_latest_name}"
+    fi
+else
+    echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+fi
+
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/ai_models
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/sample_data
+
+cd $CURRENT_FOLDER
+
+
 
 
 ####################################
 # Download NEPI Image
 
-CURRENT_FOLDER=$(pwd)
-NEPI_STORAGE=/mnt/nepi_storage
+if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
+    echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
+    sudo mkdir -p $NEPI_STORAGE/nepi_images
+fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
 
-cd $NEPI_STORAGE
+cd $NEPI_STORAGE/nepi_images
+
+HW_TYPE=jetson
+
+# HW_TYPE=unknown
+# if is_valid_jetson; then
+#     HW_TYPE=jetson
+# elif is_valid_arm64; then
+#     HW_TYPE=arm64
+# elif is_valid_amd64; then
+#     HW_TYPE=amd64
+# else
+#     arch_val=$(uname -m)
+#     echo "Arch ${arch_val} not supported yet"
+#     exit 1
+# fi
 
 
-wget https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0
+# cd $NEPI_STORAGE/nepi_images
+# sudo rm *.zip
+
+if [[ "$HW_TYPE" == 'jetson' ]]; then
+    nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
+    nepi_latest_name=nepi-jetson-latest.zip
+else
+    echo "No NEPI Image File available for hardware architecture ${arch_val}"
+    exit 1    
+fi
 
 
+if [[ ! -f ${nepi_latest_name} ]]; then
+    sudo wget ${nepi_latest_link} -O ${nepi_latest_name}
+fi
+
+if [[ -f ${nepi_latest_name} ]]; then
+    chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_name}
+    unzip -o ${nepi_latest_name}
+    if [ $? -eq 0 ]; then
+        sudo rm ${nepi_latest_name}
+    else
+        echo "Failed to unzip NEPI Image file: ${nepi_latest_name}"
+    fi
+else
+    echo "Failed to download NEPI Image from link: ${nepi_latest}"
+fi
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
 
 cd $CURRENT_FOLDER
 
+
+
+
+
 ####################################
-# Download Storage Extras
+# Cleanup
 
 
 

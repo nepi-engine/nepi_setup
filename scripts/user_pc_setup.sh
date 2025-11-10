@@ -145,42 +145,44 @@ echo "################################# "
 echo "Updating SSH Keys"
 echo ""
 
-NEPI_SSH_DIR=/home/${USER}/ssh_keys
 
 ###################
 # Check for default key
-NEPI_SSH_FILE=nepi_engine_default_private_ssh_key
-echo "Checking nepi ssh key file"
-NEPI_SSH_PATH=${NEPI_SSH_DIR}/${NEPI_SSH_FILE}
-NEPI_SSH_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/ssh_keys/${NEPI_SSH_FILE}
-if [ -e $NEPI_SSH_PATH ]; then
+
+NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
+NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
+if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
     : # Do Nothing
 else
-    echo "Installing NEPI default ssh private key ${NEPI_SSH_PATH} "
-    mkdir -p $NEPI_SSH_DIR
-    cp $NEPI_SSH_SOURCE $NEPI_SSH_PATH
+    echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
+    if [[ ! -d "$NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys" ]]; then
+        mkdir -p $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys
+    fi
+    sudo chmod 600 $NEPI_SSH_PKEY_SOURCE/*
+    sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys
 fi
-sudo chmod 600 $NEPI_SSH_PATH
+sudo chown 0600 ${USER}:${USER} $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys/*
 
 ###############
-# Check for other key options
-sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DIR | tail -n 1)
+# Check for available key options
+NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
+sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DEST | tail -n 1)
 if [[ -n "$sel_ssh_file"  ]]; then
-    sel_ssh_path=${NEPI_SSH_DIR}/${sel_ssh_file}
+    sel_ssh_path=${NEPI_SSH_DEST}/${sel_ssh_file}
     if [[ -f "$sel_ssh_path" ]]; then
         NEPI_SSH_FILE=$sel_ssh_file
-        NEPI_SSH_PATH=$sel_ssh_path
+        NEPI_SSH_SOURCE=$sel_ssh_path
     fi
 fi
-echo "Using SSH Key file: ${NEPI_SSH_PATH}"
+echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
 export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
-sudo chmod 600 $NEPI_SSH_PATH
+
 
 
 #################
 # Update Key Path
-sudo chmod 700 $NEPI_SSH_DIR
-sudo chown -R ${USER}:${USER} $NEPI_SSH_DIR
+sudo chmod 0700 $NEPI_SSH_DEST
+sudo chown -R ${USER}:${USER} $NEPI_SSH_DEST
 
 
 
@@ -207,9 +209,6 @@ echo "${NEPI_IP} ${NEPI_ADMIN_USER}" | sudo tee -a $file
 echo "${NEPI_IP} ${NEPI_ADMIN_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
 echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-
-
-
 
 
 

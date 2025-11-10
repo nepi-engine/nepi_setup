@@ -52,7 +52,7 @@ systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
-        
+
         echo "Updating Network Status IP Address"
   
 
