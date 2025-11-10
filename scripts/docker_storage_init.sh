@@ -259,7 +259,7 @@ cd $CURRENT_FOLDER
 # Cleanup
 
 
-if [[ "$success_image_storage" -eq 0 ]]; then
+if [[ "$success_image" -eq 0 ]]; then
     echo ""
     echo "NEPI Image Install Failed"
     echo ""
