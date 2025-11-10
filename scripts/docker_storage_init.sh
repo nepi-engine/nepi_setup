@@ -47,7 +47,7 @@ CURRENT_FOLDER=$(pwd)
 NEPI_STORAGE=/mnt/nepi_storage
 
 if [[ ! -d "$NEPI_STORAGE" ]]; then
-    echo "Creating NEPI Folder: ${NEPI_STORAGE}"
+    #echo "Creating NEPI Folder: ${NEPI_STORAGE}"
     sudo mkdir -p $NEPI_STORAGE
 fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
@@ -55,7 +55,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
 
 
 if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
-    echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
+    #echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
     sudo mkdir -p $NEPI_STORAGE/nepi_images
 fi
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
@@ -73,13 +73,10 @@ success_image=1
 cd $NEPI_STORAGE/nepi_images
 
 SKIP_NEPI_IMAGE=no
+sudo rm *.zip > /dev/null 2>&1
 
 echo ""
-echo "Cleaning NEPI Image folder"
-sudo rm *.zip
-
-echo ""
-echo "Checking for Existing Files"
+echo "Checking for Existing NEPI Image Files"
 echo ""
 tar_files=$(find ./ -name "*.tar")
 if [[ -n "$tar_files" ]]; then
