@@ -22,10 +22,11 @@ if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
     exit 1
 fi
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
@@ -63,18 +64,18 @@ echo " Updating NEPI Config Files"
 echo ""
 
 # Define Folders
-SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
-SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
+SOURCE_ETC_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
 sudo chmod -R +x $SOURCE_ETC_PATH
 
-SOURCE_NEPI_SCRIPTS_PATH=$(dirname "$SCRIPT_FOLDER")/resources/scripts
+SOURCE_NEPI_SCRIPTS_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")/resources/scripts
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_NEPI_SCRIPTS_PATH
 sudo chmod -R +x $SOURCE_NEPI_SCRIPTS_PATH
 
-SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "$SCRIPT_FOLDER")/resources/docker
+SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")/resources/docker
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_DOCKER_SCRIPTS_PATH
 sudo chmod -R +x $SOURCE_DOCKER_SCRIPTS_PATH
 

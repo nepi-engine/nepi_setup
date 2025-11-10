@@ -11,27 +11,49 @@
 
 
 # This file configigues an installed NEPI File System
+export CONFIG_USER=$(id -un 1000)
+
+if [[ "$CONFIG_USER" == 'nepi' ]]; then
+    CONFIG_USER=nepi
+    bfile=/home/nepi/.bashrc
+    ufile=/homenepi/.nepi_bash_utils
+    afile=/home/nepi/.nepi_system_aliases
+elif [[ "$CONFIG_USER" == 'nepihost'  ]]; then
+    CONFIG_USER=nepihost
+    bfile=/home/nepihost/.bashrc
+    ufile=/home/nepihost/.nepi_bash_utils
+    afile=/home/nepihost/.nepi_docker_aliases
+# elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
+#     bfile=/home/${CONFIG_USER}/.bashrc
+#     ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+#     afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+else
+    echo "NEPI Aliases bash file not found"
+    exit 1
+fi
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
+fi
+
+ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
+
+
+
 
 echo "########################"
 echo "NEPI SYSTEM CONFIG SETUP"
 echo "########################"
-
-CONFIG_USER=$USER
-
-# if [[ "$CONFIG_USER" -ne 'nepi' || "$CONFIG_USER" -ne 'nepihost' ]]; then
-#     echo "NEPI SYSTEM CONFIG SCRIPT must be run by either 'nepi' or 'nepihost' user"
-#     exit 1
-# fi
-
-source /home/${CONFIG_USER}/.nepi_bash_utils
-wait
 
 
 SHOW_CONFIG_MENU=0
 if [[ "$1" -eq 1 ]]; then
     SHOW_CONFIG_MENU=1
 fi
-
 
 
 
@@ -704,18 +726,20 @@ fi
 
 echo "Updating NEPI SSH PRIVATE KEY FILES"
 
-NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
+NEPI_SSH_PKEY_SOURCE=${ETC_SCRIPTS_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
 NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
+
+if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
+    mkdir -p $NEPI_SSH_PKEY_DEST
+fi
+
 if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
-    : # Do Nothing
+    echo "Failed to Find SSH Private Keys source folder: ${NEPI_SSH_PKEY_SOURCE} "
 else
     echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-    if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
-        mkdir -p $NEPI_SSH_PKEY_DEST
-    fi
-    sudo chmod 600 $NEPI_SSH_PKEY_SOURCE/*
     sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST/
 fi
+
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
 sudo chmod 600 $NEPI_SSH_PKEY_DEST/*
 
