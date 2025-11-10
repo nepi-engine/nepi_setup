@@ -203,12 +203,14 @@ sudo cp -a $bfile $file
 
 echo "Updating NEPI IP in ${file}"
 
-echo "${NEPI_IP} ${NEPI_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_ADMIN_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_ADMIN_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
-echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} nepi" | sudo tee -a $file
+echo "${NEPI_IP} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} nepihost" | sudo tee -a $file
+echo "${NEPI_IP} nepihost-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} nepiadmin" | sudo tee -a $file
+echo "${NEPI_IP} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${NEPI_IP} nepiuser" | sudo tee -a $file
+echo "${NEPI_IP} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 
 
