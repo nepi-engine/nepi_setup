@@ -17,7 +17,10 @@ if ! [ $(id -u) = 0 ]; then
    exit 1
 fi
 
-
+###############
+# Create a tmp folder for all users
+sudo mkdir -p /tmp/nepi
+sudo chmod -R 0777 /tmp/nepi
 
 ################
 # Check Valid User
@@ -351,6 +354,7 @@ cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
 echo "Updated User:"
 echo $cur_users
 
+sudo chmod -R 0777 /tmp/nepi
 
 echo "########################"
 echo "NEPI User Account Setup Complete"
