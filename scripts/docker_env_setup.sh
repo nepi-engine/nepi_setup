@@ -302,65 +302,6 @@ else
 
 fi
 
-if [[ -n "$DISPLAY" ]]; then
-
-    echo ""
-    echo "########################"
-    echo "Updating USER Desktop Files"
-    echo "########################"
-    echo ""
-    ##############################################
-    # Update User Files
-    echo ""
-    echo "########"
-    echo "Updating Desktop settings for user ${CONFIG_USER}"
-    echo ""
-
-
-    # Updated the Desktop
-    dfolder=/home/${CONFIG_USER}/Desktop
-    if [[ -d "$dfolder" ]]; then
-        if find "$dfolder" -maxdepth 0 -empty | read; then
-            echo "Desktop folder cleaned"
-        else
-            sudo rm ${dfolder}/*
-            echo "Desktop folder cleaned"
-        fi
-    fi
-
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
-    sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
-
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-
-    xdg-user-dirs-update --set DESKTOP "$dfolder"
-    gsettings set org.gnome.desktop.screensaver lock-enabled false
-    gsettings set org.gnome.desktop.session idle-delay 0
-    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
-    gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
-
-
-    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
-    'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
-    'gnome-control-center.desktop']"
-
-
-    ###################
-
-    echo "########"
-    echo "Updating Chrome settings for user ${CONFIG_USER}"
-    xdg-settings set default-web-browser chromium-browser.desktop
-    #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
-    #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
-    sudo rm -rf /home/${CONFIG_USER}/.cache/chromium 2>/dev/null
-    sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium 2>/dev/null
-
-    
-    
-fi
-
 echo ""
 echo "########################"
 echo "Cleaning File System"
