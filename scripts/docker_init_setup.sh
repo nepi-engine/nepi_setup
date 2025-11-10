@@ -83,7 +83,7 @@ fi
 if [[ -f ${storage_latest_zip} ]]; then
     sudo chown ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
     echo "Unzipping storage folders from ${storage_latest_zip}"
-    sudo unzip -o ${storage_latest_zip}
+    sudo unzip -o ./${storage_latest_zip}
     if [ $? -eq 0 ]; then
         : #sudo rm ${storage_latest_zip}
     else
