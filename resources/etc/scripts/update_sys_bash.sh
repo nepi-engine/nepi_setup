@@ -64,60 +64,6 @@ if [ ! -f ${SYS_BASH_FILE} ]; then
 	echo "ERROR! Could not find ${SYS_BASH_FILE}"
 else
 
-    function update_value(){
-    FILE=$1
-    KEY=$2
-    UPDATE=$3
-    if [ -f "$FILE" ]; then
-        if grep -q "$KEY" "$FILE"; then
-        sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-        else
-        echo "$UPDATE" | sudo tee -a $FILE
-        fi
-    else
-        echo "File not found ${FILE}"
-    fi
-    }
-
-    echo ""
-    echo "Checking for Valid Config Settings"
-
-    # CHECK FOR VALID DEVICE ID
-    # Check for empty string
-    if [ -z "$NEPI_DEVICE_ID" ]; then
-        echo "ERROR! NEPI ID's can not be blank string."
-        return 1
-    fi
-    # Check that first char is a letter
-    if [[ ! "$NEPI_DEVICE_ID" =~ ^[a-zA-Z] ]]; then
-        echo "ERROR! The first character or NEPI ID must be a letter."
-        return 1
-    fi
-    # Check if input is only letters numbers and underscores with no spaces
-    if [[ ! "$NEPI_DEVICE_ID" =~ ^[a-zA-Z0-9_]+$ ]]; then
-        echo "ERROR! NEPI ID's must be only letters, numbers, and underscores with no spaces."
-        return 1
-    fi
-
-    # CHECK FOR VALID DEVICE MODEL NAME
-    # Check for empty string
-    if [ -z "$NEPI_DEVICE_MD" ]; then
-        echo "ERROR! NEPI Device Model Name can not be blank string."
-        return 1
-    fi
-
-    # CHECK FOR VALID DEVICE SN
-    # Check for empty string
-    if [ -z "$NEPI_DEVICE_SN" ]; then
-        echo "ERROR! NEPI Serial Numbers can not be blank string."
-        return 1
-    fi
-    # Check if serial number is valid 6 digit number
-    if [[ ! "$NEPI_DEVICE_SN" =~ ^[0-9]{6}$ ]]; then
-        echo "'ERROR! $NEPI_DEVICE_SN' is not a valid 6-digit number."
-        return 1
-    fi
-
     echo ""
     echo "Updating nepi system bash file"
     echo "Using Device ID: ${NEPI_DEVICE_ID}"

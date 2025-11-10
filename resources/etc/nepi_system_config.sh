@@ -726,7 +726,7 @@ fi
 
 echo "Updating NEPI SSH PRIVATE KEY FILES"
 
-NEPI_SSH_PKEY_SOURCE=${ETC_SCRIPTS_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
+NEPI_SSH_PKEY_SOURCE=${SYSTEM_ETC_PATH}/resources/etc/ssh/ssh_keys/private_keys
 NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
 
 if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
@@ -738,10 +738,11 @@ if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
 else
     echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
     sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST/
+    sudo chmod 600 $NEPI_SSH_PKEY_DEST/*
 fi
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
-sudo chmod 600 $NEPI_SSH_PKEY_DEST/*
+
 
 
 #################################################
