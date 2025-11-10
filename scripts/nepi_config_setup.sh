@@ -667,6 +667,7 @@ if [[ -n "$DISPLAY" ]]; then
     gsettings set org.gnome.desktop.screensaver lock-enabled false
     gsettings set org.gnome.desktop.session idle-delay 0
     gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+    gsettings set org.gnome.nautilus.preferences show-hidden-files true
     gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
 
