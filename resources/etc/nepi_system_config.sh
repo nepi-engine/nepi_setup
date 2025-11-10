@@ -684,7 +684,7 @@ SYSTEM_SSH_AKEY_DEST=${SYSTEM_ETC_PATH}/ssh/authorized_keys
 
 
 if [[ -f "$SYSTEM_SSH_AKEY_SOURCE" ]]; then
-    echo "Updating NEPI SSH Public Key file from: ${SYSTEM_SSH_AKEY_SOURCE}"
+    echo "Updating NEPI SSH PUBLIC KEY FILE from: ${SYSTEM_SSH_AKEY_SOURCE}"
     sudo cp $SYSTEM_SSH_AKEY_SOURCE $SYSTEM_SSH_AKEY_DEST
     sudo chmod 0600 $SYSTEM_SSH_AKEY_DEST
 else
@@ -702,10 +702,10 @@ else
 fi
 
 
-echo "Updating NEPI ssh private key files"
+echo "Updating NEPI SSH PRIVATE KEY FILES"
 
 NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
-NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys
+NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
 if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
     : # Do Nothing
 else
@@ -714,9 +714,9 @@ else
         mkdir -p $NEPI_SSH_PKEY_DEST
     fi
     sudo chmod 600 $NEPI_SSH_PKEY_SOURCE/*
-    sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST
+    sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST/
 fi
-sudo chown 0600 ${USER}:${USER} $NEPI_SSH_PKEY_DEST/*
+sudo chown 0600 ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST/*
 
 
 #################################################

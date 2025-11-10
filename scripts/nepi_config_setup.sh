@@ -279,8 +279,8 @@ if [[ "$?" -eq 0 ]]; then
     echo ""
     echo "########"
     echo "Disable apport to avoid crash reports on a display"
-    sudo systemctl disable apport
-    sudo systemctl stop apport
+    sudo systemctl disable apport  >/dev/null 2>&1
+    sudo systemctl stop apport  >/dev/null 2>&1
 fi
 etc_path=default/apport
 sudo rm /etc/${etc_path}
@@ -368,8 +368,8 @@ if [[ "$?" -eq 0 ]]; then
         echo "########"
         echo "Updating Time Management service config"
         echo "Disable systemd-timesyncd time management"
-        sudo systemctl disable systemd-timesyncd
-        sudo systemctl stop systemd-timesyncd
+        sudo systemctl disable systemd-timesyncd  >/dev/null 2>&1
+        sudo systemctl stop systemd-timesyncd  >/dev/null 2>&1
 
         echo "Enabling chrony time service"
         sudo systemctl enable chrony
@@ -383,12 +383,12 @@ if [[ "$?" -eq 0 ]]; then
         echo "Updating Network services"
 
         echo "Disabling NetworkManager Service" 
-        sudo systemctl disable NetworkManager
-        sudo systemctl stop NetworkManager
+        sudo systemctl disable NetworkManager >/dev/null 2>&1
+        sudo systemctl stop NetworkManager >/dev/null 2>&1
 
         echo "Disabling netplan Service" 
-        sudo systemctl disable netplan
-        sudo systemctl stop netplan
+        sudo systemctl disable netplan >/dev/null 2>&1
+        sudo systemctl stop netplan >/dev/null 2>&1
            
         echo "Enabling ifupdown networking service"
         sudo systemctl enable networking

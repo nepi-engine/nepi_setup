@@ -86,9 +86,17 @@ function update_password() {
 }
 
 
-if update_password $NEPI_USER $NEPI_USER_PW; then pw_changed=1 fi
-if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then pw_changed=1 fi
-if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then pw_changed=1 fi
+if update_password $NEPI_USER $NEPI_USER_PW; then 
+    pw_changed=1 
+fi
+
+if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
+    pw_changed=1 
+fi
+
+if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
+    pw_changed=1 
+fi
 
 
 
