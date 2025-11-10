@@ -90,6 +90,10 @@ Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
 **NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut **ninet**
 
+Test that you can reconnect to the internet and sync clocks:
+
+    ninet
+
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
