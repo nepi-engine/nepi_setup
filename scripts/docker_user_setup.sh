@@ -12,6 +12,13 @@
 
 # This file sets up NEPI Docker users
 
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+
+
 export CONFIG_USER=nepihost
 export SYS_USER_1=nepi
 
@@ -26,7 +33,7 @@ if [[ -f "$script_path" ]]; then
 	source $script_path
 	wait
 else
-    echo "Setup script not found ${script_file}"
+    echo "Setup script not found ${script_path}"
     exit 1
 fi
 
