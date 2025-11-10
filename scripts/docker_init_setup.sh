@@ -76,7 +76,7 @@ if [[ ! -f ${storage_latest_zip} ]]; then
 fi
 if [[ -f ${storage_latest_zip} ]]; then
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${storage_latest_zip}
-    sudo unzip -o ${storage_latest_zip} -d ${NEPI_INSTALL}
+    sudo unzip -o ${storage_latest_zip} -d ${NEPI_STORAGE}
     if [ $? -eq 0 ]; then
         sudo rm ${storage_latest_zip}
     else
