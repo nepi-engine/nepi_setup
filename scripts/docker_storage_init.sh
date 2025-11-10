@@ -74,7 +74,7 @@ cd $NEPI_STORAGE/nepi_images
 sudo rm *.zip > /dev/null 2>&1
 
 
-SKIP_NEPI_IMAGE=no
+UPDATE_NEPI_IMAGE=no
 echo ""
 tar_files=$(find ./ -name "*.tar")
 if [[ -n "$tar_files" ]]; then
@@ -84,9 +84,9 @@ if [[ -n "$tar_files" ]]; then
     find ./ -name "*.tar"
     echo "-------------------------------"
     echo ""
-    echo " Do you want to SKIP downloading the Latest NEPI Image and use one of these?"
+    echo " Do you want to download the Latest NEPI Image?"
     echo ""
-    SKIP_NEPI_IMAGE=$(ask_yes_no)
+    UPDATE_NEPI_IMAGE=$(ask_yes_no)
     echo ""
 fi
 
@@ -100,14 +100,14 @@ success_storage=1
 cd $NEPI_STORAGE
 
 UPDATE_NEPI_STORAGE=yes
-    echo ""
-    echo "-------------------------------"
-    echo ""
-    echo " Do you want to install NEPI Demo AI Models and Data?"
-    UPDATE_NEPI_STORAGE=$(ask_yes_no)
-    echo ""
-    echo "-------------------------------"
-fi
+echo ""
+echo "-------------------------------"
+echo ""
+echo " Do you want to install NEPI Demo AI Models and Data?"
+UPDATE_NEPI_STORAGE=$(ask_yes_no)
+echo ""
+echo "-------------------------------"
+
 
 cd $CURRENT_FOLDER
 
@@ -117,7 +117,7 @@ cd $CURRENT_FOLDER
 ####################################
 # Download NEPI Image
 
-if [[ "$SKIP_NEPI_IMAGE" == 'no' ]]; then
+if [[ "$UPDATE_NEPI_IMAGE" == 'yes' ]]; then
     echo ""
     echo "########################"
     echo "Installing the Latest NEPI Image"
@@ -128,22 +128,20 @@ if [[ "$SKIP_NEPI_IMAGE" == 'no' ]]; then
 
 
 
-
-
     HW_TYPE=jetson
 
-    HW_TYPE=unknown
-    if is_valid_jetson; then
-        HW_TYPE=jetson
-    elif is_valid_arm64; then
-        HW_TYPE=arm64
-    elif is_valid_amd64; then
-        HW_TYPE=amd64
-    else
-        arch_val=$(uname -m)
-        echo "Arch ${arch_val} not supported yet"
-        exit 1
-    fi
+    # HW_TYPE=unknown
+    # if is_valid_jetson; then
+    #     HW_TYPE=jetson
+    # elif is_valid_arm64; then
+    #     HW_TYPE=arm64
+    # elif is_valid_amd64; then
+    #     HW_TYPE=amd64
+    # else
+    #     arch_val=$(uname -m)
+    #     echo "Arch ${arch_val} not supported yet"
+    #     exit 1
+    # fi
 
     if [[ "$HW_TYPE" == 'jetson' ]]; then
         nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
