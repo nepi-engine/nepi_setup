@@ -129,17 +129,19 @@ echo "########################"
 echo "Installing Latest NEPI Image File"
 echo ""
 
-success_image=0
+success=image=1
 
-if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
-    echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
-    sudo mkdir -p $NEPI_STORAGE/nepi_images
-fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
+# success_image=0
 
-cd $NEPI_STORAGE/nepi_images
+# if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
+#     echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
+#     sudo mkdir -p $NEPI_STORAGE/nepi_images
+# fi
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
 
-HW_TYPE=jetson
+# cd $NEPI_STORAGE/nepi_images
+
+# HW_TYPE=jetson
 
 # HW_TYPE=unknown
 # if is_valid_jetson; then
@@ -158,32 +160,34 @@ HW_TYPE=jetson
 # cd $NEPI_STORAGE/nepi_images
 # sudo rm *.zip
 
-if [[ "$HW_TYPE" == 'jetson' ]]; then
-    nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
-    nepi_latest_zip=nepi-jetson-latest.zip
-else
-    echo "No NEPI Image File available for hardware architecture ${arch_val}"
-    exit 1    
-fi
+# if [[ "$HW_TYPE" == 'jetson' ]]; then
+#     nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
+#     nepi_latest_zip=nepi-jetson-latest.zip
+# else
+#     echo "No NEPI Image File available for hardware architecture ${arch_val}"
+#     exit 1    
+# fi
 
 
-if [[ ! -f ${nepi_latest_zip} ]]; then
-    sudo wget ${nepi_latest_link} -O ${nepi_latest_zip}
-fi
+# if [[ ! -f ${nepi_latest_zip} ]]; then
+#     sudo wget ${nepi_latest_link} -O ${nepi_latest_zip}
+# fi
 
-if [[ -f ${nepi_latest_zip} ]]; then
-    chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_zip}
-    unzip -o ${nepi_latest_zip}
-    if [ $? -eq 0 ]; then
-        sudo rm ${nepi_latest_zip}
-        success_image=1
-    else
-        echo "Failed to unzip NEPI Image file: ${nepi_latest_zip}"
-        sudo rm ${nepi_latest_zip}
-    fi
-else
-    echo "Failed to download NEPI Image from link: ${nepi_latest}"
-fi
+# if [[ -f ${nepi_latest_zip} ]]; then
+#     chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_zip}
+#     unzip -o ${nepi_latest_zip}
+#     if [ $? -eq 0 ]; then
+#         sudo rm ${nepi_latest_zip}
+#         success_image=1
+#     else
+#         echo "Failed to unzip NEPI Image file: ${nepi_latest_zip}"
+#         sudo rm ${nepi_latest_zip}
+#     fi
+# else
+#     echo "Failed to download NEPI Image from link: ${nepi_latest}"
+# fi
+
+
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
 
 cd $CURRENT_FOLDER
