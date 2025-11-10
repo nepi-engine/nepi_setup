@@ -25,7 +25,7 @@ Open Terminal Window - Right click on the desktop and select the "Open in Termin
 
 Make sure your system has internet access by running the following command:
 
-    ping google.com # To exit press `CTRL C`
+    ping -c 1 google.com
 
 Update Git application (sudo password is #Nsetup4You):
 
