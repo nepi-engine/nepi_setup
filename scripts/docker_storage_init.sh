@@ -80,11 +80,13 @@ echo "Checking for Existing NEPI Image Files"
 echo ""
 tar_files=$(find ./ -name "*.tar")
 if [[ -n "$tar_files" ]]; then
+    echo "-------------------------------"
     echo "Existing NEPI Image files found"
     echo "-------------------------------"
     find ./ -name "*.tar"
     echo ""
-    echo "Do you want to SKIP downloading the Latest NEPI Image and use one of these?"
+    echo " Do you want to SKIP downloading the Latest NEPI Image and use one of these?"
+    echo ""
     SKIP_NEPI_IMAGE=$(ask_yes_no)
     echo ""
 fi
