@@ -88,7 +88,23 @@ Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
     source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
 
 
-**NOTE:**  After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. If you need to connect to the internet you can run the command line shortcut **ninet**
+This process will create the following NEPI Folders:
+- **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
+    This is where NEPI processes store user files such as:
+        **Saved Data**, **AI models**, **Import/Export Docker Images**, and **User Saved Configurations**.
+- **NEPI Docker** folder created at '/mnt/nepi_docker'. This is where NEPI Docker Images are stored.
+- **NEPI Config** folder created at '/mnt/nepi_config, along with several config subfolders.
+
+
+**NOTE:**  After this process, the following changes will be made:
+1) Desktop background and sidebar applications menu updates.
+2) NEPI bash alias and util functions added to user bash profile.
+3) NEPI folder shortcuts added to File Manager folder bookmarks.
+4) Chromium browser updated with useful NEPI browser bookmarks.
+
+
+**NOTE:** After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. 
+    If you need to connect to the internet you can run the command line shortcut **ninet**
 
 Test that you can reconnect to the internet and sync clocks:
 
