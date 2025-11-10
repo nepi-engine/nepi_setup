@@ -78,69 +78,70 @@ fi
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/ai_models
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/sample_data
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_src/rui_logo_update
 
 cd $CURRENT_FOLDER
 
 
 
 
-####################################
-# Download NEPI Image
+# ####################################
+# # Download NEPI Image
 
-if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
-    echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
-    sudo mkdir -p $NEPI_STORAGE/nepi_images
-fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
+# if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
+#     echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
+#     sudo mkdir -p $NEPI_STORAGE/nepi_images
+# fi
+# sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
 
-cd $NEPI_STORAGE/nepi_images
+# cd $NEPI_STORAGE/nepi_images
 
-HW_TYPE=jetson
+# HW_TYPE=jetson
 
-# HW_TYPE=unknown
-# if is_valid_jetson; then
-#     HW_TYPE=jetson
-# elif is_valid_arm64; then
-#     HW_TYPE=arm64
-# elif is_valid_amd64; then
-#     HW_TYPE=amd64
+# # HW_TYPE=unknown
+# # if is_valid_jetson; then
+# #     HW_TYPE=jetson
+# # elif is_valid_arm64; then
+# #     HW_TYPE=arm64
+# # elif is_valid_amd64; then
+# #     HW_TYPE=amd64
+# # else
+# #     arch_val=$(uname -m)
+# #     echo "Arch ${arch_val} not supported yet"
+# #     exit 1
+# # fi
+
+
+# # cd $NEPI_STORAGE/nepi_images
+# # sudo rm *.zip
+
+# if [[ "$HW_TYPE" == 'jetson' ]]; then
+#     nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
+#     nepi_latest_name=nepi-jetson-latest.zip
 # else
-#     arch_val=$(uname -m)
-#     echo "Arch ${arch_val} not supported yet"
-#     exit 1
+#     echo "No NEPI Image File available for hardware architecture ${arch_val}"
+#     exit 1    
 # fi
 
 
-# cd $NEPI_STORAGE/nepi_images
-# sudo rm *.zip
+# if [[ ! -f ${nepi_latest_name} ]]; then
+#     sudo wget ${nepi_latest_link} -O ${nepi_latest_name}
+# fi
 
-if [[ "$HW_TYPE" == 'jetson' ]]; then
-    nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
-    nepi_latest_name=nepi-jetson-latest.zip
-else
-    echo "No NEPI Image File available for hardware architecture ${arch_val}"
-    exit 1    
-fi
+# if [[ -f ${nepi_latest_name} ]]; then
+#     chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_name}
+#     unzip -o ${nepi_latest_name}
+#     if [ $? -eq 0 ]; then
+#         sudo rm ${nepi_latest_name}
+#     else
+#         echo "Failed to unzip NEPI Image file: ${nepi_latest_name}"
+#     fi
+# else
+#     echo "Failed to download NEPI Image from link: ${nepi_latest}"
+# fi
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
 
-
-if [[ ! -f ${nepi_latest_name} ]]; then
-    sudo wget ${nepi_latest_link} -O ${nepi_latest_name}
-fi
-
-if [[ -f ${nepi_latest_name} ]]; then
-    chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_name}
-    unzip -o ${nepi_latest_name}
-    if [ $? -eq 0 ]; then
-        sudo rm ${nepi_latest_name}
-    else
-        echo "Failed to unzip NEPI Image file: ${nepi_latest_name}"
-    fi
-else
-    echo "Failed to download NEPI Image from link: ${nepi_latest}"
-fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE/nepi_images
-
-cd $CURRENT_FOLDER
+# cd $CURRENT_FOLDER
 
 
 
