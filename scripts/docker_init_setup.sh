@@ -81,8 +81,9 @@ if [[ ! -f ${storage_latest_zip} ]]; then
     sudo wget ${storage_latest_link} -O ${storage_latest_zip}
 fi
 if [[ -f ${storage_latest_zip} ]]; then
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_INSTALL}/${storage_latest_zip}
-    sudo unzip -o ${NEPI_INSTALL}/${storage_latest_zip} -d $NEPI_STORAGE
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_INSTALL}
+    echo "Unzipping storage folders from ${NEPI_INSTALL}/${storage_latest_zip} to  ${NEPI_STORAGE}"
+    sudo unzip -o ${NEPI_INSTALL}/${storage_latest_zip} -d ${NEPI_STORAGE}
     if [ $? -eq 0 ]; then
         : #sudo rm ${storage_latest_zip}
     else
