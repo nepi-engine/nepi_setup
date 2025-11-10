@@ -87,6 +87,7 @@ NEPI_ROS_PORT: 11311
 ####################################################
 # NEPI SOFTWARE Config
 ####################################################
+NEPI_INSTALL: DEMO
 NEPI_PYTHON: X.X
 NEPI_ROS: uknown
 NEPI_HAS_CUDA: 0
