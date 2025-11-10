@@ -101,6 +101,7 @@ This process will create the following NEPI Folders:
 2) NEPI bash alias and util functions added to user bash profile.
 3) NEPI folder shortcuts added to File Manager folder bookmarks.
 4) Chromium browser updated with useful NEPI browser bookmarks.
+5) The NEPI Docker install instructions file is added to the Desktop.
 
 
 **NOTE:** After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. 
