@@ -48,6 +48,11 @@ else
     exit 1
 fi
 
+####################################
+# Stop any running containers
+echo ""
+nepistop
+echo ""
 
 ####################################
 # Run NEPI Folder Setup Script
