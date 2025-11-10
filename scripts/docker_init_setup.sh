@@ -62,51 +62,52 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_INSTALL
 
 
-####################################
-# Download Storage Extras
+# ####################################
+# # Download Storage Extras
 
-cd $NEPI_STORAGE
+# cd $NEPI_STORAGE
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
-sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
+# sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
 
-storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
-storage_latest_zip=nepi_storage-latest.zip
-
-
-if [[ ! -f ${storage_latest_zip} ]]; then
-    sudo wget ${storage_latest_link} -O ${storage_latest_zip}
-    if [[ "$?" -ne 0 ]]; then
-        echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
-        sudo rm ${storage_latest_zip}
-    fi
-else
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
-fi
-
-if [[ -f ${storage_latest_zip} ]]; then
-    echo "Unzipping storage folders from ${storage_latest_zip}"
-    sudo unzip -o $storage_latest_zip
-    if [ $? -eq 0 ]; then
-        : #sudo rm ${storage_latest_zip}
-    else
-        echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
-    fi
-else
-    echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
-fi
+# storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+# storage_latest_zip=nepi_storage-latest.zip
 
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
-sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
+# if [[ ! -f ${storage_latest_zip} ]]; then
+#     sudo wget ${storage_latest_link} -O ${storage_latest_zip}
+#     if [[ "$?" -ne 0 ]]; then
+#         echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+#         sudo rm ${storage_latest_zip}
+#     fi
+# else
+#     sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
+# fi
 
-cd $CURRENT_FOLDER
+# if [[ -f ${storage_latest_zip} ]]; then
+#     echo "Unzipping storage folders from ${storage_latest_zip}"
+#     sudo unzip -o $storage_latest_zip
+#     if [ $? -eq 0 ]; then
+#         sudo rm ${storage_latest_zip}
+#     else
+#         echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
+#         sudo rm ${storage_latest_zip}
+#     fi
+# else
+#     echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
+# fi
+
+
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
+# sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
+
+# cd $CURRENT_FOLDER
 
 
 
@@ -177,7 +178,10 @@ cd $CURRENT_FOLDER
 # Cleanup
 
 
-
+echo ""
 echo "########################"
 echo "NEPI Docker Initialization Setup Complete"
 echo "########################"
+echo ""
+
+

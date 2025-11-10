@@ -84,9 +84,7 @@ Log into the `nepihost` user using password  'nepi'
 
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
-
     source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
-
 
 This process will create the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
@@ -144,23 +142,20 @@ Enable internet connection and sync clocks:
 
     ninet
 
+Check for internet connection
 
+    pingi
 
+Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
-**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
-see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
+    source /home/nepihost/nepi_setup/scripts/docker_init_setup.sh
+
 
 Initialize NEPI docker image installation by typing:
 
     nepiinit
 
 After the initialization script completes, it will print the current installed NEPI Docker Images installed. 
-
-Start your NEPI container running:
-
-    nepistart
-
-The start script will let you know if the installed NEPI Image started successfully. 
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
@@ -186,6 +181,22 @@ The start script will let you know if the installed NEPI Image started successfu
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
+
+################################################################
+### NEPI Docker Image Testing
+This section will start and test your NEPI Docker solution. 
+
+
+Start your NEPI container running:
+
+    nepistart
+
+The start script will let you know if the installed NEPI Image started successfully. 
+
+**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
+see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
+
+
 **OPEN CHROMIUM WEB BROSWER**
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
 
@@ -194,11 +205,13 @@ Check that the NEPI Resident User Interface (RUI) is running by opening the Chro
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
 **NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service running.
 
+
+################################################################
+### NEPI Docker Service Setup
+
 If everthing is working, you can enable the NEPI Docker Service which will automatically start the NEPI Container and Software on boot:
 
     nepienable
-
-**NOTE:** You can disable the NEPI Docker service with the command: nepidisable
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -208,14 +221,12 @@ Check that your NEPI Container is running after reboot:
 
     dps
 
-    #If your container is not running, try to debug the issue with the following commands:
+    #If your container is not running, try to debug NEPI Docker Service issues with the following commands:
 
         nepirestart
         nepistatus
         nepilogs
-
-
-**NOTE:** You can debug any NEPI Docker Service issues by watching the live service logs using: nepilogs
+        
 
 ################################################################
 ### NEPI Docker Remote PC Connections
