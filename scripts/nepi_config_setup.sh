@@ -373,7 +373,7 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl disable systemd-timesyncd  >/dev/null 2>&1
         sudo systemctl stop systemd-timesyncd  >/dev/null 2>&1
 
-        echo "Enabling chrony time service"
+        echo "Enabling Chrony Time Services"
         sudo systemctl enable chrony
         sudo systemctl start chrony
     fi
@@ -382,7 +382,7 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
         echo ""
         echo "########"
-        echo "Updating Network services"
+        echo "Updating Network Services"
 
         echo "Disabling NetworkManager Service" 
         sudo systemctl disable NetworkManager >/dev/null 2>&1
@@ -392,7 +392,7 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl disable netplan >/dev/null 2>&1
         sudo systemctl stop netplan >/dev/null 2>&1
            
-        echo "Enabling ifupdown networking service"
+        echo "Enabling ifupdown Networking Service"
         sudo systemctl enable networking
         sudo systemctl start networking
         wait
@@ -406,7 +406,7 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
         echo ""
         echo "########"
-        echo "Updating SSH service config"
+        echo "Updating SSH Service Config"
         echo ""
 
         if [[ -f "/etc/ssh/sshd_config" ]]; then
@@ -420,12 +420,12 @@ if [[ "$?" -eq 0 ]]; then
         fi
 
         echo "Enabling ssh service"
-        sudo systemctl enable sshd
+        sudo systemctl enable sshd >/dev/null 2>&1
         wait
         sleep 2
         source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
 
-        sudo systemctl start sshd
+        sudo systemctl restart sshd
 
     fi
 
