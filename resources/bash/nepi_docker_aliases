@@ -195,14 +195,15 @@ function nepiinit(){
             echo "Action cancelled."
             return 1
         fi  
-    fi
+  fi
 
-    if [[ -f "$image_path" ]]; then
-      bash ${NEPI_DOCKER_CONFIG}/nepi_docker_init.sh $image_path
-    else
-        echo "No NEPI Image Files Found in: ${import_path}"
-        return 1
-    fi  
+  if [[ -f "$image_path" ]]; then
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_init.sh $image_path
+  else
+      echo "No NEPI Image Files Found in: ${import_path}"
+      return 1
+  fi  
+  
 }
 export -f nepiinit
 
