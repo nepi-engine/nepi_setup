@@ -217,7 +217,7 @@ function nepiimport(){
   if [[ -d "$import_path"]]; then
       selected=$(select_file_from_folder $import_path)
       if [[ -n "$selected" ]]; then
-        echo "Initializing with NEPI Image file ${selected}"
+        echo "Importing NEPI Image file ${selected}"
         image_path="${import_path}/${selected}"
       else
           echo "No NEPI Image Files Found in: ${import_path}"
@@ -233,6 +233,14 @@ function nepiimport(){
   fi  
 }
 export -f nepiimport
+
+
+function nepipull(){
+  pull_ref=$1
+  echo "Pulling NEPI Image from ${pull_ref}"
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $pull_ref
+}
+export -f nepipull
 
 
 function nepiexport(){
@@ -314,6 +322,7 @@ nepiswitch = Switch to Inactive NEPI container on next boot or reststat
 nepicommit = Commit the running NEPI container
 nepiinit = Reset, clear, and import new NEPI Image
 nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
+nepipull = Import a NEPI image from a remote repository given the PULL_URL.
 nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
 nepiconfig = Configure NEPI System settings
 nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file

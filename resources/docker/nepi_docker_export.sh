@@ -68,7 +68,7 @@ else
         # check_drive=$NEPI_DOCKER
         # check_space=$NEPI_GB_CONTAINER
         # if ! is_space_avail_gb $check_drive $check_space; then
-        #     echo "Can't install Image file ${EXPORT_NAME}"
+        #     echo "Can't install Image file ${NEPI_EXPORT_TAG}"
         #     echo "Not enough free space in folder: ${NEPI_DOCKER}"
         #     echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_EXPORT_SPACE}GB is aviable"
         # else
@@ -112,22 +112,22 @@ else
             NEW_DATE=$(date +%Y%m%d-%H%M)
     
     
-            EXPORT_NAME="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
+            NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
 
             # NEW_DESC="${TAG_ARRAY[5]}"
             # if [[ -n "$NEW_DESC" ]]; then
-            #     EXPORT_NAME="${EXPORT_NAME}-${NEW_DESC}"
+            #     NEPI_EXPORT_TAG="${NEPI_EXPORT_TAG}-${NEW_DESC}"
             # fi
         
-            EXPORT_NAME=${EXPORT_NAME,,}
+            NEPI_EXPORT_TAG=${NEPI_EXPORT_TAG,,}
         fi
 
-        if [[ -z "$EXPORT_NAME" ]]; then
-            EXPORT_NAME=$NEPI_RUNNING_ID
+        if [[ -z "$NEPI_EXPORT_TAG" ]]; then
+            NEPI_EXPORT_TAG=$NEPI_RUNNING_ID
         fi
-        echo "Got Export Name: ${EXPORT_NAME}"
+        echo "Got Export Name: ${NEPI_EXPORT_TAG}"
         
-        EXPORT_FILE_PATH=${EXPORT_PATH}/${EXPORT_NAME}
+        EXPORT_FILE_PATH=${EXPORT_PATH}/${NEPI_EXPORT_TAG}
         parent_path=$(dirname "$EXPORT_FILE_PATH")
         if [[ ${parent_path:0:1} != '.' && ${parent_path:0:1} != '/' && ! -d "${parent_path}" ]]; then
             echo "Export Parent Path Not Found ${parent_path}"
@@ -145,9 +145,9 @@ else
 
             update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
             update_yaml_value "NEPI_IMPORTING" 1 "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_IMPORT_FILE" $TAR_EXPORT_PATH "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_IMPORT_FS" $NEPI_IMPORT_FS "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_IMPORT_TAG" $NEPI_IMPORT_TAG "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$CONFIG_SOURCE"
 
 
 
