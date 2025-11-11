@@ -143,7 +143,10 @@ function nepilogin(){
 }
 export -f nepilogin
 
-
+function nepiloginroot(){
+   ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh "root"  
+}
+export -f nepiloginroot
 
 function nepicommit(){
    ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh
@@ -317,7 +320,8 @@ HELPN="${HELPN}
 nepistart = Start the NEPI docker container
 nepidev = Start the NEPI docker container in a dev mode with no processes running
 nepistop = Stop the running NEPI docker container
-nepilogin = Log into the running NEPI container
+nepilogin = Log into the running NEPI container as user 'nepi'
+nepiloginroot = Log into the running NEPI container as user 'root'
 nepiswitch = Switch to Inactive NEPI container on next boot or reststat
 nepicommit = Commit the running NEPI container
 nepiinit = Reset, clear, and import new NEPI Image
