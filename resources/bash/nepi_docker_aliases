@@ -171,7 +171,7 @@ function nepiinit(){
     fi
   fi
 
-  if [[ -d "$import_path"]]; then
+  if [[ -d "$import_path" ]]; then
         image_count=$(sudo docker images --format "{{.Repository}}:{{.Tag}}" | wc -l)
         if [ "$image_count" -gt 0 ]; then
           echo "WARNING: IF YOU PROCEED, ALL EXISTING NEPI IMAGES WILL BE STOPPED AND REMOVED"
@@ -218,7 +218,7 @@ function nepiimport(){
     fi
   fi
 
-  if [[ -d "$import_path"]]; then
+  if [[ -d "$import_path" ]]; then
       selected=$(select_file_from_folder $import_path)
       if [[ -n "$selected" ]]; then
         echo "Importing NEPI Image file ${selected}"
