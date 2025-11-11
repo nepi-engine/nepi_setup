@@ -55,7 +55,7 @@ else
         echo "Image import allready in progress"
     elif [[ -z "$PULL_REF" ]]; then
         echo "No Pull Reference Provided"
-    elif [[ "$pull_str" != *:*  ]]; then
+    elif [[ "$PULL_REF" != *:*  ]]; then
         echo "No Pull Tag Provided"
     else
         ########################
