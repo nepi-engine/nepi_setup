@@ -55,8 +55,7 @@ else
         echo "Image import allready in progress"
     elif [[ -z "$PULL_REF" ]]; then
         echo "No Pull Reference Provided"
-    elif [[ "$PULL_REF" != *:*  ]]; then
-        echo "No Pull Tag Provided"
+
     else
         ########################
         echo "Proceeding with the import..."
@@ -67,7 +66,12 @@ else
         fi
 
         PULL_FS="${pull_str%%:*}"
-        PULL_TAG="${pull_str##*:}"
+
+        if [[ "$PULL_REF" == *:*  ]]; then
+            PULL_TAG="${pull_str##*:}"
+        else
+            PULL_TAG=latest
+        fi
 
         echo "Importing image from: ${PULL_REF}"
                         
@@ -142,7 +146,7 @@ else
                 NEW_NAME=nepi
                 NEW_VERSION="0p0p0"
                 NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
-                NEW_SW_DESC=$(clean_tag_string $NEPI_IMPORT_TAG) # Updated by NEPI Software 
+                NEW_SW_DESC=$(clean_tag_string "${PULL_FS}_${PULL_TAG}") # Updated by NEPI Software 
                 NEW_DATE=$(date +%Y%m%d-%H%M)        
                 NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
 
