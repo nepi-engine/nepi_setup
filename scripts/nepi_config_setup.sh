@@ -247,10 +247,10 @@ update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
 #     fi
 # fi
 
-if [[ -z $NEPI_AB_FS ]]; then
-    NEPI_AB_FS=0
-fi
-update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
+# if [[ -z $NEPI_AB_FS ]]; then
+#     NEPI_AB_FS=0
+# fi
+# update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
 
 
 
