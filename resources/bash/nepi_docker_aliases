@@ -163,7 +163,7 @@ export -f nepiswitch
 
 function nepiinit(){
   import_path=/mnt/nepi_storage/nepi_images
-  if [[ -n "$1" ]]
+  if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
       image_path=$1
     elif [[ -n "$2" ]]; then
