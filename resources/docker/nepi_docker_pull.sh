@@ -60,12 +60,9 @@ else
         ########################
         echo "Proceeding with the import..."
     
-        pull_str=$PULL_REF
-        if [[ "$pull_str" == */* ]]; then
-            pull_str="${pull_str##*/}"
-        fi
 
-        PULL_FS="${pull_str%%:*}"
+
+        PULL_FS="${PULL_REF%%:*}"
 
         if [[ "$PULL_REF" == *:*  ]]; then
             PULL_TAG="${pull_str##*:}"
@@ -146,7 +143,12 @@ else
                 NEW_NAME=nepi
                 NEW_VERSION="0p0p0"
                 NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
-                NEW_SW_DESC=$(clean_tag_string "${PULL_FS}_${PULL_TAG}") # Updated by NEPI Software 
+                new_fs_name=$PULL_FS
+                if [[ "$new_fs_name" == */* ]]; then
+                    new_fs_name="${pull_str##*/}"
+                fi
+
+                NEW_SW_DESC=$(clean_tag_string "${new_fs_name}_${PULL_TAG}") # Updated by NEPI Software 
                 NEW_DATE=$(date +%Y%m%d-%H%M)        
                 NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
 
@@ -233,7 +235,7 @@ else
                 echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_DOCKER_SPACE}GB is aviable"
             else
                 #IMPORT_ID=debug
-                echo "Importing file ${PULL_REF} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
+                echo "Importing image ${PULL_REF} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
                 res=$(sudo docker pull $PULL_REF)
                 wait
                 hash=${res##*sha256:}
@@ -242,7 +244,7 @@ else
 
                 if [[ -n "$IMPORT_ID" ]]; then
                         echo "Docker import succeeded with IMPORT_ID: $IMPORT_ID"
-   
+                        
                         run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
                         if [[ -n "$run_names" ]]; then
                             for run_name in "${run_names[@]}"; do
@@ -270,7 +272,9 @@ else
                         fi
 
                         # Copy the Staging to the NEPI_FSA image
-                        echo "Renaming staging import to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        PULL_TAG=($(sudo docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${IMPORT_ID}" | awk '{print $2}'))
+                        echo "Renaming import to ${PULL_FS}:${PULL_TAG} to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        exit 1
                         sudo docker tag "${PULL_FS}:${PULL_TAG}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}" 
                         wait
                         echo "Removing pull import tag"

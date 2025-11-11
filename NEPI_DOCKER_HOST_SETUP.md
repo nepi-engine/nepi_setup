@@ -126,7 +126,7 @@ Check for internet connection
     ndhcp = Enable DHCP Internet Client
     nclock = Sync clock
     ninet = Restart network, connect to internet, and sync clock
-    cuda_version = Echo Cuda version number if cuda availble
+    cuda_version = Echos Cuda version number if cuda availble or 0
     fix_chromium = Fix any Chromium config issues
     sbrc = Source the current user's bashrc files
 
@@ -164,11 +164,13 @@ After the initialization script completes, it will print the current installed N
     nepistart = Start the NEPI docker container
     nepidev = Start the NEPI docker container in a dev mode with no processes running
     nepistop = Stop the running NEPI docker container
-    nepilogin = Log into the running NEPI container
+    nepilogin = Log into the running NEPI container as user 'nepi'
+    nepiloginroot = Log into the running NEPI container as user 'root'
     nepiswitch = Switch to Inactive NEPI container on next boot or reststat
     nepicommit = Commit the running NEPI container
     nepiinit = Reset, clear, and import new NEPI Image
     nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
+    nepipull = Import a NEPI image from a remote repository given the PULL_URL.
     nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
     nepiconfig = Configure NEPI System settings
     nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
