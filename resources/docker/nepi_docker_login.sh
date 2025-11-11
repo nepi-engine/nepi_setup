@@ -44,7 +44,7 @@ else
 
     if [[ "$NEPI_RUNNING" -eq 1 ]]; then
         echo "Logging into Running NEPI Container ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ID:${NEPI_RUNNING_ID}"
-        sudo docker exec -it -u ${NEPI_USER} $NEPI_RUNNING_ID /bin/bash -c "su ${NEPI_USER}"
+        sudo docker exec -it -u ${NEPI_USER} $NEPI_RUNNING_ID /bin/bash #-c "su ${NEPI_USER}"
     else
         echo "No Running NEPI Contatainer to Log Into"
     fi

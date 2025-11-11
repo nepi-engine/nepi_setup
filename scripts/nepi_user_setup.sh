@@ -55,7 +55,7 @@ SYS_USER_1_PW=nepi
 SYS_USER_2_PW=nepiadmin
 
 echo "###################################"
-echo "Setting up user account: ${CONFIG_USER}"
+echo "Setting NEPI CONFIG USER: ${CONFIG_USER}"
 echo "###################################"
 
 
@@ -125,7 +125,7 @@ function new_system_user(){
     password=$2
     echo ""
     echo "###################################"
-    echo "Setting up nepi system account: ${user}"
+    echo "Setting NEPI SYSTEM USER: ${user}"
     echo "###################################"
     # if grep -q "\b${user}\b" /etc/group;  then
     #         sudo groupdel $user

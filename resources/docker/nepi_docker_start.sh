@@ -242,7 +242,7 @@ else
         if [[ -z "$CONTAINER_ID" ]]; then
             echo "NEPI Failed to Run"
             CONTAINER_ID=($(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
-            if [[ -z "$CONTAINER_ID" ]]; then
+            if [[ -n "$CONTAINER_ID" ]]; then
                 echo "Removing stopped container ${nepi_fs}:${nepi_fs_tag} with id ${CONTAINER_ID}"
                 sudo docker rm $CONTAINER_ID
             fi
