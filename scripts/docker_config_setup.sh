@@ -22,11 +22,6 @@ if [[ "$USER" != "$CONFIG_USER" ]]; then
     exit 1
 fi
 
-echo "########################"
-echo "NEPI DOCKER CONFIG SETUP"
-echo "########################"
-echo ""
-
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
