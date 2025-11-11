@@ -69,6 +69,21 @@ else
 fi
 
 
+####################################
+# Run NEPI Files Setup Script
+
+script_file=nepi_files_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if [[ -f "$script_path" ]]; then
+	echo ""
+	echo "Running ${script_file} script"
+	source $script_path
+	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
+fi
+
 
 ####################################
 # Run NEPI Config Setup Script
