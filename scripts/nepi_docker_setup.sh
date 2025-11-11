@@ -47,7 +47,14 @@ echo ''
 
 #######################################
 ## Pull and Run Base Image
+
+
+
 export base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
+
+
+
+
 echo "Pulling Base Image ${base_image}"
 sudo docker pull $base_image
 

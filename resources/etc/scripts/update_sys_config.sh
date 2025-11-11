@@ -66,22 +66,22 @@ UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $UPDATE_PATH
-    echo "Updating settings in ${UPDATE_PATH}"
+    echo "Updating System Settings in ${UPDATE_PATH}"
 
+
+    ###########
     # UPDATE NEPI VERSION
     fw_version=$(cat /opt/nepi/nepi_engine/etc/fw_version.txt)
     if [[ -z "$fw_version" ]]; then
-        fw_version=unknown
+        fw_version=0p0p0
     else
         # Remove spaces
-        fw_version="${fw_version// /}"
-        # Remove dashes
-        fw_version="${fw_version//-/}"
-        # Lowercase
-        fw_version="${fw_version,,}"
+        fw_version=$(clean_vesion_string $fw_version)
     fi
     update_yaml_value "NEPI_VERSION" $fw_version $UPDATE_PATH
 
+
+    ###########
     # UPDATE NEPI Python Vesion
     pyver=$(python3 --version | awk '{print $2}')
     if [[ -n "$pyver" ]]; then
@@ -91,7 +91,8 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     fi
     update_yaml_value "NEPI_PYTHON" $pyver $UPDATE_PATH
 
-    echo "Looking for CUDA and Version"
+
+    ###########
     # UPDATE CUDA Info
     if is_valid_cuda; then
         hascuda=1
@@ -99,7 +100,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
         hascuda=0
     fi
 
-    cudaver=$(cuda_version)
+    cudaver=$(get_cuda_version)
     if [[ -n "$cudaver" ]]; then
         cudaver="${cudaver}"
     else
@@ -108,10 +109,16 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     update_yaml_value "NEPI_HAS_CUDA" $hascuda $UPDATE_PATH
     update_yaml_value "NEPI_CUDA_VERSION" $cudaver $UPDATE_PATH
 
-    sw_desc="CUDA${cudaver//./p}"
+
+    ###########
+    sw_desc=$(get_sw_desc)
+    if [[ -z "$sw_desc" ]]; then
+        sw_desc="unknown"
+    fi
     update_yaml_value "NEPI_SW_DESC" $sw_desc $UPDATE_PATH
 
 
+    ###########
     # UPDATE ROS VERSION
     rosver=${ROS_DISTRO}
     echo "Got ROS Version ${rosver}"
@@ -122,17 +129,13 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     update_yaml_value "NEPI_ROS" $rosver $UPDATE_PATH
 
 
+    ###########
     # UPDATE NEPI HW TYPE
-    if is_valid_jetson; then
-        narch=jetson
-    elif is_valid_arm64; then
-        narch=arm64
-    elif is_valid_amd64; then
-        narch=amd64
-    else
-        narch=uknown
+    hw_type=$(get_hw_type)
+    if [[ -z "$hw_type" ]]; then
+        hw_type="unknown"
     fi
-    update_yaml_value "NEPI_HW_TYPE" $narch $UPDATE_PATH
+    update_yaml_value "NEPI_HW_TYPE" $hw_type $UPDATE_PATH
 
 else
     echo "Config file not found ${UPDATE_PATH}"

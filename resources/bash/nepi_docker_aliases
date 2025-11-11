@@ -159,50 +159,78 @@ export -f nepiswitch
 
 
 function nepiinit(){
-
-  image_count=$(sudo docker images --format "{{.Repository}}:{{.Tag}}" | wc -l)
-  if [ "$image_count" -gt 0 ]; then
-    echo "WARNING: IF YOU PROCEED, ALL EXISTING NEPI IMAGES WILL BE STOPPED AND REMOVED"
-    echo ""
-    response=$(ask_yes_no "Do you want to proceed?")
-  else
-      response=yes
+  import_path=/mnt/nepi_storage/nepi_images
+  if [[ -n "$1" ]]
+    if [[ -f "$1" ]]; then
+      image_path=$1
+    elif [[ -n "$2" ]]; then
+      image_path=${import_path}/${$2}
+    fi
   fi
 
-  if [ "$response" == "yes" ]; then
-    import_path=/mnt/nepi_storage/nepi_images
-    selected=$(select_file_from_folder $import_path)
-    if [[ -n "$selected" ]]; then
-      echo "Initializing with NEPI Image file ${selected}"
-      image_path="${import_path}/${selected}"
-      . ${NEPI_DOCKER_CONFIG}/nepi_docker_init.sh $image_path
+  if [[ -d "$import_path"]]; then
+        image_count=$(sudo docker images --format "{{.Repository}}:{{.Tag}}" | wc -l)
+        if [ "$image_count" -gt 0 ]; then
+          echo "WARNING: IF YOU PROCEED, ALL EXISTING NEPI IMAGES WILL BE STOPPED AND REMOVED"
+          echo ""
+          response=$(ask_yes_no "Do you want to proceed?")
+        else
+            response=yes
+        fi
+
+        if [ "$response" == "yes" ]; then
+          
+          selected=$(select_file_from_folder $import_path)
+          if [[ -n "$selected" ]]; then
+            echo "Initializing with NEPI Image file ${selected}"
+            image_path="${import_path}/${selected}"
+          else
+              echo "No NEPI Image Files Found in: ${import_path}"
+              return 1
+          fi  
+        else
+            echo "Action cancelled."
+            return 1
+        fi  
+    fi
+
+    if [[ -f "$image_path" ]]; then
+      bash ${NEPI_DOCKER_CONFIG}/nepi_docker_init.sh $image_path
     else
         echo "No NEPI Image Files Found in: ${import_path}"
         return 1
     fi  
-  else
-      echo "Action cancelled."
-      return 1
-  fi  
 }
 export -f nepiinit
 
 
 function nepiimport(){
-    import_path=/mnt/nepi_storage/nepi_images
-    selected=$(select_file_from_folder $import_path | tail -n 1)
-    if [[ -n "$selected" ]]; then
-      if [[ "${selected##*.}" == "tar"  ]]; then
-        echo "Importing NEPI Image file ${selected}"
+  import_path=/mnt/nepi_storage/nepi_images
+  if [[ -n "$1" ]]
+    if [[ -f "$1" ]]; then
+      image_path=$1
+    elif [[ -n "$2" ]]; then
+      image_path=${import_path}/${$2}
+    fi
+  fi
+
+  if [[ -d "$import_path"]]; then
+      selected=$(select_file_from_folder $import_path)
+      if [[ -n "$selected" ]]; then
+        echo "Initializing with NEPI Image file ${selected}"
         image_path="${import_path}/${selected}"
-        bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
       else
-        echo "Selected file is not a tar file: ${import_path}"
-      fi
-    else
-        echo "No NEPI Image Files Found in: ${selected}"
-        return 1
-    fi  
+          echo "No NEPI Image Files Found in: ${import_path}"
+          return 1
+      fi  
+  fi
+
+  if [[ -f "$image_path" ]]; then
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
+  else
+      echo "No NEPI Image Files Found in: ${import_path}"
+      return 1
+  fi  
 }
 export -f nepiimport
 

@@ -20,7 +20,18 @@ wait
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-
+###############################
+# Load NEPI Config File
+file=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$file" ]]; then
+    echo "Loading System Config File from ${file}"
+    source $file
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${file}"
+    fi
+else
+    echo "Failed to find ${file}"
+fi
 
 CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
 
@@ -51,28 +62,35 @@ else
             IFS='-' read -ra TAG_ARRAY <<< "$NEW_TAG"
 
 
-            NEW_NAME="${TAG_ARRAY[0]}"
+            NEW_NAME=$(clean_tag_string "${TAG_ARRAY[0]}")
             if [[ -z "$NEW_NAME" ]]; then
-                NEW_NAME="unknown"
+                NEW_NAME="nepi"
             fi
 
-            NEW_VERSION="${TAG_ARRAY[1]}"
+             #echo "NEPI_VERSION = ${NEPI_VERSION}"
+            NEW_VERSION=$NEPI_VERSION
             if [[ -z "$NEW_VERSION" ]]; then
-                NEW_VERSION="unknown"
+                NEW_VERSION=$(clean_tag_string "${TAG_ARRAY[1]}")
+                if [[ -z "$NEW_VERSION" ]]; then
+                    NEW_VERSION="0p0p0"
+                fi
             fi
 
-
-
-            NEW_HW_TYPE="${TAG_ARRAY[2]}"
+            NEW_HW_TYPE=$NEPI_HW_TYPE
             if [[ -z "$NEW_HW_TYPE" ]]; then
-                NEW_HW_TYPE="unknown"
+                NEW_HW_TYPE=$(clean_tag_string "${TAG_ARRAY[2]}")
+                if [[ -z "$NEW_HW_TYPE" ]]; then
+                    NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
+                fi
             fi
 
 
-
-            NEW_SW_DESC="${TAG_ARRAY[3]}"
+            NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
             if [[ -z "$NEW_SW_DESC" ]]; then
-                NEW_SW_DESC="unknown"
+                    NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC) # Updated by NEPI Software 
+                    if [[ -z "$NEW_SW_DESC" ]]; then
+                        NEW_SW_DESC="unknown" # Uknown until NEPI runs 
+                fi
             fi
 
 

@@ -60,35 +60,54 @@ else
         INSTALL_IMAGE=$1
 
 
+        if [[ -z "$INSTALL_IMAGE" ]]; then
+            INSTALL_IMAGE=$NEPI_IMPORT_FILE
+        fi
 
-        ###################
-        # Get Install Image Path
-        # Check if Full Path Provided
+
+        if [[ ! -f $INSTALL_IMAGE ]]; then
+            INSTALL_IMAGE=/mnt/nepi_storage/nepi_images/${INSTALL_IMAGE}
+        fi
 
         
 
-        if [[ -f $INSTALL_IMAGE ]]; then
+        if [[ -f $INSTALL_IMAGE && "${INSTALL_IMAGE##*.}" == "tar" ]]; then
 
             echo "Importing image from: ${INSTALL_IMAGE}"
-            update_yaml_value "NEPI_IMPORTING" 1 "$CONFIG_SOURCE"
+                        
+
+            ###########
+            if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
+                NEPI_IMPORT_FS=$2
+            elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
+                NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
+            else
+                NEPI_IMPORT_FS=nepi_fs_a
+            fi
 
 
-            NEPI_IMPORT_FILE=$(basename "$INSTALL_IMAGE")
-
+            ###########
             # Get Imported Tag and IMPORT_ID 
-            NEPI_IMPORT_TAG="${NEPI_IMPORT_FILE%.*}"
+            NEPI_IMPORT_TAG=$2
+            if [[ -z "$NEPI_IMPORT_TAG" ]]; then
+                NEPI_IMPORT_TAG=$NEPI_IMPORT_TAG
+                if [[ "$NEPI_IMPORT_TAG" == 'uknown' ]]; then
+                    NEPI_IMPORT_TAG="${NEPI_IMPORT_FILE%.*}"
+                fi
+            fi
             #echo $NEPI_IMPORT_TAG
 
 
-            #########################
-            if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
-                INSTALL_NAME=$2
-            elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
-                INSTALL_NAME=$NEPI_INACTIVE_FS
-            else
-                INSTALL_NAME=nepi_fs_a
-            fi
 
+            ##########
+            update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORTING" 1 "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_FILE" $INSTALL_IMAGE "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_FS" $NEPI_IMPORT_FS "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_TAG" $NEPI_IMPORT_TAG "$CONFIG_SOURCE"
+
+
+\
             #########################
             # Clear any existing staging images
 
@@ -113,7 +132,7 @@ else
             check_space=$NEPI_GB_CONTAINER
             if ! is_space_avail_gb $check_drive $check_space; then
                 
-                run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${INSTALL_NAME}" | awk '{print $2}'))
+                run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
                 if [[ -n "$run_names" ]]; then
                     for run_name in "${run_names[@]}"; do
                         if [[ -n "$run_name" ]]; then
@@ -130,9 +149,9 @@ else
                 fi
 
 
-                exist_ids=($(sudo docker images --filter "reference=${INSTALL_NAME}" --format "{{.ID}}"))
+                exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
                 if [[ -n "$exist_ids" ]]; then
-                echo "Removing existing images ${INSTALL_NAME}"
+                echo "Removing existing images ${NEPI_IMPORT_FS}"
                     for id in "${exist_ids[@]}"; do
                         echo "Removing ${id}"
                         sudo docker rmi -f $id
@@ -145,12 +164,12 @@ else
             check_drive=$NEPI_DOCKER
             check_space=$NEPI_GB_CONTAINER
             if ! is_space_avail_gb $check_drive $check_space; then
-                echo "Can't install Image file ${INSTALL_NAME}"
+                echo "Can't install Image file ${NEPI_IMPORT_FS}"
                 echo "Not enough free space in folder: ${NEPI_DOCKER}"
                 echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_DOCKER_SPACE}GB is aviable"
             else
                 #IMPORT_ID=debug
-                echo "Importing file ${INSTALL_IMAGE} for NEPI Docker Image: ${INSTALL_NAME}"
+                echo "Importing file ${INSTALL_IMAGE} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
                 echo "Staging import nepi_staging:${NEPI_IMPORT_TAG}"
                 res=$(sudo docker import $INSTALL_IMAGE nepi_staging:${NEPI_IMPORT_TAG})
                 wait
@@ -163,7 +182,7 @@ else
                         update_yaml_value "NEPI_IMPORT_TAG" "$NEPI_IMPORT_TAG" "$CONFIG_SOURCE"
                         update_yaml_value "NEPI_IMPORT_ID" "$IMPORT_ID" "$CONFIG_SOURCE"
 
-                        run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${INSTALL_NAME}" | awk '{print $2}'))
+                        run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
                         if [[ -n "$run_names" ]]; then
                             for run_name in "${run_names[@]}"; do
                                 if [[ -n "$run_name" ]]; then
@@ -180,9 +199,9 @@ else
                         fi
 
                         # Remove existing NEPI image if needed
-                        exist_ids=($(sudo docker images --filter "reference=${INSTALL_NAME}" --format "{{.ID}}"))
+                        exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
                         if [[ -n "$exist_ids" ]]; then
-                        echo "Removing existing images ${INSTALL_NAME}"
+                        echo "Removing existing images ${NEPI_IMPORT_FS}"
                             for id in "${exist_ids[@]}"; do
                                 echo "Removing ${id}"
                                 sudo docker rmi -f $id
@@ -190,8 +209,8 @@ else
                         fi
 
                         # Copy the Staging to the NEPI_FSA image
-                        echo "Renaming staging import to ${INSTALL_NAME}:${NEPI_IMPORT_TAG}"
-                        sudo docker tag "nepi_staging:${NEPI_IMPORT_TAG}" "${INSTALL_NAME}:${NEPI_IMPORT_TAG}" 
+                        echo "Renaming staging import to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        sudo docker tag "nepi_staging:${NEPI_IMPORT_TAG}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}" 
                         wait
                         echo "Renaming staging import tag"
                         sudo docker rmi "nepi_staging:${NEPI_IMPORT_TAG}"
@@ -210,16 +229,19 @@ else
                     echo "NEPI Image Failed to Import: ${INSTALL_IMAGE}"
                     
                 fi
-
-                update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$CONFIG_SOURCE"
-                update_yaml_value "NEPI_IMPORT_ID" "unknown" "$CONFIG_SOURCE"
-                update_yaml_value "NEPI_FS_INITIALIZE" 0 "$CONFIG_SOURCE"
-                update_yaml_value "NEPI_IMPORTING" 0 "$CONFIG_SOURCE"
+                
                 update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
+                update_yaml_value "NEPI_IMPORTING" 0 "$CONFIG_SOURCE"
+                update_yaml_value "NEPI_IMPORT_FILE" "unknown" "$CONFIG_SOURCE"
+                update_yaml_value "NEPI_IMPORT_FS" "unknown" "$CONFIG_SOURCE"
+                update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$CONFIG_SOURCE"
+                
+
+
 
             fi
         else
-            echo "Tar file not found: ${INSTALL_IMAGE}"
+            echo "Failed to find NEPI Image '.tar' file at: ${INSTALL_IMAGE}"
         fi
     fi
     

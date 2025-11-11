@@ -362,10 +362,12 @@ function cuda_version(){
           key=release
           value=$(echo "$string" | grep "${key}" | awk '{print $NF}' | cut -d'.' -f1-2)
           echo "${value#V}"
-        echo
+        else
+          echo 0
           return 1
         fi
     else
+        echo 0
         return 1
     fi
 }
@@ -558,7 +560,6 @@ nnet = Restart the network
 ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
-cuda_version = Echo Cuda version number if cuda availble
 fix_chromium = Fix any Chromium config issues
 sbrc = Source the current user's bashrc files" 
 
@@ -1057,6 +1058,87 @@ function process_count(){
 }
 export -f process_count
 
+function clean_tag_string(){
+  cstring=$1
+  cstring="${cstring// /_}"
+  cstring="${cstring//-/_}"
+  cstring="${cstring//./p}"
+  cstring="${cstring,,}"
+  echo $cstring
+}
+export -f clean_tag_string
+
+function clean_vesion_string(){
+  cstring=$1
+  cstring="${cstring// /_}"
+  cstring="${cstring//-/_}"
+  cstring="${cstring//./p}"
+  echo $cstring
+}
+export -f clean_vesion_string
+
+function dev_vesion_string(){
+  dstring=$(clean_version_string $1)
+  dstring=${dstring}-$(date +%Y%m%d-%H%M)
+  echo $dstring
+}
+export -f dev_vesion_string
+
+
+function get_hw_type() {
+  if is_valid_jetson; then
+      hw_type=jetson
+  elif is_valid_arm64; then
+      hw_type=arm64
+  elif is_valid_amd64; then
+      hw_type=amd64
+  else
+      hw_type=$(uname -m)
+  fi
+  echo $hw_type
+}
+export -f get_hw_type
+
+
+function get_hw_arch() {
+  if is_valid_jetson; then
+      hw_type=arm64
+  elif is_valid_arm64; then
+      hw_type=arm64
+  elif is_valid_amd64; then
+      hw_type=amd64
+  else
+      hw_type=$(uname -m)
+  fi
+  echo $hw_type
+}
+export -f get_hw_arch
+
+
+function get_os_info() {
+  sw_desc=''
+  os_name=$(grep '^NAME=' /etc/os-release)
+  os_version= $(grep '^VERSION_ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+  os_info=${os_name}${os_version}
+  echo $os_info
+}
+export -f get_os_info
+
+
+function get_cuda_version() {
+  echo $(cuda_version)
+}
+export -f get_cuda_version
+
+
+function get_sw_desc() {
+  os_desc=$(get_os_info)
+  cuda_ver=$(get_cuda_version)
+  sw_desc="${os_desc} CUDA${os_version}"
+  echo $sw_desc
+}
+export -f get_sw_desc
+
 
 #### Update Help Test
 utilsn="${utilsn}
@@ -1081,7 +1163,15 @@ path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. 
 path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
 select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echos selected path name
 sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config
-process_count = Echos number of processes running for provide PROCESS_NAME"
+process_count = Echos number of processes running for provide PROCESS_NAME
+clean_tag_string = Echos a NEPI Info formated version of the provided STRING
+clean_version_string = Echos a NEPI Version formated version of the provided VERSION_STRING
+dev_version_string = Echos a NEPI Dev Version formated version of the provided VERSION_STRING
+get_hw_type = Echos the current hardware type string (ie. jetson, arm64, amd64, or uname)
+get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname)
+get_os_info = Echos the current OS NameVersion
+get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
+get_sw_desc = Echos NEPI formated software vesion tag"
 
 
 

@@ -49,7 +49,13 @@ else
 
     ########################
     # Start Processes
-    EXPORT_FILENAME=$1
+    EXPORT_PATH=$1
+    if [[ -z "$EXPORT_PATH" ]]; then
+        EXPORT_PATH=$NEPI_EXPORT_PATH
+        if [[ ! -d "${EXPORT_PATH}" ]] ; then
+            EXPORT_PATH=/mnt/nepi_storage/nepi_images
+        fi
+    fi
 
     # Export Running Container
     if [[ $NEPI_RUNNING_ID != 0 && "$NEPI_RUNNING" -eq 1 ]]; then
@@ -62,7 +68,7 @@ else
         # check_drive=$NEPI_DOCKER
         # check_space=$NEPI_GB_CONTAINER
         # if ! is_space_avail_gb $check_drive $check_space; then
-        #     echo "Can't install Image file ${INSTALL_NAME}"
+        #     echo "Can't install Image file ${EXPORT_NAME}"
         #     echo "Not enough free space in folder: ${NEPI_DOCKER}"
         #     echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_EXPORT_SPACE}GB is aviable"
         # else
@@ -80,25 +86,26 @@ else
             #echo "NEPI_VERSION = ${NEPI_VERSION}"
             NEW_VERSION=$NEPI_VERSION
             if [[ -z "$NEW_VERSION" ]]; then
-                NEW_VERSION="${TAG_ARRAY[1]}"
+                NEW_VERSION=$(clean_tag_string "${TAG_ARRAY[1]}")
                 if [[ -z "$NEW_VERSION" ]]; then
-                    NEW_VERSION="unknown"
+                    NEW_VERSION="0p0p0"
                 fi
             fi
 
             NEW_HW_TYPE=$NEPI_HW_TYPE
             if [[ -z "$NEW_HW_TYPE" ]]; then
-                NEW_HW_TYPE="${TAG_ARRAY[2]}"
+                NEW_HW_TYPE=$(clean_tag_string "${TAG_ARRAY[2]}")
                 if [[ -z "$NEW_HW_TYPE" ]]; then
-                    NEW_HW_TYPE="unknown"
+                    NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
                 fi
             fi
 
-            NEW_SW_DESC=$NEPI_SW_DESC
+
+            NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
             if [[ -z "$NEW_SW_DESC" ]]; then
-                NEW_SW_DESC="${TAG_ARRAY[3]}"
-                if [[ -z "$NEW_SW_DESC" ]]; then
-                    NEW_SW_DESC="unknown"
+                    NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC) # Updated by NEPI Software 
+                    if [[ -z "$NEW_SW_DESC" ]]; then
+                        NEW_SW_DESC="unknown" # Uknown until NEPI runs 
                 fi
             fi
 
@@ -118,9 +125,9 @@ else
         if [[ -z "$EXPORT_NAME" ]]; then
             EXPORT_NAME=$NEPI_RUNNING_ID
         fi
-         echo "Got Export Name: ${EXPORT_NAME}"
+        echo "Got Export Name: ${EXPORT_NAME}"
         
-        EXPORT_FILE_PATH=/mnt/nepi_storage/nepi_images/${EXPORT_NAME}
+        EXPORT_FILE_PATH=${EXPORT_PATH}/${EXPORT_NAME}
         parent_path=$(dirname "$EXPORT_FILE_PATH")
         if [[ ${parent_path:0:1} != '.' && ${parent_path:0:1} != '/' && ! -d "${parent_path}" ]]; then
             echo "Export Parent Path Not Found ${parent_path}"
@@ -135,8 +142,16 @@ else
             fi
             TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
             echo "Exporting FS to: ${TAR_EXPORT_PATH}"
-            update_yaml_value "NEPI_EXPORT_PATH" ${TAR_EXPORT_PATH} "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_EXPORTING" 1 "${CONFIG_SOURCE}"
+
+            update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORTING" 1 "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_FILE" $TAR_EXPORT_PATH "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_FS" $NEPI_IMPORT_FS "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_IMPORT_TAG" $NEPI_IMPORT_TAG "$CONFIG_SOURCE"
+
+
+
+
             sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
             if [[ "$?" -eq 0 ]]; then
                 echo ""
@@ -156,8 +171,11 @@ else
     else
         echo "No Running NEPI Container to Export"
     fi
-    update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_EXPORTING" 0 "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_FS_EXPORT" 0 "${CONFIG_SOURCE}"
+
+    update_yaml_value "NEPI_FS_EXPORT" 0 "$CONFIG_SOURCE"
+    update_yaml_value "NEPI_EXPORTING" 0 "$CONFIG_SOURCE"
+    update_yaml_value "NEPI_EXPORT_FILE" "unknown" "$CONFIG_SOURCE"
+    update_yaml_value "NEPI_EXPORT_FS" "unknown" "$CONFIG_SOURCE"
+    update_yaml_value "NEPI_EXPORT_TAG" "unknown" "$CONFIG_SOURCE"
 
 fi
