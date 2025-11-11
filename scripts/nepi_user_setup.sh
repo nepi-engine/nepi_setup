@@ -78,12 +78,14 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /
 
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    #sudo usermod -aG $CONFIG_USER $CONFIG_USER
+    sudo usermod -aG $SYS_USER_1 $CONFIG_USER
+    sudo usermod -aG $SYS_USER_2 $CONFIG_USER
     sudo usermod -aG sudo $CONFIG_USER
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER}
     sudo usermod -aG tty ${CONFIG_USER}
-    sudo usermod -aG $CONFIG_USER $CONFIG_USER
-
+    
         
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
         if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
@@ -137,10 +139,10 @@ function new_system_user(){
         echo "User $user does not exist, creating"
         sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${password})" ${user}
     fi    
-    if id -u "$user" >/dev/null 2>&1; then
+    if id -u $user; then
         echo "Configuring NEPI System User account $user"
         echo "${user}:${password}" | sudo chpasswd
-        sudo usermod -aG $user $user
+        # sudo usermod -aG $user $user
         sudo usermod -aG sudo $user
         sudo usermod -aG $CONFIG_USER $user
         sudo usermod -aG $user $CONFIG_USER 
