@@ -105,10 +105,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
             echo "Desktop folder cleaned"
         fi
     fi
-
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-    sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
-
+   
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
 
@@ -338,6 +335,11 @@ fi
 # echo "###################################"
 # echo "Adding NEPI users to sudo users"
 # echo "###################################"
+
+sudo cp ${SOURCE_ETC_PATH}/sudo/sudoers /etc/sudoers
+sudo chown root:root /etc/sudoers
+sudo chmod 0440 /etc/sudoers
+
 
 # file=/etc/sudoers
 # if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then

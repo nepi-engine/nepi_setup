@@ -12,18 +12,43 @@
 
 # This file sets up the ROS package 
 
+sudo -v
+
+# sudo apt
+# sudo apt install iputils-ping -y
+# wait
+
+export CONFIG_USER=$(id -un 1000)
+
+if [[ "$CONFIG_USER" != 'nepi' ]]; then
+   echo "Current user is ${CONFIG_USER}. This scripts must be run as nepi user."
+   exit 1
+fi
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+
+
+
+
 echo "########################"
 echo "NEPI ROS SETUP"
 echo "########################"
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-# Load System Config File
-source $(dirname ${SCRIPT_FOLDER})/config/load_system_config.sh
-if [ $? -eq 1 ]; then
-    echo "Failed to load ${SYSTEM_CONFIG_FILE}"
-    exit 1
+NEPI_ROS=NOETIC
+
+
+# UPDATE NEPI Python Vesion
+pyver=$(python3 --version | awk '{print $2}')
+if [[ -n "$pyver" ]]; then
+    pyver="${pyver%.*}"
+else
+    pyver=3
 fi
+PYTHON_VERSION=$pyver
 
 
 
@@ -32,9 +57,8 @@ echo "Installing ROS ${NEPI_ROS}"
 
 # Create and change to tmp install folder
 
-TMP=${NEPI_STORAGE}/tmp
-sudo mkdir $TMP
-sudo chown -R nepi:nepi ${TMP}
+TMP=/mnt/nepi_storage/tmp
+fix_folder $TMP
 cd $TMP
 
 
