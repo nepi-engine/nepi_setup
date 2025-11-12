@@ -28,7 +28,7 @@ source $NEPI_UTILS_SOURCE
 
 
 
-#######################################
+######################################dps#
 
 NEPI_ARCH=unknown
 if is_valid_jetson; then

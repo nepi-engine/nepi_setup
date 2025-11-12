@@ -1076,11 +1076,11 @@ function run_script(){
   if [[ ! -v "$1" && -n "$1" ]]; then
     script_path=$1
     if [[ -f "$script_path" ]]; then
-      echo "Running script ${basename $script_path}"
-      source ${script_path}
+      echo "Running script $(basename $script_path)"
+      bash ${script_path}
       script_error=$?
       if [[ "$script_error" -ne 0 ]]; then
-        echo "Script ${basename $script_path} returned error ${script_error}"
+        echo "Script $(basename $script_path) returned error ${script_error}"
         return $script_error
       fi
     else
@@ -1098,11 +1098,11 @@ function source_script(){
   if [[ ! -v "$1" && -n "$1" ]]; then
     script_path=$1
     if [[ -f "$script_path" ]]; then
-      echo "Sourcing script: ${basename $script_path}"
+      echo "Sourcing script: $(basename $script_path)"
       source ${script_path}
       script_error=$?
       if [[ "$script_error" -ne 0 ]]; then
-        echo "Script ${basename $script_path} returned error ${script_error}"
+        echo "Script $(basename $script_path) returned error ${script_error}"
         return $script_error
       fi
     else

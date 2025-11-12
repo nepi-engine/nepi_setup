@@ -29,7 +29,7 @@ source $NEPI_UTILS_SOURCE
 
 
 
-
+echo ""
 echo "########################"
 echo "NEPI FOLDERS SETUP"
 echo "########################"
@@ -39,8 +39,13 @@ ETC_SCRIPTS_FOLDER=$(dirname "${SCRIPT_FOLDER}")/resources/etc/scripts
 script_file=check_config_folders.sh
 script_path=${ETC_SCRIPTS_FOLDER}/${script_file}
 if [[ -f "$script_path" ]]; then
-	echo ""
 	echo "Running ${script_file} script"
 	source $script_path
 	wait
 fi
+
+echo ""
+echo "########################"
+echo "NEPI Folders Setup Complete"
+echo "########################"
+echo ""
