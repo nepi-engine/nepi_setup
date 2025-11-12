@@ -39,16 +39,8 @@ echo "NEPI USER SETUP"
 echo "########################"
 
 ###########
-echo "Got user ${CONFIG_USER}"
-if [[ ! -v "$CONFIG_USER " ]]; then
-    CONFIG_USER=nepi
-fi 
-echo "Using user ${CONFIG_USER}"
-
-if [[ ! -v "$SYS_USER_1 " ]]; then
-    SYS_USER_1=nepihost
-fi 
-
+CONFIG_USER=nepi
+SYS_USER_1=nepihost
 SYS_USER_2=nepiadmin
 
 ########
@@ -81,13 +73,16 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
-    sudo usermod -aG $SYS_USER_1 $CONFIG_USER
-    sudo usermod -aG $SYS_USER_2 $CONFIG_USER
-    sudo usermod -aG sudo $CONFIG_USER
+    sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
+    sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
+    sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
     sudo adduser ${CONFIG_USER} dialout
-    sudo usermod -aG dialout ${CONFIG_USER}
-    sudo usermod -aG tty ${CONFIG_USER}
-    
+    sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG ic2 ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG video $USER >/dev/null 2>&1
+    sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+
         
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
         if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then

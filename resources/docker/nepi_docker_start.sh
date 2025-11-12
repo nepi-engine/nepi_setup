@@ -159,6 +159,7 @@ else
         --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
         --mount type=bind,source=/dev,target=/dev \
         --cap-add=SYS_TIME --volume=/var/empty:/var/empty -v /etc/ntpd.conf:/etc/ntpd.conf \
+        -e DISPLAY=$DISPLAY \
         --net=host \
         -p 2222:22 \
         -p 9091:9091 \
