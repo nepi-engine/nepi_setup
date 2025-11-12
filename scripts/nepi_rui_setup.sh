@@ -18,9 +18,8 @@ echo "########################"
 echo "NEPI RUI Setup"
 echo "########################"
 
-echo "Running Intitialization Scripts"
 
-export CONFIG_USER=nepi
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -29,9 +28,39 @@ source $NEPI_UTILS_SOURCE
 
 
 
-##############################
-# Install NEPI RUI
-##############################
+#######################################
+
+NEPI_ARCH=unknown
+if is_valid_jetson; then
+    NEPI_ARCH=arm64
+elif is_valid_arm64; then
+    NEPI_ARCH=arm64
+elif is_valid_amd64; then
+    NEPI_ARCH=amd64
+else
+    arch_val=$(uname -m)
+    echo "Arch ${arch_val} not supported yet"
+    exit 1
+fi
+
+pyver=$(python3 --version | awk '{print $2}')
+if [[ -n "$pyver" ]]; then
+    pyver="${pyver%.*}"
+else
+    pyver=3
+fi
+NEPI_PYTHON=$pyver
+
+
+
+
+#######################################
+## Configure NEPI RUI Software
+
+export CONFIG_USER=nepi
+NEPI_BASE=/opt/nepi
+NEPI_STORAGE=/mnt/nepi_storage
+
 
 rui_source_path=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/src/nepi_rui
 rui_dest_path=${NEPI_BASE}/nepi_rui
@@ -64,17 +93,17 @@ else
 
     #sudo chown -R ${NEPI_USER}:${NEPI_USER} ${rui_dest_path}
 
-    python${NEPI_PYTHON} -m pip install --user virtualenv
+    sudo python${NEPI_PYTHON} -m pip install --user virtualenv
 
     if [[ ! -d "/home/nepi/.nvm" ]]; then
         sudo mkdir /home/nepi/.nvm
     fi
-    sudo chown -R ${NEPI_USER}:${NEPI_USER} ~/.nvm
+    sudo chown -R nepi:nepi /home/nepi/.nvm
     curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
     #curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
     wait
 
-    export NVM_DIR="$HOME/.nvm"
+    export NVM_DIR="/home/nepi/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
     source ~/.bashrc
@@ -107,22 +136,22 @@ else
     #########################################
     # Enable NEPI RUI Service
 
-    if [[ "$NEPI_IN_CONTAINER" -eq 0 ]]; then
-        #########################################
-        # Setup NEPI Engine services
-        #########################################
-        echo ""
-        echo "Enabling NEPI RUI Service"
+    systemctl&> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+            #########################################
+            # Setup NEPI Engine services
+            #########################################
+            echo ""
+            echo "Enabling NEPI RUI Service"
 
-        sudo systemctl enable nepi_rui
-
+            sudo systemctl enable nepi_rui
     fi
+
+
 fi
-
-
-# ##############################
-# echo "NEPI RUI Setup Complete"
-# ##############################
+##############################
+echo "NEPI RUI Setup Complete"
+##############################
 
 
 # # Run RUI

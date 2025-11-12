@@ -153,7 +153,6 @@ if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
         echo 'export LD_LIBRARY_PATH='${CUDA_HOME}'/lib64:$LD_LIBRARY_PATH' | sudo tee -a $BASHRC
         echo 'export PATH='${CUDA_HOME}'/bin:${PATH}' | sudo tee -a $BASHRC
         echo 'export CUDA_VISIBLE_DEVICES=0' | sudo tee -a $BASHRC
-
     fi
 fi
 
