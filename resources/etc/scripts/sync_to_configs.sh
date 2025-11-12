@@ -46,7 +46,7 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ##############################
 ## Check Folders
 load_nepi_config=0
-. ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
+source ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
 
 
 
@@ -54,34 +54,19 @@ load_nepi_config=0
 # Sync to Config Folders
 
 source_config_path=/opt/nepi
-
-sync_to_config_folder 'system_cfg' $source_config_path
-sync_to_config_folder 'factory_cfg' $source_config_path
-#sync_to_config_folder 'recovery_cfg' $source_config_path
+echo "Syncing files from system and factory configs to ${source_config_path}"
+sync_to_config_folder $source_config_path 'system_cfg'
+sync_to_config_folder $source_config_path 'factory_cfg' 
 
 
 #############################
 # Sync Docker Config folders
 
 # Sync to docker
-SOURCE_PATH=/opt/nepi/docker_cfg
-UPDATE_PATH=/mnt/nepi_config/docker_cfg
+SOURCE_PATH=/opt/nepi/docker_cfg/nepi_docker_config.yaml
+UPDATE_PATH=/mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+sync_yaml_files ${SOURCE_PATH} ${UPDATE_PATH}
 
-
-if [[ "$CONFIG_USER" == 'nepihost' || ! -d "${UPDATE_PATH}" ]]; then
-        echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-        if [[ ! -d "${SOURCE_PATH}" ]]; then
-            sudo mkdir -p ${SOURCE_PATH}
-        fi
-        sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fi
-
-if [ -z "$(ls -A "$UPDATE_PATH")" ]; then
-        sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fi
-
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
 
 ######################################
 ## Sync License Files
@@ -92,9 +77,9 @@ echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -d "${SOURCE_PATH}" ]]; then
     sudo mkdir -p ${SOURCE_PATH}
 fi
+
 sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo fix_folder $UPDATE_PATH 775
 
 # ######################################
 # ## Sync Storage Config Files

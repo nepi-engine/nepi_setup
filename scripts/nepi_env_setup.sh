@@ -14,6 +14,10 @@
 
 sudo -v
 
+# sudo apt
+# sudo apt install iputils-ping -y
+# wait
+
 export CONFIG_USER=$(id -un 1000)
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
@@ -27,10 +31,11 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-if ! is_valid_internet; then
-    echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
-fi
+
+# if ! is_valid_internet; then
+#     echo "No Internet Connection Detected.  Connect and rerun this script"
+#     exit 1
+# fi
 
 echo "########################"
 echo "NEPI ENVIRONMENT SETUP"
@@ -52,42 +57,48 @@ else
     exit 1
 fi
 
+pyver=$(python3 --version | awk '{print $2}')
+if [[ -n "$pyver" ]]; then
+    pyver="${pyver%.*}"
+else
+    pyver=3
+fi
+NEPI_PYTHON=$pyver
 
-#######################################
-## Reclone the repo
+
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
+    SYSTEMD_SERVICE_PATH=/etc/systemd/system
+
+    echo ""
+    echo "########"
+    echo "Disable apport to avoid crash reports on a display"
+    sudo systemctl disable apport
+    sudo systemctl stop apport
+fi
 
 
 
 #######################################
 ## Configure NEPI Software Requirements
 
-echo ""
-echo "Fixing installs"
-#find /var/lib/apt/lists -type f  |xargs rm -f >/dev/null \
-# sudo apt-get update --fix-missing && sudo apt-get upgrade
-# sudo dpkg --configure -a
-# sudo apt-get clean
-# sudo apt-get autoremove
-sudo apt-get update
-sudo apt --fix-broken install
 
 echo ""
 echo "Installing Software Requirements"
 
 # Create and change to tmp install folder
-TMP=${NEPI_STORAGE}/tmp
+TMP=/mnt/nepi_storage/tmp
 sudo mkdir $TMP
 sudo chown -R nepi:nepi ${TMP}
 cd $TMP
 
 
 sudo apt update
-
+sudo apt-get install software-properties-common
 sudo apt install apt-utils -y
-#### Install Software
 
 sudo add-apt-repository ppa:rmescandon/yq -y
-sudo apt update 
+sudo apt update
 sudo apt install yq -y
 
 sudo apt install cmake -y
@@ -186,11 +197,11 @@ sudo apt -y install libopenblas-dev
 #######################
 
 # Create USER python folder
-if [ ! -d "/home/${NEPI_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" ]; then
-    mkdir -p /home/${NEPI_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
-    mkdir -p /home/${NEPI_USER}/.local/bin
+if [ ! -d "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" ]; then
+    mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+    mkdir -p /home/${CONFIG_USER}/.local/bin
 fi
-sudo chown -R ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER}/.local
+sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.local
 
 # Install Python
 sudo apt update 
@@ -233,7 +244,7 @@ sudo apt update
 
 
 mkdir -p $(python -m site --user-site)
-ln -s /usr/bin/pip3 /home/${NEPI_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
+ln -s /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
 sudo rm /usr/bin/pip
 sudo ln -s /usr/bin/pip3 /usr/bin/pip
 
@@ -438,7 +449,7 @@ if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
     #sudo apt install --reinstall openssh-server -y
 
     sudo apt-get remove --purge openssh-server -y
-    sudo apt-get autoclean 
+    sudo apt-get update
     sudo apt --fix-broken install
     sudo apt-get install openssh-server -y
     if [[ ! -f "/run/sshd" ]]; then
@@ -449,14 +460,16 @@ if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
 
 fi
 
-
+    sudo apt-get update
+    sudo apt --fix-broken install
 echo "######################################"
 echo "Installing Shared Drive Apps"
 echo "######################################"
 sudo apt install samba -y
 sudo apt install smbclient -y
 
-
+sudo apt-get update
+sudo apt --fix-broken install
 echo "######################################"
 echo "Installing Supervisor Apps"
 echo "######################################"

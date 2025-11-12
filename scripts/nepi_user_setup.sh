@@ -39,11 +39,13 @@ echo "NEPI USER SETUP"
 echo "########################"
 
 ###########
-if [[ -z "$CONFIG_USER " ]]; then
+echo "Got user ${CONFIG_USER}"
+if [[ ! -v "$CONFIG_USER " ]]; then
     CONFIG_USER=nepi
 fi 
+echo "Using user ${CONFIG_USER}"
 
-if [[ -z "$SYS_USER_1 " ]]; then
+if [[ ! -v "$SYS_USER_1 " ]]; then
     SYS_USER_1=nepihost
 fi 
 

@@ -53,43 +53,21 @@ load_nepi_config=0
 
 source_config_path=/opt/nepi
 
-sync_to_config_folder 'system_cfg' $source_config_path
-
-##############################
-## Sync Docker Config folders
-
-# Sync to docker
-SOURCE_PATH=/opt/nepi/docker_cfg
-UPDATE_PATH=/mnt/nepi_config/docker_cfg
+sync_to_config_folder $source_config_path 'system_cfg' 
 
 
-if [[ "$CONFIG_USER" == 'nepihost' || ! -d "${UPDATE_PATH}" ]]; then
-        echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-        if [[ ! -d "${SOURCE_PATH}" ]]; then
-            sudo mkdir -p ${SOURCE_PATH}
-        fi
-        sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fi
+# ######################################
+# ## Sync License Files
 
-if [ -z "$(ls -A "$UPDATE_PATH")" ]; then
-        sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fi
-
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
-
-######################################
-## Sync License Files
-
-SOURCE_PATH=/opt/nepi/license
-UPDATE_PATH=/mnt/nepi_storage/license
-echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo mkdir -p ${SOURCE_PATH}
-fi
-sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+# SOURCE_PATH=/opt/nepi/license
+# UPDATE_PATH=/mnt/nepi_storage/license
+# echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+# if [[ ! -d "${SOURCE_PATH}" ]]; then
+#     sudo mkdir -p ${SOURCE_PATH}
+# fi
+# sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
+# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+# sudo chmod -R 775 ${UPDATE_PATH}
 
 
 

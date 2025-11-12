@@ -276,7 +276,35 @@ function is_space_avail_gb(){
 }
 export -f is_space_avail_gb
 
+function is_nepi_path(){
+    local check_path=$1
+    if [[ ! -e "$check_path" ]]; then
+      echo "Path not found at ${check_path}"
+      return 1
+    fi
 
+    if [[ ":$check_path:" == *"/opt/nepi"*]]; then
+      return 0
+    fi
+
+    if [[ ":$check_path:" == *"/mnt/nepi_storage"*]]; then
+      return 0
+    fi
+
+    if [[ ":$check_path:" == *"/mnt/nepi_config"*]]; then
+      return 0
+    fi
+    if [[ ":$check_path:" == *"/mnt/nepi_config"*]]; then
+      return 0
+    fi
+    if [[ ":$check_path:" == *"/home/nepi"*]]; then
+      return 0
+    fi
+
+    return 2
+    
+}
+export -f is_nepi_path
 
 
 utilsn="${utilsn}
@@ -300,7 +328,8 @@ is_valid_arm64 = Check if device is arm64 arch
 is_valid_amd64 = Check if device is amd64 arch
 is_valid_cuda = Check if system has CUDA
 is_space_avail_mb = Check SOURCE_FOLDER for REQ_SPACE in MB
-is_space_avail_gb = Check SOURCE_FOLDER for REQ_SPACE in GB"
+is_space_avail_gb = Check SOURCE_FOLDER for REQ_SPACE in GB
+is_nepi_path = Check if path in either a nepi managed folder"
 
 
 
@@ -349,29 +378,6 @@ function ask_yes_no {
 export -f ask_yes_no
 
 
-
-
-function cuda_version(){
-    lspci | grep -i nvidia >/dev/null 2>&1
-    if [[ "$?" -eq 0 ]]; then
-        #echo "System has CUDA"
-        #Check version
-        #ls -l /usr/local | grep cuda
-        if nvcc --version  >/dev/null 2>&1; then
-          string=$(nvcc --version) 
-          key=release
-          value=$(echo "$string" | grep "${key}" | awk '{print $NF}' | cut -d'.' -f1-2)
-          echo "${value#V}"
-        else
-          echo 0
-          return 1
-        fi
-    else
-        echo 0
-        return 1
-    fi
-}
-export -f cuda_version
 
 function nipa(){
   sudo -v
@@ -538,12 +544,12 @@ function fix_chromium(){
   sudo rm -rf ~/.config/chromium/chommon/Singleton* > /dev/null 2>&1
   sudo rm -rf ~/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
 
+  config_user=$(id -un 1000)
+  sudo rm -rf /home/${config_user}/.cache/chromium > /dev/null 2>&1
+  sudo rm -rf /home/${config_user}/snap/.cache/chromium > /dev/null 2>&1
 
-  sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-  sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium > /dev/null 2>&1
-
-  #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
-  #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
+  #sudo rm -rf /home/${config_user}/.config/chromium/* 2>/dev/null
+  #sudo rm -rf /home/${config_user}/snap/chromium/* 2>/dev/null
 }
 export function fix_chromium
 
@@ -629,7 +635,7 @@ function sync_yaml_files(){
     SOURCE_FILE=$1
     TARGET_FILE=$2
     REPLACE_ENTRIES=0
-    if [[ -n "$3" ]]; then
+    if [[ -v "$3" ]]; then
       REPLACE_ENTRIES=$3
     fi
 
@@ -639,8 +645,15 @@ function sync_yaml_files(){
     fi
 
     if [[ ! -f "$TARGET_FILE" ]]; then
-        echo "Target file does not exist: ${TARGET_FILE}"
-        return 2
+        target_path=$(dirname $TARGET_FILE)
+        if fix_path $target_path; then
+            sudo cp $SOURCE_FILE $TARGET_FILE
+            fix_path $TARGET_FILE
+            return 0
+        elif [[ ! -d "$target_path" ]]; then
+          echo "Failed to create path: ${target_path}"
+          return 1
+        fi
     fi
 
     keys=($(yq e 'keys | .[]' ${SOURCE_FILE}))
@@ -810,12 +823,16 @@ export -f path_sync
 
 function path_delete(){
     source_path=$1
-    if [[ -z "$source_path" ]]; then
+    if [[ ! -v "$source_path" || -z "$source_path" ]]; then
       source_path=$(pwd)
     fi
     if [[ -d "$source_path" || -f "$source_path" || -L "$source_path" ]]; then
-          echo "Deleting path ${source_folder}"
-          sudo rm -r $source_path
+          if is_nepi_path ${source_folder}; then
+            echo "Deleting path ${source_folder}"
+            sudo rm -r $source_path
+          else
+            return 1
+          fi
     else
       echo "Path not found: ${source_path}"
       return 1
@@ -996,7 +1013,7 @@ export -f select_file_from_folder
 function sync_to_config_folder() {
     if [[ -n "$1" && -n "$2" ]]; then
 
-        source_config_path=$2
+        source_config_path=$1
         source_etc_path=${source_config_path}/etc
         source_sys_config_file=${source_etc_path}/nepi_system_config.yaml
 
@@ -1005,8 +1022,8 @@ function sync_to_config_folder() {
             update_etc_path=${update_config_path}/etc
             update_config_file=${update_etc_path}/nepi_system_config.yaml
         else
-            update_folder=$1
-            update_config_path=/mnt/nepi_config/${1}
+            update_folder=$2
+            update_config_path=/mnt/nepi_config/${2}
             update_etc_path=${update_config_path}/etc
             update_config_file=${update_etc_path}/nepi_system_config.yaml
         fi
@@ -1015,19 +1032,22 @@ function sync_to_config_folder() {
 
         if [[ ! -d "$update_etc_path" ]]; then
             sudo mkdir -p $update_etc_path
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $update_etc_path
         fi
 
+          if is_nepi_path $update_etc_path; then
+            config_user=$(id -un 1000)
+            sudo chown ${config_user}:${config_user} $update_etc_path
+          else
+            echo "Update path is not a valid NEPI path: ${update_etc_path}"
+            return 1
+          fi
+
         # Update from dest
-        if [[ -n "$source_etc_path" && "$source_etc_path" != "/etc" && -d "$source_etc_path" ]]; then
-
-            # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-            # sudo chmod -R 0775 /mnt/nepi_config
-
+        if is_nepi_path $source_config_path; then
+            
             SOURCE_PATH=$source_etc_path
             UPDATE_PATH=$update_etc_path
-            #echo "Syncing ETC Folder from ${SOURCE_PATH} to ${UPDATE_PATH}"
-            #echo "Excluding nepi_system_config.yaml file"
+
             sudo rsync -arh --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
             if [[ ! -f "$update_config_file" ]]; then
@@ -1050,6 +1070,129 @@ function sync_to_config_folder() {
     fi
 }
 export -f sync_to_config_folder
+
+function run_script(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+    script_path=$1
+    if [[ -f "$script_path" ]]; then
+      echo "Running script ${basename $script_path}"
+      source ${script_path}
+      script_error=$?
+      if [[ "$script_error" -ne 0 ]]; then
+        echo "Script ${basename $script_path} returned error ${script_error}"
+        return $script_error
+      fi
+    else
+        echo "Script not found at ${script_path}"
+        return 1
+    fi
+  else
+    echo "No Script Path Provided"
+    return 1
+  fi
+}
+export -f run_script
+
+function source_script(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+    script_path=$1
+    if [[ -f "$script_path" ]]; then
+      echo "Sourcing script: ${basename $script_path}"
+      source ${script_path}
+      script_error=$?
+      if [[ "$script_error" -ne 0 ]]; then
+        echo "Script ${basename $script_path} returned error ${script_error}"
+        return $script_error
+      fi
+    else
+        echo "Script not found at ${script_path}"
+        return 1
+    fi
+  else
+    echo "No Script Path Provided"
+    return 1
+  fi
+}
+export -f source_script
+
+
+function fix_path(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+        if is_nepi_path $target_path; then
+        echo "Fixing permissions for path: ${target_path}"
+        config_user=$(id -un 1000)
+        sudo chown ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+          sudo chmod ${2} ${target_path} > /dev/null 2>&1
+      else
+          echo "Folder not found at ${target_path}"
+          return 1
+      fi
+  else
+    echo "No Path Provided"
+    return 1
+  fi
+}
+export -f fix_path
+
+function fix_folder(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+      if [[ ! -e "$target_path" ]]; then
+        sudo mkdir -p $target_path
+      elif [[ ! -d "$target_path" ]]; then
+        echo "Path is not a found: ${target_path}"
+        return 1
+      fi
+
+      if is_nepi_path $target_path; then
+        echo "Fixing permissions for path: ${target_path}"
+        config_user=$(id -un 1000)
+        sudo chown -R ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+          sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
+    else
+        echo "Folder not found at ${target_path}"
+        return 1
+    fi
+  else
+    echo "No Path Provided"
+    return 1
+  fi
+}
+export -f fix_folder
+
+
+function fix_scripts(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+
+      if [[ ! -e "$target_path" ]]; then
+        sudo mkdir -p $target_path
+      elif [[ ! -d "$target_path" ]]; then
+        echo "Script path is not a found: ${target_path}"
+        return 1
+      fi
+
+      if is_nepi_path $target_path; then
+        echo "Fixing permissions in script folder: ${target_path}"
+        config_user=$(id -un 1000)
+        sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
+        sudo chmod +x ${target_path}/* > /dev/null 2>&1
+    else
+        echo "Script folder not found at ${target_path}"
+        return 1
+    fi
+  else
+    echo "No Script Path Provided"
+    return 1
+  fi
+}
+export -f fix_scripts
+
+
+
 
 function process_count(){
   pname=$1
@@ -1125,8 +1268,29 @@ function get_os_info() {
 export -f get_os_info
 
 
-function get_cuda_version() {
-  echo $(cuda_version)
+function get_cuda_version(){
+    lspci | grep -i nvidia >/dev/null 2>&1
+    if [[ "$?" -eq 0 ]]; then
+        if nvcc --version  >/dev/null 2>&1; then
+          string=$(nvcc --version) 
+          key=release
+          value=$(echo "$string" | grep "${key}" | awk '{print $NF}' | cut -d'.' -f1-2)
+          echo "${value#V}"
+        else
+          cuda_version=0
+          cuda_path=/usr/local
+          declare -a files
+          for file in "$cuda_path"/*; do
+              if [[ -d "$file" && "$file" == *cuda-* ]]; then # Check if the item is a regular file
+                  cuda_version=${file##*-}
+              fi
+          done
+          echo $cuda_version
+        fi
+    else
+        echo 0
+        return 1
+    fi
 }
 export -f get_cuda_version
 
@@ -1138,6 +1302,8 @@ function get_sw_desc() {
   echo $sw_desc
 }
 export -f get_sw_desc
+
+
 
 
 #### Update Help Test
@@ -1155,14 +1321,19 @@ load_config_file = Exports all of the yaml entries to system variables in given 
 print_config_file = Prints all of the yaml entries in given FILE
 path_backup = Backup SOURCE_PATH TARGET_PATH with safe checks. Optional 0 or 1 to overwrite if exists. 
 path_sync = Sync SOURCE_PATH to TARGET_PATH with safe checks. Optional 0 or 1 to delete files.
+select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echos selected path name
+fix_path = Update file or folder owner to 1000 at provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
+fix_folder = Update or Make folder and contents with owner to 1000 for provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
+fix_scripts = Update files in provided FIX_PATH with owner 1000 and +x access permissions.
 path_delete = Deletes TARGET_PATH with safe checks
 path_space_mb = Echos available MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_space_gb = Echos available GB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_kb = Echos size of path (file or folder) in KB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
-select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echos selected path name
-sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config
+sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config folders
+run_script = Uses 'bash' to run script at provided SCRIPT_PATH
+source_script = Uses 'source' to run script at provided SCRIPT_PATH
 process_count = Echos number of processes running for provide PROCESS_NAME
 clean_tag_string = Echos a NEPI Info formated version of the provided STRING
 clean_version_string = Echos a NEPI Version formated version of the provided VERSION_STRING

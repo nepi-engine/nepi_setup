@@ -60,3 +60,4 @@ NEPI_AB_FS: 0
 # IF NEPI_RM_PS is disabled, NEPI containers that start successfully will not be removed,
 #   unless new images are commited or installed, or nepistop command is called.
 NEPI_RM_PS: 1
+

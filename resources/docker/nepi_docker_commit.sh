@@ -108,6 +108,15 @@ else
                 update_yaml_value "NEPI_FSB_TAG" ${COMMIT_TAG} "${CONFIG_SOURCE}"
                 update_yaml_value "NEPI_FSB_ID" ${COMMIT_ID} "${CONFIG_SOURCE}"
             fi
+
+
+            ########################
+            # Update Docker Config
+            echo ""
+            echo "Updating Docker Config File"
+            bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+            wait
+
         else
             echo "Can't Commit Containter with Name: ${COMMIT_NAME} and Tag:  ${COMMIT_TAG}.  One or both are empty"
         fi
@@ -115,8 +124,4 @@ else
         echo "No Running NEPI Container to Commit"
     fi
 
-
-    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-    source ${SCRIPT_FOLDER}/load_docker_config.sh
-    wait
 fi

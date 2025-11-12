@@ -55,7 +55,7 @@ else
     ########
     # Initialize Run Command
 
-    DOCKER_RUN_COMMAND="sudo docker run -d --privileged -ti -e UDEV=1 --ipc=host \
+    DOCKER_RUN_COMMAND="sudo docker run -d --privileged -it -e UDEV=1 --ipc=host  --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
     --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
     --mount type=bind,source=/dev,target=/dev \

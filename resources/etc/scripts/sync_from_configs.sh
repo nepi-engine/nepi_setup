@@ -37,15 +37,13 @@ fi
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
-
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chmod -R 0775 /mnt/nepi_config
+CONFIG_PATH=/mnt/nepi_config
+fix_path ${CONFIG_PATH} 775
 
 ##############################
 ## Check Folders
 load_nepi_config=0
-. ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
-
+source ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
 
 
 ##############################
@@ -53,25 +51,19 @@ load_nepi_config=0
 
 # Sync from factory
 source_config_path=/mnt/nepi_config/factory_cfg
-sync_to_config_folder 'nepi_cfg' $source_config_path
+sync_to_config_folder $source_config_path 'nepi_cfg' 
 
 # Sync from system
 source_config_path=/mnt/nepi_config/system_cfg
-sync_to_config_folder 'nepi_cfg' $source_config_path
+sync_to_config_folder $source_config_path 'nepi_cfg'
 
 
 ######################################
 ## Sync Docker Config Files
 
-SOURCE_PATH=/mnt/nepi_config/docker_cfg
-UPDATE_PATH=/opt/nepi/docker_cfg
-echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo mkdir -p ${SOURCE_PATH}
-fi
-sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+SOURCE_PATH=/mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+UPDATE_PATH=/opt/nepi/docker_cfg/nepi_docker_config.yaml
+sync_yaml_files ${SOURCE_PATH} ${UPDATE_PATH}
 
 
 ######################################
@@ -83,8 +75,7 @@ if [[ ! -d "${SOURCE_PATH}" ]]; then
     sudo mkdir -p ${SOURCE_PATH}
 fi
 sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+fix_folder ${UPDATE_PATH} 775 
 
 
 

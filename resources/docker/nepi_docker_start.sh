@@ -51,22 +51,22 @@ else
     NEEDS_RESTART=1
 
 
-    #Check for allready running
-    run_names=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${nepi_fs}" | awk '{print $2}'))
-    #echo $run_names
-    if [[ -n "$run_names" ]]; then
-        for run_name in "${run_names[@]}"; do
-            if [[ -n "$run_name" ]]; then
-                run_id=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
-                if [[ -n "$run_id" ]]; then
-                    if [[ "${nepi_fs}:${nepi_fs_tag}" == "$run_name" ]]; then
-                        echo "Image ${nepi_fs}:${nepi_fs_tag} allready running with ID: ${run_id}"
-                        NEEDS_RESTART=0
-                    fi
-                fi
-            fi
-        done
-    fi
+    # #Check for allready running
+    # run_names=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${nepi_fs}" | awk '{print $2}'))
+    # #echo $run_names
+    # if [[ -n "$run_names" ]]; then
+    #     for run_name in "${run_names[@]}"; do
+    #         if [[ -n "$run_name" ]]; then
+    #             run_id=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
+    #             if [[ -n "$run_id" ]]; then
+    #                 if [[ "${nepi_fs}:${nepi_fs_tag}" == "$run_name" ]]; then
+    #                     echo "Image ${nepi_fs}:${nepi_fs_tag} allready running with ID: ${run_id}"
+    #                     NEEDS_RESTART=0
+    #                 fi
+    #             fi
+    #         fi
+    #     done
+    # fi
     
 
     #Check for allready running
@@ -154,7 +154,7 @@ else
 
         ########
         # Initialize Run Command
-        DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host \
+        DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user 0:0 \
         --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
         --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
         --mount type=bind,source=/dev,target=/dev \

@@ -11,6 +11,7 @@
 
 
 # This file Switches a Running Containers
+
 sudo -v
 
 CONFIG_USER=nepihost
@@ -40,9 +41,11 @@ else
     # Start Processes
 
     LOGIN_USER=$1
-    if [[ -z "$LOGIN" ]]; then
+    if [[ -z "$LOGIN_USER" ]]; then
         LOGIN_USER=nepi
     fi
+
+    echo "Will log in as user: ${LOGIN_USER}"
 
     #########################################
     # Connect to the Running Container

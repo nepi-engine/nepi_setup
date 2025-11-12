@@ -155,9 +155,19 @@ sudo apt install smbclient -y
 
 
 
+if is_valid_jetson; then
+    echo "######################################"
+    echo "Installing Jetson Apps"
+    echo "######################################"
+    sudo apt install nvidia-jetpack-dev
+fi
+
 
 sudo apt-get update
 sudo apt install --fix-broken
+
+
+
 
 
 #################################

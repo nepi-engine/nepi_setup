@@ -122,41 +122,45 @@ export NEPI_STORAGE=/mnt/nepi_storage
 # NEPI stop and start shortcuts
 function nepistop(){
    sudo systemctl stop nepi_docker
-   ${NEPI_DOCKER_CONFIG}/nepi_docker_stop.sh
+   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_stop.sh
 }
 export -f nepistop
 
 function nepistart(){
-     ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepistart
 
 function nepidev(){
-     ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh
+     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh
 }
 export -f nepidev
 
 
 
 function nepilogin(){
-   ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh   
+   nuser=$1
+   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh  $nuser    
 }
 export -f nepilogin
 
 function nepiloginroot(){
-   ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh "root"  
+  nuser=root
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh $nuser 
 }
 export -f nepiloginroot
 
+
+
 function nepicommit(){
-   ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh
+   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh
 }
 export -f nepicommit
 
 
 
 function nepiswitch(){
-   ${NEPI_DOCKER_CONFIG}/nepi_docker_switch.sh
+   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_switch.sh
 }
 export -f nepiswitch
 
@@ -183,7 +187,7 @@ function nepiinit(){
 
         if [ "$response" == "yes" ]; then
           
-          selected=$(select_file_from_folder $import_path)
+          selected=$(select_file_from_folder $import_path | tail -n1)
           if [[ -n "$selected" ]]; then
             echo "Initializing with NEPI Image file ${selected}"
             image_path="${import_path}/${selected}"
@@ -219,7 +223,8 @@ function nepiimport(){
   fi
 
   if [[ -d "$import_path" ]]; then
-      selected=$(select_file_from_folder $import_path)
+      selected=$(select_file_from_folder $import_path | tail -n1)
+      echo "Selected NEPI Image file ${selected}"
       if [[ -n "$selected" ]]; then
         echo "Importing NEPI Image file ${selected}"
         image_path="${import_path}/${selected}"
@@ -228,7 +233,7 @@ function nepiimport(){
           return 1
       fi  
   fi
-
+  echo "Calling NEPI Import script with file ${image_path}"
   if [[ -f "$image_path" ]]; then
     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
   else
@@ -243,6 +248,13 @@ function nepipull(){
   pull_ref=$1
   echo "Pulling NEPI Image from ${pull_ref}"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $pull_ref
+}
+export -f nepipull
+
+function nepiretag(){
+  sw_desc=$1
+  echo "Retagging NEPI Active Image with ${sw_desc}"
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_retag.sh $sw_desc
 }
 export -f nepipull
 
@@ -328,6 +340,7 @@ nepicommit = Commit the running NEPI container
 nepiinit = Reset, clear, and import new NEPI Image
 nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
 nepipull = Import a NEPI image from a remote repository given the PULL_URL.
+nepitag = Update the Software Description field in the active NEPI container
 nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
 nepiconfig = Configure NEPI System settings
 nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file

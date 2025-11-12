@@ -46,5 +46,13 @@ else
     update_yaml_value "NEPI_ACTIVE_FS" "${NEPI_INACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
     update_yaml_value "NEPI_INACTIVE_FS" "${NEPI_ACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
     update_yaml_value "NEPI_FS_SWITCH" 0 "${NEPI_DOCKER_CONFIG_PATH}"
+
+    ########################
+    # Update Docker Config
+    echo ""
+    echo "Updating Docker Config File"
+    bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+    wait
+
 fi
 

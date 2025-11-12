@@ -143,7 +143,7 @@ update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $NEPI_SYS_CONFIG_FILE
 # # This is updated by NEPI Container process
 # if is_valid_cuda; then
 #     export NEPI_HAS_CUDA=1
-#     export NEPI_CUDA_VERSION=$(cuda_version)
+#     export NEPI_CUDA_VERSION=$(get_cuda_version)
 # else
 #     export NEPI_HAS_CUDA=0
 #     export NEPI_CUDA_VERSION=0

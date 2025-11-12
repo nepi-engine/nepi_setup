@@ -91,69 +91,71 @@ else
     export NEPI_IN_CONTAINER=0
 fi
 
-if [[ "$CONFIG_USER" == 'nepi' ]]; then
 
-    if grep -qnw $BASHRC -e "##### System Config #####" ; then
+
+if grep -qnw $BASHRC -e "##### System Config #####" ; then
+    : #echo "Already Done"
+else
+    echo ' ' | sudo tee -a $BASHRC
+    echo '##### System Config #####' | sudo tee -a $BASHRC
+    echo '#export CMAKE_POLICY_VERSION_MINIMUM=3.5' | sudo tee -a $BASHRC
+    echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $BASHRC
+    echo 'export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}' | sudo tee -a $BASHRC
+    echo 'if [[ -f "/usr/local/lib/libOpen3D.so" ]]; then' | sudo tee -a $BASHRC
+    echo '  export LD_PRELOAD=/usr/local/lib/libOpen3D.so' | sudo tee -a $BASHRC
+    echo 'fi' | sudo tee -a $BASHRC
+fi
+
+
+
+# UPDATE NEPI Python Vesion
+pyver=$(python3 --version | awk '{print $2}')
+if [[ -n "$pyver" ]]; then
+    pyver="${pyver%.*}"
+else
+    pyver=3
+fi
+NEPI_PYTHON=$pyver
+
+if grep -qnw $BASHRC -e "##### Python Config #####" ; then
+    : #echo "Already Done"
+else
+    echo ' ' | sudo tee -a $BASHRC
+    echo '##### Python Config #####' | sudo tee -a $BASHRC
+    echo 'export PYTHONPATH='${NEPI_ENGINE}'/etc:${PYTHONPATH}' | sudo tee -a $BASHRC
+    echo 'export PYTHONPATH='${NEPI_ENGINE}'/lib/nepi_drivers:${PYTHONPATH}' | sudo tee -a $BASHRC
+    echo 'export PYTHONPATH=/usr/local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
+    echo 'export PYTHONPATH=/home/'${CONFIG_USER}'/.local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
+fi
+
+
+if is_valid_cuda; then
+    export NEPI_HAS_CUDA=1
+    export NEPI_CUDA_VERSION=$(get_cuda_version)
+else
+    export NEPI_HAS_CUDA=0
+    export NEPI_CUDA_VERSION=0
+fi
+
+
+if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
+    
+
+    CUDA_HOME=/usr/local/cuda-${NEPI_CUDA_VERSION}
+    if grep -qnw $BASHRC -e "##### CUDA SETUP #####" ; then
         : #echo "Already Done"
     else
         echo ' ' | sudo tee -a $BASHRC
-        echo '##### System Config #####' | sudo tee -a $BASHRC
-        echo '#export CMAKE_POLICY_VERSION_MINIMUM=3.5' | sudo tee -a $BASHRC
-        echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $BASHRC
-        echo 'export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}' | sudo tee -a $BASHRC
-        echo 'if [[ -f "/usr/local/lib/libOpen3D.so" ]]; then' | sudo tee -a $BASHRC
-        echo '  export LD_PRELOAD=/usr/local/lib/libOpen3D.so' | sudo tee -a $BASHRC
-        echo 'fi' | sudo tee -a $BASHRC
-    fi
+        echo '##### CUDA SETUP #####' | sudo tee -a $BASHRC
+        echo 'export CUDA_PATH='${CUDA_HOME} | sudo tee -a $BASHRC
+        echo 'export CUDA_HOME='${CUDA_HOME} | sudo tee -a $BASHRC
+        echo 'export CUPY_NVCC_GENERATE_CODE=current' | sudo tee -a $BASHRC
+        echo 'export LD_LIBRARY_PATH='${CUDA_HOME}'/lib64:$LD_LIBRARY_PATH' | sudo tee -a $BASHRC
+        echo 'export PATH='${CUDA_HOME}'/bin:${PATH}' | sudo tee -a $BASHRC
 
-
-
-    # UPDATE NEPI Python Vesion
-    pyver=$(python3 --version | awk '{print $2}')
-    if [[ -n "$pyver" ]]; then
-        pyver="${pyver%.*}"
-    else
-        pyver=3
-    fi
-    NEPI_PYTHON=$pyver
-
-    if grep -qnw $BASHRC -e "##### Python Config #####" ; then
-        : #echo "Already Done"
-    else
-        echo ' ' | sudo tee -a $BASHRC
-        echo '##### Python Config #####' | sudo tee -a $BASHRC
-        echo 'export PYTHONPATH='${NEPI_ENGINE}'/etc:${PYTHONPATH}' | sudo tee -a $BASHRC
-        echo 'export PYTHONPATH='${NEPI_ENGINE}'/lib/nepi_drivers:${PYTHONPATH}' | sudo tee -a $BASHRC
-        echo 'export PYTHONPATH=/usr/local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
-        echo 'export PYTHONPATH=/home/'${CONFIG_USER}'/.local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
-    fi
-
-
-    if is_valid_cuda; then
-        export NEPI_HAS_CUDA=1
-        export NEPI_CUDA_VERSION=$(cuda_version)
-    else
-        export NEPI_HAS_CUDA=0
-        export NEPI_CUDA_VERSION=0
-    fi
-    update_yaml_value "NEPI_HAS_CUDA" $NEPI_HAS_CUDA $NEPI_CONFIG_FILE
-    update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $NEPI_CONFIG_FILE
-
-    if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
-        CUDA_HOME=/usr/local/cuda-${NEPI_CUDA_VERSION}
-        if grep -qnw $BASHRC -e "##### CUDA SETUP #####" ; then
-            : #echo "Already Done"
-        else
-            echo ' ' | sudo tee -a $BASHRC
-            echo '##### CUDA SETUP #####' | sudo tee -a $BASHRC
-            echo 'export CUDA_PATH='${CUDA_HOME} | sudo tee -a $BASHRC
-            echo 'export CUDA_HOME='${CUDA_HOME} | sudo tee -a $BASHRC
-            echo 'export CUPY_NVCC_GENERATE_CODE=current' | sudo tee -a $BASHRC
-            echo 'export LD_LIBRARY_PATH='${CUDA_HOME}'/lib64:$LD_LIBRARY_PATH' | sudo tee -a $BASHRC
-            echo 'export PATH='${CUDA_HOME}'/bin:${PATH}' | sudo tee -a $BASHRC
-        fi
     fi
 fi
+
 
 # Add NEPI SETTINGS
 echo ' ' | sudo tee -a $BASHRC

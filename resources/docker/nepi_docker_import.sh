@@ -69,6 +69,8 @@ else
             INSTALL_IMAGE=/mnt/nepi_storage/nepi_images/${INSTALL_IMAGE}
         fi
 
+        INSTALL_FILE=$(basename ${INSTALL_IMAGE})
+
         
 
         if [[ -f $INSTALL_IMAGE && "${INSTALL_IMAGE##*.}" == "tar" ]]; then
@@ -88,17 +90,13 @@ else
 
             ###########
             # Get Imported Tag and IMPORT_ID 
-            NEPI_IMPORT_TAG=$2
-            if [[ -z "$NEPI_IMPORT_TAG" ]]; then
-                NEPI_IMPORT_TAG=$NEPI_IMPORT_TAG
-                if [[ "$NEPI_IMPORT_TAG" == 'uknown' ]]; then
-                    NEPI_IMPORT_TAG="${NEPI_IMPORT_FILE%.*}"
-                fi
-            fi
+            NEPI_IMPORT_TAG="${INSTALL_FILE%.*}"
 
+            echo "Got Import Tag: ${NEPI_IMPORT_TAG}"
 
             if [[ "${NEPI_IMPORT_TAG:0:4}" == 'nepi' ]]; then # NEPI Produced Image
 
+                #echo "Updating Import Tag: ${NEPI_IMPORT_TAG}"
 
                 IFS='-' read -ra TAG_ARRAY <<< "$NEPI_IMPORT_TAG"
                 
@@ -122,16 +120,18 @@ else
                     fi
                 fi
 
-
+                echo "Got SW Tag: ${TAG_ARRAY[3]}"
                 NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
+                echo "Cleaned SW Tag: ${TAG_ARRAY[3]}"
                 if [[ -z "$NEW_SW_DESC" ]]; then
                         NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC) # Updated by NEPI Software 
                         if [[ -z "$NEW_SW_DESC" ]]; then
                             NEW_SW_DESC="unknown" # Uknown until NEPI runs 
                     fi
                 fi
+                echo "Final SW Tag: ${TAG_ARRAY[3]}"
 
-                NEW_DATE=$(clean_tag_string "${TAG_ARRAY[3]}")
+                NEW_DATE=$(clean_tag_string "${TAG_ARRAY[4]}")
                 if [[ -z "$NEW_DATE" ]]; then
                     NEW_DATE=$(date +%Y%m%d-%H%M)
                 fi          
@@ -141,8 +141,9 @@ else
 
             else # Non NEPI Produced Image
 
-                IFS='-' read -ra TAG_ARRAY <<< "$NEPI_IMPORT_TAG"
-                
+                #nsw_tag=$(clean_tag_string $NEPI_IMPORT_TAG)
+                #echo "Creating Import Tag: ${NEPI_IMPORT_TAG}  with sw_tag ${nsw_tag}"
+               
                 NEW_NAME=nepi
                 NEW_VERSION="0p0p0"
                 NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
@@ -299,7 +300,12 @@ else
                 update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$CONFIG_SOURCE"
                 
 
-
+                ########################
+                # Update Docker Config
+                echo ""
+                echo "Updating Docker Config File"
+                bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+                wait
 
             fi
         else

@@ -222,11 +222,10 @@ ninet > /dev/null 2>&1
 ########################
 # Update Docker Config
 echo ""
-echo "Updating Docker Config File"
-bash /opt/nepi/etc/scripts/sync_from_sys_config.sh
+echo "Updating Docker Config Files"
+bash ${SCRIPT_FOLDER}/nepi_docker_sync.sh
 wait
-bash /opt/nepi/etc/scripts/sync_to_sys_config.sh
-wait
+
 
 ########################
 # Update Docker Config

@@ -438,10 +438,11 @@ echo ""
 # Update Config Folders
 
 source_config_path=/mnt/nepi_config/system_cfg
-sync_to_config_folder 'factory_cfg' $source_config_path
-sync_to_config_folder 'recovery_cfg' $source_config_path
+sync_to_config_folder $source_config_path 'factory_cfg' 
+sync_to_config_folder $source_config_path 'recovery_cfg' 
 
 source /opt/nepi/etc/scripts/sync_from_configs.sh
+source /opt/nepi/docker_cfg/nepi_docker_sync.sh
 
 
 

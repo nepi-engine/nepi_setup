@@ -153,12 +153,22 @@ else
 
 
             sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
+
+            ########################
+            # Update Docker Config
+            echo ""
+            echo "Updating Docker Config File"
+            bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+            wait
+
             if [[ "$?" -eq 0 ]]; then
                 echo ""
                 echo "--------------------------"
                 echo "NEPI Image Export Complete"
                 echo ""
                 ls /mnt/nepi_storage/nepi_images
+
+
 
             else
                 echo ""
@@ -177,5 +187,8 @@ else
     update_yaml_value "NEPI_EXPORT_FILE" "unknown" "$CONFIG_SOURCE"
     update_yaml_value "NEPI_EXPORT_FS" "unknown" "$CONFIG_SOURCE"
     update_yaml_value "NEPI_EXPORT_TAG" "unknown" "$CONFIG_SOURCE"
+
+
+
 
 fi
