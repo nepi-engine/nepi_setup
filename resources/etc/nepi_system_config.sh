@@ -726,7 +726,7 @@ fi
 
 echo "Updating NEPI SSH PRIVATE KEY FILES"
 
-NEPI_SSH_PKEY_SOURCE=${SYSTEM_ETC_PATH}/resources/etc/ssh/ssh_keys/private_keys
+NEPI_SSH_PKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/private_keys
 NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
 
 if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then

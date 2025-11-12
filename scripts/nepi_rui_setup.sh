@@ -27,11 +27,6 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-. ${SCRIPT_FOLDER}/script_setup.sh
-if [[ "$?" -ne 0 ]]; then
-    echo "Script Setup Failed. Exiting"
-    exit 1
-fi 
 
 
 ##############################

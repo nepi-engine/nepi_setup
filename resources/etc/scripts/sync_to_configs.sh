@@ -16,7 +16,7 @@ export CONFIG_USER=$(id -un 1000)
 if [[ "$CONFIG_USER" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
-    ufile=/homenepi/.nepi_bash_utils
+    ufile=/home/nepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
 elif [[ "$CONFIG_USER" == 'nepihost'  ]]; then
     CONFIG_USER=nepihost
@@ -79,7 +79,7 @@ if [[ ! -d "${SOURCE_PATH}" ]]; then
 fi
 
 sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo fix_folder $UPDATE_PATH 775
+fix_folder $UPDATE_PATH 775
 
 # ######################################
 # ## Sync Storage Config Files

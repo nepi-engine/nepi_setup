@@ -68,6 +68,7 @@ echo ""
 SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
 SOURCE_ETC_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
+SOURCE_SYS_CONFIG_LOAD=${SOURCE_ETC_PATH}/load_system_config.sh
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
 sudo chmod -R +x $SOURCE_ETC_PATH

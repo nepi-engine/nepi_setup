@@ -88,13 +88,13 @@ echo "Installing Software Requirements"
 
 # Create and change to tmp install folder
 TMP=/mnt/nepi_storage/tmp
-sudo mkdir $TMP
+fix_path $TMP
 sudo chown -R nepi:nepi ${TMP}
 cd $TMP
 
 
 sudo apt update
-sudo apt-get install software-properties-common
+sudo apt-get install software-properties-common -y
 sudo apt install apt-utils -y
 
 sudo add-apt-repository ppa:rmescandon/yq -y
@@ -137,7 +137,8 @@ sudo apt install gnupg -y
 sudo apt install kgpg -y
 
 sudo apt install snapd -y
-sudo apt install xz-utils
+sudo apt install xz-utils -y
+sudo apt install rsync -y
 
 #sudo apt install -y lsyncd rsync
 
@@ -244,7 +245,8 @@ sudo apt update
 
 
 mkdir -p $(python -m site --user-site)
-ln -s /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
+mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+ln -sf /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
 sudo rm /usr/bin/pip
 sudo ln -s /usr/bin/pip3 /usr/bin/pip
 
@@ -286,9 +288,6 @@ sudo -H python${NEPI_PYTHON} -m pip install scikit-build ninja
 
 
 
-#https://github.com/ultralytics/ultralytics/issues/21015
-#sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input ultralytics
-sudo pip install git+https://github.com/ultralytics/ultralytics.git@main
 
 sudo python3 -m pip install --upgrade pip
 
@@ -336,13 +335,13 @@ sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input scipy
 
 
 
-
 #############
 # Other general python utilities
 python${NEPI_PYTHON} -m pip install --no-input --user labelImg # For onboard training
 python${NEPI_PYTHON} -m pip install --no-input --user licenseheaders # For updating license files and source code comments
 
 
+echo "####################################################"
 
 ##########################
 sudo python3 -c "import cv2; print('cv2 is installed, version:', cv2.__version__)" > /dev/null 2>&1
@@ -387,7 +386,12 @@ else
 fi
 
 
-sudo python${NEPI_PYTHON} -m pip install ultralytics
+
+#https://github.com/ultralytics/ultralytics/issues/21015
+#sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input ultralytics
+# sudo pip install git+https://github.com/ultralytics/ultralytics.git@main
+
+#sudo python${NEPI_PYTHON} -m pip install ultralytics
 
 #############
 # # Install additional python requirements
@@ -422,46 +426,44 @@ nvm install 8.11.1 # RUI-required Node version as of this script creation
 ###################################
 # Install NEPI Managed Services Apps
 ###################################
-if [[ "$NEPI_MANAGES_HOSTNAME" -eq 1 ]]; then
-    sudo apt install hostapd -y # WiFi access point setup
+sudo apt install hostapd -y # WiFi access point setup
+
+
+echo "Installing NEPI NETWORK Management Software"
+sudo apt install netplan.io -y
+sudo apt install ifupdown -y 
+sudo apt install net-tools -y 
+sudo apt install iproute2 -y
+sudo apt install isc-dhcp-client -y
+sudo apt install wpasupplicant -y
+sudo apt install iputils-ping -y
+
+echo "Installing NEPI TIME Management Software"
+sudo apt-get install chrony -y
+
+
+
+echo "Installing NEPI SSH Management Software"
+
+echo "Installing NEPI SSH Management Software"
+#sudo apt install --reinstall openssh-server -y
+
+sudo apt-get remove --purge openssh-server -y
+sudo apt-get update
+sudo apt --fix-broken install
+sudo apt-get install openssh-server -y
+if [[ ! -f "/run/sshd" ]]; then
+    sudo mkdir "/run/sshd"
 fi
+sudo chmod 0755 /run/sshd
+sudo chown root:root /run/sshd
 
-if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
-    echo "Installing NEPI NETWORK Management Software"
-    sudo apt install netplan.io -y
-    sudo apt install ifupdown -y 
-    sudo apt install net-tools -y 
-    sudo apt install iproute2 -y
-    sudo apt install isc-dhcp-client -y
-    sudo apt install wpasupplicant -y
-    sudo apt install iputils-ping -y
-fi
 
-if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
-    echo "Installing NEPI TIME Management Software"
-    sudo apt-get install chrony -y
-fi
 
-if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-    echo "Installing NEPI SSH Management Software"
+sudo apt-get update
+sudo apt --fix-broken install
 
-    echo "Installing NEPI SSH Management Software"
-    #sudo apt install --reinstall openssh-server -y
 
-    sudo apt-get remove --purge openssh-server -y
-    sudo apt-get update
-    sudo apt --fix-broken install
-    sudo apt-get install openssh-server -y
-    if [[ ! -f "/run/sshd" ]]; then
-        sudo mkdir "/run/sshd"
-    fi
-    sudo chmod 0755 /run/sshd
-    sudo chown root:root /run/sshd
-
-fi
-
-    sudo apt-get update
-    sudo apt --fix-broken install
 echo "######################################"
 echo "Installing Shared Drive Apps"
 echo "######################################"
@@ -477,34 +479,35 @@ sudo apt install supervisor -y
 
 
 
+if [[ -n "$DISPLAY" ]]; then
+    echo "########################"
+    echo "Installing Desktop Utility Apps"
+    echo "########################"
+    sudo apt update
 
-echo "########################"
-echo "Installing Utility Apps"
-echo "########################"
-sudo apt update
-
-echo ""
-echo "Installing Chromium Browser"
-sudo snap remove --purge chromium
-sudo snap install chromium
-#sudo apt install chromium-browser -y
-#chromium-browser --disable-features=DnsOverHttps
-
-if command -v code &> /dev/null; then
-    echo "Visual Studio Code is installed and accessible."
-else
     echo ""
-    echo "Installing visual code editor"
-    
-    if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-        curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-        sudo apt install ./code_arm64.deb
-        wait
-        sudo rm code_arm64.deb
-    elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-        sudo snap install code --channel=edge --classic
-    fi
+    echo "Installing Chromium Browser"
+    sudo snap remove --purge chromium
+    sudo snap install chromium
+    #sudo apt install chromium-browser -y
+    #chromium-browser --disable-features=DnsOverHttps
 
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is installed and accessible."
+    else
+        echo ""
+        echo "Installing visual code editor"
+        
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+            sudo apt install ./code_arm64.deb
+            wait
+            sudo rm code_arm64.deb
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            sudo snap install code --channel=edge --classic
+        fi
+
+    fi
 fi
 
 # echo ""

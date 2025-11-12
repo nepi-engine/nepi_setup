@@ -17,7 +17,7 @@ export CONFIG_USER=$(id -un 1000)
 if [[ -f "/home/nepi/.nepi_system_aliases" ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
-    ufile=/homenepi/.nepi_bash_utils
+    ufile=/home/nepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
 elif [[ -f "/home/nepihost/.nepi_docker_aliases" ]]; then
     CONFIG_USER=nepihost

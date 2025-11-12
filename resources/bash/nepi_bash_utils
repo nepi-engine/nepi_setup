@@ -283,21 +283,21 @@ function is_nepi_path(){
       return 1
     fi
 
-    if [[ ":$check_path:" == *"/opt/nepi"*]]; then
+    if [[ ":$check_path:" == *"/opt/nepi"* ]]; then
       return 0
     fi
 
-    if [[ ":$check_path:" == *"/mnt/nepi_storage"*]]; then
+    if [[ ":$check_path:" == *"/mnt/nepi_storage"* ]]; then
       return 0
     fi
 
-    if [[ ":$check_path:" == *"/mnt/nepi_config"*]]; then
+    if [[ ":$check_path:" == *"/mnt/nepi_config"* ]]; then
       return 0
     fi
-    if [[ ":$check_path:" == *"/mnt/nepi_config"*]]; then
+    if [[ ":$check_path:" == *"/mnt/nepi_config"* ]]; then
       return 0
     fi
-    if [[ ":$check_path:" == *"/home/nepi"*]]; then
+    if [[ ":$check_path:" == *"/home"* ]]; then
       return 0
     fi
 
@@ -363,7 +363,8 @@ export -f pingn
 
 # source bashrc
 function sbrc(){
-    source /home/${USER}/.bashrc
+    config_user=$(id -un 1000)
+    source /home/${config_user}/.bashrc
 }
 export -f sbrc
 
@@ -1119,14 +1120,16 @@ export -f source_script
 function fix_path(){
   if [[ ! -v "$1" && -n "$1" ]]; then
       target_path=$1
-        if is_nepi_path $target_path; then
+      if is_nepi_path $target_path; then
         echo "Fixing permissions for path: ${target_path}"
         config_user=$(id -un 1000)
         sudo chown ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
         if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
           sudo chmod ${2} ${target_path} > /dev/null 2>&1
+        fi
+
       else
-          echo "Folder not found at ${target_path}"
+          echo "NEPI Folder not found at ${target_path}"
           return 1
       fi
   else
@@ -1152,10 +1155,11 @@ function fix_folder(){
         sudo chown -R ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
         if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
           sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
-    else
-        echo "Folder not found at ${target_path}"
-        return 1
-    fi
+        fi
+      else
+          echo "NEPI Folder not found at ${target_path}"
+          return 1
+      fi
   else
     echo "No Path Provided"
     return 1
@@ -1166,22 +1170,23 @@ export -f fix_folder
 
 function fix_scripts(){
   if [[ ! -v "$1" && -n "$1" ]]; then
-      target_path=$1
+    target_path=$1
 
-      if [[ ! -e "$target_path" ]]; then
-        sudo mkdir -p $target_path
-      elif [[ ! -d "$target_path" ]]; then
-        echo "Script path is not a found: ${target_path}"
-        return 1
-      fi
+    if [[ ! -e "$target_path" ]]; then
+      sudo mkdir -p $target_path
+    elif [[ ! -d "$target_path" ]]; then
+      echo "Script path is not a found: ${target_path}"
+      return 1
+    fi
 
-      if is_nepi_path $target_path; then
-        echo "Fixing permissions in script folder: ${target_path}"
-        config_user=$(id -un 1000)
-        sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
-        sudo chmod +x ${target_path}/* > /dev/null 2>&1
+    if is_nepi_path $target_path; then
+      echo "Fixing permissions in script folder: ${target_path}"
+      config_user=$(id -un 1000)
+      sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
+      sudo chmod +x ${target_path}/* > /dev/null 2>&1
+
     else
-        echo "Script folder not found at ${target_path}"
+        echo "NEPI Script folder not found at ${target_path}"
         return 1
     fi
   else
@@ -1351,16 +1356,6 @@ get_sw_desc = Echos NEPI formated software vesion tag"
 ###################################
 # Command Line Confi Util Functions
 ###################################
-
-# user_color=01;32m
-# if [[ "$USER" == "nepi" ]]; then
-#   user_color=01;33m # Green
-# elif [[ "$USER" == "nepi_admin" ]]; then
-#   user_color=01;35m # Purple
-# elif [[ "$USER" == "nepihost" ]]; then
-#   user_color=01;34m # Blue
-# fi
-# export USER_COLOR=$user_color
 
 
 head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
