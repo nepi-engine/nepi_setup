@@ -140,6 +140,7 @@ sudo apt install snapd -y
 sudo apt install xz-utils -y
 sudo apt install rsync -y
 
+
 #sudo apt install -y lsyncd rsync
 
     #########
@@ -329,9 +330,8 @@ sudo -H python${NEPI_PYTHON} -m pip install --no-input Flask
 sudo -H python${NEPI_PYTHON} -m pip install --no-input supervisor 
 
 sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input scipy
+sudo -H python${NEPI_PYTHON} -m pip install --no-input virtualenv venv
 
-# upgrade python hdf5
-# sudo python${NEPI_PYTHON} -m pip install --no-input --upgrade h5py
 
 
 
@@ -510,16 +510,23 @@ if [[ -n "$DISPLAY" ]]; then
     fi
 fi
 
-# echo ""
-# echo "########################"
-# echo "Cleaning File System"
-# echo "########################"
-# echo ""
-# sudo apt-get clean
-# sudo apt-get autoremove
-# sudo apt-get autoclean
-# sudo rm -r ~/.local/share/Trash/info/ && rm -r ~/.local/share/Trash/files/ 
-# sudo rm -r * /tmp/*
+
+echo ""
+echo "########################"
+echo "Cleaning File System"
+echo "########################"
+
+
+sudo rm /var/lib/apt/lists/* -vf
+sudo apt-get clean
+sudo apt-get update
+sudo apt update
+sudo apt-get install --fix-broken -y
+sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
+sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
+sudo rm -r /tmp/* 2>/dev/null
+sudo rm /var/crash/* 2>/dev/null
+
 
 echo "##################################"
 echo ""

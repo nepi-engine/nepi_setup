@@ -30,18 +30,21 @@ source $NEPI_UTILS_SOURCE
 
 ######################################dps#
 
-NEPI_ARCH=unknown
+
 if is_valid_jetson; then
-    NEPI_ARCH=arm64
+    arch_val=arm64
 elif is_valid_arm64; then
-    NEPI_ARCH=arm64
+    arch_val=arm64
 elif is_valid_amd64; then
-    NEPI_ARCH=amd64
+    arch_val=amd64
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
     exit 1
 fi
+
+export NEPI_ARCH=$arch_val
+echo "Using HW Arch: ${NEPI_ARCH}"
 
 pyver=$(python3 --version | awk '{print $2}')
 if [[ -n "$pyver" ]]; then
@@ -49,8 +52,8 @@ if [[ -n "$pyver" ]]; then
 else
     pyver=3
 fi
-NEPI_PYTHON=$pyver
-
+export NEPI_PYTHON=$pyver
+echo "Using Python Version: ${NEPI_PYTHON}"
 
 
 
@@ -58,12 +61,12 @@ NEPI_PYTHON=$pyver
 ## Configure NEPI RUI Software
 
 export CONFIG_USER=nepi
-NEPI_BASE=/opt/nepi
-NEPI_STORAGE=/mnt/nepi_storage
+export NEPI_BASE=/opt/nepi
+export NEPI_STORAGE=/mnt/nepi_storage
 
 
-rui_source_path=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/src/nepi_rui
-rui_dest_path=${NEPI_BASE}/nepi_rui
+export rui_source_path=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/src/nepi_rui
+export rui_dest_path=${NEPI_BASE}/nepi_rui
 
 if [[ ! -d "$rui_source_path" ]]; then
     echo "NEPI RUI Source folder not found at ${rui_source_path}"
@@ -83,7 +86,7 @@ else
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $rui_dest_path
 
     sudo rsync -arp ${rui_source_path} ${NEPI_BASE}
-    printf "\n${HIGHLIGHT}*** NEPI RUI Deploy Finished ***\n"
+    printf "\nNEPI RUI Deploy Finished\n"
 
 
     if [[ -d "${rui_dest_path}/.nvmrc" ]]; then
@@ -92,8 +95,10 @@ else
     sudo echo 14.1.0 >> ${rui_dest_path}/.nvmrc
 
     #sudo chown -R ${NEPI_USER}:${NEPI_USER} ${rui_dest_path}
+     
+########################################
+# Required Software
 
-    sudo python${NEPI_PYTHON} -m pip install --user virtualenv
 
     if [[ ! -d "/home/nepi/.nvm" ]]; then
         sudo mkdir /home/nepi/.nvm
@@ -106,14 +111,19 @@ else
     export NVM_DIR="/home/nepi/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
     source ~/.bashrc
+
+
     nvm install 14.1.0
     nvm use 14.1.0
     
     cd ${rui_dest_path}
-    python${NEPI_PYTHON} -m virtualenv venv
+    python -m virtualenv venv
+    sudo chmod +x devenv.sh
     source devenv.sh
-        python${NEPI_PYTHON} -m pip install -r requirements.txt
+
+        suco python${NEPI_PYTHON} -m pip install -r requirements.txt
         cd ${rui_dest_path}/src/rui_webserver/rui-app
         npm install # Intalls packages from package.json in folders
         npm install -g yarn
@@ -145,15 +155,19 @@ else
             echo "Enabling NEPI RUI Service"
 
             sudo systemctl enable nepi_rui
+
     fi
 
+    ##############################
+    echo "NEPI RUI Setup Complete"
+    ##############################
 
 fi
-##############################
-echo "NEPI RUI Setup Complete"
-##############################
 
 
-# # Run RUI
-# #sudo ${rui_dest_path}/etc/start_rui.sh
-# #rosrun nepi_rui run_webserver.py
+
+
+
+# # # Run RUI
+# # #sudo ${rui_dest_path}/etc/start_rui.sh
+# # #rosrun nepi_rui run_webserver.py

@@ -158,7 +158,9 @@ Initialize NEPI docker image installation by typing:
 
     nepiinit
 
-After the initialization script completes, it will print the current installed NEPI Docker Images installed. 
+After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
+
+    dps
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 

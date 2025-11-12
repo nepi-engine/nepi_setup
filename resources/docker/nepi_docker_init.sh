@@ -105,11 +105,8 @@ else
 fi
 
 
-if [[ "$success" -eq 0 ]]; then
-
-
 echo ""
 echo "--------------------------"
 echo "NEPI Image Initialization Complete"
 echo ""
-dimg
+
