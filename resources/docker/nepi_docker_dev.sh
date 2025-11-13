@@ -153,8 +153,13 @@ else
     if [[ -z "$CONTAINER_ID" ]]; then
         echo "NEPI Failed to Run"
     else
-        echo "NEPI Container Running with ID: ${CONTAINER_ID}"
-        echo "Updating NEPI Docker Config Runnning Values"
+        echo ""
+        dps
+        echo ""
+        echo "--------------------------"
+        echo "NEPI DEV Container Running with ID: ${CONTAINER_ID}"
+        echo "--------------------------"   
+        echo ""
         update_yaml_value "NEPI_RUNNING" 1 "$CONFIG_SOURCE"
         update_yaml_value "NEPI_RUNNING_FS" "$nepi_fs" "$CONFIG_SOURCE"
         update_yaml_value "NEPI_RUNNING_TAG" "$nepi_fs_tag" "${CONFIG_SOURCE}"

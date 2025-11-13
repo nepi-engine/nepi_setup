@@ -256,11 +256,15 @@ else
             fi
 
         else
+
+            echo ""
+            dps
             echo ""
             echo "--------------------------"
             echo "NEPI Container Running with ID: ${CONTAINER_ID}"
+            echo "--------------------------"   
             echo ""
-            dps
+
 
             update_yaml_value "NEPI_RUNNING" 1 "$CONFIG_SOURCE"
             update_yaml_value "NEPI_RUNNING_FS" "$nepi_fs" "$CONFIG_SOURCE"

@@ -64,7 +64,7 @@ else
         fi
 
         COMMIT_HW_TYPE=$NEPI_HW_TYPE
-        if [[ -z "$COMMIT_HW_TYPE" ]]; then
+        if [[ -z "$COMMIT_HW_TYPE" || "$COMMIT_HW_TYPE" == 'unknown' ]]; then
             COMMIT_HW_TYPE="${TAG_ARRAY[2]}"
             if [[ -z "$COMMIT_HW_TYPE" ]]; then
                 COMMIT_HW_TYPE="unknown"
