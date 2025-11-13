@@ -24,8 +24,8 @@ directly on a NEPI Host device, or on a netork connected Linux Ubuntu PC for NEP
 See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
 
 
-
-
+################################################################
+### NEPI Base Container Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
 Open a terminal on your NEPI Device (or SSH into your NEPI Device from your PC):
@@ -70,7 +70,7 @@ YOU ARE NOW IN THE NEPI CONTAINER
 Run the NEPI User Setup script:
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-    source ./nepi_user_setup
+    source ./nepi_user_setup.sh
 
 Log out of the container
 
@@ -79,14 +79,25 @@ Log out of the container
 YOU ARE NOW IN THE NEPI HOST
 
 
-
-
-
 **RUN THESE STEPS IN THE NEPI HOST**
+Export your NEPI Base container.
+
+    nepiexport
+
+**NOTE**  If you run into issues and need to try the remaining setup steps,
+you can reimport the exported NEPI Base Image using 'nepiimport' command,
+and selecting this exported image file.
+
 Commit your NEPI container with a description
 
     nepicommit "user_setup"
 
+
+
+################################################################
+### NEPI Container User Setup
+
+**RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in dev mode now using the latest commit
 
     nepidev
@@ -109,15 +120,15 @@ Change to the NEPI Source Code folder:
 
 Run the NEPI Bash Setup script:
 
-    source ./nepi_bash_setup
+    source ./nepi_bash_setup.sh
 
 Run the NEPI Folders Setup script:
 
-    source ./nepi_folders_setup
+    source ./nepi_folders_setup.sh
 
 Run the NEPI Environmant Setup script:
 
-    source ./nepi_env_setup
+    source ./nepi_env_setup.sh
 
 Log out of the container
 
@@ -126,13 +137,17 @@ Log out of the container
 YOU ARE NOW IN THE NEPI HOST
 
 
-
-
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description
 
     nepicommit "env_setup"
 
+
+
+################################################################
+### NEPI Container Environment Setup
+
+**RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in dev mode now using the latest commit
 
     nepidev
@@ -155,7 +170,7 @@ Change to the NEPI Source Code folder:
 
 Run the ROS Environmant Setup script:
 
-    source ./ros_setup
+    source ./ros_setup.sh
 
 Log out of the container
 
@@ -164,13 +179,16 @@ Log out of the container
 YOU ARE NOW IN THE NEPI HOST
 
 
-
-
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description
 
     nepicommit "ros_setup"
 
+
+################################################################
+### NEPI Container ROS Setup
+
+**RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in dev mode now using the latest commit
 
     nepidev
@@ -193,7 +211,78 @@ Change to the NEPI Source Code folder:
 
 Run the NEPI Config Setup script:
 
-    source ./nepi_config_setup
+    source ./nepi_config_setup.sh
+
+Log out of the container
+
+    exit
+
+YOU ARE NOW IN THE NEPI HOST
+
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Commit your NEPI container with a description
+
+    nepicommit "config_setup"
+
+
+################################################################
+### NEPI Container Software Setup
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Restart the NEPI container running in dev mode now using the latest commit
+
+    nepidev
+    dps # Show running NEPI container
+
+Log Into the NEPI container as nepi
+
+    nepilogin
+
+YOU ARE NOW IN THE NEPI CONTAINER
+
+**RUN THESE STEPS IN THE NEPI CONTAINER**
+Start the NEPI Build from Source process:
+
+    nepibld
+
+Log out of the container
+
+    exit
+
+YOU ARE NOW IN THE NEPI HOST
+
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Commit your NEPI container with a description
+
+    nepicommit "software_setup"
+
+
+################################################################
+### NEPI Container Software Testing
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Restart the NEPI container running in dev mode now using the latest commit
+
+    nepidev
+    dps # Show running NEPI container
+
+Log Into the NEPI container as nepi
+
+    nepilogin
+
+YOU ARE NOW IN THE NEPI CONTAINER
+
+**RUN THESE STEPS IN THE NEPI CONTAINER**
+
+Change to the NEPI Source Code folder:
+
+    cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
+
+Run the NEPI Config Setup script:
+
+    source ./nepi_tests.sh
 
 Log out of the container
 
@@ -203,12 +292,10 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 
+################################################################
+### NEPI Container Deploy
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Commit your NEPI container with a description
-
-    nepicommit "config_setup"
-
 Restart the NEPI container running in production mode now using the latest commit
 
     nepistart
@@ -218,7 +305,9 @@ Export the new NEPI Docker Image
 
     nepiexport
 
-Import the new NEPI Docker Image
+Import the new NEPI Docker Image*
+**NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
+the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
 
     nepiimport
 
