@@ -17,20 +17,40 @@ See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
 ################################################################
 ### NEPI Docker Container Build Instructions
 
-You can run the following NEPI container build steps either 
+**NOTE:**  You can run the following NEPI container build steps either 
 directly on a NEPI Host device, or on a netork connected Linux Ubuntu PC for NEPI development.
+For the PC build option, you will first need to configure your PC for NEPI development. 
+See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md).
 
-**NOTE:**  For the PC build option, you will first need to configure your PC for NEPI development. 
-See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
+**NOTE:**  At the end of each of the following sections, the NEPI container at that state will be
+committed. If you run into any issues during one of the sections, can restart it from the beginning
+which will use the last steps committed container image. 
 
 
 ################################################################
 ### NEPI Base Container Setup
 
-**RUN THESE STEPS IN THE NEPI HOST**
-Open a terminal on your NEPI Device (or SSH into your NEPI Device from your PC):
+**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI DEV PC**
 
-Enable internet connection and sync clocks:
+Clone the NEPI Engine repo on your development system (NEPI Device or NEPI Dev PC):
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
+Check network connection to the NEPI HOST Device
+
+    pingn # Ctrl-C to stop
+
+Deploy the NEPI Source Code to the Device 
+
+    nepidpl
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Open a terminal on your NEPI Device (or SSH into your NEPI Device from your NEPI Dev PC using the terminal command 'sshnh')
+
+Enable internet connection and sync clocks (password is 'nepi'):
 
     ninet
 
@@ -38,29 +58,25 @@ Check for internet connection
 
     pingi
 
-Clone the NEPI Engine repo on your development system (NEPI Device or PC):
+Stop the NEPI Docker Service and any running NEPI Containers
 
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout main
-    git submodule update --init --recursive
-
-Deploy the NEPI Source Code to the Device 
-
-    nepidpl
+    nepistop
 
 Initialize a Docker with a NEPI Base Image
+**NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
+the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
+If you have an installed NEPI Docker Image that you want to preserve, run 'nepiexport' first.
 
     nsetup # Switch to nepi setup repo folder
     source ./nepi_docker_init
     dimg # Show installed base image
 
-Start a NEPI container running in dev mode
+Start a NEPI container running in dev mode (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Export your NEPI Base container.
+Export your NEPI Base container (password is 'nepi'):
 
     nepiexport
 
@@ -68,7 +84,25 @@ Export your NEPI Base container.
 you can reimport the exported NEPI Base Image using 'nepiimport' command,
 and selecting this exported image file.
 
-Log Into the NEPI container as root
+
+################################################################
+### NEPI Container User Setup
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Enable internet connection and sync clocks (password is 'nepi'):
+
+    ninet
+
+Check for internet connection
+
+    pingi
+
+Start the NEPI container running in dev mode (password is 'nepi'):
+
+    nepidev
+    dps # Show running NEPI container
+
+Log Into the NEPI container as root (password is 'nepi'):
 
     nepiloginroot
 
@@ -89,46 +123,41 @@ YOU ARE NOW IN THE NEPI HOST
 
 **RUN THESE STEPS IN THE NEPI HOST**
 
-Commit your NEPI container with a description
+Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "user_setup"
 
 
 
+
+
 ################################################################
-### NEPI Container User Setup
+### NEPI Container Environment Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in dev mode now using the latest commit
+Check for internet connection:
+
+    pingi 
+
+**NOTE** If you are not connected, run 'ninet', then try to ping again.
+
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Log Into the NEPI container as nepi
+Log Into the NEPI container as nepi (password is 'nepi'):
 
     nepilogin
 
 YOU ARE NOW IN THE NEPI CONTAINER
 
+
 **RUN THESE STEPS IN THE NEPI CONTAINER**
-Check for internet connection:
 
-    pingi
-
-Change to the NEPI Source Code folder:
+Run the NEPI Environmant Setup scripts (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-
-Run the NEPI Bash Setup script:
-
-    source ./nepi_bash_setup.sh
-
-Run the NEPI Folders Setup script:
-
-    source ./nepi_folders_setup.sh
-
-Run the NEPI Environmant Setup script:
-
     source ./nepi_env_setup.sh
 
 Log out of the container
@@ -139,38 +168,38 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Commit your NEPI container with a description
+Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "env_setup"
 
 
 
 ################################################################
-### NEPI Container Environment Setup
+### NEPI Container ROS Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in dev mode now using the latest commit
+Check for internet connection:
+
+    pingi 
+
+**NOTE** If you are not connected, run 'ninet', then try to ping again.
+
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Log Into the NEPI container as nepi
+Log Into the NEPI container as nepi (password is 'nepi'):
 
     nepilogin
 
 YOU ARE NOW IN THE NEPI CONTAINER
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
-Check for internet connection:
 
-    pingi
-
-Change to the NEPI Source Code folder:
+Run the ROS Environmant Setup script (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-
-Run the ROS Environmant Setup script:
-
     source ./ros_setup.sh
 
 Log out of the container
@@ -181,21 +210,22 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Commit your NEPI container with a description
+Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "ros_setup"
 
+    
 
 ################################################################
-### NEPI Container ROS Setup
+### NEPI Container Config Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in dev mode now using the latest commit
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Log Into the NEPI container as nepi
+Log Into the NEPI container as nepi (password is 'nepi'):
 
     nepilogin
 
@@ -206,15 +236,14 @@ Check for internet connection:
 
     pingi 
 
-Change to the NEPI Source Code folder:
+**NOTE** If you are not connected, open another terminal on the NEPI Host Device and run 'ninet', then try to ping again.
+
+Run the NEPI Config Setup script (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-
-Run the NEPI Config Setup script:
-
     source ./nepi_config_setup.sh
 
-Log out of the container
+Log out of the container (password is 'nepi'):
 
     exit
 
@@ -222,7 +251,7 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Commit your NEPI container with a description
+Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "config_setup"
 
@@ -231,19 +260,19 @@ Commit your NEPI container with a description
 ### NEPI Container Software Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in dev mode now using the latest commit
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Log Into the NEPI container as nepi
+Log Into the NEPI container as nepi (password is 'nepi'):
 
     nepilogin
 
 YOU ARE NOW IN THE NEPI CONTAINER
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
-Start the NEPI Build from Source process:
+Start the NEPI Build from Source process (password is 'nepi'):
 
     nepibld
 
@@ -255,21 +284,21 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Commit your NEPI container with a description
+Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "software_setup"
 
 
 ################################################################
-### NEPI Container Software Testing
+### NEPI Container RUI (Resident User Interface) Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in dev mode now using the latest commit
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
 
     nepidev
     dps # Show running NEPI container
 
-Log Into the NEPI container as nepi
+Log Into the NEPI container as nepi (password is 'nepi'):
 
     nepilogin
 
@@ -277,13 +306,10 @@ YOU ARE NOW IN THE NEPI CONTAINER
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 
-Change to the NEPI Source Code folder:
+Run the NEPI RUI Config Setup script (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-
-Run the NEPI Config Setup script:
-
-    source ./nepi_tests.sh
+    source ./nepi_rui_setup.sh
 
 Log out of the container
 
@@ -291,22 +317,27 @@ Log out of the container
 
 YOU ARE NOW IN THE NEPI HOST
 
+**RUN THESE STEPS IN THE NEPI HOST**
+Commit your NEPI container with a description (password is 'nepi'):
+
+    nepicommit "rui_setup"
 
 
 ################################################################
 ### NEPI Container Deploy
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Restart the NEPI container running in production mode now using the latest commit
+Restart the NEPI container running in production mode now using the latest commit (password is 'nepi'):
 
     nepistart
     dps # Show running NEPI container
 
-Export the new NEPI Docker Image
+Export the new NEPI Docker Image (password is 'nepi'):
 
     nepiexport
 
-Import the new NEPI Docker Image*
+Import the new NEPI Docker Image (password is 'nepi'):
+
 **NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
 the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
 

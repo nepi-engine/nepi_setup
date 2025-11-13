@@ -44,6 +44,31 @@ echo "########################"
 echo ""
 
 
+
+####################################
+# Run NEPI Bash Setup Script
+
+
+script_file=nepi_bash_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Folder Setup Script
+
+script_file=nepi_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
 ##########################
 NEPI_ARCH=unknown
 if is_valid_jetson; then
@@ -91,21 +116,32 @@ echo "########################"
 echo ""
 
 
-# Create and change to tmp install folder
-TMP=/mnt/nepi_storage/tmp
-fix_path $TMP
-sudo chown -R nepi:nepi ${TMP}
-cd $TMP
-
-
+#sudo rm /var/lib/apt/lists/* -vf
 sudo apt update
-sudo apt-get install software-properties-common -y
+sudo apt install software-properties-common -y
 sudo apt install apt-utils -y
 
-sudo add-apt-repository ppa:rmescandon/yq -y
-sudo apt update
-sudo apt install yq -y
+sudo apt install --reinstall ubuntu-advantage-tools -y
+sudo apt install --reinstall ubuntu-desktop -y
 
+sudo apt clean
+sudo apt update
+sudo apt-get install --fix-broken -y
+
+
+# # Create and change to tmp install folder
+# TMP=/mnt/nepi_storage/tmp
+# fix_path $TMP
+# sudo chown -R nepi:nepi ${TMP}
+# cd $TMP
+
+
+sudo apt update
+sudo apt install software-properties-common -y
+sudo apt install apt-utils -y
+
+
+sudo apt update
 sudo apt install cmake -y
 sudo apt install cmake-doc ninja-build -y
 
@@ -133,8 +169,6 @@ sudo apt install psmisc -y
 sudo apt install scapy -y
 sudo apt install minicom -y
 sudo apt install dconf-editor -y
-sudo apt install python-debian -y
-sudo apt install python3-scipy -y
 sudo apt install gparted -y
 sudo apt install socat protobuf-compiler -y
 
@@ -145,6 +179,10 @@ sudo apt install snapd -y
 sudo apt install xz-utils -y
 sudo apt install rsync -y
 
+
+sudo add-apt-repository ppa:rmescandon/yq -y
+sudo apt update
+sudo apt install yq -y
 
 
 echo ""
@@ -191,7 +229,8 @@ sudo apt install -y libv4l-dev v4l-utils qv4l2 #v4l2ucp
 sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev 
 sudo apt -y install libopenblas-dev
 
-
+sudo apt update
+sudo apt-get install --fix-broken -y 
 
 echo ""
 echo "########################"
@@ -199,13 +238,7 @@ echo "Configuring Python"
 echo "########################"
 echo ""
 
-# Create USER python folder
-fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages"
-fix_path  /home/${CONFIG_USER}/.local/bin
-fix_folder /home/${CONFIG_USER}/.local
 
-# Install Python
-sudo apt update 
 
 
 #######################
@@ -244,11 +277,15 @@ sudo apt update
 # # Make sure there is user local package
 
 
+
+# Create USER python folder
 mkdir -p $(python -m site --user-site)
-mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages"
+fix_path  /home/${CONFIG_USER}/.local/bin
+fix_folder /home/${CONFIG_USER}/.local
 ln -sf /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
-sudo rm /usr/bin/pip
-sudo ln -s /usr/bin/pip3 /usr/bin/pip
+
+
 
 
 
@@ -257,15 +294,21 @@ sudo apt install python${NEPI_PYTHON}-distutils -y
 sudo apt install python${NEPI_PYTHON}-venv -y
 sudo apt install python${NEPI_PYTHON}-dev -y 
 
+# Install and Configure pip
+#sudo python${NEPI_PYTHON} -m pip install --upgrade pip
+sudo python${NEPI_PYTHON} -m pip install --upgrade pip
 
-
-# Update python symlinks
 sudo ln -sfn /usr/bin/python${NEPI_PYTHON} /usr/bin/python3
 sudo ln -sfn /usr/bin/python3 /usr/bin/python
-sudo python${NEPI_PYTHON} -m pip --version
-sudo python3 -m pip install --upgrade pip
 
+sudo rm /usr/bin/pip
+sudo ln -s /usr/bin/pip3 /usr/bin/pip
 
+# Upgrade stetup tools
+sudo -H python${NEPI_PYTHON} -m pip install --upgrade setuptools
+
+sudo apt update
+sudo apt-get install --fix-broken -y 
 
 # ** This is just for notes, 
 # these commmands are part of nepi_system_aliases 
@@ -276,6 +319,10 @@ sudo python3 -m pip install --upgrade pip
 #    export SETUPTOOLS_USE_DISTUTILS=stdlib
 #    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #    export PYTHONPATH=/usr/.local/lib/python${NEPI_PYTHON}/site-packages/:$PYTHONPATH
+
+sudo apt install python-debian -y
+sudo apt install python3-scipy -y
+
 
 echo ""
 echo "########################"
@@ -294,8 +341,7 @@ echo "Installing Python Apps"
 echo "########################"
 echo ""
 
-
-sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input setuptools
+#
 
 sudo -H python${NEPI_PYTHON} -m pip install --no-input virtualenv
 
@@ -440,7 +486,7 @@ sudo apt install wpasupplicant -y
 sudo apt install iputils-ping -y
 
 echo "Installing NEPI TIME Management Software"
-sudo apt-get install chrony -y
+sudo apt install chrony -y
 
 
 
@@ -449,10 +495,10 @@ echo "Installing NEPI SSH Management Software"
 echo "Installing NEPI SSH Management Software"
 #sudo apt install --reinstall openssh-server -y
 
-sudo apt-get remove --purge openssh-server -y
-sudo apt-get update
-sudo apt --fix-broken install
-sudo apt-get install openssh-server -y
+sudo apt remove --purge openssh-server -y
+sudo apt update
+sudo apt-get install --fix-broken -y 
+sudo apt install openssh-server -y
 if [[ ! -f "/run/sshd" ]]; then
     sudo mkdir "/run/sshd"
 fi
@@ -461,8 +507,8 @@ sudo chown root:root /run/sshd
 
 
 
-sudo apt-get update
-sudo apt --fix-broken install
+sudo apt update
+sudo apt-get install --fix-broken -y 
 
 echo ""
 echo "######################################"
@@ -473,8 +519,8 @@ echo ""
 sudo apt install samba -y
 sudo apt install smbclient -y
 
-sudo apt-get update
-sudo apt --fix-broken install
+sudo apt update
+sudo apt-get install --fix-broken -y 
 echo "######################################"
 echo "Installing Supervisor Apps"
 echo "######################################"
@@ -524,10 +570,12 @@ echo "########################"
 
 
 #sudo rm /var/lib/apt/lists/* -vf
-sudo apt-get clean
-sudo apt-get update
+sudo apt clean
 sudo apt update
-sudo apt-get install --fix-broken -y
+sudo apt update
+sudo apt-get install --fix-broken -y 
+
+
 sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
 sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
 sudo rm -r /tmp/* 2>/dev/null

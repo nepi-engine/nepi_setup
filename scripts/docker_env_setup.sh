@@ -37,6 +37,29 @@ echo "NEPI DOCKER ENVIRONMENT SETUP"
 echo "########################"
 
 
+####################################
+# Run NEPI Bash Setup Script
+
+
+script_file=nepi_bash_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Folder Setup Script
+
+script_file=nepi_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
 
 ##########################
 NEPI_ARCH=unknown

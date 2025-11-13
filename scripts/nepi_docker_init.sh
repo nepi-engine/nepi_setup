@@ -53,8 +53,6 @@ echo ''
 base_image=ultralytics/ultralytics:latest-jetson-jetpack5
 
 
-
-
 echo "Pulling Base Image ${base_image}"
 nepipull $base_image
 

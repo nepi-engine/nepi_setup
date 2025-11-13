@@ -153,7 +153,8 @@ export -f nepiloginroot
 
 
 function nepicommit(){
-   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh
+   commit_desc=$1
+   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
 }
 export -f nepicommit
 
