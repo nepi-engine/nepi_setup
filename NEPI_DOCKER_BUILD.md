@@ -60,6 +60,14 @@ Start a NEPI container running in dev mode
     nepidev
     dps # Show running NEPI container
 
+Export your NEPI Base container.
+
+    nepiexport
+
+**NOTE**  If you run into issues and need to try the remaining setup steps,
+you can reimport the exported NEPI Base Image using 'nepiimport' command,
+and selecting this exported image file.
+
 Log Into the NEPI container as root
 
     nepiloginroot
@@ -80,13 +88,6 @@ YOU ARE NOW IN THE NEPI HOST
 
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Export your NEPI Base container.
-
-    nepiexport
-
-**NOTE**  If you run into issues and need to try the remaining setup steps,
-you can reimport the exported NEPI Base Image using 'nepiimport' command,
-and selecting this exported image file.
 
 Commit your NEPI container with a description
 
