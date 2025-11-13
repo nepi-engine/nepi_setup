@@ -1,18 +1,39 @@
-# NEPI Docker Host Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker production installation on a suitable edge processor.
-
-**NOTE:** NEPI Docker production installation will make significant changes to your device's operating system configuration.  
-If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.
-
-**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
-See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
-
-
-For a detailed tutorials and videos on this process see the "NEPI Docker Host Setup" tutorial under the "NEPI Installation" section at:
-[NEPI Tutorials](https://www.nepi.com/tutorials)
+# NEPI Docker Build Setup Instructions
+This tutorial will walk you through setting up, configuring, and building a NEPI Docker production container on a suitable edge processor.
 
 For additional support, see the documentation, tuturials, videos, and community forum available at NEPI.com:
 [NEPI Website](https://www.nepi.com)
+
+################################################################
+### NEPI Docker Host Setup
+
+Configure an edge processor with a NEPI Docker production installation
+
+See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
+
+
+################################################################
+### NEPI Development PC Setup
+
+Setup a Linux Ubuntu PC for NEPI development
+
+
+
+See the NEPI User PC Setup instructions at [here](NEPI_USER_PC_SETUP.md)
+See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
+
+For a detailed tutorial on this process see the "NEPI Docker Host Setup" tutorial under the "NEPI Installation" section at:
+[NEPI Tutorials](https://www.nepi.com/tutorials)
+
+
+Clone the NEPI Engine repo:
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
+
 
 
 ################################################################
@@ -24,13 +45,7 @@ Log into a user account on the device with 'Adminstrator' privilages, or 'nepiho
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Make sure your system has internet access by running the following command:
 
-    ping -c 1 google.com
-
-Update Git application:
-
-    sudo apt update && sudo apt install -y git
 
 Clone the NEPI Setup repo:
 
@@ -238,13 +253,15 @@ Check that your NEPI Container is running after reboot:
 
 ################################################################
 ### NEPI Docker Remote PC Connections
-Setup and test a network connected PC connection to your NEPI device following these instructions.
 
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
 
 Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
 See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+
+Configure NEPI through the RUI interface.
+See a tutorial at [NEPI Configuration](https:///)
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
 See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
@@ -254,10 +271,7 @@ See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-a
 ################################################################
 ### NEPI Docker Customization
 
-While most NEPI device settings are configurable real-time through the RUI (Resident User Interface),
-you can configure NEPI Docker's custom run-time settings following these instructions:
 
-See NEPI Docker Customization instructions at [here](NEPI_DOCKER_CUSTOMIZE.md)
 
 
 ################################################################

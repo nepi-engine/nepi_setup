@@ -115,9 +115,9 @@ else
             NEW_DESC=${TAG_ARRAY[5]}
             if [[ -z "$NEW_DESC" ]]; then
                 NEW_DESC="-$(date +%H%M)"
-            elif [[ "$NEW_DESC" =~ [0-9]{4}$ ]]; then
-                NEW_DESC=${NEW_DESC%????}
-                NEW_DESC="-${NEW_DESC}$(date +%H%M)"
+            elif [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
+                NEW_DESC=${NEW_DESC%?????}
+                NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
             else
                 NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
             fi

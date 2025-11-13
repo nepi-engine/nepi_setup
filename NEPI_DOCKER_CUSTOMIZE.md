@@ -1,17 +1,39 @@
-# NEPI Docker Host Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker production installation on a suitable edge processor.
+# NEPI Docker Build Setup Instructions
+This tutorial will walk you through setting up, configuring, and building a NEPI Docker production container on a suitable edge processor.
 
-**NOTE:** NEPI Docker production installation will make significant changes to your device's operating system configuration.  
-If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.
+For additional support, see the documentation, tuturials, videos, and community forum available at NEPI.com:
+[NEPI Website](https://www.nepi.com)
 
-**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
-See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
+################################################################
+### NEPI Docker Host Setup
+
+Configure an edge processor with a NEPI Docker production installation
+
+See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
+
+
+################################################################
+### NEPI Development PC Setup
+
+Setup a Linux Ubuntu PC for NEPI development
+
+
+
+See the NEPI User PC Setup instructions at [here](NEPI_USER_PC_SETUP.md)
+See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
 
 For a detailed tutorial on this process see the "NEPI Docker Host Setup" tutorial under the "NEPI Installation" section at:
 [NEPI Tutorials](https://www.nepi.com/tutorials)
 
-For additional support, visit the NEPI software community forum at:
-[NEPI Community](https://www.community.nepi.com)
+
+Clone the NEPI Engine repo:
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
+
 
 
 ################################################################
@@ -23,13 +45,7 @@ Log into a user account on the device with 'Adminstrator' privilages, or 'nepiho
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Make sure your system has internet access by running the following command:
 
-    ping -c 1 google.com
-
-Update Git application (sudo password is #Nsetup4You):
-
-    sudo apt update && sudo apt install -y git
 
 Clone the NEPI Setup repo:
 
@@ -81,8 +97,9 @@ Log into the `nepihost` user using password  'nepi'
 **NOTE:** IF YOU WANT TO HAVE REMOTE ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
           USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
           CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
-            1) /mnt/nepi_config -> 200 MB Minimum
-            2) /mnt/nepi_storage -> 20 GB Minimum
+            1) /mnt/nepi_storage -> 20 GB Minimum - 60 GB Recommended
+            2) /mnt/nepi_config -> 200 MB Minimum
+            3) /mnt/nepi_storage -> 20 GB Minimum - 150+ GB Recommended
             
 
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
@@ -126,7 +143,7 @@ Check for internet connection
     ndhcp = Enable DHCP Internet Client
     nclock = Sync clock
     ninet = Restart network, connect to internet, and sync clock
-    cuda_version = Echo Cuda version number if cuda availble
+    cuda_version = Echos Cuda version number if cuda availble or 0
     fix_chromium = Fix any Chromium config issues
     sbrc = Source the current user's bashrc files
 
@@ -157,18 +174,22 @@ Initialize NEPI docker image installation by typing:
 
     nepiinit
 
-After the initialization script completes, it will print the current installed NEPI Docker Images installed. 
+After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
+
+    dps
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
     nepistart = Start the NEPI docker container
     nepidev = Start the NEPI docker container in a dev mode with no processes running
     nepistop = Stop the running NEPI docker container
-    nepilogin = Log into the running NEPI container
+    nepilogin = Log into the running NEPI container as user 'nepi'
+    nepiloginroot = Log into the running NEPI container as user 'root'
     nepiswitch = Switch to Inactive NEPI container on next boot or reststat
     nepicommit = Commit the running NEPI container
     nepiinit = Reset, clear, and import new NEPI Image
     nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
+    nepipull = Import a NEPI image from a remote repository given the PULL_URL.
     nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
     nepiconfig = Configure NEPI System settings
     nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file

@@ -81,13 +81,16 @@ else
 
         COMMIT_DATE=$(date +%Y%m%d)
 
-
-        COMMIT_DESC=${TAG_ARRAY[5]}
+        COMMIT_DESC=$1
+        if [[ -z "$COMMIT_DESC" ]]; then
+            COMMIT_DESC=${TAG_ARRAY[5]}
+        fi
+        
         if [[ -z "$COMMIT_DESC" ]]; then
             COMMIT_DESC="-$(date +%H%M)"
-        elif [[ "$COMMIT_DESC" =~ [0-9]{4}$ ]]; then
-            COMMIT_DESC=${COMMIT_DESC%????}
-            COMMIT_DESC="-${COMMIT_DESC}$(date +%H%M)"
+        elif [[ "$COMMIT_DESC" =~ _[0-9]{4}$ ]]; then
+            COMMIT_DESC=${COMMIT_DESC%?????}
+            COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
         else
             COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
         fi
