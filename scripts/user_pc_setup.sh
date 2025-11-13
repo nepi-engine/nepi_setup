@@ -135,6 +135,19 @@ if [[ -f "$USER_CONFIG_FILE" ]]; then
 fi
 
 
+####################################################
+
+# sudo apt update
+# git
+# chromium
+# vcode
+# sudo apt install gnome-shell-extensions gnome-tweaks
+
+# Download nepi repo
+
+
+####################################################
+
 echo " "
 echo "################################# "
 echo "Updating SSH Keys"

@@ -93,6 +93,7 @@ NEPI_ROS: uknown
 NEPI_HAS_CUDA: 0
 NEPI_CUDA_VERSION: X.X
 NEPI_HAS_XPU: 0
+NEPI_FS_AB: 0
 
 ####################################################
 ### NEPI HARDWARE SETTINGS

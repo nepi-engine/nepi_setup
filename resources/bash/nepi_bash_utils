@@ -606,6 +606,93 @@ export -f update_text_value
 
 
 
+
+function fix_path(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+      if [[ ! -e "$target_path" ]]; then
+        sudo mkdir -p $target_path
+        config_user=$(id -un 1000)
+        sudo chmod 0664 ${target_path} > /dev/null 2>&1
+      elif is_nepi_path $target_path; then
+        echo "Fixing permissions for path: ${target_path}"
+        config_user=$(id -un 1000)
+        sudo chown ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+          sudo chmod ${2} ${target_path} > /dev/null 2>&1
+        fi
+
+      else
+          echo "NEPI Folder not found at ${target_path}"
+          return 1
+      fi
+  else
+    echo "No Path Provided"
+    return 1
+  fi
+}
+export -f fix_path
+
+function fix_folder(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+      if [[ ! -e "$target_path" ]]; then
+        config_user=$(id -un 1000)
+        sudo chmod 0664 ${target_path} > /dev/null 2>&1
+      elif is_nepi_path $target_path; then
+        echo "Fixing permissions for path: ${target_path}"
+        config_user=$(id -un 1000)
+        sudo chown -R ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+          sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
+        fi
+      else
+          echo "NEPI Folder not found at ${target_path}"
+          return 1
+      fi
+  else
+    echo "No Path Provided"
+    return 1
+  fi
+}
+export -f fix_folder
+
+
+function fix_scripts(){
+  if [[ -v "$1" || -z "$1" ]]; then
+    target_path=$(pwd)
+  else
+    target_path=$1
+  fi
+  if [[ -n "$target_path" ]]; then
+    if [[ ! -e "$target_path" ]]; then
+      sudo mkdir -p $target_path
+    elif [[ ! -d "$target_path" ]]; then
+      echo "Script path is not a found: ${target_path}"
+      return 1
+    fi
+
+    if is_nepi_path $target_path; then
+      echo "Fixing permissions in script folder: ${target_path}"
+      config_user=$(id -un 1000)
+      sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
+      sudo chmod +x ${target_path}/* > /dev/null 2>&1
+
+    else
+        echo "NEPI Script folder not found at ${target_path}"
+        return 1
+    fi
+  else
+    echo "No Script Path Provided"
+    return 1
+  fi
+}
+export -f fix_scripts
+
+
+
+
+
 function update_yaml_value(){
     export UPDATE_YAML_KEY=$1
     #echo $UPDATE_YAML_KEY
@@ -1115,89 +1202,6 @@ function source_script(){
   fi
 }
 export -f source_script
-
-
-function fix_path(){
-  if [[ ! -v "$1" && -n "$1" ]]; then
-      target_path=$1
-      if is_nepi_path $target_path; then
-        echo "Fixing permissions for path: ${target_path}"
-        config_user=$(id -un 1000)
-        sudo chown ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
-        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
-          sudo chmod ${2} ${target_path} > /dev/null 2>&1
-        fi
-
-      else
-          echo "NEPI Folder not found at ${target_path}"
-          return 1
-      fi
-  else
-    echo "No Path Provided"
-    return 1
-  fi
-}
-export -f fix_path
-
-function fix_folder(){
-  if [[ ! -v "$1" && -n "$1" ]]; then
-      target_path=$1
-      if [[ ! -e "$target_path" ]]; then
-        sudo mkdir -p $target_path
-      elif [[ ! -d "$target_path" ]]; then
-        echo "Path is not a found: ${target_path}"
-        return 1
-      fi
-
-      if is_nepi_path $target_path; then
-        echo "Fixing permissions for path: ${target_path}"
-        config_user=$(id -un 1000)
-        sudo chown -R ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
-        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
-          sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
-        fi
-      else
-          echo "NEPI Folder not found at ${target_path}"
-          return 1
-      fi
-  else
-    echo "No Path Provided"
-    return 1
-  fi
-}
-export -f fix_folder
-
-
-function fix_scripts(){
-  if [[ -v "$1" || -z "$1" ]]; then
-    target_path=$(pwd)
-  else
-    target_path=$1
-  fi
-  if [[ -n "$target_path" ]]; then
-    if [[ ! -e "$target_path" ]]; then
-      sudo mkdir -p $target_path
-    elif [[ ! -d "$target_path" ]]; then
-      echo "Script path is not a found: ${target_path}"
-      return 1
-    fi
-
-    if is_nepi_path $target_path; then
-      echo "Fixing permissions in script folder: ${target_path}"
-      config_user=$(id -un 1000)
-      sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
-      sudo chmod +x ${target_path}/* > /dev/null 2>&1
-
-    else
-        echo "NEPI Script folder not found at ${target_path}"
-        return 1
-    fi
-  else
-    echo "No Script Path Provided"
-    return 1
-  fi
-}
-export -f fix_scripts
 
 
 

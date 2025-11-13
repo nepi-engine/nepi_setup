@@ -37,10 +37,11 @@ source $NEPI_UTILS_SOURCE
 #     exit 1
 # fi
 
+echo ""
 echo "########################"
 echo "NEPI ENVIRONMENT SETUP"
 echo "########################"
-
+echo ""
 
 
 ##########################
@@ -84,7 +85,11 @@ fi
 
 
 echo ""
+echo "########################"
 echo "Installing Software Requirements"
+echo "########################"
+echo ""
+
 
 # Create and change to tmp install folder
 TMP=/mnt/nepi_storage/tmp
@@ -141,28 +146,12 @@ sudo apt install xz-utils -y
 sudo apt install rsync -y
 
 
-#sudo apt install -y lsyncd rsync
 
-    #########
-    # Install Driver Support Libs
-
-#https://www.stereolabs.com/developers/release/4.1
-wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons
-sudo sudo apt install zstd -y
-
-
-
-
-
-#######################################################
-sudo apt install nvidia-utils-515 -y
-###################################################
-
-echo "######################################"
-echo "Installing Hostname Apps"
-echo "######################################"
-sudo apt install hostapd -y # WiFi access point setup
-
+echo ""
+echo "########################"
+echo "Installing Driver Support Software"
+echo "########################"
+echo ""
 
 ### Install ccache
 #https://askubuntu.com/questions/470545/how-do-i-set-up-ccache
@@ -173,6 +162,16 @@ echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
 source ~/.bashrc && echo $PATH
 ccache --version
 
+
+
+### Install Driver Support Libs
+
+#https://www.stereolabs.com/developers/release/4.1
+wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons
+sudo sudo apt install zstd -y
+
+
+sudo apt install nvidia-utils-515 -y
 
 
 
@@ -194,16 +193,16 @@ sudo apt -y install libopenblas-dev
 
 
 
-#######################
-# Install Python 
-#######################
+echo ""
+echo "########################"
+echo "Configuring Python"
+echo "########################"
+echo ""
 
 # Create USER python folder
-if [ ! -d "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" ]; then
-    mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
-    mkdir -p /home/${CONFIG_USER}/.local/bin
-fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.local
+fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages"
+fix_path  /home/${CONFIG_USER}/.local/bin
+fix_folder /home/${CONFIG_USER}/.local
 
 # Install Python
 sudo apt update 
@@ -259,10 +258,13 @@ sudo apt install python${NEPI_PYTHON}-venv -y
 sudo apt install python${NEPI_PYTHON}-dev -y 
 
 
+
 # Update python symlinks
 sudo ln -sfn /usr/bin/python${NEPI_PYTHON} /usr/bin/python3
 sudo ln -sfn /usr/bin/python3 /usr/bin/python
 sudo python${NEPI_PYTHON} -m pip --version
+sudo python3 -m pip install --upgrade pip
+
 
 
 # ** This is just for notes, 
@@ -275,32 +277,39 @@ sudo python${NEPI_PYTHON} -m pip --version
 #    export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 #    export PYTHONPATH=/usr/.local/lib/python${NEPI_PYTHON}/site-packages/:$PYTHONPATH
 
-sudo -H python${NEPI_PYTHON} -m pip install cmake
-sudo -H python${NEPI_PYTHON} -m pip install numpy
-sudo -H python${NEPI_PYTHON} -m pip install scikit-build ninja 
-#sudo -H python${NEPI_PYTHON} -m pip install mkl-static mkl-include
-# Maybe
-# Revert numpy
-#sudo python${NEPI_PYTHON} -m pip uninstall numpy
-#sudo python${NEPI_PYTHON} -m pip3 install numpy=='1.24.4'
+echo ""
+echo "########################"
+echo "Installing ROS System"
+echo "########################"
+echo ""
+
+ source ros_setup.sh
+ wait
 
 
 
+echo ""
+echo "########################"
+echo "Installing Python Apps"
+echo "########################"
+echo ""
 
 
+sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input setuptools
 
+sudo -H python${NEPI_PYTHON} -m pip install --no-input virtualenv
 
-sudo python3 -m pip install --upgrade pip
-
-#############
-#Manual installs some additinal packages in sudo one at a time
-
-sudo -H python${NEPI_PYTHON} -m pip install --upgrade setuptools
-
-sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input wheel
+#sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input wheel
 sudo -H python${NEPI_PYTHON} -m pip install --no-input wheel
 
+sudo -H python${NEPI_PYTHON} -m pip install --no-input scikit-build 
+sudo -H python${NEPI_PYTHON} -m pip install --no-input ninja 
+sudo -H python${NEPI_PYTHON} -m pip install --no-input cmake
+
+sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy
+
 sudo -H python${NEPI_PYTHON} -m pip install --no-input cffi
+
 sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input netifaces
 sudo -H python${NEPI_PYTHON} -m pip install --no-input netifaces
 
@@ -315,31 +324,38 @@ sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif_zeep
 sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif 
 sudo -H python${NEPI_PYTHON} -m pip install --no-input rospy_message_converter
 sudo -H python${NEPI_PYTHON} -m pip install --no-input PyUSB
-sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
 
-sudo -H python${NEPI_PYTHON} -m pip install --no-input labelImg # For onboard training
-sudo -H python${NEPI_PYTHON} -m pip install --no-input licenseheaders # For updating license files and source code comments
+sudo -H python${NEPI_PYTHON} -m pip install --no-input licenseheaders
 
 sudo -H python${NEPI_PYTHON} -m pip install --no-input yap
 sudo -H python${NEPI_PYTHON} -m pip install --no-input yapf
 
 sudo -H python${NEPI_PYTHON} -m pip install --no-input python-gnupg
 
-sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input tornado
+#sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input tornado
+
 sudo -H python${NEPI_PYTHON} -m pip install --no-input Flask
 sudo -H python${NEPI_PYTHON} -m pip install --no-input supervisor 
 
 sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input scipy
-sudo -H python${NEPI_PYTHON} -m pip install --no-input virtualenv venv
 
 
 
+
+sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
+
+
+sudo -H python${NEPI_PYTHON} -m pip install --no-input labelImg # For onboard training
 
 #############
 # Other general python utilities
-python${NEPI_PYTHON} -m pip install --no-input --user labelImg # For onboard training
-python${NEPI_PYTHON} -m pip install --no-input --user licenseheaders # For updating license files and source code comments
 
+
+echo ""
+echo "########################"
+echo "Installing Solution Applications"
+echo "########################"
+echo ""
 
 echo "####################################################"
 
@@ -402,30 +418,15 @@ fi
 
 
 
-# ############################################
-# ## Setup ROS
-# ############################################
-# source ros_setup.sh
-# wait
-
-#########################################
-# Setup RUI Required Software
-#########################################
-
-python${NEPI_PYTHON} -m pip install --no-input --user -U pip
-python${NEPI_PYTHON} -m pip install --no-input --user virtualenv
 
 
-# Install Base Node.js Tools and Packages (Required for RUI, etc.)
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-export NVM_DIR="${NEPI_HOME}/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-nvm install 8.11.1 # RUI-required Node version as of this script creation
+echo ""
+echo "########################"
+echo "Installing System Applications"
+echo "########################"
+echo ""
 
-###################################
-# Install NEPI Managed Services Apps
-###################################
+
 sudo apt install hostapd -y # WiFi access point setup
 
 
@@ -463,10 +464,12 @@ sudo chown root:root /run/sshd
 sudo apt-get update
 sudo apt --fix-broken install
 
-
+echo ""
 echo "######################################"
 echo "Installing Shared Drive Apps"
 echo "######################################"
+echo ""
+
 sudo apt install samba -y
 sudo apt install smbclient -y
 
@@ -476,6 +479,9 @@ echo "######################################"
 echo "Installing Supervisor Apps"
 echo "######################################"
 sudo apt install supervisor -y
+
+
+
 
 
 

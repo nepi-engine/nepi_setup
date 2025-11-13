@@ -98,7 +98,7 @@ else
                 fi
             fi
 
-            COMMNEW_SW_DESCIT_SW_DESC=$NEPI_SW_DESC
+            NEW_SW_DESC=$NEPI_SW_DESC
             if [[ -z "$NEW_SW_DESC" || "$NEW_SW_DESC" == 'unknown' ]]; then
                 NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
                 if [[ -z "$NEW_SW_DESC" ]]; then
@@ -110,6 +110,18 @@ else
             fi
 
             NEW_DATE=$(date +%Y%m%d-%H%M)
+
+
+            NEW_DESC=${TAG_ARRAY[5]}
+            if [[ -z "$NEW_DESC" ]]; then
+                NEW_DESC="-$(date +%H%M)"
+            elif [[ "$NEW_DESC" =~ [0-9]{4}$ ]]; then
+                NEW_DESC=${NEW_DESC%????}
+                NEW_DESC="-${NEW_DESC}$(date +%H%M)"
+            else
+                NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
+            fi
+
     
     
             NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"

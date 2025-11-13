@@ -80,15 +80,21 @@ else
         fi
 
         COMMIT_DATE=$(date +%Y%m%d)
- 
-        #COMMIT_DESCRIPTION="${TAG_ARRAY[5]}"
-
-        COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}-$(date +%H%M)"
 
 
-        if [[ -n "$COMMIT_DESCRIPTION" ]]; then
-            COMMIT_TAG="${COMMIT_TAG}-${COMMIT_DESCRIPTION}"
+        COMMIT_DESC=${TAG_ARRAY[5]}
+        if [[ -z "$COMMIT_DESC" ]]; then
+            COMMIT_DESC="-$(date +%H%M)"
+        elif [[ "$COMMIT_DESC" =~ [0-9]{4}$ ]]; then
+            COMMIT_DESC=${COMMIT_DESC%????}
+            COMMIT_DESC="-${COMMIT_DESC}$(date +%H%M)"
+        else
+            COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
         fi
+
+        COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}"${COMMIT_DESC}
+
+
 
 
         COMMIT_TAG=${COMMIT_TAG,,}

@@ -128,13 +128,20 @@ else
                     fi
                 fi
 
-                NEW_DATE=$(clean_tag_string "${TAG_ARRAY[3]}")
+                NEW_DATE=$(clean_tag_string "${TAG_ARRAY[4]}")
                 if [[ -z "$NEW_DATE" ]]; then
                     NEW_DATE=$(date +%Y%m%d)
                 fi          
         
+
+
+                NEW_DESC=${TAG_ARRAY[5]}
+                if [[ -n "$NEW_DESC" ]]; then
+                    NEW_DESC="-${NEW_DESC}"
+                fi
+
         
-                NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
+                NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"${NEW_DESC}
 
             else # Non NEPI Produced Image
                 

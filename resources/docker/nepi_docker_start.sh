@@ -38,6 +38,13 @@ else
     ########################
     # Start Processes
 
+    # Reset. Updated by NEPI Software
+    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/nepi_system_config.yaml
+    update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
+    update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
+    update_yaml_value "NEPI_FS_AB" $NEPI_AB_FS "$SYSTEM_CONFIG_FILE"
+
+
     if [[ "$NEPI_ACTIVE_FS" == "nepi_fs_a" ]]; then
         nepi_fs=${NEPI_FSA}
         nepi_fs_tag=${NEPI_FSA_TAG}
