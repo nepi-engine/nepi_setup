@@ -304,7 +304,7 @@ Restart the NEPI container running in production mode now using the latest commi
 
 Export the new NEPI Docker Image
 
-    nepiexport
+    nepiexport clean
 
 Import the new NEPI Docker Image*
 **NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,

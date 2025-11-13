@@ -69,7 +69,7 @@ fi
 ####################################
 # Run NEPI Config Setup Script
 
-script_file=nepi_config_setup.sh
+script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
@@ -80,7 +80,7 @@ fi
 ####################################
 echo ""
 echo "##################################"
-echo 'NEPI Config Setup Complete'
+echo 'NEPI Docker Config Setup Complete'
 echo "##################################"
 echo ""
 

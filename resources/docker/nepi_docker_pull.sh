@@ -88,7 +88,7 @@ else
             NEPI_IMPORT_TAG=$2
             if [[ -z "$NEPI_IMPORT_TAG" ]]; then
                 NEPI_IMPORT_TAG=$NEPI_IMPORT_TAG
-                if [[ "$NEPI_IMPORT_TAG" == 'unknown/nepi' ]]; then               
+                if [[ "$NEPI_IMPORT_TAG" == 'unknown' ]]; then               
                     NEPI_IMPORT_TAG=$PULL_TAG
             fi
 

@@ -111,7 +111,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     elif is_valid_amd64; then
         narch=amd64
     else
-        narch=unknown/nepi
+        narch=unknown
     fi
     update_yaml_value "NEPI_HW_TYPE" $narch $UPDATE_PATH
 
