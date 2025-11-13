@@ -13,8 +13,6 @@
 
 export CONFIG_USER=$(id -un 1000)
 
-export CONFIG_USER=$(id -un 1000)
-
 if [[ "$CONFIG_USER" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc

@@ -517,7 +517,7 @@ echo "Cleaning File System"
 echo "########################"
 
 
-sudo rm /var/lib/apt/lists/* -vf
+#sudo rm /var/lib/apt/lists/* -vf
 sudo apt-get clean
 sudo apt-get update
 sudo apt update

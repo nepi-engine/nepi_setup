@@ -72,7 +72,7 @@ else
         fi
 
         COMMIT_SW_DESC=$NEPI_SW_DESC
-        if [[ -z "$COMMIT_SW_DESC" ]]; then
+        if [[ -z "$COMMIT_SW_DESC" || "$COMMIT_SW_DESC" == 'unknown' ]]; then
             COMMIT_SW_DESC="${TAG_ARRAY[3]}"
             if [[ -z "$COMMIT_SW_DESC" ]]; then
                 COMMIT_SW_DESC="unknown"

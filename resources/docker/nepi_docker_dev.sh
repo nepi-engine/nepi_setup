@@ -40,6 +40,12 @@ else
     ########################
     # Start Processes
 
+    # Reset. Updated by NEPI Software
+    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/nepi_system_config.yaml
+    update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
+    update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
+
+
     ########################
     # Stop Any Running NEPI Containers
     echo "Calling NEPI Docker Stop Process"

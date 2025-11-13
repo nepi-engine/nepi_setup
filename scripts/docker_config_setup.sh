@@ -13,15 +13,8 @@
 # This file configures a NEPI Docker installation environment
 
 sudo -v
-export CONFIG_USER=nepihost
 
-
-if [[ "$USER" != "$CONFIG_USER" ]]; then
-    echo "This script must be run by user account ${CONFIG_USER}."
-    echo "Log in as ${CONFIG_USER} and run again"
-    exit 1
-fi
-
+export CONFIG_USER=$(id -un 1000)
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -87,7 +80,7 @@ fi
 ####################################
 echo ""
 echo "##################################"
-echo 'NEPI Docker Config Setup Complete'
+echo 'NEPI Config Setup Complete'
 echo "##################################"
 echo ""
 
