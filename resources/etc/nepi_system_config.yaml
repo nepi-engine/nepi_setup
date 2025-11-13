@@ -20,13 +20,13 @@ NEPI_ALLOWS_USERS: 1
 # Set the NEPI System Name
 NEPI_DEVICE_ID: device1
 # NEPI Model Description
-NEPI_DEVICE_MD: unknown/nepi
+NEPI_DEVICE_MD: unknown
 # NEPI device's serial number (6 digits starting with non-zero)
 NEPI_DEVICE_SN: '999999'
 # NEPI Build Version Name
 NEPI_VERSION: XpXpX
 # NEPI Software Description
-NEPI_SW_DESC: unknown/nepi
+NEPI_SW_DESC: unknown
 
 
 ####################################################
@@ -58,9 +58,9 @@ NEPI_SSH_AKEY: nepi_engine_default_authorized_keys
 NEPI_SSH_PKEY: nepi_engine_default_private_ssh_key
 ## WIFI NETWORK SETTINGS
 # Set the NEPI device's WiFi hardware interface name
-# NOTE: If set to "unknown/nepi", the first detected WiFi harware will be used
+# NOTE: If set to "unknown", the first detected WiFi harware will be used
 #  if set to NONE, wifi hardware and processes will be disabled
-NEPI_WIFI_INTERFACE: unknown/nepi
+NEPI_WIFI_INTERFACE: unknown
 # Enable WiFi Client Connectivity on Startup if WiFi Adapter Present. 
 # NOTE: If enabled, the NEPI device will enable the device's WiFi hardware on startup,
 #   and start WiFi client connection processes. If enabled and the setup proccess 
@@ -89,7 +89,7 @@ NEPI_ROS_PORT: 11311
 ####################################################
 NEPI_INSTALL: DEMO
 NEPI_PYTHON: X.X
-NEPI_ROS: unknown/nepi
+NEPI_ROS: unknown
 NEPI_HAS_CUDA: 0
 NEPI_CUDA_VERSION: X.X
 NEPI_HAS_XPU: 0
@@ -99,9 +99,9 @@ NEPI_FS_AB: 0
 ### NEPI HARDWARE SETTINGS
 ####################################################
 # NEPI Hardware Host Options: jetson, arm64, amd64.
-NEPI_HW_TYPE: unknown/nepi
+NEPI_HW_TYPE: unknown
 # NEPI Hardware Host Model Options: ORIN, XAVIER, TX2, NANO, RPI4, GENERIC.
-NEPI_HW_MODEL: unknown/nepi
+NEPI_HW_MODEL: unknown
 
 ####################################################
 # NEPI CONTAINER SETTINGS
