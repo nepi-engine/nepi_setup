@@ -1105,7 +1105,7 @@ function sync_to_config_folder() {
         source_etc_path=${source_config_path}/etc
         source_sys_config_file=${source_etc_path}/nepi_system_config.yaml
 
-        if [[ "$1" == 'nepi_cfg' ]]; then
+        if [[ "$2" == 'nepi_cfg' ]]; then
             update_config_path=/opt/nepi
             update_etc_path=${update_config_path}/etc
             update_config_file=${update_etc_path}/nepi_system_config.yaml

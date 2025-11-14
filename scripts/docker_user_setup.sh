@@ -67,14 +67,14 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
+    sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
     sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
     sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
-    sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG ic2 ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG video $USER >/dev/null 2>&1
+    sudo usermod -aG i2c ${CONFIG_USER} #>/dev/null 2>&1
+    sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
 
 	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
@@ -134,10 +134,16 @@ function new_system_user(){
     if id -u $user; then
         echo "Configuring NEPI System User account $user"
         echo "${user}:${password}" | sudo chpasswd
-        # sudo usermod -aG $user $user
-        sudo usermod -aG sudo $user
-        sudo usermod -aG $CONFIG_USER $user
-        sudo usermod -aG $user $CONFIG_USER 
+        # sudo usermod -aG $user $user    
+        sudo usermod -aG sudo $user >/dev/null 2>&1
+        sudo usermod -aG $CONFIG_USER $user >/dev/null 2>&1
+        sudo adduser ${user} dialout
+        sudo usermod -aG dialout ${user} >/dev/null 2>&1
+        sudo usermod -aG tty ${user} >/dev/null 2>&1
+        sudo usermod -aG i2c ${user} #>/dev/null 2>&1
+        sudo usermod -aG video ${user} >/dev/null 2>&1
+        sudo usermod -aG docker ${user} >/dev/null 2>&1
+
         sudo usermod -s /sbin/nologin $user
 		
 		
@@ -331,22 +337,13 @@ fi
 # echo "Adding NEPI users to sudo users"
 # echo "###################################"
 
-sudo cp ${SOURCE_ETC_PATH}/sudo/sudoers /etc/sudoers
-sudo chown root:root /etc/sudoers
-sudo chmod 0440 /etc/sudoers
-
-
-# file=/etc/sudoers
-# if grep -qnw $file -e "##### NEPI SUDO USERS #####" ; then
-#     : #echo "Already Done"
-# else
-#     echo ' ' | sudo tee -a $file
-#     echo '##### NEPI SUDO USERS #####' | sudo tee -a $file
-#     echo 'nepi ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-#     echo 'nepihost ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-#     echo 'nepiadmin ALL=(ALL:ALL) ALL'  | sudo tee -a $file
-# fi
-# cat $file
+source_file=${SOURCE_ETC_PATH}/sudo/sudoers 
+dest_file=/etc/sudoers
+if [[ -f "$source_file" ]]; then
+    sudo cp $source_file $dest_file
+fi
+sudo chown root:root $dest_file
+sudo chmod 0440 $dest_file
 
 
 

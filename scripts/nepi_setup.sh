@@ -146,18 +146,19 @@ if [[ "$?" -eq 0 ]]; then
     echo "########"
     echo "Configuring Samba Service"
 
-    if [[ "$CONFIG_USER" == "nepihost" ]]; then
-        samba_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-    else
-        samba_file=${SOURCE_ETC_PATH}/samba/smb.conf
-    fi
+
 
 
     echo "Updating Samba ETC config file"
-    if [ -f "/etc/samba/smb.conf" ]; then
-        sudo rm -r /etc/samba/smb.conf
+    if [[ "$CONFIG_USER" == "nepihost" ]]; then
+        source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+    else
+        source_file=${SOURCE_ETC_PATH}/samba/smb.conf
     fi
-    sudo cp -d ${samba_file} /etc/samba/smb.conf
+    dest_file=/etc/ssh/sshd_config
+    if [[ -f "$source_file" ]]; then
+        sudo cp -d $source_file $dest_file
+    fi
 
 
     echo "Restarting Samba Service"
@@ -220,14 +221,16 @@ if [[ "$?" -eq 0 ]]; then
         echo "Updating SSH Service Config"
         echo ""
 
-        if [[ -f "/etc/ssh/sshd_config" ]]; then
-            sudo rm -r /etc/ssh/sshd_config
-        fi
 
+        
         if [[ "$CONFIG_USER" == "nepihost" ]]; then
-            sudo cp ${SOURCE_ETC_PATH}/docker/ssh/sshd_config /etc/ssh/sshd_config
+            source_file=${SOURCE_ETC_PATH}/docker/ssh/sshd_config 
         else
-            sudo cp ${SOURCE_ETC_PATH}/ssh/sshd_config /etc/ssh/sshd_config
+            source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
+        fi
+        dest_file=/etc/ssh/sshd_config
+        if [[ -f "$source_file" ]]; then
+            sudo cp $source_file $dest_file
         fi
 
         echo "Enabling ssh service"
@@ -334,11 +337,13 @@ else
     echo "Updating SSH Service Config"
     echo ""
 
-    if [[ -f "/etc/ssh/sshd_config" ]]; then
-        sudo rm -r /etc/ssh/sshd_config
+
+    source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
+    dest_file=/etc/ssh/sshd_config
+    if [[ -f "$source_file" ]]; then
+        sudo cp $source_file $dest_file
     fi
 
-    sudo cp ${SOURCE_ETC_PATH}/ssh/sshd_config /etc/ssh/sshd_config
 
     echo "Enabling ssh service"
     sudo systemctl enable sshd >/dev/null 2>&1
