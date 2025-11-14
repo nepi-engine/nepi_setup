@@ -10,7 +10,7 @@
 
 #source /opt/nepi/etc/load_system_config.sh
 
-# Start NEPI Time Management Processes
+# Start NEPI Process Management services
 echo "Starting NEPI Supervisor Processes"
 sudo service supervisor stop
 sleep 1

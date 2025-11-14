@@ -241,7 +241,7 @@ if [[ "$?" -eq 0 ]]; then
     fi
 
 
-    if [[ "$CONFIG_USER" == "nepihost" &&  "$NEPI_MANAGES_DOCKER" -eq 1 ]]; then
+    if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" == "nepihost" ]]; then
         echo ""
         echo "########"
         echo "Updating Docker Service Config"
@@ -328,6 +328,27 @@ if [[ "$?" -eq 0 ]]; then
 
 else
 
+    ##################
+    echo ""
+    echo "########"
+    echo "Updating SSH Service Config"
+    echo ""
+
+    if [[ -f "/etc/ssh/sshd_config" ]]; then
+        sudo rm -r /etc/ssh/sshd_config
+    fi
+
+    sudo cp ${SOURCE_ETC_PATH}/ssh/sshd_config /etc/ssh/sshd_config
+
+    echo "Enabling ssh service"
+    sudo systemctl enable sshd >/dev/null 2>&1
+    wait
+    sleep 2
+    source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
+
+    sudo systemctl restart sshd
+
+    ###################
     echo ""
     echo "########"
     echo "Setting up Supervisor"

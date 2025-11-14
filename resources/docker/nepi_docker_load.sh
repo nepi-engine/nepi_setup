@@ -9,7 +9,7 @@
 ## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
 ##
 
-# This file imports an image from a tar file to the inactive fs
+# This file loads an image from a .archive.tar file to the inactive fs
 sudo -v
 
 CONFIG_USER=nepihost
@@ -52,11 +52,11 @@ else
 
 
     if [[ "$NEPI_IMPORTING" -eq 1 ]]; then
-        echo "Image import allready in progress"
+        echo "Image load allready in progress"
 
     else
         ########################
-        echo "Proceeding with the import..."
+        echo "Proceeding with the load..."
         INSTALL_IMAGE=$1
 
 
@@ -73,13 +73,12 @@ else
 
         
 
-        if [[ -f $INSTALL_IMAGE && "${INSTALL_IMAGE##*.}" == "tar" &&  "$INSTALL_IMAGE" == "*.archive.tar" ]]; then
-
-            echo "The selected file is NEPI Archive Image file.  Use 'nepiload' to load the file"
+        if [[ -f $INSTALL_IMAGE && "${INSTALL_IMAGE##*.}" == "tar" &&  "$INSTALL_IMAGE" != "*.archive.tar" ]]; then
+            echo "The selected file is a NEPI Image file.  Use 'nepiimport' to import the file"
 
         elif [[ -f $INSTALL_IMAGE && "${INSTALL_IMAGE##*.}" == "tar" ]]; then
 
-            echo "Importing image from: ${INSTALL_IMAGE}"
+            echo "Loading image from: ${INSTALL_IMAGE}"
                         
 
             ###########
@@ -94,13 +93,13 @@ else
 
             ###########
             # Get Imported Tag and IMPORT_ID 
-            NEPI_IMPORT_TAG="${INSTALL_FILE%.*}"
+            NEPI_IMPORT_TAG="${INSTALL_FILE%%.*}"
 
-            echo "Got Import Tag: ${NEPI_IMPORT_TAG}"
+            echo "Got Load Tag: ${NEPI_IMPORT_TAG}"
 
             if [[ "${NEPI_IMPORT_TAG:0:4}" == 'nepi' ]]; then # NEPI Produced Image
 
-                #echo "Updating Import Tag: ${NEPI_IMPORT_TAG}"
+                #echo "Updating Load Tag: ${NEPI_IMPORT_TAG}"
 
                 IFS='-' read -ra TAG_ARRAY <<< "$NEPI_IMPORT_TAG"
                 
@@ -146,7 +145,7 @@ else
             else # Non NEPI Produced Image
 
                 #nsw_tag=$(clean_tag_string $NEPI_IMPORT_TAG)
-                #echo "Creating Import Tag: ${NEPI_IMPORT_TAG}  with sw_tag ${nsw_tag}"
+                #echo "Creating Load Tag: ${NEPI_IMPORT_TAG}  with sw_tag ${nsw_tag}"
                
                 NEW_NAME=nepi
                 NEW_VERSION="0p0p0"
@@ -238,16 +237,16 @@ else
                 echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_DOCKER_SPACE}GB is aviable"
             else
                 #IMPORT_ID=debug
-                echo "Importing file ${INSTALL_IMAGE} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
-                echo "Staging import nepi_staging:${NEPI_IMPORT_TAG}"
-                res=$(sudo docker import $INSTALL_IMAGE nepi_staging:${NEPI_IMPORT_TAG})
+                echo "Loading file ${INSTALL_IMAGE} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
+                echo "Staging load nepi_staging:${NEPI_IMPORT_TAG}"
+                res=$(sudo docker load $INSTALL_IMAGE nepi_staging:${NEPI_IMPORT_TAG})
                 wait
                 hash=${res##*sha256:}
                 IMPORT_ID=${hash:0:12}
                 NEPI_IMPORT_ID=$IMPORT_ID
 
                 if [[ -n "$IMPORT_ID" ]]; then
-                        echo "Docker import succeeded with IMPORT_ID: $IMPORT_ID"
+                        echo "Docker load succeeded with IMPORT_ID: $IMPORT_ID"
 
                         run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
                         if [[ -n "$run_names" ]]; then
@@ -276,16 +275,16 @@ else
                         fi
 
                         # Copy the Staging to the NEPI_FSA image
-                        echo "Renaming staging import to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        echo "Renaming staging load to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
                         sudo docker tag "nepi_staging:${NEPI_IMPORT_TAG}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}" 
                         wait
-                        echo "Renaming staging import tag"
+                        echo "Renaming staging load tag"
                         sudo docker rmi "nepi_staging:${NEPI_IMPORT_TAG}"
 
                         #############
                         echo ""
                         echo "--------------------------"
-                        echo "NEPI Image Import Complete"
+                        echo "NEPI Image Load Complete"
                         echo ""
                         dimg
 
@@ -293,7 +292,7 @@ else
                 else
                     echo ""
                     echo "--------------------------"
-                    echo "NEPI Image Failed to Import: ${INSTALL_IMAGE}"
+                    echo "NEPI Image Failed to Load: ${INSTALL_IMAGE}"
                     
                 fi
                 
@@ -313,7 +312,7 @@ else
 
             fi
         else
-            echo "Failed to find NEPI Image '.tar' file at: ${INSTALL_IMAGE}"
+            echo "Failed to find NEPI Image file at: ${INSTALL_IMAGE}"
         fi
     fi
     

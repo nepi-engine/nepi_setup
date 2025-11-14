@@ -119,11 +119,14 @@ else
     nvm use 14.1.0
     
     cd ${rui_dest_path}
-    python -m virtualenv venv
+
+    sudo rm -r venv 2>/dev/null 
+    #python${NEPI_PYTHON} -m virtualenv venv
+    
     sudo chmod +x devenv.sh
     source devenv.sh
 
-        suco python${NEPI_PYTHON} -m pip install -r requirements.txt
+        sudo python${NEPI_PYTHON} -m pip install -r requirements.txt
         cd ${rui_dest_path}/src/rui_webserver/rui-app
         npm install # Intalls packages from package.json in folders
         npm install -g yarn
@@ -131,9 +134,11 @@ else
         npm install --save react-app-rewired
         npm install --save react-zoom-pan-pinch
         npm install --save ffmpeg-kit-react-native   
+
+        #npm audit fix
         
-        #npm run build
-    deactivate
+        npm run build
+    #deactivate
 
 
     # # Build RUI
@@ -168,6 +173,4 @@ fi
 
 
 
-# # # Run RUI
-# # #sudo ${rui_dest_path}/etc/start_rui.sh
-# # #rosrun nepi_rui run_webserver.py
+

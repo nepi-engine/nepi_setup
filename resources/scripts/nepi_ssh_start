@@ -9,6 +9,6 @@
 ##
 
 # Start NEPI ssh service
-sudo /usr/sbin/sshd
+sudo /usr/sbin/sshd -D -e -d
 
 

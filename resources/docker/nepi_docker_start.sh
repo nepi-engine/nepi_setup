@@ -243,6 +243,7 @@ else
 
 
         sleep 2
+        ninet  >/dev/null 2>&1 #Restart the network
 
 
         CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))

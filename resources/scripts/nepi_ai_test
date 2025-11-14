@@ -1,0 +1,24 @@
+#! /bin/bash
+##
+## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
+##
+## This file is part of nepi-engine
+## (see https://github.com/nepi-engine).
+##
+## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
+##
+
+#source /opt/nepi/etc/load_system_config.sh
+
+# Run and AI Detection Speed test
+
+
+if ! [ $(id -u) = 0 ]; then
+   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   exit 1
+fi
+
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+NEPI_TESTS_FOLDER=$(dirname "${SCRIPT_FOLDER}")/etc/tests/
+python ${NEPI_TESTS_FOLDER}/test_ai_detect/nepi_ai_yolov8_detection_test.py

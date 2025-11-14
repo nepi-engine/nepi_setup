@@ -166,12 +166,12 @@ RED='\033[0;31m'
 ## NEPI deploy complete
 alias nepidpl="
 cd $SOURCE_FOLDER
-./deploy_nepi_complete.sh"
+source ./deploy_nepi_complete.sh"
 
 # NEPI deploy repos
 alias repodpl="
 cd $SOURCE_FOLDER
-./deploy_nepi_repos.sh"
+source ./deploy_nepi_repos.sh"
 
 utilsn="${utilsn}
 ### NEPI DEV UTIL FUNCTIONS

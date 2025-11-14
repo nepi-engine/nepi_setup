@@ -1223,21 +1223,23 @@ function clean_tag_string(){
 }
 export -f clean_tag_string
 
-function clean_vesion_string(){
+
+function clean_version_string(){
   cstring=$1
   cstring="${cstring// /_}"
   cstring="${cstring//-/_}"
   cstring="${cstring//./p}"
   echo $cstring
 }
-export -f clean_vesion_string
+export -f clean_version_string
 
-function dev_vesion_string(){
+function dev_version_string(){
   dstring=$(clean_version_string $1)
   dstring=${dstring}-$(date +%Y%m%d-%H%M)
   echo $dstring
 }
-export -f dev_vesion_string
+export -f dev_version_string
+
 
 
 function get_hw_type() {

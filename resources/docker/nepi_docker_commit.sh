@@ -89,7 +89,7 @@ else
 
         
 
-        if [[ -z "$COMMIT_DESC" || "$COMMIT_SW_DESC" == 'unknown' || "$COMMIT_SW_DESC" == 'clean']]; then
+        if [[ -z "$COMMIT_DESC" || "$COMMIT_SW_DESC" == 'unknown' || "$COMMIT_SW_DESC" == 'clean' ]]; then
             COMMIT_DESC="-$(date +%H%M)"
         elif [[ "$COMMIT_DESC" =~ _[0-9]{4}$ ]]; then
             COMMIT_DESC=${COMMIT_DESC%?????}

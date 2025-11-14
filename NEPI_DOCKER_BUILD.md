@@ -45,6 +45,7 @@ Check network connection to the NEPI HOST Device
 
 Deploy the NEPI Source Code to the Device 
 
+    export DEPLOY_3RD_PARTY=1 # Set flag to deploy 3rd Party Software for first build
     nepidpl
 
 **RUN THESE STEPS IN THE NEPI HOST**
@@ -132,7 +133,7 @@ Commit your NEPI container with a description (password is 'nepi'):
 
 
 ################################################################
-### NEPI Container Environment Setup
+### NEPI Container Environment Setup 1
 
 **RUN THESE STEPS IN THE NEPI HOST**
 Check for internet connection:
@@ -158,7 +159,7 @@ YOU ARE NOW IN THE NEPI CONTAINER
 Run the NEPI Environmant Setup scripts (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-    source ./nepi_env_setup.sh
+    source ./nepi_env_setup1.sh
 
 Log out of the container
 
@@ -170,8 +171,54 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "env_setup"
+    nepicommit "env_setup1"
 
+
+
+
+################################################################
+### NEPI Container Environment Setup 2
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Check for internet connection:
+
+    pingi 
+
+**NOTE** If you are not connected, run 'ninet', then try to ping again.
+
+Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
+
+    nepidev
+    dps # Show running NEPI container
+
+Log Into the NEPI container as nepi (password is 'nepi'):
+
+    nepilogin
+
+YOU ARE NOW IN THE NEPI CONTAINER
+
+
+**RUN THESE STEPS IN THE NEPI CONTAINER**
+
+Run the NEPI Environmant Setup scripts (password is 'nepi'):
+
+**NOTE:** "Building wheel for lxml (pyproject.toml)" step took a long time but worked.
+
+    cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
+    source ./nepi_env_setup2.sh
+
+
+Log out of the container
+
+    exit
+
+YOU ARE NOW IN THE NEPI HOST
+
+
+**RUN THESE STEPS IN THE NEPI HOST**
+Commit your NEPI container with a description (password is 'nepi'):
+
+    nepicommit "env_setup2"
 
 
 ################################################################
@@ -232,18 +279,31 @@ Log Into the NEPI container as nepi (password is 'nepi'):
 YOU ARE NOW IN THE NEPI CONTAINER
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
-Check for internet connection:
-
-    pingi 
-
-**NOTE** If you are not connected, open another terminal on the NEPI Host Device and run 'ninet', then try to ping again.
 
 Run the NEPI Config Setup script (password is 'nepi'):
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
     source ./nepi_config_setup.sh
 
-Log out of the container (password is 'nepi'):
+Test the NEPI Container's SSH Service (port 2222)
+**NOTE** You will see a message that port 22 is in use
+
+    scripts
+    source ./nepi_ssh_start
+
+**Ctrl-C** to stop the process
+
+Test Run an AI Detectror
+
+    scripts
+    sudo su
+    source ./nepi_ai_test
+
+**Ctrl-C** to stop the process
+
+    exit # exit sudo uer
+
+Log out of the container:
 
     exit
 
@@ -256,8 +316,10 @@ Commit your NEPI container with a description (password is 'nepi'):
     nepicommit "config_setup"
 
 
+
+
 ################################################################
-### NEPI Container Software Setup
+### NEPI Container NEPI Engine Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
@@ -274,7 +336,17 @@ YOU ARE NOW IN THE NEPI CONTAINER
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 Start the NEPI Build from Source process (password is 'nepi'):
 
-    nepibld
+    codebld
+
+Test Run the NEPI
+
+    scripts
+    sudo su
+    source ./nepi_engine_start
+
+**Ctrl-C** to stop the process
+
+    exit # exit sudo uer
 
 Log out of the container
 
@@ -286,11 +358,12 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "software_setup"
+    nepicommit "engine_setup"
+
 
 
 ################################################################
-### NEPI Container RUI (Resident User Interface) Setup
+### NEPI Container NEPI RUI (Resident User Interface) Setup
 
 **RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in dev mode now using the latest commit (password is 'nepi'):
@@ -307,9 +380,19 @@ YOU ARE NOW IN THE NEPI CONTAINER
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 
 Run the NEPI RUI Config Setup script (password is 'nepi'):
+**NOTE** The following process witll show a lot of 'npm WARN' meassages you can ignore.
 
     cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
     source ./nepi_rui_setup.sh
+
+
+Test Run the RUI:**
+**NOTE:** You can ignore a red 'WARNING: This is a development server' warning
+
+    scripts
+    source ./nepi_rui_start
+
+**Ctrl-C** to stop the process
 
 Log out of the container
 
@@ -321,6 +404,7 @@ YOU ARE NOW IN THE NEPI HOST
 Commit your NEPI container with a description (password is 'nepi'):
 
     nepicommit "rui_setup"
+
 
 
 ################################################################

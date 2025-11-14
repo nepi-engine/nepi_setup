@@ -146,8 +146,10 @@ else
     #         echo "NEPI Container ${dname} FAILED to run"
     #         exit 1
     #     fi
-    # fi
+    # 
+   
     sleep 2
+    ninet  >/dev/null 2>&1 #Restart the network
 
     CONTAINER_ID=$(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}")
     if [[ -z "$CONTAINER_ID" ]]; then
@@ -168,4 +170,5 @@ else
         update_yaml_value "NEPI_FS_RESTART" 0 "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_RESTARTING" 0 "${CONFIG_SOURCE}"
     fi
+
 fi

@@ -13,6 +13,16 @@
 # This file sets up NEPI Docker users
 
 
+if ! [ $(id -u) = 0 ]; then
+   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   exit 1
+fi
+
+###############
+# Create a tmp folder for all users
+sudo mkdir -p /tmp/nepihost
+sudo chmod -R 0777 /tmp/nepihost
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils

@@ -102,7 +102,7 @@ NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
     sudo mkdir -p $NEPI_CONFIG_PATH
 fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_PATH
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_PATH
 
 if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
     sudo cp -r -p "${SOURCE_ETC_PATH}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}

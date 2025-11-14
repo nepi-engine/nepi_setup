@@ -114,7 +114,7 @@ if __name__ == '__main__':
         print("Failed to process detection with exception: " + str(e))
 
     print('')
-    print("Running Detections")
+    print("Running 100 Detections")
 
     start_time = time.time()
 

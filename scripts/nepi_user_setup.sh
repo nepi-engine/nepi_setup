@@ -22,8 +22,6 @@ fi
 sudo mkdir -p /tmp/nepi
 sudo chmod -R 0777 /tmp/nepi
 
-################
-# Check Valid User
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

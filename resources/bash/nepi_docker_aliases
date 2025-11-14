@@ -265,6 +265,49 @@ function nepiexport(){
 }
 export -f nepiexport
 
+
+function nepisave(){
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_save.sh $1
+}
+export -f nepisave
+
+
+function nepiload(){
+  import_path=/mnt/nepi_storage/nepi_images
+  if [[ -n "$1" ]]; then
+    if [[ -f "$1" ]]; then
+      image_path=$1
+    elif [[ -n "$2" ]]; then
+      image_path=${import_path}/${$2}
+    fi
+  fi
+
+  if [[ -d "$import_path" ]]; then
+      selected=$(select_file_from_folder $import_path | tail -n1)
+      echo "Selected NEPI Image file ${selected}"
+      if [[ -n "$selected" ]]; then
+        echo "Importing NEPI Image file ${selected}"
+        image_path="${import_path}/${selected}"
+      else
+          echo "No NEPI Image Files Found in: ${import_path}"
+          return 1
+      fi  
+  fi
+  echo "Calling NEPI Load script with file ${image_path}"
+  if [[ -f "$image_path" ]]; then
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_load.sh $image_path
+  else
+      echo "No NEPI Image Files Found in: ${import_path}"
+      return 1
+  fi  
+}
+export -f nepiload
+
+
+
+
+
+
 function nepiconfig(){
   SHOW_CONFIG_MENU=1
   bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
@@ -339,10 +382,12 @@ nepiloginroot = Log into the running NEPI container as user 'root'
 nepiswitch = Switch to Inactive NEPI container on next boot or reststat
 nepicommit = Commit the running NEPI container
 nepiinit = Reset, clear, and import new NEPI Image
-nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
+nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
+nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
+nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
+nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepipull = Import a NEPI image from a remote repository given the PULL_URL.
 nepitag = Update the Software Description field in the active NEPI container
-nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
 nepiconfig = Configure NEPI System settings
 nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
 nepienable = Enable NEPI Docker service on next boot

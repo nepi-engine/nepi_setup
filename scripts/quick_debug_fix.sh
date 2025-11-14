@@ -23,11 +23,31 @@ fi
 
 
 
-
-script_file=nepi_folders_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
+echo "##################################"
+echo ""
+echo 'NEPI Environment Setup 1 Complete'
+echo "##################################"
+echo ""
+echo ""
+echo "##################################"
+echo "Chcking for CUDA support on python installs"
+echo ""
+sudo python3 -c "import cv2; print(cv2.__version__);print(cv2.getBuildInformation())"
+echo ""
+echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+echo ""
+sudo python3 -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+echo ""
+echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+echo ""
+sudo python3 -c "import torchvision; print(torchvision.__version__)"
+echo ""
+echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+echo ""
+sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+echo ""
+echo ""
+echo "##################################"
+echo "If CUDA support required for any of these packages,"
+echo " and not supported in current configurations shown above,"
+echo "install CUDA supported version manaully"
