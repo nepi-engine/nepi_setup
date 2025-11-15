@@ -16,9 +16,3 @@
 sleep 3
 sudo service supervisor start
 
-while true; do
-  #echo "Service is running in a loop... (PID: $$)"
-  # Add your service logic here
-  sleep 3
-done
-

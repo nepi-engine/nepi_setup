@@ -177,8 +177,7 @@ else
     # fi
 
 
-    sleep 2
-    ninet  >/dev/null 2>&1 #Restart the network
+    sleep 1
 
 
     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))

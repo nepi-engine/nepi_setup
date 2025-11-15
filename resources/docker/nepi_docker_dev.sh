@@ -152,8 +152,8 @@ else
     #     fi
     # 
    
-    sleep 2
-    ninet  >/dev/null 2>&1 #Restart the network
+    sleep 1
+
 
     CONTAINER_ID=$(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}")
     if [[ -z "$CONTAINER_ID" ]]; then
