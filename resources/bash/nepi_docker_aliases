@@ -121,30 +121,36 @@ export NEPI_STORAGE=/mnt/nepi_storage
 
 # NEPI stop and start shortcuts
 function nepistop(){
-   sudo systemctl stop nepi_docker
-   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_stop.sh
+  sudo -v
+  echo "Stopping NEPI Docker Service"
+  sudo systemctl stop nepi_docker
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_stop.sh
 }
 export -f nepistop
 
 function nepistart(){
-     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+  sudo -v
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepistart
 
 function nepidev(){
-     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh
+  sudo -v
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh
 }
 export -f nepidev
 
 
 
 function nepilogin(){
-   nuser=$1
-   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh  $nuser    
+  sudo -v
+  nuser=$1
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh  $nuser    
 }
 export -f nepilogin
 
 function nepiloginroot(){
+  sudo -v
   nuser=root
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_login.sh $nuser 
 }
@@ -153,20 +159,23 @@ export -f nepiloginroot
 
 
 function nepicommit(){
-   commit_desc=$1
-   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
+  sudo -v
+  commit_desc=$1
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
 }
 export -f nepicommit
 
 
 
 function nepiswitch(){
-   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_switch.sh
+  sudo -v
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_switch.sh
 }
 export -f nepiswitch
 
 
 function nepiinit(){
+  sudo -v
   import_path=/mnt/nepi_storage/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
@@ -214,6 +223,7 @@ export -f nepiinit
 
 
 function nepiimport(){
+  sudo -v
   import_path=/mnt/nepi_storage/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
@@ -246,6 +256,7 @@ export -f nepiimport
 
 
 function nepipull(){
+  sudo -v
   pull_ref=$1
   echo "Pulling NEPI Image from ${pull_ref}"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $pull_ref
@@ -253,6 +264,7 @@ function nepipull(){
 export -f nepipull
 
 function nepiretag(){
+  sudo -v
   sw_desc=$1
   echo "Retagging NEPI Active Image with ${sw_desc}"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_retag.sh $sw_desc
@@ -261,18 +273,21 @@ export -f nepipull
 
 
 function nepiexport(){
+  sudo -v
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh $1
 }
 export -f nepiexport
 
 
 function nepisave(){
+  sudo -v
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_save.sh $1
 }
 export -f nepisave
 
 
 function nepiload(){
+  sudo -v
   import_path=/mnt/nepi_storage/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
@@ -304,27 +319,27 @@ function nepiload(){
 export -f nepiload
 
 
-
-
-
-
 function nepiconfig(){
+  sudo -v
   SHOW_CONFIG_MENU=1
   bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
 }
 export -f nepiconfig
 
 function nepiupdate(){
+  sudo -v
   bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
 }
 export -f nepiupdate
 
 function nepistatus(){
+  sudo -v
   sudo systemctl status nepi_docker
 }
 export -f nepistatus
 
 function nepilogs(){
+  sudo -v
   sudo journalctl -u nepi_docker -f
 }
 export -f nepilogs
@@ -332,34 +347,40 @@ export -f nepilogs
 
 # NEPI stop and start shortcuts
 function nepienable(){
-   sudo systemctl enable nepi_docker
-   echo "NEPI Docker Service enabled on next boot"
+  sudo -v
+  sudo systemctl enable nepi_docker
+  echo "NEPI Docker Service enabled on next boot"
 }
 export -f nepienable
 
 function nepidisable(){
-    sudo systemctl disable nepi_docker
-    echo "NEPI Docker Service disabled on next boot"
+  sudo -v
+  sudo systemctl disable nepi_docker
+  echo "NEPI Docker Service disabled on next boot"
 }
 export -f nepidisable
 
 function nepireset(){
+  sudo -v
   bash /opt/nepi/etc/scripts/sync_to_configs.sh
 }
 export -f nepireset
 
 
 function nepirestart(){
-   sudo systemctl restart nepi_docker
+  sudo -v
+  sudo systemctl restart nepi_docker
 }
 export -f nepirestart
 
 function nepiupdate() {
+  sudo -v
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_update.sh
 }
 export -f nepiupdate
 
 function nepisettings(){
+  sudo -v
   echo "NEPI DOCKER SETTINGS"
   echo "--------------------"
   print_config_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml

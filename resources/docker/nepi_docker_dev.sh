@@ -19,13 +19,21 @@ wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
+UPDATE_CONFIG=1
+# if [[ "$1" -eq 0 ]]; then
+#     UPDATE_CONFIG=0
+# fi
 
-########################
-# Update Docker Config
-echo ""
-echo "Updating Docker Config File"
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
+if [[ "$UPDATE_CONFIG" -eq 1 ]]; then
+    ########################
+    # Update Docker Config
+    echo ""
+    echo "Updating Docker Config File"
+    bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+    wait
+else
+    echo "Not Updating Docker Config File"
+fi
 
 ########################
 # Load NEPI DOCKER
@@ -33,7 +41,6 @@ CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
     echo "Failed to load ${CONFIG_SOURCE}"
-
 else
 
 
@@ -44,7 +51,6 @@ else
     SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/nepi_system_config.yaml
     update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
     update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
-    update_yaml_value "NEPI_FS_AB" $NEPI_AB_FS "$SYSTEM_CONFIG_FILE"
 
 
     ########################
@@ -52,8 +58,6 @@ else
     echo "Calling NEPI Docker Stop Process"
     bash ${DOCKER_FOLDER}/nepi_docker_stop.sh
     wait
-
-
 
     ########################
     # Build Run Command

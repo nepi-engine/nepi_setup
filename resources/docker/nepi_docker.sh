@@ -28,7 +28,6 @@ wait
 # Redefine any nepi_bash_util functions that require without sudo
 
 function nipa(){
-  
   file=/etc/network/interfaces.d/nepi_static_ip
   if [ ! -f "$file" ]; then
       return 2
@@ -46,7 +45,6 @@ export -f nipa
 
 
 function naipa(){
-  
   file=/etc/network/interfaces.d/nepi_user_ip_aliases
   if [ ! -f "$file" ]; then
       return 2
@@ -63,7 +61,6 @@ function naipa(){
 export -f naipa
 
 function nnipa(){
-  
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
       return 1
@@ -80,7 +77,6 @@ function nnipa(){
 export -f nnipa
 
 function nnet(){
-  
     nepi_ip=$(nipa)
     if [[ -z "$nepi_ip" ]]; then
       return 1
@@ -102,7 +98,6 @@ function nnet(){
 export -f nnet
 
 function ndhcp(){
-  
   if nnet; then
     # This file sets up nepi bash aliases and util functions
     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -122,6 +117,7 @@ function ndhcp(){
       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
       dhclient -nw
+      sleep 2
       if ! pingi; then
         return 1
       fi
@@ -132,7 +128,6 @@ export -f ndhcp
 
 
 function nclock(){
-  
   if [[ "$(date +%Y)" -lt 2025 ]]; then
 
       # This file sets up nepi bash aliases and util functions
@@ -147,35 +142,24 @@ function nclock(){
             return 1 # Exit with a non-zero status to indicate an error
         fi
       fi
-      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-        : # Do Nothing
-      else
-        echo "Restarting chrony time service"
-        systemctl restart chronyd
-        echo "Forcing clock sync"
-        chronyc -a makestep
-     fi
 
-      # #echo "Waiting for clock to synchronize..."
+      echo "Restarting chrony time service"
+      systemctl restart chronyd
       # sleep 1
-      # #chronyc waitsync 1
-      # if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-      #   echo "Clock synchronization complete."}
-      # else
-      #   #echo "Clock Failed to Synchronize."}
-      #   return 1
-      # fi
-    fi
+      # chronyc -a makestep > /dev/null 2>&1
+      # chronyc waitsync 5
+      # echo "Forcing clock sync"
+      # chronyc -a makestep > /dev/null 2>&1
+  fi
 
 }
 export -f nclock
 
 
 function ninet(){
-  
-  if ndhcp > /dev/null 2>&1; then # Enable DHCP internet connection if needed
+  if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
-    if ! nclock > /dev/null 2>&1; then # Connect to NTP server
+    if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
       return 1
     fi
   else
@@ -184,25 +168,6 @@ function ninet(){
 
 }
 export function ninet
-
-########################
-# Redefine any nepi docker processes as functions that require without sudo
-
-function load_docker_config() {
-    FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-    if [[ -f "$FILE" ]]; then
-        #echo "Updating Docker Config file from: ${FILE}"
-        keys=($(yq e 'keys | .[]' ${FILE}))
-        for key in "${keys[@]}"; do
-            value=$(yq e '.'"$key"'' $FILE)
-            export ${key}=$value
-        done
-    else
-        echo "Config file not found ${FILE}"
-        exit 1
-    fi
-}
-
 
 
 
@@ -469,10 +434,11 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
  while [[ 1 ]]; do
 
     
-    #echo "Updating Network and Clock"
-    ninet > /dev/null 2>&1
+
 
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
+        #echo "Updating Network and Clock"
+        ninet > /dev/null 2>&1
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             source ${DOCKER_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE

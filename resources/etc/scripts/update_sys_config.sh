@@ -71,12 +71,10 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
 
     ###########
     # UPDATE NEPI VERSION
-    fw_version=$(cat /opt/nepi/nepi_engine/etc/fw_version.txt)
+    fw_version=$(cat /opt/nepi/nepi_engine/etc/fw_version.txt | tail -n1)
+    fw_version=$(clean_version_string $fw_version)
     if [[ -z "$fw_version" ]]; then
-        fw_version=0p0p0
-    else
-        # Remove spaces
-        fw_version=$(clean_version_string $fw_version)
+        fw_version=0p0p0        
     fi
     update_yaml_value "NEPI_VERSION" $fw_version $UPDATE_PATH
 

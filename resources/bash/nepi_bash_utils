@@ -394,7 +394,6 @@ export -f ask_yes_no
 
 
 function nipa(){
-  sudo -v
   file=/etc/network/interfaces.d/nepi_static_ip
   if [ ! -f "$file" ]; then
       return 2
@@ -412,7 +411,6 @@ export -f nipa
 
 
 function naipa(){
-  sudo -v
   file=/etc/network/interfaces.d/nepi_user_ip_aliases
   if [ ! -f "$file" ]; then
       return 2
@@ -429,7 +427,6 @@ function naipa(){
 export -f naipa
 
 function nnipa(){
-  sudo -v
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
       return 1
@@ -446,7 +443,6 @@ function nnipa(){
 export -f nnipa
 
 function nnet(){
-  sudo -v
     nepi_ip=$(nipa)
     if [[ -z "$nepi_ip" ]]; then
       return 1
@@ -468,7 +464,6 @@ function nnet(){
 export -f nnet
 
 function ndhcp(){
-  sudo -v
   if nnet; then
     # This file sets up nepi bash aliases and util functions
     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -499,7 +494,6 @@ export -f ndhcp
 
 
 function nclock(){
-  sudo -v
   if [[ "$(date +%Y)" -lt 2025 ]]; then
 
       # This file sets up nepi bash aliases and util functions
@@ -529,7 +523,6 @@ export -f nclock
 
 
 function ninet(){
-  sudo -v
   if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
     if ! nclock  > /dev/null 2>&1; then # Connect to NTP server

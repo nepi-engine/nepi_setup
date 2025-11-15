@@ -77,15 +77,21 @@ else
     # NEPI_STORAGE=/mnt/nepi_storage
     # NEPI_CONFIG=/mnt/nepi_coinfig
     
-
-    if [[ "$NEPI_RM_PS" -eq 0 ]]; then
-        echo "Starting with rm process disabled"
-        rm_cmd=''
-    else
-        echo "Starting with rm process enabled"
-        rm_cmd="--rm"
-    fi
+    # if [[ "$1" -eq 0 ]]; then 
+    #     echo "Starting with rm process disabled"
+    #     rm_cmd=''
+    # if [[ "$1" -eq 1 ]]; then 
+    #     echo "Starting with rm process enabled"
+    #     rm_cmd="--rm"
+    # elif [[ "$NEPI_RM_PS" -eq 0 ]]; then
+    #     echo "Starting with rm process disabled"
+    #     rm_cmd=''
+    # else
+    #     echo "Starting with rm process enabled"
+    #     rm_cmd="--rm"
+    # fi
     
+    rm_cmd="--rm"
 
 
     ########
