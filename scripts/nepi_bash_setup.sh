@@ -101,9 +101,17 @@ else
     echo '#export CMAKE_POLICY_VERSION_MINIMUM=3.5' | sudo tee -a $BASHRC
     echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $BASHRC
     echo 'export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}' | sudo tee -a $BASHRC
-    echo 'if [[ -f "/usr/local/lib/libOpen3D.so" ]]; then' | sudo tee -a $BASHRC
-    echo '  export LD_PRELOAD=/usr/local/lib/libOpen3D.so' | sudo tee -a $BASHRC
+
+    echo 'if [[ -f "/usr/lib/aarch64-linux-gnu/libgomp.so.1" ]]; then' | sudo tee -a $BASHRC
+    echo '   LIB1=/usr/lib/aarch64-linux-gnu/libgomp.so.1' | sudo tee -a $BASHRC
     echo 'fi' | sudo tee -a $BASHRC
+
+    echo  | sudo tee -a $BASHRC
+    echo 'if [[ -f "/usr/local/lib/libOpen3D.so" ]]; then' | sudo tee -a $BASHRC
+    echo '  LIB2=/usr/local/lib/libOpen3D.so' | sudo tee -a $BASHRC
+    echo 'fi' | sudo tee -a $BASHRC
+
+    echo 'export LD_PRELOAD="$LIB1 $LIB2"' | sudo tee -a $BASHRC
 fi
 
 

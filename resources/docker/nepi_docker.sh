@@ -16,8 +16,8 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
 
 CONFIG_USER=nepihost
@@ -189,7 +189,7 @@ export function ninet
 # Redefine any nepi docker processes as functions that require without sudo
 
 function load_docker_config() {
-    FILE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
+    FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
     if [[ -f "$FILE" ]]; then
         #echo "Updating Docker Config file from: ${FILE}"
         keys=($(yq e 'keys | .[]' ${FILE}))
@@ -223,7 +223,7 @@ ninet > /dev/null 2>&1
 # Update Docker Config
 echo ""
 echo "Updating Docker Config Files"
-bash ${SCRIPT_FOLDER}/nepi_docker_sync.sh
+bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
 wait
 
 
@@ -231,12 +231,12 @@ wait
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
-bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+bash ${DOCKER_FOLDER}/nepi_docker_update.sh
 wait
 ########################
 # Load NEPI DOCKER
-CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
-source ${SCRIPT_FOLDER}/load_docker_config.sh
+CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
     echo "Failed to load ${CONFIG_SOURCE}"
     exit 1
@@ -272,8 +272,8 @@ function NEPI_START_FUNCTION(){
     #echo "CONFIG MODE: ${CONFIG_MODE}"
     while [[ ! "$NEPI_FAIL_COUNT" -eq 0 && "$CONFIG_MODE" != "STOP" ]]; do
         # Update docker config variables
-        SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-        source ${SCRIPT_FOLDER}/load_docker_config.sh
+        DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+        source ${DOCKER_FOLDER}/load_docker_config.sh
 
         echo "FAIL COUNT: ${NEPI_FAIL_COUNT}"
         # SUCCESS RESET MAX FAIL COUNT SET TO ZERO, STOP TRYING
@@ -310,8 +310,8 @@ function NEPI_START_FUNCTION(){
                     echo "##########################"
                     echo "Switching to Backup NEPI File System Container"
                     echo "##########################"
-                    #source ${SCRIPT_FOLDER}/nepi_docker_stop.sh
-                    source ${SCRIPT_FOLDER}/nepi_docker_switch.sh
+                    #source ${DOCKER_FOLDER}/nepi_docker_stop.sh
+                    source ${DOCKER_FOLDER}/nepi_docker_switch.sh
                     CONFIG_MODE=BACKUP
                     NEPI_FAIL_COUNT=-1
                     update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
@@ -387,7 +387,7 @@ function NEPI_START_FUNCTION(){
             echo "##########################"
             echo "Calling NEPI Docker Start Script with ${CONFIG_MODE} Config"
             ####  START NEPI USING SET CONFIG MODE
-            bash ${SCRIPT_FOLDER}/nepi_docker_start.sh
+            bash ${DOCKER_FOLDER}/nepi_docker_start.sh
             if [[ "$?" -eq 0 ]]; then
                 # Wait for NEPI to start and try to reset fail count
                 echo "Waiting for ${NEPI_BOOT_TIME} seconds for NEPI Engine to boot successfully"
@@ -449,7 +449,7 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_FAIL_COUNT" -1 $DOCKER_CONFIG_FILE
 
-source ${SCRIPT_FOLDER}/load_docker_config.sh
+source ${DOCKER_FOLDER}/load_docker_config.sh
 #source ${SETC_FOLDER}/update_etc_files.sh
 
 
@@ -475,51 +475,51 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE
+            source ${DOCKER_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE
         fi
 
         if [[ "$NEPI_FS_SWITCH" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/nepi_docker_switch.sh
+            source ${DOCKER_FOLDER}/nepi_docker_switch.sh
         fi
 
         if [[ "$NEPI_ETC_HOSTNAME_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_hostname.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_hostname.sh
         fi
 
         if [[ "$NEPI_ETC_TIME_NTPS_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_time_ntps.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_time_ntps.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_STATIC_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wired_static.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_static.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_ALIASES_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wired_aliases.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_aliases.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_DHCP_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wired_dhcp.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_dhcp.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_ENABLE_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wifi_enable.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_enable.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_LOW_POWER_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wifi_low_power.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_low_power.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_CLIENT_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wifi_client.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_client.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_ACCESS_POINT_UPDATE" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/etc/scripts/update_etc_wifi_access_point.sh
+            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_access_point.sh
         fi
 
         if [[ "$NEPI_FS_EXPORT" -eq 1 && "$NEPI_RUNNING" -eq 1 ]]; then
-            source ${SCRIPT_FOLDER}/nepi_docker_export.sh $NEPI_EXPORT_FILE
+            source ${DOCKER_FOLDER}/nepi_docker_export.sh $NEPI_EXPORT_FILE
         fi
 
 
@@ -537,7 +537,7 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
 
         ########################
         # Load NEPI DOCKER CONFIG Updates
-        source ${SCRIPT_FOLDER}/load_docker_config.sh
+        source ${DOCKER_FOLDER}/load_docker_config.sh
     fi
     sleep 1
 done

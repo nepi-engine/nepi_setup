@@ -76,7 +76,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
         fw_version=0p0p0
     else
         # Remove spaces
-        fw_version=$(clean_vesion_string $fw_version)
+        fw_version=$(clean_version_string $fw_version)
     fi
     update_yaml_value "NEPI_VERSION" $fw_version $UPDATE_PATH
 

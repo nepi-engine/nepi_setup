@@ -16,19 +16,19 @@ CONFIG_USER=nepihost
 bash /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
-bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+bash ${DOCKER_FOLDER}/nepi_docker_update.sh
 wait
 ########################
 # Load NEPI DOCKER
-CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
-source ${SCRIPT_FOLDER}/load_docker_config.sh
+CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
     echo "Failed to load ${CONFIG_SOURCE}"
 
@@ -37,7 +37,7 @@ else
     ########################
     # Start Processes
     ########################
-    NEPI_DOCKER_CONFIG_PATH=${SCRIPT_FOLDER}/nepi_docker_config.yaml
+    NEPI_DOCKER_CONFIG_PATH=${DOCKER_FOLDER}/nepi_docker_config.yaml
     #echo $NEPI_DOCKER_CONFIG_PATH
 
     echo "Switcing NEPI ACTIVE CONTAINER from ${NEPI_ACTIVE_FS} to ${NEPI_INACTIVE_FS}"
@@ -51,7 +51,7 @@ else
     # Update Docker Config
     echo ""
     echo "Updating Docker Config File"
-    bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+    bash ${DOCKER_FOLDER}/nepi_docker_update.sh
     wait
 
 fi

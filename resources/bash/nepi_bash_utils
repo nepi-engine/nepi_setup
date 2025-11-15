@@ -346,7 +346,7 @@ export -f echovar
 
 # ping internet
 function pingi(){
-    if ! ping -c 2 google.com; then
+    if ! ping -c 1 google.com > /dev/null 2>&1; then
         echo "No Internet Connection"
         return 1
     else
@@ -357,9 +357,21 @@ export -f pingi
 
 # ping nepi
 function pingn(){
-  ping ${NEPI_IP}
+    if ! ping -c 1 ${NEPI_IP} > /dev/null 2>&1; then
+        echo "No NEPI Connection at ${NEPI_IP}"
+        return 1
+    else
+        echo "NEPI Connected at ${NEPI_IP}"
+    fi
 }
 export -f pingn
+
+
+# ping nepi
+function pingnc(){
+  ping ${NEPI_IP}
+}
+export -f pingnc
 
 # source bashrc
 function sbrc(){
@@ -367,6 +379,7 @@ function sbrc(){
     source /home/${config_user}/.bashrc
 }
 export -f sbrc
+
 
 
 function ask_yes_no {
@@ -501,25 +514,15 @@ function nclock(){
             return 1 # Exit with a non-zero status to indicate an error
         fi
       fi
-      if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-        : # Do Nothing
-      else
-        echo "Restarting chrony time service"
-        systemctl restart chronyd
-        echo "Forcing clock sync"
-        chronyc -a makestep
-     fi
 
-      # #echo "Waiting for clock to synchronize..."
+      echo "Restarting chrony time service"
+      sudo systemctl restart chronyd
       # sleep 1
-      # #chronyc waitsync 1
-      # if chronyc tracking | grep -q ": Normal" > /dev/null 2>&1; then
-      #   echo "Clock synchronization complete."}
-      # else
-      #   #echo "Clock Failed to Synchronize."}
-      #   return 1
-      # fi
-    fi
+      # sudo chronyc -a makestep > /dev/null 2>&1
+      # chronyc waitsync 5
+      # echo "Forcing clock sync"
+      # sudo chronyc -a makestep > /dev/null 2>&1
+  fi
 
 }
 export -f nclock
@@ -527,9 +530,9 @@ export -f nclock
 
 function ninet(){
   sudo -v
-  if ndhcp; then # Enable DHCP internet connection if needed
+  if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
-    if ! nclock; then # Connect to NTP server
+    if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
       return 1
     fi
   else
@@ -559,7 +562,9 @@ utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
-pingi = ping internet test
+pingi = Check connection to NEPI IP
+pingnc = ping NEPI IP address continously
+pingi = Check connection to internet
 nipa= Echo NEPI set IP address
 naipa= Echo NEPI set IP alias addresses
 nnipa= Echo NEPI set NTP IP addresses
@@ -1186,7 +1191,7 @@ function source_script(){
     script_path=$1
     if [[ -f "$script_path" ]]; then
       echo "Sourcing script: $(basename $script_path)"
-      source ${script_path}
+      source ${script_path} $2
       script_error=$?
       if [[ "$script_error" -ne 0 ]]; then
         echo "Script $(basename $script_path) returned error ${script_error}"
@@ -1274,9 +1279,9 @@ export -f get_hw_arch
 
 function get_os_info() {
   sw_desc=''
-  os_name=$(grep '^NAME=' /etc/os-release)
-  os_version= $(grep '^VERSION_ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
-  os_info=${os_name}${os_version}
+  os_name=$(grep '^NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+  os_version=$(grep '^VERSION_ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+  os_info="${os_name}${os_version}"
   echo $os_info
 }
 export -f get_os_info
@@ -1312,8 +1317,8 @@ export -f get_cuda_version
 function get_sw_desc() {
   os_desc=$(get_os_info)
   cuda_ver=$(get_cuda_version)
-  sw_desc="${os_desc} CUDA${os_version}"
-  echo $sw_desc
+  sw_desc=${os_desc}_CUDA${os_version}
+  echo "${sw_desc}"
 }
 export -f get_sw_desc
 
@@ -1347,7 +1352,7 @@ path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. 
 path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
 sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config folders
 run_script = Uses 'bash' to run script at provided SCRIPT_PATH
-source_script = Uses 'source' to run script at provided SCRIPT_PATH
+source_script = Uses 'source' to run script at provided SCRIPT_PATH, with an optional SCRIPT_OPTION passed to script
 process_count = Echos number of processes running for provide PROCESS_NAME
 clean_tag_string = Echos a NEPI Info formated version of the provided STRING
 clean_version_string = Echos a NEPI Version formated version of the provided VERSION_STRING

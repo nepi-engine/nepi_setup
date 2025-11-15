@@ -18,7 +18,7 @@ CONFIG_USER=nepihost
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 

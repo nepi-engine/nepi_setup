@@ -43,7 +43,7 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ -n "$1" ]]; then
+if [[ -v "$1" ]]; then
     LOAD_NEPI_CONFIG=$1
 fi
 
@@ -67,11 +67,11 @@ else
     echo ""
     echo "Updating nepi system bash file"
     echo "Using Device ID: ${NEPI_DEVICE_ID}"
-    update_value ${SYS_BASH_FILE} "export DEVICE_ID" "export DEVICE_ID=${NEPI_DEVICE_ID}"
+    update_text_value ${SYS_BASH_FILE} "export DEVICE_ID" "export DEVICE_ID=${NEPI_DEVICE_ID}"
     echo "Using Device Model Name: ${NEPI_DEVICE_MD}"
-    update_value ${SYS_BASH_FILE} "export DEVICE_TYPE" "export DEVICE_TYPE=${NEPI_DEVICE_MD}"
+    update_text_value ${SYS_BASH_FILE} "export DEVICE_TYPE" "export DEVICE_TYPE=${NEPI_DEVICE_MD}"
     echo "Using Device Serial Number: ${NEPI_DEVICE_SN}"
-    update_value ${SYS_BASH_FILE} "export DEVICE_SN" "export DEVICE_SN=${NEPI_DEVICE_SN}"
+    update_text_value ${SYS_BASH_FILE} "export DEVICE_SN" "export DEVICE_SN=${NEPI_DEVICE_SN}"
 
 
 

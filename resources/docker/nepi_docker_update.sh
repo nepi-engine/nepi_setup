@@ -18,7 +18,7 @@ CONFIG_USER=nepihost
 bash /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 ###############################
 # Load NEPI Config File
@@ -33,9 +33,9 @@ else
     echo "Failed to find ${file}"
 fi
 
-CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
+CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
-blank_config=${SCRIPT_FOLDER}/nepi_docker_config.blank
+blank_config=${DOCKER_FOLDER}/nepi_docker_config.blank
 if [[ -f "$blank_config" ]]; then
     sync_yaml_files $blank_config $CONFIG_SOURCE
 fi

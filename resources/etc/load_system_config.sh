@@ -10,12 +10,12 @@
 ##
 
 
-# This file loads the nepi_system_config.yaml values
+# This script loads the nepi_system_config.yaml values
 
-CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-#echo "Looking for nepi_system_config.yaml in ${CONFIG_FOLDER}"
-export SYSTEM_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
+ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
  
+export SYSTEM_CONFIG_FILE=${ETC_FOLDER}/nepi_system_config.yaml
+
 if [[ -f "$SYSTEM_CONFIG_FILE" ]]; then
     #sudo echo "Updating NEPI Config file from: ${SYSTEM_CONFIG_FILE}"
     keys=($(yq e 'keys | .[]' ${SYSTEM_CONFIG_FILE}))

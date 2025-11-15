@@ -16,7 +16,7 @@ CONFIG_USER=nepihost
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 ###############################
@@ -36,12 +36,12 @@ fi
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
-bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+bash ${DOCKER_FOLDER}/nepi_docker_update.sh
 wait
 ########################
 # Load NEPI DOCKER
-CONFIG_SOURCE=${SCRIPT_FOLDER}/nepi_docker_config.yaml
-source ${SCRIPT_FOLDER}/load_docker_config.sh
+CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
     echo "Failed to load ${CONFIG_SOURCE}"
 
@@ -315,7 +315,7 @@ else
                 # Update Docker Config
                 echo ""
                 echo "Updating Docker Config File"
-                bash ${SCRIPT_FOLDER}/nepi_docker_update.sh
+                bash ${DOCKER_FOLDER}/nepi_docker_update.sh
                 wait
 
             fi

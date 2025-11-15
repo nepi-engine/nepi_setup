@@ -9,7 +9,7 @@
 ## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
 ##
 
-# This file contains nepi system aliases and sources nepi bash utils
+# This file contains NEPI system aliases and sources NEPI bash utils
 
 #echo "########################"
 #echo "NEPI System Aliases"
@@ -71,29 +71,33 @@ cd ${NEPI_HOME}"
 
   }
 
+  CONFIG=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/nepi_setup/scripts
+  ## NEPI build shortcuts
+  alias nepiconfig="
+  sudo -v
+  cd $CONFIG
+  show_menu=1
+  ./nepi_config_setup.sh $show_menu"
+
 
   BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws
   ## NEPI build shortcuts
   alias nepibld="
+  sudo -v
   cd $BUILD
   ./build_nepi_complete.sh"
 
   # NEPI build shortcuts
   alias codebld="
+  sudo -v
   cd $BUILD
   ./build_nepi_code.sh"
 
   # NEPI build shortcuts
   alias ruibld="
+  sudo -v
   cd $BUILD
   ./build_nepi_rui.sh"
-
-function nepiconfig(){
-  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
-}
-export -f nepiconfig
-
-
 
 
 function snvm(){
@@ -135,13 +139,13 @@ HELPN="${HELPN}
 ################################
 ### NEPI SYSTEM UTIL FUNCTIONS
 ################################
-nepihome = change to nepi home dir
-nepistart = start the nepi processes
-nepistop = stop the nepi processe
+nepihome = change to NEPI home dir
+nepistart = start the NEPI processes
+nepistop = stop the NEPI processe
 nepiconfig = Configure NEPI System Settings
-nepibld = Build and deploy all nepi repos and RUI
-codebld = Build and deploy all nepi repos
-ruibld = Build and deploy rui system
+nepibld = Build NEPI bash, config, code repos, and RUI
+codebld = Build NEPI code repos only
+ruibld = Build the RUI only
 nepi_status = Print running status of all NEPI processes
 nepi_status_engine = Print tail of nepi_engine process
 nepi_status_rui = Print tail of nepi_rui process
@@ -290,7 +294,7 @@ HELPN="${HELPN}
 nsetup = /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts"
 
 
-# Print out the nepi shortcuts
+# Print out the NEPI shortcuts
 function nepihelp(){
     echo "$HELPN"
 }

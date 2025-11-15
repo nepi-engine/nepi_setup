@@ -71,6 +71,7 @@ echo "########################"
 # Define Folders
 SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
 SOURCE_ETC_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
+SOURCE_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/scripts
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
@@ -361,7 +362,7 @@ else
 
     sudo chmod +x ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf
     sudo cp -a ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
-
+    sudo ln -sf /opt/nepi/scripts/nepi_start_all /nepi_start_all
     echo "Restarting Supervisor Process"
     sudo supervisorctl reread
     sudo supervisorctl update

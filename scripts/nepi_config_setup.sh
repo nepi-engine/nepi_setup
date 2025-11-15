@@ -19,7 +19,10 @@ export CONFIG_USER=$(id -un 1000)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-
+SHOW_CONFIG_MENU=0
+if [[ "$1" -eq 1 ]]; then
+    SHOW_CONFIG_MENU=1
+fi
 
 ####################################
 # Run NEPI Bash Setup Script
@@ -63,7 +66,7 @@ fi
 
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
+if ! source_script $script_path $SHOW_CONFIG_MENU; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     exit 1
