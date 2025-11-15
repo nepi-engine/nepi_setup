@@ -170,7 +170,6 @@ fi
 
 NEPI_STORAGE=/mnt/nepi_storage
 
-
 nfolder=${NEPI_STORAGE}
 if [ ! -d "${nfolder}" ]; then
     echo "Creating NEPI Folder: ${nfolder}"
@@ -180,6 +179,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} $nfolder
 
 declare -a rfolders=(  
 "${NEPI_STORAGE}/ai_models" 
+"${NEPI_STORAGE}/ai_training" 
 "${NEPI_STORAGE}/data" 
 "${NEPI_STORAGE}/install" 
 "${NEPI_STORAGE}/logs"  

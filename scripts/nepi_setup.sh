@@ -238,8 +238,9 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl enable sshd >/dev/null 2>&1
         wait
         sleep 2
+        echo "Updating ssh keys"
         source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
-
+        
         sudo systemctl restart sshd
 
     fi
@@ -346,14 +347,6 @@ else
     fi
 
 
-    echo "Enabling ssh service"
-    sudo systemctl enable sshd >/dev/null 2>&1
-    wait
-    sleep 2
-    source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
-
-    sudo systemctl restart sshd
-
     ###################
     echo ""
     echo "########"
@@ -364,8 +357,8 @@ else
     sudo cp -a ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
     sudo ln -sf /opt/nepi/scripts/nepi_start_all /nepi_start_all
     echo "Restarting Supervisor Process"
-    sudo supervisorctl reread
-    sudo supervisorctl update
+    sudo supervisorctl reread >/dev/null 2>&1
+    sudo supervisorctl update >/dev/null 2>&1
     # sudo supervisorctl status
     # sudo supervisorctl tail nepi_engine
     # sudo supervisorctl tail nepi_rui
@@ -441,11 +434,8 @@ if [[ "$?" -eq 0 ]]; then
         gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
 
         # Update ETC files if systemd is running (Not in Container)
-        systemctl&> /dev/null
-        if [[ "$?" -eq 0 ]]; then
-            cp /opt/nepi/etc/services/nepi_check_license.service /etc/systemd/system/
-            sudo systemctl enable nepi_check_license
-        fi
+        cp /opt/nepi/etc/services/nepi_check_license.service /etc/systemd/system/
+        sudo systemctl enable nepi_check_license
 
         echo "***** nepi_check_license license manager is installed... you must still provide a valid license file in /mnt/nepi_storage/license *****"
     fi

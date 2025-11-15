@@ -196,6 +196,7 @@ function pushn(){
     else
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head main"
         git push origin HEAD:main
+        #git checkout main
     fi
     if [ ! $? -eq 0 ]; then
       echo -e "${RED}Push Failed"

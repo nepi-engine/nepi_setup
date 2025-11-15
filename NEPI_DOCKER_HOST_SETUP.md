@@ -299,18 +299,18 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
 
         # Once Inside the container, start and stop the NEPI software 
 
-            nepi_status
+            nepistatus
 
             # Check if any of the NEPI services are not running in the printout. If any are not running, 
             # you can examine the process messages by running one of the following status commants:
 
-            nepi_status_engine
+            nepistatus_engine
 
-            nepi_status_rui
+            nepistatus_rui
 
-            nepi_status_license
+            nepistatus_license
 
-            nepi_status_ssh
+            nepistatus_ssh
 
             # To bug issues with the core NEPI Engine software process, you can start and stop NEPI Engine to visually look for run-time errors:
 
@@ -326,11 +326,11 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
                 nepibld = Build and deploy all nepi repos and RUI
                 codebld = Build and deploy all nepi repos
                 ruibld = Build and deploy rui system
-                nepi_status = Print running status of all NEPI processes
-                nepi_status_engine = Print tail of nepi_engine process
-                nepi_status_rui = Print tail of nepi_rui process
-                nepi_status_license = Print tail of nepi_license process
-                nepi_status_ssh = Print tail of nepi_ssh process
+                nepistatus = Print running status of all NEPI processes
+                nepistatus_engine = Print tail of nepi_engine process
+                nepistatus_rui = Print tail of nepi_rui process
+                nepistatus_license = Print tail of nepi_license process
+                nepistatus_ssh = Print tail of nepi_ssh process
 
 **********************
 

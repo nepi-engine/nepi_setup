@@ -98,15 +98,13 @@ else
                 fi
             fi
 
-            NEW_SW_DESC=$NEPI_SW_DESC
+            NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC)
             if [[ -z "$NEW_SW_DESC" || "$NEW_SW_DESC" == 'unknown' ]]; then
                 NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
                 if [[ -z "$NEW_SW_DESC" ]]; then
-                        NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC) # Updated by NEPI Software 
-                        if [[ -z "$NEW_SW_DESC" ]]; then
-                            NEW_SW_DESC="unknown" # Uknown until NEPI runs 
-                    fi
+                    NEW_SW_DESC="unknown" # Uknown until NEPI runs 
                 fi
+                
             fi
 
             NEW_DATE=$(date +%Y%m%d-%H%M)

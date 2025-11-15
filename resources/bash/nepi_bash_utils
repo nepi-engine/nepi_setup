@@ -1317,7 +1317,7 @@ export -f get_cuda_version
 function get_sw_desc() {
   os_desc=$(get_os_info)
   cuda_ver=$(get_cuda_version)
-  sw_desc=${os_desc}_CUDA${os_version}
+  sw_desc=${os_desc}_CUDA${cuda_ver}
   echo "${sw_desc}"
 }
 export -f get_sw_desc

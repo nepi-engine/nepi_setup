@@ -105,6 +105,11 @@ if [[ "$update_keys" -eq 1  ]]; then
         # sudo chmod 0700 /home/${NEPI_ADMIN_USER}/.ssh
         # sudo chown -R ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}/.ssh
 
-        sudo systemctl restart sshd
+
+        # Update ETC files if systemd is running (Not in Container)
+        systemctl&> /dev/null
+        if [[ "$?" -eq 0 ]]; then
+            sudo systemctl restart sshd
+        fi
 fi
 

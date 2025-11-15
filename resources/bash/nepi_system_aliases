@@ -109,30 +109,30 @@ function snvm(){
 }
 export -f snvm
 
-function nepi_status(){
+function nepistatus(){
   sudo supervisorctl status
 }
-export -f nepi_status
+export -f nepistatus
 
-function nepi_status_engine(){
+function nepistatus_engine(){
   sudo supervisorctl tail nepi_engine
 }
-export -f nepi_status_engine
+export -f nepistatus_engine
 
-function nepi_status_rui(){
+function nepistatus_rui(){
   sudo supervisorctl tail nepi_rui
 }
-export -f nepi_status_rui
+export -f nepistatus_rui
 
-function nepi_status_license(){
+function nepistatus_license(){
   sudo supervisorctl tail nepi_license
 }
-export -f nepi_status_license
+export -f nepistatus_license
 
-function nepi_status_ssh(){
+function nepistatus_ssh(){
   sudo supervisorctl tail nepi_ssh
 }
-export -f nepi_status_ssh
+export -f nepistatus_ssh
 
 
 HELPN="${HELPN}
@@ -146,11 +146,11 @@ nepiconfig = Configure NEPI System Settings
 nepibld = Build NEPI bash, config, code repos, and RUI
 codebld = Build NEPI code repos only
 ruibld = Build the RUI only
-nepi_status = Print running status of all NEPI processes
-nepi_status_engine = Print tail of nepi_engine process
-nepi_status_rui = Print tail of nepi_rui process
-nepi_status_license = Print tail of nepi_license process
-nepi_status_ssh = Print tail of nepi_ssh process"
+nepistatus = Print running status of all NEPI processes
+nepistatus_engine = Print tail of nepi_engine process
+nepistatus_rui = Print tail of nepi_rui process
+nepistatus_license = Print tail of nepi_license process
+nepistatus_ssh = Print tail of nepi_ssh process"
 
 
 

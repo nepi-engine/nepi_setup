@@ -198,7 +198,7 @@ echo "Updating NEPI Config File Settings"
 
 
 source $NEPI_SYS_CONFIG_LOAD
-if [[ "$1" -ne 0 ]]; then
+if [[ "$?" -ne 0 ]]; then
     echo "Failed to find load config file at: ${NEPI_SYS_CONFIG_LOAD}"
     exit 1
 fi
