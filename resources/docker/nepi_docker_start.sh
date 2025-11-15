@@ -177,20 +177,20 @@ else
     # fi
 
 
-    sleep 1
+    sleep 3
 
 
     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
     CONTAINER_ID=${CONTAINER_ID[0]}
-    if [[ -z "$CONTAINER_ID" ]]; then
-        echo "NEPI Failed to Run"
-        CONTAINER_ID=($(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
-        if [[ -n "$CONTAINER_ID" ]]; then
-            echo "Removing stopped container ${nepi_fs}:${nepi_fs_tag} with id ${CONTAINER_ID}"
-            sudo docker rm $CONTAINER_ID
-        fi
+    # if [[ -z "$CONTAINER_ID" ]]; then
+    #     echo "NEPI Failed to Run"
+    #     CONTAINER_ID=($(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
+    #     if [[ -n "$CONTAINER_ID" ]]; then
+    #         echo "Removing stopped container ${nepi_fs}:${nepi_fs_tag} with id ${CONTAINER_ID}"
+    #         sudo docker rm $CONTAINER_ID
+    #     fi
 
-    else
+    #else
 
         echo ""
         dps
@@ -208,7 +208,7 @@ else
         update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "$(date +%Y-%m-%d)" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FS_RESTART" 0 "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_RESTARTING" 0 "${CONFIG_SOURCE}"
-    fi
+    #fi
 
 fi
 

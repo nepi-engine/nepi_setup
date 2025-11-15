@@ -234,6 +234,7 @@ else
     sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif_zeep
     sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input PyUSB
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input usb
 
     sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input PyYAML
     sudo -H python${NEPI_PYTHON} -m pip install --no-input declxml
