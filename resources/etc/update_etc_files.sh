@@ -11,26 +11,28 @@
 
 # This script Updates NEPI ETC Files
 
+sudo -v
+
+if [[ "$(id -un 1000)" == 'nepi' ]]; then
+    CONFIG_USER=nepi
+    bfile=/home/nepi/.bashrc
+    ufile=/home/nepi/.nepi_bash_utils
+    afile=/home/nepi/.nepi_system_aliases
+elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
+    CONFIG_USER=${USER}
+    bfile=/home/${USER}/.bashrc
+    ufile=/home/${USER}/.nepi_bash_utils
+    afile=/home/${USER}/.nepi_docker_aliases
+else
+    echo "NEPI Aliases bash file not found"
+    exit 1
+fi
+
 echo ""
 echo "########################"
 echo "STARTING NEPI ETC UPDATE PROCESSES"
 echo "########################"
 echo ""
-
-if [[ -f "/home/nepi/.nepi_bash_utils" ]]; then
-    CONFIG_USER=nepi
-    source /home/nepi/.nepi_bash_utils
-    wait
-elif [[ -f "/home/nepihost/.nepi_bash_utils" ]]; then
-    CONFIG_USER=nepihost
-    source /home/nepihost/.nepi_bash_utils
-    wait
-else
-    echo ".nepi_bash_utils file not found"
-    exit 1
-fi 
-
-
 
 ######################################
 
@@ -56,6 +58,7 @@ fi
 
 #############################
 # Load the config file
+
 if [ ! -f "${ETC_FOLDER}/load_system_config.sh" ]; then
   echo  "Could not find system config file at: ${ETC_FOLDER}/load_system_config.sh"
 else

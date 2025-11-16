@@ -11,22 +11,16 @@
 
 # This script syncs the current folders etc files to the system config folder
 
-export CONFIG_USER=$(id -un 1000)
-
-if [[ "$CONFIG_USER" == 'nepi' ]]; then
+if [[ "$(id -un 1000)" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
     ufile=/home/nepi/.nepi_bash_utils
     afile=/home/nepi/.nepi_system_aliases
-elif [[ "$CONFIG_USER" == 'nepihost'  ]]; then
-    CONFIG_USER=nepihost
-    bfile=/home/nepihost/.bashrc
-    ufile=/home/nepihost/.nepi_bash_utils
-    afile=/home/nepihost/.nepi_docker_aliases
-# elif [[ -f "/home/${CONFIG_USER}/.nepi_docker_aliases" ]]; then
-#     bfile=/home/${CONFIG_USER}/.bashrc
-#     ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-#     afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
+    CONFIG_USER=${USER}
+    bfile=/home/${USER}/.bashrc
+    ufile=/home/${USER}/.nepi_bash_utils
+    afile=/home/${USER}/.nepi_docker_aliases
 else
     echo "NEPI Aliases bash file not found"
     exit 1
