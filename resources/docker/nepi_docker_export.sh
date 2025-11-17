@@ -98,7 +98,7 @@ else
                     NEW_HW_TYPE=$(get_hw_type)
                 fi
             fi
-            NEW_SW_DESC=$(clean_tag_string $NEW_SW_DESC)
+            NEW_HW_TYPE=$(clean_tag_string $NEW_HW_TYPE)
 
             NEW_SW_DESC=$NEPI_SW_DESC
             if [[ -z "$NEW_SW_DESC" || "$NEW_SW_DESC" == 'unknown' ]]; then
@@ -107,19 +107,20 @@ else
                     NEW_SW_DESC="unknown" # Uknown until NEPI runs 
                 fi
             fi
-            NEW_HW_TYPE=$(clean_tag_string $NEW_HW_TYPE)
+            NEW_SW_DESC=$(clean_tag_string $NEW_SW_DESC)
+            
 
             NEW_DATE=$(date +%Y%m%d)
 
 
             NEW_DESC=${TAG_ARRAY[5]}
-            if [[ -z "$NEW_DESC" ]]; then
-                NEW_DESC="-$(date +%H%M)"
-            elif [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
+            if [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
                 NEW_DESC=${NEW_DESC%?????}
-                NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
+                NEW_DESC="${NEW_DESC}_$(date +%H%M)"
+            elif [[ -n "$NEW_DESC" ]]; then
+                NEW_DESC="${NEW_DESC}_$(date +%H%M)"
             else
-                NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
+                NEW_DESC="$(date +%H%M)"
             fi
             NEW_DESC=$(clean_tag_string $NEW_DESC)
 

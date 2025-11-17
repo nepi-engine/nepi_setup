@@ -141,11 +141,11 @@ else
                 fi       
                 NEW_DATE=$(clean_tag_string "${NEW_DATE}")   
 
-                NEW_DESC="${TAG_ARRAY[5]}"
-                if [[ -z "$NEW_DESC" ]]; then
-                    NEW_DESC="-${NEW_DESC}"
-                fi       
+                NEW_DESC="${TAG_ARRAY[5]}"   
                 NEW_DESC=$(clean_tag_string "${NEW_DESC}")   
+                if [[ -n "$NEW_DESC" ]]; then
+                    NEW_DESC="-${NEW_DESC}"
+                fi     
         
         
                 NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
