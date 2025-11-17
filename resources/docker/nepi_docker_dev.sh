@@ -11,6 +11,13 @@
 
 # This script launches NEPI Container
 
+RUN_CMD=""
+if [[ -n "$1" ]]; then
+    RUN_CMD=$1
+fi
+
+
+
 sudo -v
 
 CONFIG_USER=nepihost
@@ -37,6 +44,7 @@ fi
 
 ########################
 # Load NEPI DOCKER
+echo "Loading Updated Docker Config Values"
 CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
@@ -48,7 +56,7 @@ else
     # Start Processes
 
     # Reset. Updated by NEPI Software
-    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/nepi_system_config.yaml
+    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
     update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
     update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
 
@@ -94,6 +102,7 @@ else
 
     fi 
 
+
     # Finish Run Command
     if [[ "$NEPI_ACTIVE_FS" == "nepi_fs_a" ]]; then
         nepi_fs=${NEPI_FSA}
@@ -103,8 +112,13 @@ else
         nepi_fs_tag=${NEPI_FSB_TAG}
     fi
 
+    run_cmd=""
+    if [[ -n "$RUN_CMD" ]]; then
+        run_cmd="-c "\'${RUN_CMD}\'
+    fi
+
     DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
-    ${nepi_fs}:${nepi_fs_tag} /bin/bash "
+    ${nepi_fs}:${nepi_fs_tag} /bin/bash ${run_cmd} "
 
 
     # ${nepi_fs}:${nepi_fs_tag} /bin/bash \
@@ -125,9 +139,6 @@ else
         return 0
     }
 
-    echo "Restarting Network"
-    sudo systemctl restart networking
-    echo ""
     echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
     echo "${DOCKER_RUN_COMMAND}"
     eval "$DOCKER_RUN_COMMAND"

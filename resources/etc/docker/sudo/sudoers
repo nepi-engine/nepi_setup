@@ -28,6 +28,6 @@ root	ALL=(ALL:ALL) ALL
 # See sudoers(5) for more information on "#include" directives:
 
 ##### NEPI SUDO USERS #####
-nepi ALL=(ALL) NOPASSWD: ALL
+nepi ALL=(ALL:ALL) ALL
 nepihost ALL=(ALL:ALL) ALL
 nepiadmin ALL=(ALL:ALL) ALL

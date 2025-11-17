@@ -17,7 +17,7 @@ DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
 if [[ -f "$DOCKER_CONFIG_FILE" ]]; then
-    #echo "Updating Docker Config DOCKER_CONFIG_FILE from: ${DOCKER_CONFIG_FILE}"
+    echo "Updating Docker Config from: ${DOCKER_CONFIG_FILE}"
     keys=($(yq e 'keys | .[]' ${DOCKER_CONFIG_FILE}))
     for key in "${keys[@]}"; do
         value=$(yq e '.'"$key"'' $DOCKER_CONFIG_FILE)

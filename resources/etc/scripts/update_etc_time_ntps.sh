@@ -27,11 +27,11 @@ else
     exit 1
 fi
 
-if [[ -f "$ufile" ]]; then
-    source $ufile
-else
-    echo "NEPI Utils bash file not found at: ${ufile}"
-    exit 1
+LOAD_NEPI_CONFIG=1
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
 
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

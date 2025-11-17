@@ -394,6 +394,7 @@ export -f ask_yes_no
 
 
 function nipa(){
+  sudo -v
   file=/etc/network/interfaces.d/nepi_static_ip
   if [ ! -f "$file" ]; then
       return 2
@@ -411,6 +412,7 @@ export -f nipa
 
 
 function naipa(){
+  sudo -v
   file=/etc/network/interfaces.d/nepi_user_ip_aliases
   if [ ! -f "$file" ]; then
       return 2
@@ -427,6 +429,7 @@ function naipa(){
 export -f naipa
 
 function nnipa(){
+  sudo -v
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
       return 1
@@ -443,6 +446,7 @@ function nnipa(){
 export -f nnipa
 
 function nnet(){
+    sudo -v
     nepi_ip=$(nipa)
     if [[ -z "$nepi_ip" ]]; then
       return 1
@@ -464,6 +468,7 @@ function nnet(){
 export -f nnet
 
 function ndhcp(){
+  sudo -v
   if nnet; then
     # This file sets up nepi bash aliases and util functions
     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -495,7 +500,7 @@ export -f ndhcp
 
 function nclock(){
   if [[ "$(date +%Y)" -lt 2025 ]]; then
-
+      sudo -v
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
@@ -509,13 +514,17 @@ function nclock(){
         fi
       fi
 
-      echo "Restarting chrony time service"
-      sudo systemctl restart chronyd
       # sleep 1
       # sudo chronyc -a makestep > /dev/null 2>&1
       # chronyc waitsync 5
       # echo "Forcing clock sync"
       # sudo chronyc -a makestep > /dev/null 2>&1
+
+      echo "Restarting chrony time service"
+      sudo systemctl restart chronyd
+
+      sleep 1
+      nnet # restart the network
   fi
 
 }
@@ -523,6 +532,7 @@ export -f nclock
 
 
 function ninet(){
+  sudo -v
   if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
     if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
@@ -551,6 +561,11 @@ function fix_chromium(){
 export function fix_chromium
 
 
+function nls(){
+  ls -l -a $1
+}
+export function nls
+
 utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
@@ -565,6 +580,7 @@ nnet = Restart the network
 ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
+nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 fix_chromium = Fix any Chromium config issues
 sbrc = Source the current user's bashrc files" 
 
@@ -1316,15 +1332,30 @@ function get_sw_desc() {
 export -f get_sw_desc
 
 
+function cmd_loop() {
+  if [[ ! -v "$1" && -n "$1" ]]; then
+    while $1; do 
+      echo ""
+      sleep 1
+    done
+  else
+    echo "No command string provided"
+  fi
+}
+export -f cmd_loop
+
+
+
 
 
 #### Update Help Test
 utilsn="${utilsn}
 ################################
-### NEPI FILE UTIL FUNCTIONS
+### NEPI SYSTEM UTIL FUNCTIONS
 ################################
 ftext = Find text in files recursively
 ffile = Find filenames with text match recursively
+cmd_loop = Runs the COMMAND_STRING until Ctrl-C every second
 update_text_value = Adds or Replaces value in text file given FILE KEY UPDATE_STRING FILE
 update_yaml_value = Update entry in yaml file given KEY VAL FILE
 export_yaml_value = Exports the value of yaml entry to system variable given KEY VARIBLE FILE

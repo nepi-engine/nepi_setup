@@ -84,30 +84,32 @@ else
             #echo "NEPI_VERSION = ${NEPI_VERSION}"
             NEW_VERSION=$NEPI_VERSION
             if [[ -z "$NEW_VERSION" ]]; then
-                NEW_VERSION=$(clean_tag_string "${TAG_ARRAY[1]}")
+                NEW_VERSION="${TAG_ARRAY[1]}"
                 if [[ -z "$NEW_VERSION" ]]; then
                     NEW_VERSION="0p0p0"
                 fi
             fi
+            NEW_VERSION=$(clean_tag_string $NEW_VERSION)
 
             NEW_HW_TYPE=$NEPI_HW_TYPE
             if [[ -z "$NEW_HW_TYPE" ]]; then
-                NEW_HW_TYPE=$(clean_tag_string "${TAG_ARRAY[2]}")
+                NEW_HW_TYPE="${TAG_ARRAY[2]}"
                 if [[ -z "$NEW_HW_TYPE" ]]; then
-                    NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
+                    NEW_HW_TYPE=$(get_hw_type)
                 fi
             fi
+            NEW_SW_DESC=$(clean_tag_string $NEW_SW_DESC)
 
-            NEW_SW_DESC=$(clean_tag_string $NEPI_SW_DESC)
+            NEW_SW_DESC=$NEPI_SW_DESC
             if [[ -z "$NEW_SW_DESC" || "$NEW_SW_DESC" == 'unknown' ]]; then
-                NEW_SW_DESC=$(clean_tag_string "${TAG_ARRAY[3]}")
+                NEW_SW_DESC="${TAG_ARRAY[3]}"
                 if [[ -z "$NEW_SW_DESC" ]]; then
                     NEW_SW_DESC="unknown" # Uknown until NEPI runs 
                 fi
-                
             fi
+            NEW_HW_TYPE=$(clean_tag_string $NEW_HW_TYPE)
 
-            NEW_DATE=$(date +%Y%m%d-%H%M)
+            NEW_DATE=$(date +%Y%m%d)
 
 
             NEW_DESC=${TAG_ARRAY[5]}
@@ -119,15 +121,12 @@ else
             else
                 NEW_DESC="-${NEW_DESC}_$(date +%H%M)"
             fi
+            NEW_DESC=$(clean_tag_string $NEW_DESC)
 
     
     
-            NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
+            NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}-${NEW_DESC}"
 
-            # NEW_DESC="${TAG_ARRAY[5]}"
-            # if [[ -n "$NEW_DESC" ]]; then
-            #     NEPI_EXPORT_TAG="${NEPI_EXPORT_TAG}-${NEW_DESC}"
-            # fi
         
             NEPI_EXPORT_TAG=${NEPI_EXPORT_TAG,,}
         fi

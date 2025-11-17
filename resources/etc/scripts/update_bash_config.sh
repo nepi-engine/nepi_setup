@@ -38,8 +38,10 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ "$1" -eq 0 ]]; then
-    LOAD_NEPI_CONFIG=0
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
 
 if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
@@ -73,7 +75,17 @@ if [[ -f "$bfile" ]]; then
     if is_valid_ipv4 $NEPI_IP; then
         update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${NEPI_IP}"
     fi
-    sudo cp $bfile /root/.bashrc
+
+    sudo rm /root/.bashrc
+    sudo cp /home/${CONFIG_USER}/.bashrc /root/.bashrc
+    sudo chmod 0644 /root/.bashrc
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.bashrc
+    sudo chmod 0664 /home/${CONFIG_USER}/.bashrc
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+    sudo chmod 0755 /home/${CONFIG_USER}
+
 else
     echo "NEPI Bashrc file not found at: ${bfile}"
     exit 1

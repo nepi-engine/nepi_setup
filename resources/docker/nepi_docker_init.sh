@@ -17,18 +17,6 @@ wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-###############################
-# Load NEPI Config File
-file=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$file" ]]; then
-    echo "Loading System Config File from ${file}"
-    source $file
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${file}"
-    fi
-else
-    echo "Failed to find ${file}"
-fi
 
 ########################
 # Update Docker Config
@@ -63,7 +51,6 @@ else
         echo ""
         echo "Removing all Docker Images"
         sudo docker rmi -f $(sudo docker images -q)  > /dev/null 2>&1
-        sudo cp ${docker_cfg_path}/nepi_docker_config.blank ${docker_cfg_path}/nepi_docker_config.yaml
 
         echo "Proceeding with the import..."
         INSTALL_IMAGE=$1
@@ -78,7 +65,7 @@ else
             if [[ "$?" -eq 0 ]]; then
                 success=1
                 #########################
-                if [[ "$NEPI_AB_FS" -eq 1 ]]; then
+                if [[ "$NEPI_FS_AB" -eq 1 ]]; then
                     echo "Checking avail space in ${NEPI_DOCKER}"
 
                     check_drive=$NEPI_DOCKER
@@ -86,8 +73,8 @@ else
                     if ! is_space_avail_gb $check_drive $check_space; then
                         echo "Not enough available space () to support NEPI AB Backup/Recovery File System"
                         echo "Disabling NEPI AB File System Support"
-                        file=/mnt/nepi_config/docker_cfg/etc/nepi_system_config.yaml
-                        update_yaml_value "NEPI_AB_FS" 0 "$file"
+                        file=/mnt/nepi_config/docker_cfg/etc/nepi_docker_config.yaml
+                        update_yaml_value "NEPI_FS_AB" 0 "$file"
                     else
                         echo ""
                         echo "Initializing NEPI Docker nepi_fs_b"

@@ -39,7 +39,7 @@ else
     # Start Processes
 
     # Reset. Updated by NEPI Software
-    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/nepi_system_config.yaml
+    SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
     update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
     update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
     update_yaml_value "NEPI_FS_AB" $NEPI_AB_FS "$SYSTEM_CONFIG_FILE"
@@ -149,8 +149,6 @@ else
         return 0
     }
 
-    echo "Restarting Network"
-    sudo systemctl restart networking
     echo ""
     echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
     echo "${DOCKER_RUN_COMMAND}"
@@ -176,8 +174,6 @@ else
     #     fi
     # fi
 
-
-    sleep 3
 
 
     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))

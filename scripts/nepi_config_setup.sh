@@ -110,60 +110,60 @@ fi
  
 
 
-echo ""
-if [[ "$check_failed" -eq 1 ]]; then
-    echo "*****  Storage Folder Space Check Failed ******"
-    echo ""
-    echo ""
-    echo "The following folders need additional space to continue"
-    echo ""
+# echo ""
+# if [[ "$check_failed" -eq 1 ]]; then
+#     echo "*****  Storage Folder Space Check Failed ******"
+#     echo ""
+#     echo ""
+#     echo "The following folders need additional space to continue"
+#     echo ""
 
-    tot_need=0
+#     tot_need=0
 
-    check_drive=$NEPI_DOCKER
-    check_space=$min_docker_gb
-    if ! is_space_avail_gb $check_drive $check_space; then
-            total_space=$(path_size_gb $check_drive)
-            avail_space=$(path_space_gb $check_drive)
-            space_needed=$((avail_space - check_space))
-            tot_need=$((tot_need + space_needed))
-            echo ""
-            echo "NEPI Folder ${check_drive}"
-            echo "--------------------------"
-            echo "min:    ${check_space} GB"
-            echo "avail:  ${avail_space} GB"
-            echo "needed: ${space_needed} GB" 
-    fi
+#     check_drive=$NEPI_DOCKER
+#     check_space=$min_docker_gb
+#     if ! is_space_avail_gb $check_drive $check_space; then
+#             total_space=$(path_size_gb $check_drive)
+#             avail_space=$(path_space_gb $check_drive)
+#             space_needed=$((avail_space - check_space))
+#             tot_need=$((tot_need + space_needed))
+#             echo ""
+#             echo "NEPI Folder ${check_drive}"
+#             echo "--------------------------"
+#             echo "min:    ${check_space} GB"
+#             echo "avail:  ${avail_space} GB"
+#             echo "needed: ${space_needed} GB" 
+#     fi
 
-    check_drive=$NEPI_STORAGE
-    check_space=$min_storage_gb
-    if ! is_space_avail_gb $check_drive $check_space; then
-            total_space=$(path_size_gb $check_drive)
-            avail_space=$(path_space_gb $check_drive)
-            space_needed=$((avail_space - check_space))
-            tot_need=$((tot_need + space_needed))
-            echo ""
-            echo "NEPI Folder ${check_drive}"
-            echo "--------------------------"
-            echo "min:    ${check_space} GB"
-            echo "avail:  ${avail_space} GB"
-            echo "needed: ${space_needed} GB" 
-    fi
+#     check_drive=$NEPI_STORAGE
+#     check_space=$min_storage_gb
+#     if ! is_space_avail_gb $check_drive $check_space; then
+#             total_space=$(path_size_gb $check_drive)
+#             avail_space=$(path_space_gb $check_drive)
+#             space_needed=$((avail_space - check_space))
+#             tot_need=$((tot_need + space_needed))
+#             echo ""
+#             echo "NEPI Folder ${check_drive}"
+#             echo "--------------------------"
+#             echo "min:    ${check_space} GB"
+#             echo "avail:  ${avail_space} GB"
+#             echo "needed: ${space_needed} GB" 
+#     fi
 
-    echo ""
-    echo ""
-    echo "Options to proceed:"
-    echo
-    echo "    1) Free up ${tot_need} GB on your current file system"
-    echo
-    echo "    2) Manually create the missing folders as individually mounted partitions with the minimum required space shown"
-    echo ""
-    echo "DO NOT PROCEED UNTIL THE ISSUES LISTED ARE ADDRESSED"
-    echo ""
-    echo ""
-    echo ""
+#     echo ""
+#     echo ""
+#     echo "Options to proceed:"
+#     echo
+#     echo "    1) Free up ${tot_need} GB on your current file system"
+#     echo
+#     echo "    2) Manually create the missing folders as individually mounted partitions with the minimum required space shown"
+#     echo ""
+#     echo "DO NOT PROCEED UNTIL THE ISSUES LISTED ARE ADDRESSED"
+#     echo ""
+#     echo ""
+#     echo ""
 
-fi
+# fi
 
 echo ""
 echo "*** REBOOT YOUR DEVICE ***"

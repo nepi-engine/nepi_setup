@@ -35,11 +35,6 @@ fi
 
 CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
-blank_config=${DOCKER_FOLDER}/nepi_docker_config.blank
-if [[ -f "$blank_config" ]]; then
-    sync_yaml_files $blank_config $CONFIG_SOURCE
-fi
-
 if [[ ! -f "$CONFIG_SOURCE" ]]; then
     echo "Failed to find ${CONFIG_SOURCE}"
 
@@ -106,6 +101,7 @@ else
 
 
         #echo "Reseting NEPI Image ${NEW_FS} Info in ${CONFIG_SOURCE}"
+        update_yaml_value "NEPI_FSA" "$NEW_FS" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_TAG" "$NEW_TAG" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_ID" "$NEW_ID" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_NAME" "$NEW_NAME" "${CONFIG_SOURCE}"
@@ -127,6 +123,7 @@ else
 
     else
         #echo "Clearing NEPI Image ${NEW_FS} Info in ${CONFIG_SOURCE}"
+        update_yaml_value "NEPI_FSA" "$NEW_FS" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_TAG" "unknown" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_ID" "unknown" "${CONFIG_SOURCE}"
         update_yaml_value "NEPI_FSA_NAME" "unknown" "${CONFIG_SOURCE}"

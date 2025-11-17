@@ -27,11 +27,11 @@ else
     exit 1
 fi
 
-if [[ -f "$ufile" ]]; then
-    source $ufile
-else
-    echo "NEPI Utils bash file not found at: ${ufile}"
-    exit 1
+LOAD_NEPI_CONFIG=1
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
 
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -57,42 +57,52 @@ echo "UPDATING ETC USERS"
 
 pw_changed=0
 
-echo ""
-echo "########"
-echo "Updating nepi user passwords"
+
 
 function update_password() {
         username=$1
         password=$2
 
-        OLD_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+        if is_valid_pw $password; then
 
-        echo "${username}:${password}" | sudo chpasswd
+            OLD_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
 
-        # After chpasswd
-        NEW_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+            echo "${username}:${password}" | sudo chpasswd
 
-        if [ "$OLD_HASH" != "$NEW_HASH" ]; then
-            return 0
+            # After chpasswd
+            NEW_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+
+            if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+                echo "Updated password for user ${username}"
+                return 0
+            else
+                return 1
+            fi
         else
+            echo "Password update for user ${username} failed. Not valid password" 
             return 1
         fi
 }
 
 
+
 if update_password $NEPI_USER $NEPI_USER_PW; then 
     pw_changed=1 
 fi
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
     pw_changed=1 
 fi
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
     pw_changed=1 
 fi
-
-
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 
 if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
@@ -118,6 +128,11 @@ if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
         echo "User '$username' removed successfully."
     }
 
+    allow_users=1
+    if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]
+        allow_users=0
+    fi
+
     # Read /etc/passwd and process users
     while IFS=':' read -r username _ uid gid _ _ _; do
 
@@ -129,7 +144,7 @@ if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
             else
                 is_nepi_user=0
             fi
-            if [[  "$is_nepi_user" -eq 0 ]]; then
+            if [[  "$allow_users" -eq 0 && "$is_nepi_user" -eq 0 ]]; then
                 remove_user "$username"
             fi
         fi
@@ -145,19 +160,21 @@ fi
 # Update ETC files if systemd is running (Not in Container)
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
-        echo ""
-        echo "########"
-        echo "Configuring nepi Samba passwords"
-        echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
-
-        echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
-
-        echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null 2>&1
 
         if [[ "$pw_changed" -eq 1 ]]; then
+                echo ""
+                echo "########"
+                echo "Configuring nepi Samba passwords"
+                echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
+                sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+
+                echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
+                sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+                echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
+                sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null 2>&1
+
+                echo "Restarting sshd service"
                 sudo systemctl restart sshd
         fi
 

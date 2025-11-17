@@ -32,6 +32,7 @@ echo "########################"
 echo "NEPI USER SETUP"
 echo "########################"
 
+
 ###########
 CONFIG_USER=nepihost
 SYS_USER_1=nepi
@@ -42,10 +43,25 @@ CONFIG_USER_PW=nepi
 SYS_USER_1_PW=nepi
 SYS_USER_2_PW=nepiadmin
 
+
+echo ""
+echo "###################################"
+echo "Setting NEPI ROOT USER"
+echo "###################################"
+echo ""
+
+sudo adduser root dialout
+sudo usermod -aG dialout root >/dev/null 2>&1
+sudo usermod -aG tty root >/dev/null 2>&1
+sudo usermod -aG i2c root >/dev/null 2>&1
+sudo usermod -aG video root >/dev/null 2>&1
+sudo usermod -aG docker root >/dev/null 2>&1
+
+echo ""
 echo "###################################"
 echo "Setting NEPI CONFIG USER: ${CONFIG_USER}"
 echo "###################################"
-
+echo ""
 
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "User $CONFIG_USER exists."
@@ -73,7 +89,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG i2c ${CONFIG_USER} #>/dev/null 2>&1
+    sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
 
@@ -121,6 +137,7 @@ function new_system_user(){
     echo "###################################"
     echo "Setting NEPI SYSTEM USER: ${user}"
     echo "###################################"
+    echo ""
     # if grep -q "\b${user}\b" /etc/group;  then
     #         sudo groupdel $user
     # fi
@@ -140,7 +157,7 @@ function new_system_user(){
         sudo adduser ${user} dialout
         sudo usermod -aG dialout ${user} >/dev/null 2>&1
         sudo usermod -aG tty ${user} >/dev/null 2>&1
-        sudo usermod -aG i2c ${user} #>/dev/null 2>&1
+        sudo usermod -aG i2c ${user} >/dev/null 2>&1
         sudo usermod -aG video ${user} >/dev/null 2>&1
         sudo usermod -aG docker ${user} >/dev/null 2>&1
 
@@ -163,10 +180,11 @@ new_system_user ${SYS_USER_2} ${SYS_USER_2_PW}
 
 
 
-
+echo ""
 echo "###################################"
 echo "Changing Non-NEPI user IDs and Groups"
 echo "###################################"
+echo ""
 
 cur_users=$(awk -F':' '1000 <= $3 && $3 <= 2000 {print $1, $3}' /etc/passwd)
 echo "Current Users:"
@@ -260,10 +278,11 @@ cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
 echo "Updated User:"
 echo $cur_users
 
-
+echo ""
 echo "###################################"
 echo "Changing NEPI user IDs and Groups"
 echo "###################################"
+echo ""
 
 echo ""
 echo "Updating NEPI User IDs and Groups if Needed"
@@ -277,6 +296,8 @@ new_gid=$new_uid
 if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 username=${SYS_USER_1}
 uid=$(id -u "$username")
@@ -287,6 +308,8 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
     sudo usermod -s /sbin/nologin $username
 fi
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 username=${SYS_USER_2}
 uid=$(id -u "$username")
@@ -297,6 +320,8 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
     sudo usermod -s /sbin/nologin $username
 fi
+sudo chown ${username}:${username} /home/${username}
+sudo chmod 0755 /home/${username}
 
 
 # echo "###################################"
@@ -337,7 +362,7 @@ fi
 # echo "Adding NEPI users to sudo users"
 # echo "###################################"
 
-source_file=${SOURCE_ETC_PATH}/sudo/sudoers 
+source_file=${SOURCE_ETC_PATH}/docker/sudo/sudoers 
 dest_file=/etc/sudoers
 if [[ -f "$source_file" ]]; then
     sudo cp $source_file $dest_file
@@ -355,6 +380,7 @@ echo $cur_users
 
 sudo chmod -R 0777 /tmp/nepi
 
+echo ""
 echo "########################"
 echo "NEPI User Account Setup Complete"
 echo "########################"

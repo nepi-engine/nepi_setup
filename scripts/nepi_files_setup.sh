@@ -167,7 +167,7 @@ if [[ ! -d "$UPDATE_PATH" ]]; then
     sudo mkdir -p $UPDATE_PATH
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $UPDATE_PATH
 fi
-sudo cp -r ${SOURCE_PATH}/* ${UPDATE_PATH}/
+sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod +x ${UPDATE_PATH}/*
 
@@ -185,7 +185,7 @@ echo "Copying NEPI Docker Scripts Files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -d "$UPDATE_PATH" ]]; then
     sudo mkdir -p $UPDATE_PATH
 fi
-sudo cp -r ${SOURCE_PATH}/* ${UPDATE_PATH}/
+sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod +x ${UPDATE_PATH}/*
 

@@ -37,8 +37,10 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ "$1" -eq 0 ]]; then
-    LOAD_NEPI_CONFIG=0
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
 
 if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v CONFIG_USER ]]; then
@@ -73,31 +75,14 @@ if [[ "$update_keys" -eq 1  ]]; then
             sudo mkdir /home/${CONFIG_USER}/.ssh
         fi 
         sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${CONFIG_USER}/.ssh/authorized_keys
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+        sudo chmod 0755 /home/${CONFIG_USER}
         sudo chmod 0600 /home/${CONFIG_USER}/.ssh/authorized_keys
         sudo chmod 0700 /home/${CONFIG_USER}/.ssh
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.ssh
 
 
-        # ###############
-        # echo "Installing nepi ssh key files for user ${NEPI_HOST_USER}"
-        # if [ ! -d "/home/${NEPI_HOST_USER}/.ssh" ]; then
-        #     sudo mkdir /home/${NEPI_HOST_USER}/.ssh
-        # fi 
-        # sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${NEPI_HOST_USER}/.ssh/authorized_keys
-        # sudo chmod 0600 /home/${NEPI_HOST_USER}/.ssh/authorized_keys
-        # sudo chmod 0700 /home/${NEPI_HOST_USER}/.ssh
-        # sudo chown -R ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER}/.ssh
-
-
-        # ################
-        # echo "Installing nepi ssh key files for user ${NEPI_ADMIN_USER}"
-        # if [ ! -d "/home/${NEPI_ADMIN_USER}/.ssh" ]; then
-        #     sudo mkdir /home/${NEPI_ADMIN_USER}/.ssh
-        # fi 
-        # sudo cp ${ETC_FOLDER}/ssh/authorized_keys /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        # sudo chmod 0600 /home/${NEPI_ADMIN_USER}/.ssh/authorized_keys
-        # sudo chmod 0700 /home/${NEPI_ADMIN_USER}/.ssh
-        # sudo chown -R ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}/.ssh
+    
 
 
         # Update ETC files if systemd is running (Not in Container)

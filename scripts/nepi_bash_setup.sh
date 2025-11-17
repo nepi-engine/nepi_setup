@@ -14,7 +14,7 @@
 
 sudo -v
 
-export CONFIG_USER=$(id -un 1000)
+export CONFIG_USER=${USER}
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -41,7 +41,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_DEST
 sudo chmod 755 $NEPI_UTILS_DEST
 
 
-if [[ "$CONFIG_USER" == 'nepihost' ]]; then
+if [[ "$CONFIG_USER" != 'nepi' ]]; then
     NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_docker_aliases
     NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_docker_aliases
 else

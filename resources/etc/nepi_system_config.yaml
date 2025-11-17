@@ -108,7 +108,7 @@ NEPI_HW_MODEL: unknown
 ####################################################
 # Set whether NEPI is running in a docker container
 NEPI_IN_CONTAINER: 1
-NEPI_GB_CONTAINER: 20
+NEPI_GB_CONTAINER: 30
 # If NEPI_IN_CONTAINER=1, set whether NEPI supports a recovery mode
 # Note: If NEPI_RECOVERY_ENABLED enabled and NEPI_IP is not 192.168.179.103,
 #   the NEPI Host system will run with 

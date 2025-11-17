@@ -30,10 +30,11 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ -n "$1" ]]; then
-    LOAD_NEPI_CONFIG=$1
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
-
 if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
     # Load System Config File
     source ${ETC_FOLDER}/load_system_config.sh

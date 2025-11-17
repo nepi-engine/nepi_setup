@@ -62,6 +62,7 @@ else
                 COMMIT_VERSION="unknown"
             fi
         fi
+        COMMIT_VERSION=$(clean_tag_string $COMMIT_VERSION)
 
         COMMIT_HW_TYPE=$NEPI_HW_TYPE
         if [[ -z "$COMMIT_HW_TYPE" || "$COMMIT_HW_TYPE" == 'unknown' ]]; then
@@ -70,14 +71,16 @@ else
                 COMMIT_HW_TYPE="unknown"
             fi
         fi
+        COMMIT_HW_TYPE=$(clean_tag_string $COMMIT_HW_TYPE)
 
-        COMMIT_SW_DESC=$(clean_tag_string $NEPI_SW_DESC)
+        COMMIT_SW_DESC=$NEPI_SW_DESC
         if [[ -z "$COMMIT_SW_DESC" || "$COMMIT_SW_DESC" == 'unknown' ]]; then
             COMMIT_SW_DESC="${TAG_ARRAY[3]}"
             if [[ -z "$COMMIT_SW_DESC" ]]; then
                 COMMIT_SW_DESC="unknown"
             fi
         fi
+        COMMIT_SW_DESC=$(clean_tag_string $COMMIT_SW_DESC)
 
         COMMIT_DATE=$(date +%Y%m%d)
 
@@ -85,9 +88,7 @@ else
         if [[ -z "$COMMIT_DESC" ]]; then
             COMMIT_DESC=${TAG_ARRAY[5]}
         fi
-
-
-        
+       
 
         if [[ -z "$COMMIT_DESC" || "$COMMIT_SW_DESC" == 'unknown' || "$COMMIT_SW_DESC" == 'clean' ]]; then
             COMMIT_DESC="-$(date +%H%M)"
@@ -97,6 +98,7 @@ else
         else
             COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
         fi
+        COMMIT_DESC=$(clean_tag_string $COMMIT_DESC)
 
         COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}"${COMMIT_DESC}
 

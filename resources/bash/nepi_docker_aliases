@@ -136,7 +136,8 @@ export -f nepistart
 
 function nepidev(){
   sudo -v
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh
+  run_cmd=$1
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh $run_cmd
 }
 export -f nepidev
 
@@ -391,34 +392,38 @@ function nepisettings(){
 }
 export -f nepiconfig
 
+
+
 HELPN="${HELPN}
 ################################
 ## NEPI Docer Shortcut Functions ##
 ################################
-nepistart = Start the NEPI docker container
-nepidev = Start the NEPI docker container in a dev mode with no processes running
-nepistop = Stop the running NEPI docker container
-nepilogin = Log into the running NEPI container as user 'nepi'
-nepiloginroot = Log into the running NEPI container as user 'root'
-nepiswitch = Switch to Inactive NEPI container on next boot or reststat
-nepicommit = Commit the running NEPI container
-nepiinit = Reset, clear, and import new NEPI Image
+nepistart = Start the NEPI docker container.
+nepidev = Start the NEPI docker container in a dev mode with no processes running, and an OPTIONAL_RUN_COMMAND.
+nepistop = Stop the running NEPI docker container.
+nepilogin = Log into the running NEPI container as user 'nepi'.
+nepiloginroot = Log into the running NEPI container as user 'root'.
+nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
+nepicommit = Commit the running NEPI container.
+nepiinit = Reset, clear, and import new NEPI Image.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepipull = Import a NEPI image from a remote repository given the PULL_URL.
-nepitag = Update the Software Description field in the active NEPI container
-nepiconfig = Configure NEPI System settings
-nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
-nepienable = Enable NEPI Docker service on next boot
-nepidisable = Disable NEPI Docker service on next boot
-nepirestart = Restart NEPI docker service
-nepistatus = Show the systemctl status for nepi_docker service
-nepilogs = Show live NEPI Docker service journal file
-nepireset = Reset all NEPI Config Folders
-nepiupdate = Run update process on NEPI Docker config file
-nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings"
+nepitag = Update the Software Description field in the active NEPI container.
+nepiconfig = Configure NEPI System settings.
+nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file.
+nepienable = Enable NEPI Docker service on next boot.
+nepidisable = Disable NEPI Docker service on next boot.
+nepirestart = Restart NEPI docker service.
+nepistatus = Show the systemctl status for nepi_docker service.
+nepilogs = Show live NEPI Docker service journal file.
+nepireset = Reset all NEPI Config Folders.
+nepiupdate = Run update process on NEPI Docker config file.
+nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings."
+
+#nepilicense = Print the NEPI Software Licencse"
 
 
 
