@@ -129,7 +129,7 @@ if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
     }
 
     allow_users=1
-    if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]
+    if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
         allow_users=0
     fi
 
