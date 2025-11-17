@@ -130,12 +130,16 @@ export -f nepistop
 
 function nepistart(){
   sudo -v
+  echo "Stopping NEPI Docker Service"
+  sudo systemctl stop nepi_docker
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepistart
 
 function nepidev(){
   sudo -v
+  echo "Stopping NEPI Docker Service"
+  sudo systemctl stop nepi_docker
   run_cmd=$1
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh $run_cmd
 }
