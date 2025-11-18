@@ -37,49 +37,22 @@ echo ""
 
 
 
-echo "Checking Requirements"
-
-# Check Valid Software
-if command -v yq &>/dev/null; then
-    : # Do nothing here
-elif is_valid_internet; then
-    echo "Installing yq software"
-    sudo add-apt-repository ppa:rmescandon/yq -y
-    sudo apt update
-    sudo apt install yq -y
-fi
-if command -v yq &>/dev/null; then
-    : # Do nothing here
-else
-    echo "EXITING"
-    echo "yq application is not installed"
-    echo "Connect to internet and rerun this script"
-    exit 1
-fi
-
-
 #######################################################################################
 echo ""
 echo "#########"
-echo " Updating NEPI Files"
+echo " Updating NEPI Config Files"
 echo ""
 
 # Define Folders
 SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
-SOURCE_ETC_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
-SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
-SOURCE_SYS_CONFIG_LOAD=${SOURCE_ETC_PATH}/load_system_config.sh
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
-sudo chmod -R +x $SOURCE_ETC_PATH
+SOURCE_SYS_CONFIG_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
+SOURCE_SYS_CONFIG_FILE=${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml
 
-SOURCE_NEPI_SCRIPTS_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")/resources/scripts
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_NEPI_SCRIPTS_PATH
-sudo chmod -R +x $SOURCE_NEPI_SCRIPTS_PATH
+SOURCE_NEPI_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/scripts
 
-SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")/resources/docker
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_DOCKER_SCRIPTS_PATH
-sudo chmod -R +x $SOURCE_DOCKER_SCRIPTS_PATH
+SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/docker
+SOURCE_DOCKER_CONFIG_FILE=${SOURCE_DOCKER_SCRIPTS_PATH}/nepi_docker_config.yaml
 
 
 NEPI_CONFIG_PATH=/opt/nepi
@@ -95,9 +68,9 @@ NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 
 
 
-
 ###################
 #  Sync and Load NEPI Config File
+echo " Updating NEPI System Config File"
 
 if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
     sudo mkdir -p $NEPI_CONFIG_PATH
@@ -105,45 +78,45 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_PATH
 
 if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
-    sudo cp -r -p "${SOURCE_ETC_PATH}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
+    sudo cp -r -p "${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
 else
-    sync_yaml_files ${SOURCE_ETC_PATH}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
+    sync_yaml_files ${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
 fi
 
 
 
 
 ############
-echo ""
-echo "###########"
+
 echo "Updating NEPI Config Folders"
-echo ""
 
 if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
     sudo mkdir -p $NEPI_CONFIG_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_CONFIG_PATH}
 fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_CONFIG_PATH}
 
-#############
 
 if [[ ! -d "$NEPI_ETC_PATH" ]]; then
     sudo mkdir -p $NEPI_ETC_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_ETC_PATH}
 fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_ETC_PATH}
 
 
 if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
     sudo cp -p $SOURCE_SYS_CONFIG_FILE $NEPI_SYS_CONFIG_FILE
 fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_SYS_CONFIG_FILE}
+
+
 SOURCE_PATH=${SOURCE_SYS_CONFIG_FILE}
 UPDATE_PATH=${NEPI_SYS_CONFIG_FILE}
 echo "Syncing NEPI System Config YAML File from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_PATH $UPDATE_PATH
 
 
-if [[ "$SOURCE_ETC_PATH" != "/etc" && -n "$SOURCE_ETC_PATH" ]]; then
+if [[ "$SOURCE_SYS_CONFIG_PATH" != "/etc" && -n "$SOURCE_SYS_CONFIG_PATH" ]]; then
 
-    SOURCE_PATH=$SOURCE_ETC_PATH
+    SOURCE_PATH=$SOURCE_SYS_CONFIG_PATH
     UPDATE_PATH=$NEPI_ETC_PATH
 
     echo "Syncing ETC Folder from ${SOURCE_PATH} to ${UPDATE_PATH}"
@@ -153,41 +126,46 @@ if [[ "$SOURCE_ETC_PATH" != "/etc" && -n "$SOURCE_ETC_PATH" ]]; then
 fi
 
 
+
+
+############
 # Install NEPI Sciprts
-
-if [[ ! -d "$NEPI_SCRIPTS_PATH" ]]; then
-    sudo mkdir -p $NEPI_SCRIPTS_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_SCRIPTS_PATH}
-fi
-
 SOURCE_PATH=${SOURCE_NEPI_SCRIPTS_PATH}
 UPDATE_PATH=/opt/nepi/scripts
-echo "Copying NEPI System Scripts Files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "$UPDATE_PATH" ]]; then
-    sudo mkdir -p $UPDATE_PATH
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $UPDATE_PATH
-fi
-sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod +x ${UPDATE_PATH}/*
 
+echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
+if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
 
-# Install Docker Sciprts
+    if [[ ! -d "$UPDATE_PATH" ]]; then
+        sudo mkdir -p $UPDATE_PATH 
+    fi
+    sudo rm -r $UPDATE_PATH/*
 
-if [[ ! -d "$NEPI_SCRIPTS_PATH" ]]; then
-    sudo mkdir -p $NEPI_SCRIPTS_PATH 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_SCRIPTS_PATH}
+    sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod +x ${UPDATE_PATH}/*
 fi
 
+
+
+
+############
+# Install NEPI Docker Sciprts
 SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
 UPDATE_PATH=/opt/nepi/docker_cfg
-echo "Copying NEPI Docker Scripts Files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "$UPDATE_PATH" ]]; then
-    sudo mkdir -p $UPDATE_PATH
+
+echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
+if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
+
+    if [[ ! -d "$UPDATE_PATH" ]]; then
+        sudo mkdir -p $UPDATE_PATH 
+    fi
+    sudo rm -r $UPDATE_PATH/*
+
+    sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod +x ${UPDATE_PATH}/*
 fi
-sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod +x ${UPDATE_PATH}/*
 
 
 ################
@@ -255,6 +233,9 @@ update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
 # update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
 
 
+#######################################################################################
+echo "Cleaning NEPI Bash Folder"
+sudo rm -r /opt/nepi/bash/* 2>/dev/null
 
 #######################################################################################
 

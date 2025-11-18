@@ -34,9 +34,7 @@ fix_path ${CONFIG_PATH} 775
 
 ##############################
 ## Check Folders
-load_nepi_config=0
-source ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh $load_nepi_config
-
+source ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh 
 
 ##############################
 ## Sync from Config Folders
@@ -63,11 +61,12 @@ sync_yaml_files ${SOURCE_PATH} ${UPDATE_PATH}
 SOURCE_PATH=/mnt/nepi_storage/license
 UPDATE_PATH=/opt/nepi/license
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo mkdir -p ${SOURCE_PATH}
+if [[ -d "${SOURCE_PATH}" ]]; then
+
+    sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    fix_folder ${UPDATE_PATH} 775 
+
 fi
-sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fix_folder ${UPDATE_PATH} 775 
 
 
 
@@ -76,19 +75,18 @@ fix_folder ${UPDATE_PATH} 775
 SOURCE_PATH=/home/${CONFIG_USER}
 UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo mkdir -p ${SOURCE_PATH}
+if [[ -d "${SOURCE_PATH}" ]]; then
+
+    if [ -e "$bfile" ] && [ ! -s "$bfile" ]; then
+        echo "Fix ${CONFIG_USER} bash files"
+        sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    elif [ ! -e "$FILE" ]; then
+    echo "Fix ${CONFIG_USER} bash files"
+    sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    fi
+
+    sudo rsync -av --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod 755 ${UPDATE_PATH}
+
 fi
-
-
-if [ -e "$bfile" ] && [ ! -s "$bfile" ]; then
-  echo "Fix ${CONFIG_USER} bash files"
-  sudo rsync -ah ${UPDATE_PATH}/ ${SOURCE_PATH}/
-elif [ ! -e "$FILE" ]; then
-  echo "Fix ${CONFIG_USER} bash files"
-  sudo rsync -ah ${UPDATE_PATH}/ ${SOURCE_PATH}/
-fi
-
-sudo rsync -ah ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}

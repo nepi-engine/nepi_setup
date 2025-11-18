@@ -12,18 +12,27 @@
 
 # This script loads the nepi_system_config.yaml values
 
-ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
  
-export SYSTEM_CONFIG_FILE=${ETC_FOLDER}/nepi_system_config.yaml
+CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
 
-if [[ -f "$SYSTEM_CONFIG_FILE" ]]; then
-    #sudo echo "Updating NEPI Config file from: ${SYSTEM_CONFIG_FILE}"
-    keys=($(yq e 'keys | .[]' ${SYSTEM_CONFIG_FILE}))
-    for key in "${keys[@]}"; do
-        value=$(yq e '.'"$key"'' $SYSTEM_CONFIG_FILE)
-        export ${key}=$value
-    done
+
+
+if [[ -f "$CONFIG_FILE" ]]; then
+
+    success=0
+    eval $(python ${CONFIG_FOLDER}/load_system_config.py 2>/dev/null)
+
+    if [[ "$success" -eq 0 ]]; then
+        #sudo echo "Updating NEPI Config file from: ${CONFIG_FILE}"
+        keys=($(yq e 'keys | .[]' ${CONFIG_FILE}))
+        for key in "${keys[@]}"; do
+            value=$(yq e '.'"$key"'' $CONFIG_FILE)
+            export ${key}=$value
+        done
+    fi
+
 else
-    echo "Config file not found ${SYSTEM_CONFIG_FILE}"
+    echo "Config file not found ${CONFIG_FILE}"
     exit 1
 fi

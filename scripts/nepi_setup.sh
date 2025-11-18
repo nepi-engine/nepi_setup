@@ -101,6 +101,7 @@ sudo rm /etc/${etc_path}
 sudo cp ${SOURCE_ETC_PATH}/${etc_path} /etc/${etc_path}  >/dev/null 2>&1
 
 sudo rm /var/crash/* 2>/dev/null
+
  
 echo ""
 echo "########"
@@ -540,6 +541,10 @@ sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/info/ 2>/dev/null
 sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/files/ 2>/dev/null
 sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
+
+##########
+sudo journalctl --vacuum-size=50M  # Limits journal size to 50MB
+sudo journalctl --vacuum-time=7d   # Keeps logs for 7 days
 
 echo ""
 echo "##################################"

@@ -29,17 +29,27 @@ echo "NEPI BASH SETUP"
 echo "########################"
 
 ##############
-echo "Installing NEPI utils file"
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-NEPI_UTILS_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
-echo "Installing NEPI utils file ${NEPI_UTILS_DEST} "
-if [ -f "$NEPI_UTILS_DEST" ]; then
-    sudo rm $NEPI_UTILS_DEST
-fi
-sudo cp $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_DEST
-sudo chmod 755 $NEPI_UTILS_DEST
 
+echo "Installing NEPI Utils files"
+
+NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
+sudo chmod 755 $NEPI_UTILS_FILE_SOURCE
+sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
+NEPI_UTILS_DEST=/home/${CONFIG_USER}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
+sudo chmod 755 $NEPI_UTILS_SOURCE
+sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
+
+
+
+##############
+echo "Installing NEPI aliases file ${NEPI_ALIASES_DEST} "
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
     NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_docker_aliases
@@ -49,8 +59,7 @@ else
     NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_system_aliases
 fi 
 
-##############
-echo "Installing NEPI aliases file ${NEPI_ALIASES_DEST} "
+
 if [ -f "$NEPI_ALIASES_DEST" ]; then
     sudo rm $NEPI_ALIASES_DEST
 fi

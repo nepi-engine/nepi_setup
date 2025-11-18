@@ -232,15 +232,24 @@ echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
 BASHRC=/home/${USER}/.bashrc
 
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-NEPI_UTILS_DEST=/home/${USER}/.nepi_bash_utils
-echo "Installing NEPI utils file from ${NEPI_UTILS_SOURCE} to  ${NEPI_UTILS_DEST} "
-if [ -f "$NEPI_UTILS_DEST" ]; then
-    sudo rm $NEPI_UTILS_DEST
-fi
-sudo cp $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST
-sudo chown -R ${USER}:${USER} $NEPI_UTILS_DEST
+##############
+echo "Installing NEPI Utils files"
 
+NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
+sudo chmod 755 $NEPI_UTILS_FILE_SOURCE
+sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
+NEPI_UTILS_DEST=/home/${CONFIG_USER}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
+sudo chmod 755 $NEPI_UTILS_SOURCE
+sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
+
+##############
 NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
 NEPI_ALIASES_DEST=/home/${USER}/.nepi_pc_aliases
 echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "

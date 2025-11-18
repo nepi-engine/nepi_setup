@@ -715,7 +715,15 @@ function update_yaml_value(){
     export UPDATE_YAML_FILE=$3
     #echo $UPDATE_YAML_FILE
 
-    yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
+
+    eval_cmd="success=$(python3 /home/${USER}/nepi_utils/sync_yaml_files.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
+    eval "$eval_cmd" 
+    success=$(echo ${success} | tail -n 1)
+    #echo "Python returned success = ${success}"
+
+    if [[ "$success" -ne 1 ]]; then
+      yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
+    fi
 }
 export -f update_yaml_value
 
@@ -758,21 +766,28 @@ function sync_yaml_files(){
         fi
     fi
 
-    keys=($(yq e 'keys | .[]' ${SOURCE_FILE}))
-    for key in "${keys[@]}"; do
-        KEY_NAME="${key}" # The path to the key you want to add
-        #echo "Check if the key exists for key ${KEY_NAME} in file ${TARGET_FILE}"
-        if yq eval ". | has(\"$KEY_NAME\")" "$TARGET_FILE" | grep -q "false"; then
-            echo "Key ${KEY_NAME} is missing. Adding it to ${TARGET_FILE} "
-            KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
-            update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
-            #echo "Key added successfully."
-        elif [[ "$REPLACE_ENTRIES" -eq 1 ]]; then # Update the value
-            #echo "Key ${KEY_NAME} exists. Will update"
-            KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
-            update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
-        fi        
-    done
+    eval_cmd="success=$(python3 /home/${USER}/nepi_utils/sync_yaml_files.py $SOURCE_FILE $TARGET_FILE $REPLACE_ENTRIES)"  #2>/dev/null"
+    eval "$eval_cmd" 
+    success=$(echo ${success} | tail -n 1)
+    #echo "Python returned success = ${success}"
+
+    if [[ "$success" -ne 1 ]]; then
+      keys=($(yq e 'keys | .[]' ${SOURCE_FILE}))
+      for key in "${keys[@]}"; do
+          KEY_NAME="${key}" # The path to the key you want to add
+          #echo "Check if the key exists for key ${KEY_NAME} in file ${TARGET_FILE}"
+          if yq eval ". | has(\"$KEY_NAME\")" "$TARGET_FILE" | grep -q "false"; then
+              echo "Key ${KEY_NAME} is missing. Adding it to ${TARGET_FILE} "
+              KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
+              update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
+              #echo "Key added successfully."
+          elif [[ "$REPLACE_ENTRIES" -eq 1 ]]; then # Update the value
+              #echo "Key ${KEY_NAME} exists. Will update"
+              KEY_VALUE=$(yq e '.'"$KEY_NAME"'' $SOURCE_FILE)      # The value for the new key
+              update_yaml_value $KEY_NAME $KEY_VALUE $TARGET_FILE
+          fi        
+      done
+    fi
 
 }
 export -f sync_yaml_files
@@ -782,10 +797,25 @@ function load_config_file(){
     config_file=$1
     echo $config_file
     if [ -f "$config_file" ]; then
-        keys=($(yq e 'keys | .[]' ${config_file}))
-        for key in "${keys[@]}"; do
-            export_yaml_value "${key}" "${key}" "$config_file" 
-        done
+
+      eval_cmd="load_vals=$(python3 /home/${USER}/nepi_utils/load_yaml_file.py $config_file)"  #2>/dev/null"
+      eval "$eval_cmd"
+      #echo "Python returned: $load_vals"
+
+      for entry in $load_vals; do
+         export ${entry}
+      done
+
+      #echo "Python returned success = ${success}"
+
+
+      if [[ "$success" -ne 1 ]]; then
+          keys=($(yq e 'keys | .[]' ${config_file}))
+          for key in "${keys[@]}"; do
+              export_yaml_value "${key}" "${key}" "$config_file" 
+          done
+      fi
+
     else
         echo "Config file not found ${config_file}"
         return 1
@@ -793,30 +823,42 @@ function load_config_file(){
 }
 export -f load_config_file
 
-function print_config_file(){
-    echo $1
+function print_yaml_file(){
+    #echo $1
     config_file=$1
     if [ -f "$config_file" ]; then
-        CONFIGN="#############################
-        ## NEPI Config Settings ##
-        #############################
-        FILE=${config_file}"
 
-        keys=($(yq e 'keys | .[]' ${config_file}))
-        for key in "${keys[@]}"; do
-            value=$(yq e '.'"$key"'' $config_file)
-            echo "${key}=${value}"
-            CONFIGN="${CONFIGN}
-            ${key}=${!key}"
-        done
-        echo $CONFIG
+      eval_cmd="load_vals=$(python3 /home/${USER}/nepi_utils/load_yaml_file.py $config_file)"  #2>/dev/null"
+      eval "$eval_cmd"
+      #echo "Python returned: $load_vals"
+
+      for entry in $load_vals; do
+         export ${entry}
+        if [[ "$entry" != *"success="* ]]; then
+          echo ${entry}
+        fi
+         
+      done
+
+      #echo "Python returned success = ${success}"
+
+        if [[ "$success" -eq 0 ]]; then
+
+          keys=($(yq e 'keys | .[]' ${config_file}))
+          for key in "${keys[@]}"; do
+              value=$(yq e '.'"$key"'' $config_file)
+              echo "${key}=${value}"
+              CONFIGN="${CONFIGN}
+              ${key}=${!key}"
+          done
+          echo $CONFIG
+        fi
     else
         echo "Config file not found ${config_file}"
         return 1
     fi
 }
-
-export -f print_config_file
+export -f print_yaml_file
 
 
 function path_backup(){
@@ -1358,10 +1400,9 @@ ffile = Find filenames with text match recursively
 cmd_loop = Runs the COMMAND_STRING until Ctrl-C every second
 update_text_value = Adds or Replaces value in text file given FILE KEY UPDATE_STRING FILE
 update_yaml_value = Update entry in yaml file given KEY VAL FILE
-export_yaml_value = Exports the value of yaml entry to system variable given KEY VARIBLE FILE
+print_yaml_file = Prints all of the yaml entries in given FILE
 sync_yaml_files = Sync missing keys between given SOURCE_FILE TARGET_FILE. Add '1' to replace existing values 
 load_config_file = Exports all of the yaml entries to system variables in given FILE
-print_config_file = Prints all of the yaml entries in given FILE
 path_backup = Backup SOURCE_PATH TARGET_PATH with safe checks. Optional 0 or 1 to overwrite if exists. 
 path_sync = Sync SOURCE_PATH to TARGET_PATH with safe checks. Optional 0 or 1 to delete files.
 select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echos selected path name
