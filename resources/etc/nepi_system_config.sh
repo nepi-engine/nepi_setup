@@ -268,7 +268,7 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
     #     select opt in  "VIEW SETTINGS" "APPLY SETTINGS" "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" "Update NEPI_IP" "Update NEPI_ALIAS_IPS" "Update NEPI_NTP_IPS" "Update NEPI_AB_FS" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "QUIT"; do
     #         case $opt in
     #             "VIEW SETTINGS")
-    #                 print_config_file $SYSTEM_SYS_CONFIG_FILE
+    #                 print_yaml_file $SYSTEM_SYS_CONFIG_FILE
     #                 ;;
     #             "APPLY SETTINGS")
     #                 udpate_config_file
@@ -429,7 +429,7 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
     #                 break 2 # Exit both the select and the while loop
     #                 ;;
     #             "View Settings" )
-    #                 print_config_file $SYSTEM_SYS_CONFIG_FILE
+    #                 print_yaml_file $SYSTEM_SYS_CONFIG_FILE
     #                 echo ""
     #                 break # Exit the select statement, re-display menu
     #             ;;

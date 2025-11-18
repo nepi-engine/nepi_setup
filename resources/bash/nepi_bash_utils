@@ -17,6 +17,9 @@
 #echo "########################"
 
 
+BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+
 utilsn=""
 
 
@@ -716,7 +719,7 @@ function update_yaml_value(){
     #echo $UPDATE_YAML_FILE
 
 
-    eval_cmd="success=$(python3 /home/${USER}/nepi_utils/sync_yaml_files.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
+    eval_cmd="success=$(python3 /home/${USER}/nepi_utils/update_yaml_value.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
     eval "$eval_cmd" 
     success=$(echo ${success} | tail -n 1)
     #echo "Python returned success = ${success}"
@@ -1164,11 +1167,13 @@ function sync_to_config_folder() {
         if [[ "$2" == 'nepi_cfg' ]]; then
             update_config_path=/opt/nepi
             update_etc_path=${update_config_path}/etc
+            update_scripts_path=${update_etc_path}/scripts
             update_config_file=${update_etc_path}/nepi_system_config.yaml
         else
             update_folder=$2
             update_config_path=/mnt/nepi_config/${2}
             update_etc_path=${update_config_path}/etc
+            update_scripts_path=${update_etc_path}/scripts
             update_config_file=${update_etc_path}/nepi_system_config.yaml
         fi
         
@@ -1188,22 +1193,26 @@ function sync_to_config_folder() {
 
         # Update from dest
         if is_nepi_path $source_config_path; then
-            
+            ################
             SOURCE_PATH=$source_etc_path
             UPDATE_PATH=$update_etc_path
 
-            sudo rsync -arh --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+            sudo rsync -arh --exclude='nepi_system_config.yaml' --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+            SOURCE_PATH=$source_scripts_path
+            UPDATE_PATH=$update_scripts_path
+
+            sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+
+            ############
 
             if [[ ! -f "$update_config_file" ]]; then
                 sudo cp -r -p $source_sys_config_file $update_config_file
             fi
 
-            if yq eval "$update_config_file" > /dev/null; then
-                : # Do Nothing
-            else
-                echo "YAML file '$update_config_file' is invalid. Will replace"
-                sudo cp -r -p $source_sys_config_file $update_config_file
-            fi
+            echo "YAML file '$update_config_file' is invalid. Will replace"
+            sudo cp -r -p $source_sys_config_file $update_config_file
 
             SOURCE_PATH=${source_sys_config_file}
             UPDATE_PATH=${update_config_file}

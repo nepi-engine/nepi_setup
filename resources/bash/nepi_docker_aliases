@@ -388,11 +388,11 @@ function nepisettings(){
   sudo -v
   echo "NEPI DOCKER SETTINGS"
   echo "--------------------"
-  print_config_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+  print_yaml_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
   echo ""
   echo "NEPI SYSTEM SETTINGS"
   echo "--------------------"
-  print_config_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+  print_yaml_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
 }
 export -f nepiconfig
 

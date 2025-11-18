@@ -91,14 +91,17 @@ else
        
 
         if [[ -z "$COMMIT_DESC" || "$COMMIT_SW_DESC" == 'unknown' || "$COMMIT_SW_DESC" == 'clean' ]]; then
-            COMMIT_DESC="-$(date +%H%M)"
+            COMMIT_DESC="$(date +%H%M)"
         elif [[ "$COMMIT_DESC" =~ _[0-9]{4}$ ]]; then
             COMMIT_DESC=${COMMIT_DESC%?????}
-            COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
+            COMMIT_DESC="${COMMIT_DESC}_$(date +%H%M)"
         else
-            COMMIT_DESC="-${COMMIT_DESC}_$(date +%H%M)"
+            COMMIT_DESC="${COMMIT_DESC}_$(date +%H%M)"
         fi
         COMMIT_DESC=$(clean_tag_string $COMMIT_DESC)
+        if [[ -n "$COMMIT_DESC" ]]; then
+            COMMIT_DESC="-${COMMIT_DESC}"
+        fi
 
         COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}"${COMMIT_DESC}
 

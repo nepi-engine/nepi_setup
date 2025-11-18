@@ -77,15 +77,16 @@ UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ -d "${SOURCE_PATH}" ]]; then
 
-    if [ -e "$bfile" ] && [ ! -s "$bfile" ]; then
+    if [ ! -e "$bfile" ] || [ -s "$bfile" ]; then
         echo "Fix ${CONFIG_USER} bash files"
         sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    elif [ ! -e "$FILE" ]; then
-    echo "Fix ${CONFIG_USER} bash files"
-    sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
     sudo rsync -av --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+    sudo chmod 755 ${SOURCE_PATH}
+
     sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
     sudo chmod 755 ${UPDATE_PATH}
 
