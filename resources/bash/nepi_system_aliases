@@ -45,9 +45,7 @@ cd ${NEPI_HOME}"
 
 
 
-  function nepistart(){
-      source ${NEPI_BASE}/scripts/nepi_engine_start
-  }
+
   
 
   # NEPI stop and start shortcuts
@@ -69,6 +67,12 @@ cd ${NEPI_HOME}"
 
     sudo ${NEPI_BASE}/scripts/nepi_engine_stop
 
+  }
+
+
+    function nepistart(){
+      nepistop
+      source ${NEPI_BASE}/scripts/nepi_engine_start
   }
 
   CONFIG=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/nepi_setup/scripts

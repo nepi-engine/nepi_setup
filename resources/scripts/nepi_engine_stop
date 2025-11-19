@@ -10,3 +10,4 @@
 
 # Stop NEPI Engine Process
 sudo kill $(ps aux | grep 'nepi_base.launch' | awk '{print $2}') >/dev/null 2>&1
+sudo pkill 'nepi_engine' >/dev/null 2>&1
