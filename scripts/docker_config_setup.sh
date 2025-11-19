@@ -33,14 +33,6 @@ if ! source_script $script_path; then
     exit 1
 fi
 
-####################################
-# Stop any running containers
-echo ""
-echo "########################"
-echo "Stopping Running NEPI Containers"
-echo ""
-nepistop
-echo ""
 
 ####################################
 # Run NEPI Folder Setup Script

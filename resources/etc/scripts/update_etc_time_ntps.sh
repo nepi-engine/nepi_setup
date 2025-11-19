@@ -27,6 +27,8 @@ else
     exit 1
 fi
 
+source $ufile
+
 LOAD_NEPI_CONFIG=1
 if [[ -v "$1" ]]; then
     if [[ "$1" -eq 0 ]]; then

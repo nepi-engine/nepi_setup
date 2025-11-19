@@ -39,9 +39,7 @@ echo ""
 
 #######################################################################################
 echo ""
-echo "#########"
-echo " Updating NEPI Config Files"
-echo ""
+echo "Updating NEPI Config Files"
 
 # Define Folders
 SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
@@ -70,7 +68,8 @@ NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 
 ###################
 #  Sync and Load NEPI Config File
-echo " Updating NEPI System Config File"
+echo ""
+echo "Updating NEPI System Config File"
 
 if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
     sudo mkdir -p $NEPI_CONFIG_PATH
@@ -87,7 +86,7 @@ fi
 
 
 ############
-
+echo ""
 echo "Updating NEPI Config Folders"
 
 if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
@@ -172,8 +171,6 @@ fi
 # Update NEPI System Config Files
 
 echo "Updating NEPI Config File Settings"
-
-
 
 source $NEPI_SYS_CONFIG_LOAD
 if [[ "$?" -ne 0 ]]; then

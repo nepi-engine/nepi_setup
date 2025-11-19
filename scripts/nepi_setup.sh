@@ -136,31 +136,30 @@ ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_gig
 
 
 
+
+echo ""
+echo "########"
+echo "Configuring Samba Service"
+
+
+echo "Updating Samba ETC config file"
+if [[ "$CONFIG_USER" == "nepi" ]]; then
+    source_file=${SOURCE_ETC_PATH}/samba/smb.conf
+else
+    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+fi
+dest_file=/etc/samba/smb.conf
+if [[ -f "$source_file" ]]; then
+    sudo cp -d $source_file $dest_file
+fi
+
+
+
 ################################
 # Update ETC files if systemd is running (Not in Container)
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
     SYSTEMD_SERVICE_PATH=/etc/systemd/system
-
-
-
-    echo ""
-    echo "########"
-    echo "Configuring Samba Service"
-
-
-
-
-    echo "Updating Samba ETC config file"
-    if [[ "$CONFIG_USER" == "nepihost" ]]; then
-        source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-    else
-        source_file=${SOURCE_ETC_PATH}/samba/smb.conf
-    fi
-    dest_file=/etc/ssh/sshd_config
-    if [[ -f "$source_file" ]]; then
-        sudo cp -d $source_file $dest_file
-    fi
 
 
     echo "Restarting Samba Service"
@@ -334,18 +333,6 @@ if [[ "$?" -eq 0 ]]; then
 
 else
 
-    ##################
-    echo ""
-    echo "########"
-    echo "Updating SSH Service Config"
-    echo ""
-
-
-    source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
-    dest_file=/etc/ssh/sshd_config
-    if [[ -f "$source_file" ]]; then
-        sudo cp $source_file $dest_file
-    fi
 
 
     ###################

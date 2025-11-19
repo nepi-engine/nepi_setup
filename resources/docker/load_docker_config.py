@@ -9,20 +9,19 @@
 #
 
 
-# NEPI misc python utility functions
+# This script loads and exports key values from file
 
-# This script loads the nepi_system_config.yaml values
-
-print("success=0")
 
 import os
 import sys
 import yaml
 
-# Get the path of the current script file
-SCRIPT_FOLDER = os.path.dirname(__file__)
-CONFIG_FILE=os.path.join(SCRIPT_FOLDER, 'nepi_docker_config.yaml')
- 
+
+config_folder=os.path.dirname(sys.argv[0])
+config_file=config_folder + "/nepi_docker_config.yaml"
+
+
+print_list=[]
 def read_yaml_2_dict(file_path):
     dict_from_file = dict()
     if os.path.exists(file_path):
@@ -30,15 +29,28 @@ def read_yaml_2_dict(file_path):
             with open(file_path) as f:
                 dict_from_file = yaml.load(f, Loader=yaml.FullLoader)
         except Exception as e:
-           print("Failed to get dict from file: " + file_path + " " + str(e))
+           print_list.append("success=-1")
     else:
-       print("Failed to find dict file: " + file_path)
+       print_list.append("success=-2")
     return dict_from_file
 
+if os.path.exists(config_file) == True:
+    # print_string=("yfile=" + str(YAML_FILE))
+    # print_list.append(print_string)
+    config_dict = read_yaml_2_dict(config_file)
+    if len(config_dict.keys()) > 0:
+        for key in config_dict.keys():
+            print_string=(str(key) + "=" + str(config_dict[key]))
+            print_list.append(print_string)
+        print_list.append("success=1")
+    else:
+        print_list.append("success=-3")
+    
+else:
+    print_list.append("success=0")
 
-CONFIG_DICT = read_yaml_2_dict(CONFIG_FILE)
-
-for key in CONFIG_DICT.keys():
-    print(key + "=" + str(CONFIG_DICT[key]))
-
-print("success=1")
+print_string="\'"
+for entry in print_list:
+    print_string += entry + " "
+print_string += "\'"
+print(print_string)

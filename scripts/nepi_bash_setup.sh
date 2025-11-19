@@ -14,7 +14,8 @@
 
 sudo -v
 
-export CONFIG_USER=${USER}
+export CONFIG_USER=$(id -un)
+export USER=$CONFIG_USER
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

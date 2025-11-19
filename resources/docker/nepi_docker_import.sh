@@ -108,22 +108,16 @@ else
                 NEW_NAME=nepi
 
                 #echo "NEPI_VERSION = ${NEPI_VERSION}"
-                NEW_VERSION=$NEPI_VERSION
-                if [[ -z "$NEW_VERSION" ]]; then
                     NEW_VERSION="${TAG_ARRAY[1]}"
                     if [[ -z "$NEW_VERSION" ]]; then
                         NEW_VERSION="0p0p0"
                     fi
-                fi
                 NEW_VERSION=$(clean_tag_string "${NEW_VERSION}")
 
-                NEW_HW_TYPE=$NEPI_HW_TYPE
-                if [[ -z "$NEW_HW_TYPE" ]]; then
                     NEW_HW_TYPE="${TAG_ARRAY[2]}"
                     if [[ -z "$NEW_HW_TYPE" ]]; then
                         NEW_HW_TYPE=$(get_hw_type)
                     fi
-                fi
                 NEW_HW_TYPE=$(clean_tag_string "${NEW_HW_TYPE}")
 
                 NEW_SW_DESC="${TAG_ARRAY[3]}"

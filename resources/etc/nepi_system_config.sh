@@ -13,6 +13,11 @@
 # This file configigues an installed NEPI File System
 sudo -v
 
+SHOW_CONFIG_MENU=0
+if [[ -n "$1" ]]; then
+    SHOW_CONFIG_MENU=$1
+fi
+
 if [[ "$(id -un 1000)" == 'nepi' ]]; then
     CONFIG_USER=nepi
     bfile=/home/nepi/.bashrc
@@ -46,10 +51,7 @@ echo "NEPI SYSTEM CONFIG SETUP"
 echo "########################"
 
 
-SHOW_CONFIG_MENU=0
-if [[ "$1" -eq 1 ]]; then
-    SHOW_CONFIG_MENU=1
-fi
+
 
 
 

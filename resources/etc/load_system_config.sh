@@ -13,26 +13,31 @@
 # This script loads the nepi_system_config.yaml values
 
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
- 
-CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
+
+LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
+
+echo "Load Script = ${LOAD_SCRIPT}"
 
 
+if [[ -f "$LOAD_SCRIPT" ]]; then
 
-if [[ -f "$CONFIG_FILE" ]]; then
 
-    success=0
-    eval $(python ${CONFIG_FOLDER}/load_system_config.py 2>/dev/null)
+      success=0
+      eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
+      eval "$eval_cmd"
+      #echo "${load_vals}"
+      
+      for entry in $load_vals; do
+         export ${entry}
+      done
 
-    if [[ "$success" -eq 0 ]]; then
-        #sudo echo "Updating NEPI Config file from: ${CONFIG_FILE}"
-        keys=($(yq e 'keys | .[]' ${CONFIG_FILE}))
-        for key in "${keys[@]}"; do
-            value=$(yq e '.'"$key"'' $CONFIG_FILE)
-            export ${key}=$value
-        done
-    fi
+      if [[ "$success" -ne 1 ]]; then
+          echo "Success = ${success}"
+          exit 1
+      fi
+
 
 else
-    echo "Config file not found ${CONFIG_FILE}"
+    echo "Load script not found ${LOAD_SCRIPT}"
     exit 1
 fi
