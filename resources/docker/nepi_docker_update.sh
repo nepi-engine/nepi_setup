@@ -3,44 +3,47 @@
 ##
 ## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
 ##
-## This file is part of nepi-engine
+## This NEPI_CONFIG_LOAD_FILE is part of nepi-engine
 ## (see https://github.com/nepi-engine).
 ##
 ## License: 3-clause BSD, see https://openbash.org/licenses/BSD-3-Clause
 ##
 
 
-# This file creates updates the NEPI Docker Config AB FS Info
+# This NEPI_CONFIG_LOAD_FILE creates updates the NEPI Docker Config AB FS Info
 
 sudo -v
 
-CONFIG_USER=nepihost
-bash /home/${CONFIG_USER}/.nepi_bash_utils
+CONFIG_USER=$(id -un)
+source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 
 ###############################
 # Load NEPI Config File
-file=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$file" ]]; then
-    echo "Loading System Config File from ${file}"
-    source $file
+NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
+    source $NEPI_CONFIG_LOAD_FILE
     if [ $? -eq 1 ]; then
-        echo "Failed to load ${file}"
+        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
     fi
 else
-    echo "Failed to find ${file}"
+    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
 fi
 
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
-if [[ ! -f "$CONFIG_SOURCE" ]]; then
-    echo "Failed to find ${CONFIG_SOURCE}"
-
+########################
+# Load NEPI DOCKER
+source ${DOCKER_CONFIG_LOAD_FILE}
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed to load ${DOCKER_CONFIG_FILE}"
 else
 
-    
+    echo "Upating Docker Config File: ${DOCKER_CONFIG_FILE}"
     ##########################
     # Update FSA
         
@@ -105,16 +108,16 @@ else
             NEW_DESC=$(clean_tag_string $NEW_DESC)
 
 
-        #echo "Reseting NEPI Image ${NEW_FS} Info in ${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA" "$NEW_FS" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_TAG" "$NEW_TAG" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_ID" "$NEW_ID" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_NAME" "$NEW_NAME" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_VERSION" "$NEW_VERSION" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_HW_TYPE" "$NEW_HW_TYPE" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_SW_DESC" "$NEW_SW_DESC" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_BUILD_DATE" "$NEW_DATE" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${CONFIG_SOURCE}"
+        #echo "Reseting NEPI Image ${NEW_FS} Info in ${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA" "$NEW_FS" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_TAG" "$NEW_TAG" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_ID" "$NEW_ID" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_NAME" "$NEW_NAME" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_VERSION" "$NEW_VERSION" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_HW_TYPE" "$NEW_HW_TYPE" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_SW_DESC" "$NEW_SW_DESC" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_BUILD_DATE" "$NEW_DATE" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${DOCKER_CONFIG_FILE}"
 
 
         NEW_SIZE=$(sudo docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
@@ -123,21 +126,21 @@ else
             NEW_SIZE="${NEW_SIZE%??}"
             NEW_SIZE="${NEW_SIZE%.*}"
             NEW_SIZE=$((NEW_SIZE * 1000))
-            update_yaml_value "NEPI_FSA_SIZE_MB" "$NEW_SIZE" "${CONFIG_SOURCE}"; 
+            update_yaml_value "NEPI_FSA_SIZE_MB" "$NEW_SIZE" "${DOCKER_CONFIG_FILE}"; 
         fi
 
     else
-        #echo "Clearing NEPI Image ${NEW_FS} Info in ${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA" "$NEW_FS" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_TAG" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_ID" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_NAME" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_VERSION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_HW_TYPE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_SW_DESC" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_BUILD_DATE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_DESCRIPTION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_SIZE_MB" 0.0 "${CONFIG_SOURCE}"
+        #echo "Clearing NEPI Image ${NEW_FS} Info in ${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA" "$NEW_FS" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_ID" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_NAME" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_VERSION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_HW_TYPE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_SW_DESC" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_BUILD_DATE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_DESCRIPTION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_SIZE_MB" 0.0 "${DOCKER_CONFIG_FILE}"
         NEW_TAG=unknown
         NEW_ID=unknown
 
@@ -198,15 +201,15 @@ else
             fi
 
 
-        #echo "Reseting NEPI Image ${NEW_FS} Info in ${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_TAG" "$NEW_TAG" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_ID" "$NEW_ID" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_NAME" "$NEW_NAME" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_VERSION" "$NEW_VERSION" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_HW_TYPE" "$NEW_HW_TYPE" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_SW_DESC" "$NEW_SW_DESC" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_BUILD_DATE" "$NEW_DATE" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${CONFIG_SOURCE}"
+        #echo "Reseting NEPI Image ${NEW_FS} Info in ${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_TAG" "$NEW_TAG" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_ID" "$NEW_ID" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_NAME" "$NEW_NAME" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_VERSION" "$NEW_VERSION" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_HW_TYPE" "$NEW_HW_TYPE" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_SW_DESC" "$NEW_SW_DESC" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_BUILD_DATE" "$NEW_DATE" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${DOCKER_CONFIG_FILE}"
 
 
         NEW_SIZE=$(sudo docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
@@ -215,37 +218,37 @@ else
             NEW_SIZE="${NEW_SIZE%??}"
             NEW_SIZE="${NEW_SIZE%.*}"
             NEW_SIZE=$((NEW_SIZE * 1000))
-            update_yaml_value "NEPI_FSB_SIZE_MB" "$NEW_SIZE" "${CONFIG_SOURCE}"; 
+            update_yaml_value "NEPI_FSB_SIZE_MB" "$NEW_SIZE" "${DOCKER_CONFIG_FILE}"; 
         fi
 
     elif  [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
 
-        #echo "Clearing NEPI NEPI_FSB Config Info in ${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_TAG" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_ID" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_NAME" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_VERSION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_HW_TYPE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_SW_DESC" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_BUILD_DATE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_DESCRIPTION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_SIZE_MB" 0.0 "${CONFIG_SOURCE}"
+        #echo "Clearing NEPI NEPI_FSB Config Info in ${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_ID" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_NAME" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_VERSION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_HW_TYPE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_SW_DESC" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_BUILD_DATE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_DESCRIPTION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_SIZE_MB" 0.0 "${DOCKER_CONFIG_FILE}"
         #echo "Removing NEPI NEPI_FSB Image ${NEW_ID}"
         sudo docker rmi $NEW_ID
         NEW_TAG=unknown
         NEW_ID=unknown
 
     else
-        #echo "Clearing NEPI NEPI_FSB Config Info in ${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_TAG" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_ID" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_NAME" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_VERSION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_HW_TYPE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_SW_DESC" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_BUILD_DATE" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_DESCRIPTION" "unknown" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FSB_SIZE_MB" 0.0 "${CONFIG_SOURCE}"
+        #echo "Clearing NEPI NEPI_FSB Config Info in ${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_ID" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_NAME" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_VERSION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_HW_TYPE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_SW_DESC" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_BUILD_DATE" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_DESCRIPTION" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FSB_SIZE_MB" 0.0 "${DOCKER_CONFIG_FILE}"
         NEW_TAG=unknown
         NEW_ID=unknown
 
@@ -274,13 +277,13 @@ else
         NEPI_RUNNING_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
         #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${CONTAINER_ID}"
         #echo "Updating NEPI Docker Config Runnning Values"
-        update_yaml_value "NEPI_RUNNING" 1 "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FS_RESTART" 0 "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_RESTARTING" 0 "${CONFIG_SOURCE}"
+        update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
 
     else 
         RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
@@ -296,23 +299,23 @@ else
             NEPI_RUNNING_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
             #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${RUN_ID}"
             #echo "Updating NEPI Docker Config Runnning Values"
-            update_yaml_value "NEPI_RUNNING" 1 "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_FS_RESTART" 0 "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RESTARTING" 0 "${CONFIG_SOURCE}"
+            update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
         else
             #echo "NEPI Container NOT Running"
             #echo "Updating NEPI Docker Config Runnning Values"
-            update_yaml_value "NEPI_RUNNING" 0 "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_RUNNING_FS" "unknown" "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RUNNING_ID" "unknown" "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "0:0:0" "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_FS_RESTART" 0 "${CONFIG_SOURCE}"
-            update_yaml_value "NEPI_RESTARTING" 0 "${CONFIG_SOURCE}"
+            update_yaml_value "NEPI_RUNNING" 0 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_RUNNING_FS" "unknown" "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RUNNING_ID" "unknown" "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "0:0:0" "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
+            update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
 
         fi
 
@@ -333,8 +336,8 @@ else
         export NEPI_INACTIVE_FS=nepi_fs_b
     fi
         
-    update_yaml_value "NEPI_ACTIVE_FS" $NEPI_ACTIVE_FS "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_INACTIVE_FS" $NEPI_INACTIVE_FS "${CONFIG_SOURCE}"
+    update_yaml_value "NEPI_ACTIVE_FS" $NEPI_ACTIVE_FS "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_INACTIVE_FS" $NEPI_INACTIVE_FS "${DOCKER_CONFIG_FILE}"
     #echo "Updated FS Active and Inactive FS to: ${NEPI_ACTIVE_FS} ${NEPI_INACTIVE_FS}"
 
     ##########################
@@ -342,19 +345,19 @@ else
     pnmae="docker import"
     pcount=$(process_count)
     if [[ "$process_count" -eq 0 ]]; then
-        update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_IMPORT_ID" "unknown" "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_FS_INITIALIZE" 0 "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_IMPORTING" 0 "$CONFIG_SOURCE"
-        update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
+        update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_IMPORT_ID" "unknown" "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_FS_INITIALIZE" 0 "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_IMPORTING" 0 "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
     fi
 
     pnmae="docker export"
     pcount=$(process_count)
     if [[ "$process_count" -eq 0 ]]; then
-        update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_EXPORTING" 0 "${CONFIG_SOURCE}"
-        update_yaml_value "NEPI_FS_EXPORT" 0 "${CONFIG_SOURCE}"
+        update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_EXPORTING" 0 "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FS_EXPORT" 0 "${DOCKER_CONFIG_FILE}"
     fi
 
 

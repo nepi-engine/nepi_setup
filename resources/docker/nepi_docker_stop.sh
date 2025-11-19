@@ -13,25 +13,22 @@
 
 sudo -v
 
-
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
-
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
 ########################
-# Load NEPI DOCKER
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-source ${DOCKER_FOLDER}/load_docker_config.sh
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${CONFIG_SOURCE}"
+# Update Docker Config
+echo ""
+echo "Updating Docker Config File"
 
+source $DOCKER_CONFIG_UPDATE_FILE
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
 
     ########################
@@ -86,10 +83,10 @@ else
             echo ""
             #dps
 
-    update_yaml_value "NEPI_RUNNING" 0 "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_RUNNING_FS" "unknown" "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_RUNNING_ID" 0 "${CONFIG_SOURCE}"
-    update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" 0 "${CONFIG_SOURCE}"
+    update_yaml_value "NEPI_RUNNING" 0 "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_RUNNING_FS" "unknown" "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_RUNNING_ID" 0 "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" 0 "${DOCKER_CONFIG_FILE}"
 
 fi

@@ -47,7 +47,7 @@ def write_dict_to_file(dict_2_save,file_path,defaultFlowStyle=False,sortKeys=Fal
 
 overwrite = False
 success = 0
-if len(sys.argv) > 2:
+if len(sys.argv) > 3:
     KEY = sys.argv[1]
     VALUE = sys.argv[2]
     SOURCE_YAML_FILE = sys.argv[3]
@@ -56,6 +56,7 @@ if len(sys.argv) > 2:
             [success, source_dict] = read_yaml_2_dict(SOURCE_YAML_FILE)
             if success == 1:
                 success = 0
+                source_dict[KEY] = str(VALUE)
                 success=write_dict_to_file(source_dict, SOURCE_YAML_FILE)
     else:
          print("Source file not found " + str(SOURCE_YAML_FILE))

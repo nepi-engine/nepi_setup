@@ -13,38 +13,22 @@
 # This file exports the running fs to a tar file
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-###############################
-# Load NEPI Config File
-file=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$file" ]]; then
-    echo "Loading System Config File from ${file}"
-    source $file
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${file}"
-    fi
-else
-    echo "Failed to find ${file}"
-fi
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
-########################
-# Load NEPI DOCKER
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-source ${DOCKER_FOLDER}/load_docker_config.sh
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${CONFIG_SOURCE}"
 
+source $DOCKER_CONFIG_UPDATE_FILE
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
 
     ########################
@@ -156,11 +140,11 @@ else
             TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
             echo "Exporting FS to: ${TAR_EXPORT_PATH}"
 
-            update_yaml_value "NEPI_FS_IMPORT" 0 "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_IMPORTING" 1 "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$CONFIG_SOURCE"
-            update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$CONFIG_SOURCE"
+            update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_IMPORTING" 1 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$DOCKER_CONFIG_FILE"
 
 
 
@@ -195,11 +179,11 @@ else
         echo "No Running NEPI Container to Save"
     fi
 
-    update_yaml_value "NEPI_FS_EXPORT" 0 "$CONFIG_SOURCE"
-    update_yaml_value "NEPI_EXPORTING" 0 "$CONFIG_SOURCE"
-    update_yaml_value "NEPI_EXPORT_FILE" "unknown" "$CONFIG_SOURCE"
-    update_yaml_value "NEPI_EXPORT_FS" "unknown" "$CONFIG_SOURCE"
-    update_yaml_value "NEPI_EXPORT_TAG" "unknown" "$CONFIG_SOURCE"
+    update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
+    update_yaml_value "NEPI_EXPORTING" 0 "$DOCKER_CONFIG_FILE"
+    update_yaml_value "NEPI_EXPORT_FILE" "unknown" "$DOCKER_CONFIG_FILE"
+    update_yaml_value "NEPI_EXPORT_FS" "unknown" "$DOCKER_CONFIG_FILE"
+    update_yaml_value "NEPI_EXPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
 
 
 

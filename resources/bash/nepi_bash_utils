@@ -17,7 +17,8 @@
 #echo "########################"
 
 
-BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+#echo "BASH_FOLDER = ${BASH_FOLDER}"
 export CONFIG_USER=$(id -un)
 export USER=$CONFIG_USER
 
@@ -720,15 +721,17 @@ function update_yaml_value(){
     #echo $UPDATE_YAML_FILE
 
 
-    eval_cmd="success=$(python3 ${BASH_FOLDER}/nepi_utils/update_yaml_value.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
-    eval "$eval_cmd" 
-    success=$(echo ${success})
+    # eval_cmd="success=$(python3 ${BASH_FOLDER}/nepi_utils/update_yaml_value.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
+    # eval "$eval_cmd" 
+    # success=$(echo ${success})
 
-    if [[ "$success" -ne 1 ]]; then
-        echo "Success = ${success}"
-        return 1
-    fi
+    # if [[ "$success" -ne 1 ]]; then
+    #     echo "Success = ${success}"
+    #     return 1
+    # fi
 
+    yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
+    eval "export $UPDATE_YAML_KEY=\"$UPDATE_YAML_VAL\""
 }
 export -f update_yaml_value
 

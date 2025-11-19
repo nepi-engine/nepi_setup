@@ -11,26 +11,24 @@
 
 # This file initializes NEPI Docker Images
 
-CONFIG_USER=nepihost
+sudo -v
+
+CONFIG_USER=$(id -un)
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
-########################
-# Load NEPI DOCKER
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-source ${DOCKER_FOLDER}/load_docker_config.sh
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${CONFIG_SOURCE}"
 
+source $DOCKER_CONFIG_UPDATE_FILE
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
 
     ########################

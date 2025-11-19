@@ -16,9 +16,9 @@ export NEPI_FSA_TAG=nepi-3p2p0_rc6c-20251115-0543-jetson-ubuntu20p04_cuda11p4-20
 
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-update_yaml_value "NEPI_ACTIVE_FS" $NEPI_ACTIVE_FS "$CONFIG_SOURCE"
-update_yaml_value "NEPI_FSA_TAG" $NEPI_FSA_TAG "$CONFIG_SOURCE"
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+update_yaml_value "NEPI_ACTIVE_FS" $NEPI_ACTIVE_FS "$DOCKER_CONFIG_FILE"
+update_yaml_value "NEPI_FSA_TAG" $NEPI_FSA_TAG "$DOCKER_CONFIG_FILE"
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

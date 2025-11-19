@@ -200,10 +200,10 @@ bash ${DOCKER_FOLDER}/nepi_docker_update.sh
 wait
 ########################
 # Load NEPI DOCKER
-CONFIG_SOURCE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 source ${DOCKER_FOLDER}/load_docker_config.sh
 if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${CONFIG_SOURCE}"
+    echo "Failed to load ${DOCKER_CONFIG_FILE}"
     exit 1
 fi
 
