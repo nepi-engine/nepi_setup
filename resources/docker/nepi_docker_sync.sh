@@ -52,6 +52,10 @@ UPDATE_PATH=/mnt/nepi_config/docker_cfg
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
+SOURCE_PATH=/opt/nepi/docker_cfg/nepi_docker_config.yaml
+UPDATE_PATH=/mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+
+sudo cp ${SOURCE_PATH} ${UPDATE_PATH}
 
 #############
 # Sync Config Folders
@@ -71,6 +75,8 @@ fi
 SOURCE_PATH=/opt/nepi/etc/nepi_system_config.yaml
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 sync_yaml_files ${SOURCE_PATH} ${UPDATE_PATH}
+
+sudo cp ${UPDATE_PATH} ${SOURCE_PATH}
 
 
 ######################################

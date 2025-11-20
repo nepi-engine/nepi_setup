@@ -152,44 +152,57 @@ else
         return 0
     }
 
+
+
     echo ""
     echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
     echo "${DOCKER_RUN_COMMAND}"
-    eval "$DOCKER_RUN_COMMAND"
-
-    # sleep 2
-    # dcheck $nepi_fs
-    # if [[ "$?" -eq 1 ]]; then
-    #     echo "NEPI Container ${dname} FAILED to run"
-    #     exit 1
-    # fi
-
-    # sleep 2
-    # dcheck $nepi_fs
-    # if [[ "$?" -eq 1 ]]; then
-    #     echo "Retrying NEPI Docker Container ${nepi_fs}:${nepi_fs_tag}"
-    #     eval "$DOCKER_RUN_COMMAND"
-    #     sleep 2
-    #     dcheck $nepi_fs
-    #     if [[ "$?" -eq 1 ]]; then
-    #         echo "NEPI Container ${dname} FAILED to run"
-    #         exit 1
-    #     fi
-    # fi
 
 
+    fail_count=0
+    while [[ "$fail_count" -le "$NEPI_RETRY_COUNT" ]]
 
-    CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
-    CONTAINER_ID=${CONTAINER_ID[0]}
-    # if [[ -z "$CONTAINER_ID" ]]; then
-    #     echo "NEPI Failed to Run"
-    #     CONTAINER_ID=($(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
-    #     if [[ -n "$CONTAINER_ID" ]]; then
-    #         echo "Removing stopped container ${nepi_fs}:${nepi_fs_tag} with id ${CONTAINER_ID}"
-    #         sudo docker rm $CONTAINER_ID
-    #     fi
+        eval "$DOCKER_RUN_COMMAND"
 
-    #else
+        # sleep 2
+        # dcheck $nepi_fs
+        # if [[ "$?" -eq 1 ]]; then
+        #     echo "NEPI Container ${dname} FAILED to run"
+        #     exit 1
+        # fi
+
+        # sleep 2
+        # dcheck $nepi_fs
+        # if [[ "$?" -eq 1 ]]; then
+        #     echo "Retrying NEPI Docker Container ${nepi_fs}:${nepi_fs_tag}"
+        #     eval "$DOCKER_RUN_COMMAND"
+        #     sleep 2
+        #     dcheck $nepi_fs
+        #     if [[ "$?" -eq 1 ]]; then
+        #         echo "NEPI Container ${dname} FAILED to run"
+        #         exit 1
+        #     fi
+        # fi
+
+
+        CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
+        CONTAINER_ID=${CONTAINER_ID[0]}
+        if [[ -z "$CONTAINER_ID" ]]; then
+            echo "NEPI Failed to Run"
+            CONTAINER_ID=($(sudo docker ps -aqf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
+            if [[ -n "$CONTAINER_ID" ]]; then
+                echo "Removing stopped container ${nepi_fs}:${nepi_fs_tag} with id ${CONTAINER_ID}"
+                sudo docker rm $CONTAINER_ID
+            fi
+        fi
+
+    if [[ -z "$CONTAINER_ID" ]]; then
+
+        echo "--------------------------"
+        echo "NEPI Container Failed to Run"
+        echo "--------------------------"   
+
+    else
 
         echo ""
         dps
@@ -199,7 +212,6 @@ else
         echo "--------------------------"   
         echo ""
 
-
         update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_RUNNING_FS" "$nepi_fs" "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_RUNNING_TAG" "$nepi_fs_tag" "${DOCKER_CONFIG_FILE}"
@@ -207,7 +219,7 @@ else
         update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "$(date +%Y-%m-%d)" "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
-    #fi
+    fi
 
 fi
 

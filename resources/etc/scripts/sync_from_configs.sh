@@ -41,11 +41,13 @@ source ${ETC_SCRIPTS_FOLDER}/check_config_folders.sh
 
 # Sync from factory
 source_config_path=/mnt/nepi_config/factory_cfg
-sync_to_config_folder $source_config_path 'nepi_cfg' 
+rsync -a $source_config_path 'nepi_cfg' 
+
 
 # Sync from system
 source_config_path=/mnt/nepi_config/system_cfg
 sync_to_config_folder $source_config_path 'nepi_cfg'
+sudo cp ${source_config_path}/etc/nepi_system_config.yaml ${ETC_FOLDER}/
 
 
 ######################################
