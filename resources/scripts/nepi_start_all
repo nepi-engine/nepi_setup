@@ -13,6 +13,5 @@
 # Start NEPI Process Management services
 # echo "Starting NEPI Supervisor Processes"
 # sudo service supervisor stop
-sleep 3
 sudo service supervisor start
 
