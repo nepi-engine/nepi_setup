@@ -52,14 +52,16 @@ if len(sys.argv) > 3:
     VALUE = sys.argv[2]
     SOURCE_YAML_FILE = sys.argv[3]
     if os.path.exists(SOURCE_YAML_FILE):
-        if len(KEY) > 0 and len(VALUE) > 0:
+        if len(KEY) > 0 and VALUE != "":
             [success, source_dict] = read_yaml_2_dict(SOURCE_YAML_FILE)
             if success == 1:
                 success = 0
-                source_dict[KEY] = str(VALUE)
+                source_dict[KEY] = VALUE
                 success=write_dict_to_file(source_dict, SOURCE_YAML_FILE)
+            else:
+            success = -2
     else:
-         print("Source file not found " + str(SOURCE_YAML_FILE))
+         success = -1
 
 
 
