@@ -213,6 +213,8 @@ else
 
     sudo apt install nvidia-utils-515 -y
 
+    sudo apt install linux-generic-hwe-20.04 -y
+
 
 
     # https://stackoverflow.com/questions/8430332/uninstall-boost-and-install-another-version

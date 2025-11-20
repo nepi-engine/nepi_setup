@@ -32,6 +32,12 @@ if [[ "$?" -eq 1 ]]; then
     echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
     
+    echo ""
+    echo "Cleaning and Fixing Folders"
+    sudo rm -r /tmp/*
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+    echo ""  
     ########################
     # Start Processes
 
