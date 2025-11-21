@@ -14,7 +14,7 @@
 sudo -v
 
 CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
+if [[ "$CONFIG_USER" == 'root' ]]; then
     CONFIG_USER="$(id -un 1000)"
 fi
 
@@ -33,7 +33,15 @@ fi
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
-
+################## 
+# Fix Folder Owners
+echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0775 /opt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0775 /opt/nepi_storage
 
 #############################
 # Sync Docker Config folders
@@ -73,8 +81,8 @@ fi
 #############
 # Sync Config Folders
 
-SOURCE_PATH=/mnt/nepi_config/system_cfg
-UPDATE_PATH=/opt/nepi/system_cfg
+SOURCE_PATH=/mnt/nepi_config/system_cfg/etc
+UPDATE_PATH=/opt/nepi/system_cfg/etc
 
 SOURCE_FILE=${SOURCE_PATH}/nepi_system_config.yaml
 UPDATE_FILE=${UPDATE_PATH}/nepi_system_config.yaml
@@ -147,3 +155,13 @@ if [[ -d "${SOURCE_PATH}" ]]; then
     sudo chmod 755 ${UPDATE_PATH}
 
 fi
+
+
+################## 
+# Fix Folder Owners
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0775 /opt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0775 /opt/nepi_storage

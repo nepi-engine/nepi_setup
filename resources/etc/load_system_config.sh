@@ -32,8 +32,8 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
       done
 
       if [[ "$success" -ne 1 ]]; then
-          echo "Success = ${success}"
-          exit 1
+        #echo "Success = ${success}"
+        echo "System Config File failed to load"
       fi
 
 

@@ -22,11 +22,10 @@ if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
     exit 1
 fi
 
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
-NEPI_UTILS_SOURCE=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
@@ -69,9 +68,9 @@ echo "Configuring NEPI Managed Services"
 echo "########################"
 
 # Define Folders
-SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
-SOURCE_ETC_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
-SOURCE_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/scripts
+SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
+SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/scripts
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH

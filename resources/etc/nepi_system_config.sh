@@ -161,6 +161,35 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
     update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $NEPI_SYS_CONFIG_FILE
 
 
+    ###################
+    #  Upated NEPI Config File
+
+    echo "Updating NEPI Config File"
+
+    export NEPI_INSTALL=PRODUCTION
+    update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_HOSTNAME=1
+    update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_NETWORK=1
+    update_yaml_value "NEPI_MANAGES_NETWORK" 1 $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_TIME=1
+    update_yaml_value "NEPI_MANAGES_TIME" 1 $NEPI_SYS_CONFIG_FILE
+
+
+    export NEPI_MANAGES_SSH=1
+    update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_SHARE=1
+    update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_SOFTWARE=1
+    update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_DOCKER=1
+    update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
 
 
     # #####################################

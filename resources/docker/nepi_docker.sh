@@ -208,13 +208,14 @@ echo "Updating Docker Config Files"
 bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
 wait
 
-
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
 bash ${DOCKER_FOLDER}/nepi_docker_update.sh
 wait
+
+
 ########################
 # Load NEPI DOCKER
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
@@ -455,54 +456,67 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
 
 
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
+        #echo "Calling: ninet"
         #echo "Updating Network and Clock"
         ninet > /dev/null 2>&1
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
+            echo "Calling: nepi_docker_import"
             source ${DOCKER_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE
         fi
 
         if [[ "$NEPI_FS_SWITCH" -eq 1 ]]; then
+            echo "Calling: nepi_docker_switch"
             source ${DOCKER_FOLDER}/nepi_docker_switch.sh
         fi
 
         if [[ "$NEPI_ETC_HOSTNAME_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_hostname"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_hostname.sh
         fi
 
         if [[ "$NEPI_ETC_TIME_NTPS_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_time_ntps"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_time_ntps.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_STATIC_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wired_static"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_static.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_ALIASES_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wired_aliases"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_aliases.sh
         fi
 
         if [[ "$NEPI_ETC_WIRED_DHCP_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wired_dhcp"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_dhcp.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_ENABLE_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wifi_enable"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_enable.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_LOW_POWER_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wifi_low_power"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_low_power.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_CLIENT_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wifi_client"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_client.sh
         fi
 
         if [[ "$NEPI_ETC_WIFI_ACCESS_POINT_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_wifi_access_point"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_access_point.sh
         fi
 
         if [[ "$NEPI_FS_EXPORT" -eq 1 && "$NEPI_RUNNING" -eq 1 ]]; then
+            echo "Calling: nepi_docker_export"
             source ${DOCKER_FOLDER}/nepi_docker_export.sh $NEPI_EXPORT_FILE
         fi
 
@@ -521,8 +535,10 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
 
         ########################
         # Load NEPI DOCKER CONFIG Updates
+        bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
         source ${DOCKER_FOLDER}/load_docker_config.sh
     fi
+    #echo "NEPI DOCKER SERVICE MONITOR LOOP COMPLETE"
     sleep 1
 done
 

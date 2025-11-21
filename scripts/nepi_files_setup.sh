@@ -22,11 +22,10 @@ if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
     exit 1
 fi
 
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
-NEPI_UTILS_SOURCE=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 echo ""
@@ -42,15 +41,12 @@ echo ""
 echo "Updating NEPI Config Files"
 
 # Define Folders
-SOURCE_INSTR_PATH=$(dirname "$ETC_SCRIPTS_FOLDER")
+SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
 
-SOURCE_SYS_CONFIG_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/etc
+SOURCE_SYS_CONFIG_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 SOURCE_SYS_CONFIG_FILE=${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml
 
-SOURCE_NEPI_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/scripts
-
-SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "${ETC_SCRIPTS_FOLDER}")/resources/docker
-SOURCE_DOCKER_CONFIG_FILE=${SOURCE_DOCKER_SCRIPTS_PATH}/nepi_docker_config.yaml
+SOURCE_NEPI_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/scripts
 
 
 NEPI_CONFIG_PATH=/opt/nepi
@@ -61,8 +57,6 @@ NEPI_SYS_CONFIG_LOAD=${NEPI_ETC_PATH}/load_system_config.sh
 
 NEPI_SCRIPTS_PATH=${NEPI_CONFIG_PATH}/scripts
 
-NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
-NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 
 
 
@@ -148,27 +142,6 @@ if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
 fi
 
 
-
-
-############
-# Install NEPI Docker Sciprts
-SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
-UPDATE_PATH=/opt/nepi/docker_cfg
-
-echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
-if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
-
-    if [[ ! -d "$UPDATE_PATH" ]]; then
-        sudo mkdir -p $UPDATE_PATH 
-    fi
-    sudo rm -r $UPDATE_PATH/*
-
-    sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-    sudo chmod +x ${UPDATE_PATH}/*
-fi
-
-
 ################
 # Update NEPI System Config Files
 
@@ -179,36 +152,6 @@ if [[ "$?" -ne 0 ]]; then
     echo "Failed to find load config file at: ${NEPI_SYS_CONFIG_LOAD}"
     exit 1
 fi
-
-###################
-#  Upated NEPI Config File
-
-echo "Updating NEPI Config File"
-
-export NEPI_INSTALL=PRODUCTION
-update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_HOSTNAME=1
-update_yaml_value "NEPI_MANAGES_HOSTNAME" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_NETWORK=1
-update_yaml_value "NEPI_MANAGES_NETWORK" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_TIME=1
-update_yaml_value "NEPI_MANAGES_TIME" 1 $NEPI_SYS_CONFIG_FILE
-
-
-export NEPI_MANAGES_SSH=1
-update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SHARE=1
-update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SOFTWARE=1
-update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_DOCKER=1
-update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
 
 # min_docker_gb=$((NEPI_GB_CONTAINER * 3))
 

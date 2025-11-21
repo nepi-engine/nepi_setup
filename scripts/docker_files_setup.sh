@@ -26,6 +26,30 @@ fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
+SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+SOURCE_DOCKER_CONFIG_FILE=${SOURCE_DOCKER_SCRIPTS_PATH}/nepi_docker_config.yaml
+
+NEPI_CONFIG_PATH=/opt/nepi
+NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
+NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
+
+############
+# Install NEPI Docker Sciprts
+SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
+UPDATE_PATH=/opt/nepi/docker_cfg
+
+echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
+if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
+
+    if [[ ! -d "$UPDATE_PATH" ]]; then
+        sudo mkdir -p $UPDATE_PATH 
+    fi
+    sudo rm -r $UPDATE_PATH/*
+
+    sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod +x ${UPDATE_PATH}/*
+fi
 
 
 ####################################
