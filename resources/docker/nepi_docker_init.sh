@@ -17,8 +17,17 @@ CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER="$(id -un 1000)"
 fi
-source /home/${CONFIG_USER}/.nepi_bash_utils
-wait
+
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
+fi
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml

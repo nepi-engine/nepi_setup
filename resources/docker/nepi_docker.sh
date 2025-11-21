@@ -16,10 +16,6 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-
-
 sudo -v
 
 CONFIG_USER=$(id -un)
@@ -37,6 +33,13 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
+
+
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+
+
+
 
 ########################
 # Redefine any nepi_bash_util functions that require without sudo
@@ -370,7 +373,7 @@ function NEPI_START_FUNCTION(){
             if [[ "$?" -eq 0 ]]; then
                 # Wait for NEPI to start and try to reset fail count
                 echo "Waiting for ${NEPI_BOOT_TIME} seconds for NEPI Engine to boot successfully"
-                sleep 30
+                sleep ${NEPI_BOOT_TIME}
             fi
         else
             echo "##########################"

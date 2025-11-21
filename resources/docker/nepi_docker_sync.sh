@@ -18,9 +18,9 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER="$(id -un 1000)"
 fi
 
-bfile=/home/${CONFIG_USER}/.bashrc
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -55,11 +55,11 @@ else
         echo "Fix ${SOURCE_PATH} file"
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
-
-
-    sync_yaml_files $SOURCE_FILE $UPDATE_FILE
-    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    
     sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+    sudo rsync -arv ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    
 
 fi
 
@@ -89,9 +89,9 @@ else
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
-    sync_yaml_files $SOURCE_FILE $UPDATE_FILE
-    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
     sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+    sudo rsync -arv ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 fi
 

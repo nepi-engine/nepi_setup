@@ -123,7 +123,7 @@ NEPI_RECOVERY_ENABLED: 1
 # NOTE:  This time may vary on different hardware configurations,
 #   so best to start with a longer wait and adjust aftertwards to
 #   a lower value if needed.
-NEPI_BOOT_TIME: 30
+NEPI_BOOT_TIME: 60
 
 ####################################################
 # NEPI MANAGED SERVICES 
