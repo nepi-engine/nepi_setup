@@ -120,7 +120,7 @@ fi
 
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG
-sudo chmod -R 0775 $NEPI_CONFIG
+sudo chmod -R 0755 $NEPI_CONFIG
 
 
 if [[ "$NEPI_CONFIG" != "/mnt/nepi_config" && ! -d "$NEPI_CONFIG" ]]; then
@@ -132,7 +132,7 @@ if [[ "$NEPI_CONFIG" != "/mnt/nepi_config" && ! -d "$NEPI_CONFIG" ]]; then
     sudo ln -sf $sconfig "/mnt/nepi_config/system_cfg"
 
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-    sudo chmod -R 0775 /mnt/nepi_config
+    sudo chmod -R 0755 /mnt/nepi_config
 fi
 
 ##############################
@@ -150,6 +150,7 @@ if [ ! -d "${nfolder}" ]; then
     sudo mkdir "${nfolder}"
 fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $nfolder
+sudo chmod 0755 $nfolder
 
 declare -a rfolders=(  
 "${NEPI_STORAGE}/ai_models" 

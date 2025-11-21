@@ -128,7 +128,7 @@ echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
 
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 ${nepi_fs}:${nepi_fs_tag} /bin/bash \
--c 'service supervisor start'"
+-c '/nepi_start_all'"
 
 #-c '/nepi_start_all'"
 
@@ -149,6 +149,14 @@ function dcheck() {
     return 0
 }
 
+################## 
+# Fix Folder Owners
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0750 /mnt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0750 /mnt/nepi_storage
 
 
 echo ""
