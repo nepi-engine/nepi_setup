@@ -28,6 +28,8 @@ def read_yaml_2_dict(file_path):
         try:
             with open(file_path) as f:
                 dict_from_file = yaml.load(f, Loader=yaml.FullLoader)
+                if dict_from_file is None:
+                    dict_from_file = dict()
                 success = 1
         except Exception as e:
            pass

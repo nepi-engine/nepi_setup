@@ -17,7 +17,7 @@ import sys
 import yaml
 
 
-config_folder=os.path.dirname(sys.argv[0])
+config_folder="/mnt/nepi_config/docker_cfg"
 config_file=config_folder + "/nepi_docker_config.yaml"
 
 
@@ -29,6 +29,8 @@ def read_yaml_2_dict(file_path):
             with open(file_path) as f:
                 dict_from_file = yaml.load(f, Loader=yaml.FullLoader)
         except Exception as e:
+            pass
+        if dict_from_file is None:
            print_list.append("success=-1")
     else:
        print_list.append("success=-2")
@@ -38,13 +40,14 @@ if os.path.exists(config_file) == True:
     # print_string=("yfile=" + str(YAML_FILE))
     # print_list.append(print_string)
     config_dict = read_yaml_2_dict(config_file)
-    if len(config_dict.keys()) > 0:
-        for key in config_dict.keys():
-            print_string=(str(key) + "=" + str(config_dict[key]))
-            print_list.append(print_string)
-        print_list.append("success=1")
-    else:
-        print_list.append("success=-3")
+    if config_dict is not None:
+        if len(config_dict.keys()) > 0:
+            for key in config_dict.keys():
+                print_string=(str(key) + "=" + str(config_dict[key]))
+                print_list.append(print_string)
+            print_list.append("success=1")
+        else:
+            print_list.append("success=-3")
     
 else:
     print_list.append("success=0")

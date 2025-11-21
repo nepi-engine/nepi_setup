@@ -28,6 +28,8 @@ def read_yaml_2_dict(file_path):
             with open(file_path) as f:
                 dict_from_file = yaml.load(f, Loader=yaml.FullLoader)
         except Exception as e:
+           pass
+        if dict_from_file is None:
            print_list.append("success=-1")
     else:
        print_list.append("success=-2")
@@ -38,13 +40,14 @@ if len(sys.argv) > 1:
     # print_string=("yfile=" + str(YAML_FILE))
     # print_list.append(print_string)
     CONFIG_DICT = read_yaml_2_dict(YAML_FILE)
-    if len(CONFIG_DICT.keys()) > 0:
-        for key in CONFIG_DICT.keys():
-            print_string=(str(key) + "=" + str(CONFIG_DICT[key]))
-            print_list.append(print_string)
-        print_list.append("success=1")
-    else:
-        print_list.append("success=-3")
+    if CONFIG_DICT is not None:
+        if len(CONFIG_DICT.keys()) > 0:
+            for key in CONFIG_DICT.keys():
+                print_string=(str(key) + "=" + str(CONFIG_DICT[key]))
+                print_list.append(print_string)
+            print_list.append("success=1")
+        else:
+            print_list.append("success=-3")
     
 else:
     print_list.append("success=0")

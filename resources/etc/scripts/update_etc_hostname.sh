@@ -83,7 +83,6 @@ if [[ "$?" -eq 0 ]]; then
                     echo $entry | sudo tee -a $file
                 fi
 
-                #sudo cp -R -a ${NEPI_CONFIG}/docker_cfg/${file} $file
                 sudo rm -r /etc/hostname
                 sudo cp -R -a $file /etc/hostname
 
@@ -148,12 +147,12 @@ docker_config_setting="NEPI_ETC_HOSTNAME_UPDATE"
 if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
     echo "Updating NEPI Docker Setting ${docker_config_setting}"
     docker_config_file=${NEPI_CONFIG}/docker_cfg/nepi_docker_config.yaml
-    if [[ "$USER" == "$NEPI_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
+    if [[ "$CONFIG_USER" == "$NEPI_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
         update_val=1
         if [[ -f "$docker_config_file" ]]; then
             update_yaml_value $docker_config_setting $update_val $docker_config_file
         fi
-    elif [[ "$USER" == "$NEPI_HOST_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
+    elif [[ "$CONFIG_USER" == "$NEPI_HOST_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
         update_val=0
         if [[ -f "$docker_config_file" ]]; then
             update_yaml_value $docker_config_setting $update_val $docker_config_file
