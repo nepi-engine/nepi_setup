@@ -13,20 +13,14 @@
 
 sudo -v
 
-if [[ "$(id -un 1000)" == 'nepi' ]]; then
-    CONFIG_USER=nepi
-    bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
-    afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
-    CONFIG_USER=${USER}
-    bfile=/home/${USER}/.bashrc
-    ufile=/home/${USER}/.nepi_bash_utils
-    afile=/home/${USER}/.nepi_docker_aliases
-else
-    echo "NEPI Aliases bash file not found"
-    exit 1
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
 fi
+
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -45,39 +39,67 @@ DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 # Sync Docker Config folders
 
 # Sync to docker_cfg
-SOURCE_PATH=/opt/nepi/docker_cfg
-UPDATE_PATH=/mnt/nepi_config/docker_cfg
 
+SOURCE_PATH=/mnt/nepi_config/docker_cfg
+UPDATE_PATH=/opt/nepi/docker_cfg
+
+SOURCE_FILE=${SOURCE_PATH}/nepi_docker_config.yaml
+UPDATE_FILE=${UPDATE_PATH}/nepi_docker_config.yaml
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
+if [[ ! -d "${SOURCE_PATH}" ]]; then
+    sudo rsync -arv $UPDATE_FILE $SOURCE_FILE
+else
 
-SOURCE_PATH=/opt/nepi/docker_cfg/nepi_docker_config.yaml
-UPDATE_PATH=/mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+    if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
+        echo "Fix ${SOURCE_PATH} file"
+        sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    fi
 
-sudo cp ${SOURCE_PATH} ${UPDATE_PATH}
+
+    sync_yaml_files $SOURCE_FILE $UPDATE_FILE
+    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+
+fi
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+    sudo chmod 755 ${SOURCE_PATH}
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod 755 ${UPDATE_PATH}
+
 
 #############
 # Sync Config Folders
 
-SOURCE_PATH=/opt/nepi/etc
-UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
+SOURCE_PATH=/mnt/nepi_config/system_cfg
+UPDATE_PATH=/opt/nepi/system_cfg
 
+SOURCE_FILE=${SOURCE_PATH}/nepi_system_config.yaml
+UPDATE_FILE=${UPDATE_PATH}/nepi_system_config.yaml
 
-if [[ ! -d "${UPDATE_PATH}" ]]; then
-        echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-        if [[ ! -d "${SOURCE_PATH}" ]]; then
-            sudo mkdir -p ${SOURCE_PATH}
-        fi
-        sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -d "${SOURCE_PATH}" ]]; then
+    sudo rsync -arv $UPDATE_FILE $SOURCE_FILE
+else
+
+    if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
+        echo "Fix ${SOURCE_PATH} file"
+        sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    fi
+
+    sync_yaml_files $SOURCE_FILE $UPDATE_FILE
+    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+
 fi
-        
-SOURCE_PATH=/opt/nepi/etc/nepi_system_config.yaml
-UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
-sync_yaml_files ${SOURCE_PATH} ${UPDATE_PATH}
 
-sudo cp ${UPDATE_PATH} ${SOURCE_PATH}
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+    sudo chmod 755 ${SOURCE_PATH}
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod 755 ${UPDATE_PATH}
 
 ######################################
 ## Sync License Files
@@ -111,7 +133,7 @@ UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ -d "${SOURCE_PATH}" ]]; then
 
-    if [ ! -e "$bfile" ] || [ -s "$bfile" ]; then
+    if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
         echo "Fix ${CONFIG_USER} bash files"
         sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi

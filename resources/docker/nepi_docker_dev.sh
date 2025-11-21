@@ -19,6 +19,9 @@ fi
 sudo -v
 
 CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
 source /home/${CONFIG_USER}/.nepi_bash_utils
 wait
 

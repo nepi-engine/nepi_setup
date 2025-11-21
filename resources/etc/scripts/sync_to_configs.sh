@@ -11,20 +11,16 @@
 
 # This script syncs to NEPI config folder
 
-if [[ "$(id -un 1000)" == 'nepi' ]]; then
-    CONFIG_USER=nepi
-    bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
-    afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
-    CONFIG_USER=${USER}
-    bfile=/home/${USER}/.bashrc
-    ufile=/home/${USER}/.nepi_bash_utils
-    afile=/home/${USER}/.nepi_docker_aliases
-else
-    echo "NEPI Aliases bash file not found"
-    exit 1
+sudo -v
+
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
 fi
+
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -83,7 +79,7 @@ UPDATE_PATH=/home/${CONFIG_USER}
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ -d "${SOURCE_PATH}" ]]; then
 
-    if [ ! -e "$bfile" ] || [ -s "$bfile" ]; then
+    if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
         echo "Fix ${CONFIG_USER} bash files"
         sudo rsync -av --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
     fi

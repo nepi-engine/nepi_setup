@@ -76,9 +76,11 @@ if [[ ! -d "$NEPI_CONFIG_PATH" ]]; then
 fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_PATH
 
-if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
+if [ ! -e "$NEPI_SYS_CONFIG_FILE" ] || [ ! -s "$NEPI_SYS_CONFIG_FILE" ]; then
     sudo cp -r -p "${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml" ${NEPI_SYS_CONFIG_FILE}
 else
+
+    echo "Syncing system_config files from  ${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml to ${NEPI_SYS_CONFIG_FILE}"
     sync_yaml_files ${SOURCE_SYS_CONFIG_PATH}/nepi_system_config.yaml ${NEPI_SYS_CONFIG_FILE}
 fi
 
@@ -101,7 +103,7 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_ETC_PATH}
 
 
-if [[ ! -f "$NEPI_SYS_CONFIG_FILE" ]]; then
+if [ ! -e "$NEPI_SYS_CONFIG_FILE" ] || [ ! -s "$NEPI_SYS_CONFIG_FILE" ]; then
     sudo cp -p $SOURCE_SYS_CONFIG_FILE $NEPI_SYS_CONFIG_FILE
 fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_SYS_CONFIG_FILE}

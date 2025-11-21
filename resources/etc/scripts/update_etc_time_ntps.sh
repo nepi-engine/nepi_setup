@@ -12,36 +12,32 @@
 # This script updates etc chrony time files and processes
 
 
-if [[ "$(id -un 1000)" == 'nepi' ]]; then
-    CONFIG_USER=nepi
-    bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
-    afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
-    CONFIG_USER=${USER}
-    bfile=/home/${USER}/.bashrc
-    ufile=/home/${USER}/.nepi_bash_utils
-    afile=/home/${USER}/.nepi_docker_aliases
-else
-    echo "NEPI Aliases bash file not found"
-    exit 1
+sudo -v
+
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
 fi
 
-source $ufile
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
-LOAD_NEPI_CONFIG=1
-if [[ -v "$1" ]]; then
-    if [[ "$1" -eq 0 ]]; then
-        LOAD_NEPI_CONFIG=0
-    fi
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
 fi
 
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ "$1" -eq 0 ]]; then
-    LOAD_NEPI_CONFIG=0
+if [[ -v "$1" ]]; then
+    if [[ "$1" -eq 0 ]]; then
+        LOAD_NEPI_CONFIG=0
+    fi
 fi
 
 if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then

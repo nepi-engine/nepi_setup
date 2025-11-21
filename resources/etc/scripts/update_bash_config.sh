@@ -11,21 +11,16 @@
 
 # This script updates bash stored system values
 
+sudo -v
 
-if [[ "$(id -un 1000)" == 'nepi' ]]; then
-    CONFIG_USER=nepi
-    bfile=/home/nepi/.bashrc
-    ufile=/home/nepi/.nepi_bash_utils
-    afile=/home/nepi/.nepi_system_aliases
-elif [[ -f "/home/${USER}/.nepi_docker_aliases" ]]; then
-    CONFIG_USER=${USER}
-    bfile=/home/${USER}/.bashrc
-    ufile=/home/${USER}/.nepi_bash_utils
-    afile=/home/${USER}/.nepi_docker_aliases
-else
-    echo "NEPI Aliases bash file not found"
-    exit 1
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
 fi
+
+    bfile=/home/${CONFIG_USER}/.bashrc
+    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
