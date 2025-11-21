@@ -39,9 +39,9 @@ echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chmod 0775 /opt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-sudo chmod 0775 /opt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage
 
 #############################
 # Sync Docker Config folders
@@ -56,7 +56,7 @@ UPDATE_FILE=${UPDATE_PATH}/nepi_docker_config.yaml
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo rsync -arv $UPDATE_FILE $SOURCE_FILE
+    sudo rsync -ar $UPDATE_FILE $SOURCE_FILE
 else
 
     if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
@@ -64,9 +64,9 @@ else
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
     
-    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    sudo rsync -ar --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -arv ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
     
 
 fi
@@ -89,7 +89,7 @@ UPDATE_FILE=${UPDATE_PATH}/nepi_system_config.yaml
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo rsync -arv $UPDATE_FILE $SOURCE_FILE
+    sudo rsync -ar $UPDATE_FILE $SOURCE_FILE
 else
 
     if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
@@ -97,9 +97,9 @@ else
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
-    sudo rsync -arv --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    sudo rsync -ar --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -arv ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 fi
 
@@ -162,6 +162,6 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chmod 0775 /opt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-sudo chmod 0775 /opt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage

@@ -371,11 +371,15 @@ function NEPI_START_FUNCTION(){
             echo "Calling NEPI Docker Start Script with ${CONFIG_MODE} Config"
             ####  START NEPI USING SET CONFIG MODE
             bash ${DOCKER_FOLDER}/nepi_docker_start.sh
-            if [[ "$?" -eq 0 ]]; then
+            wait
+            bash ${DOCKER_FOLDER}/load_docker_config.sh
+            wait
+            if [[ -n "$NEPI_RUNNING_ID" ]]; then
                 # Wait for NEPI to start and try to reset fail count
-                echo "Waiting for ${NEPI_BOOT_TIME} seconds for NEPI Engine to boot successfully"
+                echo "Waiting for 60 seconds for NEPI Engine to boot successfully"
                 sleep 60
             fi
+
         else
             echo "##########################"
             echo "FAIL COUNT CHECKS FAILED"
@@ -535,8 +539,8 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
 
         ########################
         # Load NEPI DOCKER CONFIG Updates
-        bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
-        source ${DOCKER_FOLDER}/load_docker_config.sh
+        bash ${DOCKER_FOLDER}/nepi_docker_sync.sh > /dev/null 2>&1
+        source ${DOCKER_FOLDER}/load_docker_config.sh > /dev/null 2>&1
     fi
     #echo "NEPI DOCKER SERVICE MONITOR LOOP COMPLETE"
     sleep 1
