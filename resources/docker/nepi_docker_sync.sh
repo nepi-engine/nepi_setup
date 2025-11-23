@@ -100,7 +100,7 @@ else
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
-    sudo rsync -ar --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    sudo rsync -ar --exclude='nepi_system_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
     sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 

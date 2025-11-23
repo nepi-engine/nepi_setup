@@ -512,7 +512,6 @@ NEPI_FAIL_COUNT=-1
 echo "Updating ${DOCKER_CONFIG_FILE} with fail count ${NEPI_FAIL_COUNT}"
 update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
 
-
 #####################################
 # Run Monitoring and Upadate Loop
 
