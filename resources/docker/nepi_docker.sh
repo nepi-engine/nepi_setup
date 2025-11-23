@@ -261,9 +261,12 @@ fi
 if [[ "$enable_dhcp" -eq 1 ]]; then
     echo "Running ninet"
     ninet
+    wait
+    sleep 2
 else
     echo "Running nnet"
     nnet
+    wait
 fi
 
 
@@ -413,17 +416,18 @@ function NEPI_START_FUNCTION(){
             ####  START NEPI USING SET CONFIG MODE
             bash ${DOCKER_FOLDER}/nepi_docker_start.sh
             wait
-            bash ${DOCKER_FOLDER}/load_docker_config.sh
+            source ${DOCKER_FOLDER}/nepi_docker_update.sh
             wait
+            echo "Got NEPI Running = ${NEPI_RUNNING}"
             if [[ "$NEPI_RUNNING" -eq 1 ]]; then
-                Wait for NEPI to start and try to reset fail count
+                #Wait for NEPI to start and try to reset fail count
 
 
                 TIMEOUT_SECONDS=90
                 SECONDS=0
                 echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
                 while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
-                    bash ${DOCKER_FOLDER}/load_docker_config.sh
+                    source ${DOCKER_FOLDER}/nepi_docker_update.sh > /dev/null 2>&1
                     sleep 2 # Check every 2 seconds
                 done                
 
@@ -479,9 +483,7 @@ fi
 
 
 #####################################
-# Initialize State Variables
-
-
+# Initialize Start Variables
 
 source ${DOCKER_FOLDER}/load_docker_config.sh
 #source ${SETC_FOLDER}/update_etc_files.sh
@@ -520,7 +522,7 @@ update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
         #echo "Calling: ninet"
         #echo "Updating Network and Clock"
-        #ninet > /dev/null 2>&1
+        ninet > /dev/null 2>&1
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"
@@ -585,6 +587,7 @@ update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
 
         ##################################
         if [[ "$NEPI_FS_RESTART" -eq 1 && "$NEPI_STARTING" -eq 0 ]]; then
+            update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
             echo "NEPI RESTARTING"
             CONFIG_MODE=SYSTEM
             NEPI_START_FUNCTION

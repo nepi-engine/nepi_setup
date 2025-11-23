@@ -88,10 +88,13 @@ SOURCE_FILE=${SOURCE_PATH}/nepi_system_config.yaml
 UPDATE_FILE=${UPDATE_PATH}/nepi_system_config.yaml
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
+if [[ ! -d "$SOURCE_PATH" && -d "$UPDATE_PATH" ]]; then
     sudo rsync -ar $UPDATE_FILE $SOURCE_FILE
 else
 
+    if [[ ! -d "$UPDATE_PATH" ]]; then
+        sudo mkdir -p $UPDATE_PATH
+    fi
     if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
         echo "Fix ${SOURCE_PATH} file"
         sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
