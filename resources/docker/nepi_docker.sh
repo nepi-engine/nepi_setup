@@ -35,6 +35,44 @@ else
 fi
 
 
+###############################
+# Load NEPI Config File
+NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
+    source $NEPI_CONFIG_LOAD_FILE
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
+    fi
+else
+    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
+fi
+
+
+
+echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+echo "Reseting Network Config"
+echo "Got NEPI_IP = ${NEPI_IP}"
+echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
+
+
+enable_dhcp=0
+if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
+    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
+fi
+
+
+if [[ "$enable_dhcp" -eq 1 ]]; then
+    echo "Running ninet"
+    ninet
+    wait
+    sleep 2
+else
+    echo "Running nnet"
+    nnet
+    wait
+fi
+
 
 ########################
 # Redefine any nepi_bash_util functions that require without sudo
@@ -232,42 +270,7 @@ if [[ "$?" -eq 1 ]]; then
     exit 1
 fi
 
-###############################
-# Load NEPI Config File
-NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
-    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
-    source $NEPI_CONFIG_LOAD_FILE
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
-    fi
-else
-    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
-fi
 
-
-
-echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-echo "Reseting Network Config"
-echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
-
-
-enable_dhcp=0
-if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
-    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
-fi
-
-
-if [[ "$enable_dhcp" -eq 1 ]]; then
-    echo "Running ninet"
-    ninet
-    wait
-    sleep 2
-else
-    echo "Running nnet"
-    nnet
-    wait
-fi
 
 
 # ####################################
@@ -465,6 +468,7 @@ if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$NEPI
     echo "##########################"
     echo "Starting Recovery Mode"
     echo "##########################"
+    echo "Got NEPI_IP = ${NEPI_IP}"
     echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - 192.168.179.103"
 
     # Load NEPI FACTORY CONFIG
