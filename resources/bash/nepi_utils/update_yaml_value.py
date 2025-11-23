@@ -17,6 +17,7 @@ import os
 import sys
 import shutil
 import yaml
+import numpy as np
 
 # for arg in sys.argv:
 #     print(str(arg))
@@ -47,21 +48,43 @@ def write_dict_to_file(dict_2_save,file_path,defaultFlowStyle=False,sortKeys=Fal
         pass
     return success
 
+def convert_string_to_number(value):
+    try:
+        # Try converting to float first
+        f_val = float(value)
+        # If it's a float, check if it's also an integer (e.g., "5.0")
+        if f_val == int(f_val):
+            return int(f_val)
+        else:
+            return f_val
+    except ValueError:
+        # If float conversion fails, try converting to int
+        try:
+            return int(value)
+        except:
+            # If neither conversion works, return the original string or raise an error
+            return value  # Or raise ValueError(f"Cannot convert '{s
+
+
+
 overwrite = False
 success = 0
 if len(sys.argv) > 3:
     KEY = sys.argv[1]
     VALUE = sys.argv[2]
+    VALUE = convert_string_to_number(VALUE)
+
     SOURCE_YAML_FILE = sys.argv[3]
     if os.path.exists(SOURCE_YAML_FILE):
-        if len(KEY) > 0 and VALUE != "":
+        if len(KEY) > 0 and VALUE is not None:
             [success, source_dict] = read_yaml_2_dict(SOURCE_YAML_FILE)
             if success == 1:
                 success = 0
                 source_dict[KEY] = VALUE
+                #source_dict['Test'] = 5
                 success=write_dict_to_file(source_dict, SOURCE_YAML_FILE)
             else:
-            success = -2
+                success = -2
     else:
          success = -1
 

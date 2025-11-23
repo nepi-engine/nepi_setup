@@ -94,8 +94,8 @@ if ! is_valid_did $NEPI_DEVICE_ID; then
     NEPI_DEVICE_ID=device1
 fi
 
-systemctl&> /dev/null
-if [[ "$?" -eq 1  && "$CONFIG_USER" == 'nepihost' ]]; then
+
+if [[ "$?" -eq 1  && "$CONFIG_USER" != 'nepi' ]]; then
     export NEPI_IN_CONTAINER=1
 else
     export NEPI_IN_CONTAINER=0
@@ -205,7 +205,7 @@ sudo chmod 0664 /home/${CONFIG_USER}/.bashrc
 echo "Fixing other user files"
 cp /etc/skel/.profile /home/${CONFIG_USER}/
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.profile
-sudo chmod 0664 /home/${CONFIG_USER}/.profile
+sudo chmod 0644 /home/${CONFIG_USER}/.profile
 
 sudo mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
 sudo chmod 0664 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages

@@ -16,7 +16,7 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-sudo -v
+
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -33,11 +33,6 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
-
-
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-
 
 
 
@@ -93,7 +88,9 @@ function nnipa(){
 }
 export -f nnipa
 
+
 function nnet(){
+    
     nepi_ip=$(nipa)
     if [[ -z "$nepi_ip" ]]; then
       return 1
@@ -103,7 +100,7 @@ function nnet(){
         echo "Can't ping NEPI IP address: ${nepi_ip}"
 
         echo "Restarting Network"
-        systemctl restart networking
+         systemctl restart networking
         wait
         ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -115,6 +112,7 @@ function nnet(){
 export -f nnet
 
 function ndhcp(){
+  
   if nnet; then
     # This file sets up nepi bash aliases and util functions
     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -127,18 +125,20 @@ function ndhcp(){
     # Non-zero indicates failure (no internet connection)
     if [ $? -ne 0 ]; then
       echo "No internet connection detected. Will try and connect"
-      nnet # Restart network
-      wait
+
       echo "Enabling DHCP internet connection"
       echo "Killing existing DHCP clients"
-      kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
-      dhclient -nw
+       dhclient -nw
       sleep 2
+      nnet # Restart network
+      wait
       if ! pingi; then
         return 1
       fi
     fi
+     kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
   fi
 }
 export -f ndhcp
@@ -146,7 +146,7 @@ export -f ndhcp
 
 function nclock(){
   if [[ "$(date +%Y)" -lt 2025 ]]; then
-
+      
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
@@ -160,13 +160,16 @@ function nclock(){
         fi
       fi
 
-      echo "Restarting chrony time service"
-      systemctl restart chronyd
-      # sleep 1
-      # chronyc -a makestep > /dev/null 2>&1
-      # chronyc waitsync 5
+      sleep 1
+      #  chronyc -a makestep > /dev/null 2>&1
+      #chronyc waitsync 10
       # echo "Forcing clock sync"
-      # chronyc -a makestep > /dev/null 2>&1
+       chronyc -a makestep > /dev/null 2>&1
+
+      #  echo "Restarting chrony time service"
+      #   systemctl restart chronyd
+
+
   fi
 
 }
@@ -174,6 +177,7 @@ export -f nclock
 
 
 function ninet(){
+  
   if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
     wait
     if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
@@ -189,17 +193,20 @@ export function ninet
 
 
 ########################
-#journalctl --vacuum-time=5s --unit=nepi_docker
-
-########################
-# Check Network and Clock Configuration
+# Service Processes
 
 echo "##########################"
 echo "*** NEPI DOCKER SERVICE ***"
 echo "##########################"
 
+
+
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+
 #echo "Updating Network and Clock"
-ninet > /dev/null 2>&1
+#ninet > /dev/null 2>&1
 
 ########################
 # Update Docker Config
@@ -224,6 +231,41 @@ if [[ "$?" -eq 1 ]]; then
     echo "Failed to load ${DOCKER_CONFIG_FILE}"
     exit 1
 fi
+
+###############################
+# Load NEPI Config File
+NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
+    source $NEPI_CONFIG_LOAD_FILE
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
+    fi
+else
+    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
+fi
+
+
+
+echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+echo "Reseting Network Config"
+echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
+
+
+enable_dhcp=0
+if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
+    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
+fi
+
+
+if [[ "$enable_dhcp" -eq 1 ]]; then
+    echo "Running ninet"
+    ninet
+else
+    echo "Running nnet"
+    nnet
+fi
+
 
 # ####################################
 # # Update NEPI Docker Config Link
@@ -332,7 +374,6 @@ function NEPI_START_FUNCTION(){
                 if [[ "$?" -eq 0 ]]; then
                     echo "Factory config loaded successfully"
                     NEPI_FAIL_COUNT=-1
-                    
                     update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
                 else
                     echo "##########################"
@@ -374,10 +415,18 @@ function NEPI_START_FUNCTION(){
             wait
             bash ${DOCKER_FOLDER}/load_docker_config.sh
             wait
-            if [[ -n "$NEPI_RUNNING_ID" ]]; then
-                # Wait for NEPI to start and try to reset fail count
-                echo "Waiting for 60 seconds for NEPI Engine to boot successfully"
-                sleep 60
+            if [[ "$NEPI_RUNNING" -eq 1 ]]; then
+                Wait for NEPI to start and try to reset fail count
+
+
+                TIMEOUT_SECONDS=90
+                SECONDS=0
+                echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
+                while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
+                    bash ${DOCKER_FOLDER}/load_docker_config.sh
+                    sleep 2 # Check every 2 seconds
+                done                
+
             fi
 
         else
@@ -392,7 +441,7 @@ function NEPI_START_FUNCTION(){
     done
     NEPI_STARTING=0
     update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
-    echo "EXITING START FUNCTION"
+    echo "START SUCCEEDED. RETURNING TO MONITOR LOOP"
     echo ""
     return 0
 }
@@ -432,9 +481,7 @@ fi
 #####################################
 # Initialize State Variables
 
-update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
-update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
-update_yaml_value "NEPI_FAIL_COUNT" -1 $DOCKER_CONFIG_FILE
+
 
 source ${DOCKER_FOLDER}/load_docker_config.sh
 #source ${SETC_FOLDER}/update_etc_files.sh
@@ -447,7 +494,18 @@ if [[ ! "$?" -eq 0 ]]; then
     echo " Restart Process Failed. Will Stop Trying"
     CONFIG_MODE=STOP
 fi
-update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
+
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+
+
+CONFIG_MODE=SYSTEM
+update_yaml_value "NEPI_FS_RESTART" 1 $DOCKER_CONFIG_FILE
+update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
+NEPI_FAIL_COUNT=-1
+echo "Updating ${DOCKER_CONFIG_FILE} with fail count ${NEPI_FAIL_COUNT}"
+update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
+
 
 #####################################
 # Run Monitoring and Upadate Loop
@@ -462,7 +520,7 @@ update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
         #echo "Calling: ninet"
         #echo "Updating Network and Clock"
-        ninet > /dev/null 2>&1
+        #ninet > /dev/null 2>&1
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"

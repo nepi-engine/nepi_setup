@@ -19,6 +19,25 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 ###############
+# Ask Some Questions
+
+DEMO_INSTALL=1
+
+echo "Is this a DEMO installation"
+read -p "$1 ([y]es or [N]o): " choice
+case "$(echo "$choice" | tr '[:upper:]' '[:lower:]')" in
+    y|yes) DEMO_INSTALL=1 ;;
+    *) DEMO_INSTALL=0 ;;
+esac
+
+
+
+
+
+
+
+
+###############
 # Create a tmp folder for all users
 sudo mkdir -p /tmp/nepihost
 sudo chmod -R 0777 /tmp/nepihost
@@ -92,6 +111,8 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG $SUDO_USER ${CONFIG_USER} >/dev/null 2>&1
+
 
 	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
 	#sudo chsh -s /bin/bash ${CONFIG_USER} # Fix no login user
@@ -115,8 +136,20 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
         fi
     fi
    
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${user}
+        sudo chmod 0755 /home/${CONFIG_USER}
 
+
+    sudo usermod -aG sudo $SUDO_USER >/dev/null 2>&1
+    sudo usermod -aG $SYS_USER_1 $SUDO_USER >/dev/null 2>&1
+    sudo usermod -aG $SYS_USER_2 $SUDO_USER >/dev/null 2>&1
+    sudo adduser ${SUDO_USER} dialout
+    sudo usermod -aG dialout ${SUDO_USER} >/dev/null 2>&1
+    sudo usermod -aG tty ${SUDO_USER} >/dev/null 2>&1
+    sudo usermod -aG i2c ${SUDO_USER} >/dev/null 2>&1
+    sudo usermod -aG video ${SUDO_USER} >/dev/null 2>&1
+    sudo usermod -aG docker ${SUDO_USER} >/dev/null 2>&1
+    sudo usermod -aG $CONFIG_USER ${SUDO_USER} >/dev/null 2>&1
 
 
 else
@@ -160,10 +193,14 @@ function new_system_user(){
         sudo usermod -aG i2c ${user} >/dev/null 2>&1
         sudo usermod -aG video ${user} >/dev/null 2>&1
         sudo usermod -aG docker ${user} >/dev/null 2>&1
+        sudo usermod -aG $SUDO_USER  ${user} >/dev/null 2>&1
 
         sudo usermod -s /sbin/nologin $user
 		
-		
+        sudo chown ${user}:${user} /home/${user}
+        sudo chmod 0755 /home/${user}
+
+        sudo usermod -aG $user ${SUDO_USER} >/dev/null 2>&1
         
     else
         echo "Failed to create user account $user"
@@ -248,80 +285,86 @@ update_user_and_group() {
     echo "User '$username' updated successfully."
 }
 
-# Read /etc/passwd and process users
-while IFS=':' read -r username _ uid gid _ _ _; do
 
-    # Check if the UID is within the 1000-1999 range and is not a system user
-    if [[ $uid -ge $OLD_UID_START && $uid -le $OLD_UID_END ]]; then
-        echo "Checking user ${username} against nepi users"
-        if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
-            is_nepi_user=1
-        else
-            is_nepi_user=0
-        fi
-        if [[  "$is_nepi_user" -eq 0 ]]; then
-            # Calculate the new UID by adding 1000 to the old UID
-            new_uid=$((uid + 1000))
-            new_gid=$new_uid
 
-            echo "Updating Non-NEPI user account ${username} ID and Group from ${uid} to ${new_uid}"
-            echo "Updating Non-NEPI user account ${username} ID and Group from ${gid} to ${new_gid}"
-            # Check if the group ID is the same as the user ID
-            # This is the default behavior on many modern Linux systems
-            update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+
+    # Read /etc/passwd and process users
+    while IFS=':' read -r username _ uid gid _ _ _; do
+
+        # Check if the UID is within the 1000-1999 range and is not a system user
+        if [[ $uid -ge $OLD_UID_START && $uid -le $OLD_UID_END ]]; then
+            echo "Checking user ${username} against nepi users"
+            if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
+                is_nepi_user=1
+            else
+                is_nepi_user=0
+            fi
+            if [[  "$is_nepi_user" -eq 0 ]]; then
+                # Calculate the new UID by adding 1000 to the old UID
+                new_uid=$((uid + 1000))
+                new_gid=$new_uid
+
+                echo "Updating Non-NEPI user account ${username} ID and Group from ${uid} to ${new_uid}"
+                echo "Updating Non-NEPI user account ${username} ID and Group from ${gid} to ${new_gid}"
+                # Check if the group ID is the same as the user ID
+                # This is the default behavior on many modern Linux systems
+                update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+            fi
         fi
+    done < /etc/passwd
+
+    echo "All Non-NEPI users have been updated."
+    cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
+    echo "Updated User:"
+    echo $cur_users
+
+    echo ""
+    echo "###################################"
+    echo "Changing NEPI user IDs and Groups"
+    echo "###################################"
+    echo ""
+
+    echo ""
+    echo "Updating NEPI User IDs and Groups if Needed"
+
+
+    # Read /etc/passwd and process users
+    username=${CONFIG_USER}
+    uid=$(id -u "$username")
+    gid=$(id -g "$username")
+    new_uid=1000
+    new_gid=$new_uid
+    if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+        update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
     fi
-done < /etc/passwd
+    sudo chown ${username}:${username} /home/${username}
+    sudo chmod 0755 /home/${username}
 
-echo "All Non-NEPI users have been updated."
-cur_users=$(awk -F':' '1000 <= $3 && $3 <= 3000 {print $1, $3}' /etc/passwd)
-echo "Updated User:"
-echo $cur_users
+    username=${SYS_USER_1}
+    uid=$(id -u "$username")
+    gid=$(id -g "$username")
+    new_uid=1001
+    new_gid=$new_uid
+    if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+        update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+        sudo usermod -s /sbin/nologin $username
+    fi
+    sudo chown ${username}:${username} /home/${username}
+    sudo chmod 0755 /home/${username}
 
-echo ""
-echo "###################################"
-echo "Changing NEPI user IDs and Groups"
-echo "###################################"
-echo ""
-
-echo ""
-echo "Updating NEPI User IDs and Groups if Needed"
-
-# Read /etc/passwd and process users
-username=${CONFIG_USER}
-uid=$(id -u "$username")
-gid=$(id -g "$username")
-new_uid=1000
-new_gid=$new_uid
-if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
-    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+    username=${SYS_USER_2}
+    uid=$(id -u "$username")
+    gid=$(id -g "$username")
+    new_uid=1002
+    new_gid=$new_uid
+    if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
+        update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
+        sudo usermod -s /sbin/nologin $username
+    fi
+    sudo chown ${username}:${username} /home/${username}
+    sudo chmod 0755 /home/${username}
 fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
-
-username=${SYS_USER_1}
-uid=$(id -u "$username")
-gid=$(id -g "$username")
-new_uid=1001
-new_gid=$new_uid
-if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
-    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
-    sudo usermod -s /sbin/nologin $username
-fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
-
-username=${SYS_USER_2}
-uid=$(id -u "$username")
-gid=$(id -g "$username")
-new_uid=1002
-new_gid=$new_uid
-if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
-    update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
-    sudo usermod -s /sbin/nologin $username
-fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
 
 
 # echo "###################################"

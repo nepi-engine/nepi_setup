@@ -489,18 +489,20 @@ function ndhcp(){
     # Non-zero indicates failure (no internet connection)
     if [ $? -ne 0 ]; then
       echo "No internet connection detected. Will try and connect"
-      nnet # Restart network
-      wait
+
       echo "Enabling DHCP internet connection"
       echo "Killing existing DHCP clients"
       sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
       sudo dhclient -nw
       sleep 2
+      nnet # Restart network
+      wait
       if ! pingi; then
         return 1
       fi
     fi
+    sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
   fi
 }
 export -f ndhcp
@@ -522,17 +524,16 @@ function nclock(){
         fi
       fi
 
-      # sleep 1
-      # sudo chronyc -a makestep > /dev/null 2>&1
-      # chronyc waitsync 5
-      # echo "Forcing clock sync"
-      # sudo chronyc -a makestep > /dev/null 2>&1
-
-      echo "Restarting chrony time service"
-      sudo systemctl restart chronyd
-
       sleep 1
-      nnet # restart the network
+      # sudo chronyc -a makestep > /dev/null 2>&1
+      #chronyc waitsync 10
+      # echo "Forcing clock sync"
+      sudo chronyc -a makestep > /dev/null 2>&1
+
+      #  echo "Restarting chrony time service"
+      #  sudo systemctl restart chronyd
+
+
   fi
 
 }
@@ -552,6 +553,8 @@ function ninet(){
 
 }
 export function ninet
+
+
 
 function fix_chromium(){
   sudo -v
@@ -727,7 +730,6 @@ function update_yaml_value(){
     # eval_cmd="success=$(python3 ${BASH_FOLDER}/nepi_utils/update_yaml_value.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
     # eval "$eval_cmd" 
     # success=$(echo ${success})
-
     # if [[ "$success" -ne 1 ]]; then
     #     echo "Success = ${success}"
     #     return 1

@@ -84,7 +84,7 @@ else
                         echo "Not enough available space () to support NEPI AB Backup/Recovery File System"
                         echo "Disabling NEPI AB File System Support"
                         file=/mnt/nepi_config/docker_cfg/etc/nepi_docker_config.yaml
-                        update_yaml_value "NEPI_FS_AB" 0 "$file"
+                        update_yaml_value "NEPI_FS_AB" 0 "$DOCKER_CONFIG_FILE"
                     else
                         echo ""
                         echo "Initializing NEPI Docker nepi_fs_b"

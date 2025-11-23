@@ -1,0 +1,14 @@
+Clear package cache: Remove downloaded package files to free up space.
+
+    sudo apt clean
+    sudo apt autoclean
+
+Remove old kernels: Uninstall unused kernels to free space, especially in the boot partition.
+    
+    sudo apt autoremove
+
+Delete temporary files: Clear temporary files and empty the trash.
+
+rm -rf /local/share/Trash/*
+
+Check disk usage: Use sudo du -sh * to find large files or directories taking up space. 

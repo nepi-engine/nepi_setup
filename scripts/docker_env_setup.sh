@@ -168,6 +168,7 @@ sudo apt install iproute2 -y
 sudo apt install isc-dhcp-client -y
 sudo apt install wpasupplicant -y
 sudo apt install nmap -y
+sudo apt install gparted -y
 
 
 echo "######################################"

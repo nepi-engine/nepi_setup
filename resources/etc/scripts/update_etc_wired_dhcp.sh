@@ -49,6 +49,31 @@ if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
     fi
 fi
 
+
+
+
+function nnet(){
+    sudo -v
+    nepi_ip=$(nipa)
+    if [[ -z "$nepi_ip" ]]; then
+      return 1
+    else
+      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo "Can't ping NEPI IP address: ${nepi_ip}"
+
+        echo "Restarting Network"
+        sudo systemctl restart networking
+        wait
+        ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+          echo "Failed to connect NEPI IP address: ${nepi_ip}"
+        fi
+      fi
+    fi
+}
+
+
 #################################
 echo ""
 echo "UPDATING ETC WIRED DHCP"
@@ -59,10 +84,34 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_WIRED_DHCP_ENABLED" -eq 1 ]]; then
 
 
-        echo "Killing existing DHCP clients"
-        sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-        echo "Renewing dhclient"
-        sudo dhclient -nw
+        if nnet; then
+            # This file sets up nepi bash aliases and util functions
+            # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+            # -c 1: Send only one ping packet
+            # -W 1: Wait for 1 second for a response
+            ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+
+            # Check the exit status of the ping command
+            # 0 indicates success (internet connection)
+            # Non-zero indicates failure (no internet connection)
+            if [ $? -ne 0 ]; then
+            echo "No internet connection detected. Will try and connect"
+
+            echo "Enabling DHCP internet connection"
+            echo "Killing existing DHCP clients"
+            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+            echo "Renewing dhclient"
+            sudo dhclient -nw
+            sleep 2
+            nnet # Restart network
+            wait
+            if ! pingi; then
+                return 1
+            fi
+            fi
+            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+        fi
+
 
     fi  
 

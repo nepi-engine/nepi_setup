@@ -72,11 +72,15 @@ if [[ -f "$bfile" ]]; then
     fi
 
     sudo rm /root/.bashrc
+
     sudo cp /home/${CONFIG_USER}/.bashrc /root/.bashrc
     sudo chmod 0644 /root/.bashrc
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.bashrc
-    sudo chmod 0664 /home/${CONFIG_USER}/.bashrc
+    sudo chmod 0644 /home/${CONFIG_USER}/.bashrc
+
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_utils
+    sudo chmod -R 0755 /home/${CONFIG_USER}/nepi_utils
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
     sudo chmod 0755 /home/${CONFIG_USER}
