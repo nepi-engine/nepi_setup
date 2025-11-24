@@ -17,8 +17,8 @@ See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
 ################################################################
 ### NEPI Docker Container Build Instructions
 
-**NOTE:**  You can run the following NEPI container build steps either 
-directly on a NEPI Host device, or on a netork connected Linux Ubuntu PC for NEPI development.
+**NOTE:**  You can run the following NEPI Container Build steps either 
+directly on a NEPI Host device, or on a network connected Linux Ubuntu PC for NEPI development.
 For the PC build option, you will first need to configure your PC for NEPI development. 
 See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md).
 
@@ -31,6 +31,10 @@ which will use the last steps committed container image.
 ### NEPI Base Container Setup
 
 **RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI DEV PC**
+
+Check for internet connection
+
+    pingi  # "Run 'ninet' on a NEPI Host Device to try and connect if not connected:
 
 Clone the NEPI Engine repo on your development system (NEPI Device or NEPI Dev PC):
 
