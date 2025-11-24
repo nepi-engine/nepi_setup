@@ -94,7 +94,7 @@ rm_cmd="--rm"
 
 ########
 # Initialize Run Command
-DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user 0:0 \
+DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user nepi:nepi \
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
