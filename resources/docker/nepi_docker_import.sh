@@ -84,6 +84,10 @@ else
                 NEPI_IMPORT_FS=nepi_fs_a
             fi
 
+            if [[ "$NEPI_IMPORT_FS" == "$NEPI_ACTIVE_FS" ]]; then
+                bash ${DOCKER_FOLDER}/nepi_docker_stop.sh
+            fi
+
 
             ###########
             # Get Imported Tag and IMPORT_ID 

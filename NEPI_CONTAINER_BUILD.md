@@ -39,6 +39,11 @@ Clone the NEPI Engine repo on your development system (NEPI Device or NEPI Dev P
     git checkout main
     git submodule update --init --recursive
 
+Run the NEPI Docker Build processes to update your NEPI Docker files (password is 'nepi'):
+
+    nepibld
+    dps # Show running NEPI container
+
 Check network connection to the NEPI HOST Device
 
     pingn # Ctrl-C to stop

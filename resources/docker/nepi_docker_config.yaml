@@ -49,6 +49,7 @@ NEPI_ETC_WIFI_CLIENT_UPDATE: 0
 NEPI_ETC_WIFI_ACCESS_POINT_UPDATE: 0
 NEPI_MAX_FAIL_COUNT: 1
 NEPI_FAIL_COUNT: 0
+NEPI_RETRY_COUNT: 5
 NEPI_RESTARTING: 0
 #If NEPI_AB_FS is enabled, the NEPI docker service will manage an Active NEPI container image,
 #   and an Inactive Image used for backup and recovery purposes. If NEPI_AB_FS is enabled, 

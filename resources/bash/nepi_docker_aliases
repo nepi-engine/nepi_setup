@@ -370,6 +370,8 @@ export -f nepienable
 
 function nepidisable(){
   sudo -v
+  nepistop
+  wait
   sudo systemctl disable nepi_docker
   echo "NEPI Docker Service disabled on next boot"
 }
