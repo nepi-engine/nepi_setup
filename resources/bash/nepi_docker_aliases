@@ -409,6 +409,11 @@ function nepiprint(){
 export -f nepiconfig
 
 
+function nepicreate(){
+  sudo -v
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_create.sh
+}
+export -f nepicreate
 
 
 ## NEPI build shortcuts
@@ -446,6 +451,7 @@ nepilogs = Show live NEPI Docker service journal file.
 nepireset = Reset all NEPI Config Folders.
 nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
 nepiupdate = Run update process on NEPI Docker config file.
+nepicreate = Export and Import a new NEPI Docker Image from running container
 nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 
 #nepilicense = Print the NEPI Software Licencse"

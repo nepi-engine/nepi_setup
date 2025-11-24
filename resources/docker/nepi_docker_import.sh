@@ -297,9 +297,6 @@ else
                 
                 update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
                 update_yaml_value "NEPI_IMPORTING" 0 "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_FILE" "unknown" "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_FS" "unknown" "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
                 
 
                 ########################

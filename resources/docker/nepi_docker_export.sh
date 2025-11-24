@@ -31,7 +31,8 @@ DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
-########################
+
+#######################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
@@ -43,12 +44,18 @@ else
 
     ########################
     # Start Processes
-    EXPORT_PATH=$1
-    if [[ -z "$EXPORT_PATH" ]]; then
-        EXPORT_PATH=$NEPI_EXPORT_PATH
-        if [[ ! -d "${EXPORT_PATH}" ]] ; then
-            EXPORT_PATH=/mnt/nepi_storage/nepi_images
+    EXPORT_PATH=$NEPI_EXPORT_PATH
+    export_clean=0
+    if [[ -z "$1" ]]; then
+        if [[ "$1" == 'clean' ]]; then
+            export_clean=1
+        else
+            EXPORT_PATH=$NEPI_EXPORT_PATH
         fi
+    fi
+
+    if [[ ! -d "${EXPORT_PATH}" ]] ; then
+        EXPORT_PATH=/mnt/nepi_storage/nepi_images
     fi
 
     # Export Running Container
@@ -107,20 +114,25 @@ else
             NEW_DATE=$(date +%Y%m%d)
 
 
-            NEW_DESC=${TAG_ARRAY[5]}
-            if [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
-                NEW_DESC=${NEW_DESC%?????}
-                NEW_DESC="${NEW_DESC}_$(date +%H%M)"
-            elif [[ -n "$NEW_DESC" ]]; then
-                NEW_DESC="${NEW_DESC}_$(date +%H%M)"
+            if [[ "$export_clean" == 1 ]]; then
+                NEW_DESC=''
             else
-                NEW_DESC="$(date +%H%M)"
+                NEW_DESC=${TAG_ARRAY[5]}
+                if [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
+                    NEW_DESC=${NEW_DESC%?????}
+                    NEW_DESC="${NEW_DESC}_$(date +%H%M)"
+                elif [[ -n "$NEW_DESC" ]]; then
+                    NEW_DESC="${NEW_DESC}_$(date +%H%M)"
+                else
+                    NEW_DESC="$(date +%H%M)"
+                fi
+                NEW_DESC=$(clean_tag_string $NEW_DESC)
+                NEW_DESC="-${NEPI_DESC}"
             fi
-            NEW_DESC=$(clean_tag_string $NEW_DESC)
 
     
     
-            NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}-${NEW_DESC}"
+            NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
 
         
             NEPI_EXPORT_TAG=${NEPI_EXPORT_TAG,,}
@@ -147,8 +159,8 @@ else
             TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
             echo "Exporting FS to: ${TAR_EXPORT_PATH}"
 
-            update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_IMPORTING" 1 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_EXPORTING" 1 "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$DOCKER_CONFIG_FILE"
@@ -188,9 +200,6 @@ else
 
     update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
     update_yaml_value "NEPI_EXPORTING" 0 "$DOCKER_CONFIG_FILE"
-    update_yaml_value "NEPI_EXPORT_FILE" "unknown" "$DOCKER_CONFIG_FILE"
-    update_yaml_value "NEPI_EXPORT_FS" "unknown" "$DOCKER_CONFIG_FILE"
-    update_yaml_value "NEPI_EXPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
 
 
 

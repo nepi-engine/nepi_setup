@@ -39,11 +39,6 @@ Clone the NEPI Engine repo on your development system (NEPI Device or NEPI Dev P
     git checkout main
     git submodule update --init --recursive
 
-Run the NEPI Docker Build processes to update your NEPI Docker files (password is 'nepi'):
-
-    nepibld
-    dps # Show running NEPI container
-
 Check network connection to the NEPI HOST Device
 
     pingn # Ctrl-C to stop
@@ -413,7 +408,7 @@ Commit your NEPI container with a description (password is 'nepi'):
 
 
 ################################################################
-### NEPI Container Deploy
+### NEPI Container Create
 
 **RUN THESE STEPS IN THE NEPI HOST**
 Restart the NEPI container running in production mode now using the latest commit (password is 'nepi'):
@@ -421,15 +416,10 @@ Restart the NEPI container running in production mode now using the latest commi
     nepistart
     dps # Show running NEPI container
 
-Export the new NEPI Docker Image (password is 'nepi'):
-
-    nepiexport clean
-
-Import the new NEPI Docker Image (password is 'nepi'):
+Export and Import the new NEPI Docker Image from the running NEPI Container (password is 'nepi'):
 
 **NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
 the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
 
-    nepiimport
-
+    nepicreate # OR 'nepiexport clean' to just export the new image without importing
 
