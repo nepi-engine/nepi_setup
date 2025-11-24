@@ -1,6 +1,12 @@
 # NEPI User PC Setup
 
-This tutorial will walk you through setting up a linux PC for connecting to a NEPI device.
+This tutorial will walk you through setting up a Linux or MAC PC for connecting to a NEPI device. 
+
+**NOTE:** For Window's PC's you can still connect and interact with the NEPI Device following the setup tutorials in the last section,
+but if you want to do actual NEPI Software development on your Windows PC, 
+you will first need to install and start a Ubuntu Virtual Environment on your PC with 
+both internet and either Wired or WiFi access from within the virtual environment.  There are many good 
+online tutorials on this process such as https://automaticaddison.com/how-to-install-ubuntu-22-04-virtual-machine-on-a-windows-pc/
 
 For detailed tutorials on NEPI User PC Setup processes see the "NEPI Getting Started" turoials at:
 [NEPI Tutorials](https://www.nepi.com/tutorials)
@@ -8,25 +14,17 @@ For detailed tutorials on NEPI User PC Setup processes see the "NEPI Getting Sta
 For additional support, visit the NEPI software community forum at:
 [NEPI Community](https://www.community.nepi.com)
 
-### Connect to the Internet
-Make sure your PC has internet access
 
-### Install Software Requirments
-Install yq:
+################################################################
+### Create a NEPI Dev User Account
 
-    sudo add-apt-repository ppa:rmescandon/yq
-    wait
-    sudo apt update
-    wait
-    sudo apt install yq -y
-    wait
+On your PC, create a new user account nameed 'nepidev' with 'administrator' privileges
 
-Verify your installation:
 
-    yq --version
+################################################################
+### NEPI Dev User Account Setup
 
-### Clone the NEPI SETUP Repo
-This step will clone the NEPI Setup github repo to the nepihost user home folder.
+Log into your 'nepidev' user account
 
 
 Update Git application (sudo password is #Nsetup4You):
@@ -39,9 +37,7 @@ Clone the NEPI setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-
-### NEPI PC Setup
-This step configures a network connected PC to communicate with a NEPI Device:
+Run the NEPI User PC Setup script:
 
     source /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
     source ~/.bashrc
@@ -50,13 +46,11 @@ See the NEPI PC command line shortcuts menu:
 
     nepihelp
 
-### NEPI Development PC Setup
 
-If you want set up your PC for NEPI software development,
-see the instructions "NEPI_DEV_PC_SETUP"
+################################################################
+### NEPI Remote PC Connections Tutorials
 
-
-### NEPI Remote PC Connections
+Setup and test your network or WiFi connected PC connection to your NEPI device following these instructions.
 
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
@@ -64,8 +58,13 @@ See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-en
 Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
 See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
 
+SSH into either your NEPI Host device or NEPI running container following this tutorial.
+See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 
+################################################################
+### NEPI Remote PC Software Developent Tutorials
 
+See the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 
