@@ -18,14 +18,11 @@ fi
 
 
 
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
-fi
+CONFIG_USER=nepihost
 
-    bfile=/home/${CONFIG_USER}/.bashrc
-    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -71,6 +68,44 @@ else
     echo "Running nnet"
     nnet
     wait
+fi
+
+
+
+####################################
+# Run NEPI Bash Setup Script
+
+SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+script_file=nepi_bash_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Folder Setup Script
+SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+script_file=nepi_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Files Setup Script
+SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+script_file=nepi_files_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
 fi
 
 
