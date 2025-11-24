@@ -127,8 +127,7 @@ fi
 echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
 
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
-${nepi_fs}:${nepi_fs_tag} /bin/bash \
--c '/nepi_start_all'"
+${nepi_fs}:${nepi_fs_tag} /bin/bash"
 
 #-c '/nepi_start_all'"
 
@@ -159,8 +158,14 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
 sudo chmod 0775 /mnt/nepi_storage
 
 
+
+###############################
 echo ""
 echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
+
+DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+-c 'service supervisor start'"
+
 echo "${DOCKER_RUN_COMMAND}"
 
 eval "$DOCKER_RUN_COMMAND"
@@ -169,24 +174,29 @@ sleep 2
 
 CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
 CONTAINER_ID=${CONTAINER_ID[0]}
+###############################
 
-# fail_count=0
-# retries=$NEPI_RETRY_COUNT
-# while [[ "$fail_count" -le "$NEPI_RETRY_COUNT" ]]; do
-#     ((fail_count++))
-#     eval "$DOCKER_RUN_COMMAND"
+if [[ -n "$CONTAINER_ID" ]]; then
+    break
+else
+    ###############################
+    echo ""
+    echo "Retrying NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
 
-#     sleep 3
+    DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+    -c '/nepi_start_all'"
 
-#     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
-#     CONTAINER_ID=${CONTAINER_ID[0]}
-#     if [[ -n "$CONTAINER_ID" ]]; then
-#         break
-#     elif [[ "$fail_count" -le "$NEPI_RETRY_COUNT" ]]; then
-#         retries=$(( $retries -1 ))
-#         echo "NEPI Container Failed to Run. Will try again ${retries} times"
-#     fi
-# done
+    echo "${DOCKER_RUN_COMMAND}"
+
+    eval "$DOCKER_RUN_COMMAND"
+
+    sleep 2
+
+    CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
+    CONTAINER_ID=${CONTAINER_ID[0]}
+    ###############################
+fi
+
 
 if [[ -z "$CONTAINER_ID" ]]; then
 

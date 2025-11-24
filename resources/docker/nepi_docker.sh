@@ -46,7 +46,6 @@ else
 fi
 
 
-
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 echo "Reseting Network Config"
 echo "Got NEPI_IP = ${NEPI_IP}"
@@ -265,68 +264,6 @@ export function ninet
 
 
 
-########################
-# Service Processes
-
-echo "##########################"
-echo "*** NEPI DOCKER SERVICE ***"
-echo "##########################"
-
-
-
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
-
-#echo "Updating Network and Clock"
-#ninet > /dev/null 2>&1
-
-########################
-# Update Docker Config
-echo ""
-echo "Updating Docker Config Files"
-bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
-wait
-
-########################
-# Update Docker Config
-echo ""
-echo "Updating Docker Config File"
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
-
-
-########################
-# Load NEPI DOCKER
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-source ${DOCKER_FOLDER}/load_docker_config.sh
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${DOCKER_CONFIG_FILE}"
-    exit 1
-fi
-
-
-
-
-# ####################################
-# # Update NEPI Docker Config Link
-# sfolder=${NEPI_DOCKER_PATH}
-# lfolder=${NEPI_CONFIG}/docker_cfg
-# if [ ! -e "$dfolder" ]; then
-#     mkdir -p $dfolder
-# fi
-# if [ -e "$lfolder" ]; then
-#     rm -r -p $lfolder
-# fi
-# echo "Creating NEPI Docker Config Symlink: source: ${dfolder} target: ${lfolder}"
-# ln -sf $dfolder $lfolder
-
-####################################
-# Define CONFIG FOLDERS
-NEPI_CONFIG=/mnt/nepi_config
-SETC_FOLDER=${NEPI_CONFIG}/system_cfg/etc
-FETC_FOLDER=${NEPI_CONFIG}/factory_cfg/etc
-RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 
 ####################################
 # Process Functions
@@ -490,6 +427,60 @@ function NEPI_START_FUNCTION(){
 
 
 
+########################
+# Service Processes
+
+
+
+
+echo "##########################"
+echo "*** NEPI DOCKER SERVICE ***"
+echo "##########################"
+
+
+
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+
+#echo "Updating Network and Clock"
+#ninet > /dev/null 2>&1
+
+########################
+# Update Docker Config
+echo ""
+echo "Updating Docker Config Files"
+bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
+wait
+
+########################
+# Update Docker Config
+echo ""
+echo "Updating Docker Config File"
+bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+wait
+
+
+
+# ####################################
+# # Update NEPI Docker Config Link
+# sfolder=${NEPI_DOCKER_PATH}
+# lfolder=${NEPI_CONFIG}/docker_cfg
+# if [ ! -e "$dfolder" ]; then
+#     mkdir -p $dfolder
+# fi
+# if [ -e "$lfolder" ]; then
+#     rm -r -p $lfolder
+# fi
+# echo "Creating NEPI Docker Config Symlink: source: ${dfolder} target: ${lfolder}"
+# ln -sf $dfolder $lfolder
+
+####################################
+# Define CONFIG FOLDERS
+NEPI_CONFIG=/mnt/nepi_config
+SETC_FOLDER=${NEPI_CONFIG}/system_cfg/etc
+FETC_FOLDER=${NEPI_CONFIG}/factory_cfg/etc
+RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 
 #####################################
 # Start NEPI Docker Service Processes
@@ -524,17 +515,15 @@ fi
 #####################################
 # Initialize Start Variables
 
+
 source ${DOCKER_FOLDER}/load_docker_config.sh
 #source ${SETC_FOLDER}/update_etc_files.sh
 
 
-echo "NEPI STARTING"
-CONFIG_MODE=SYSTEM
-NEPI_START_FUNCTION
-if [[ ! "$?" -eq 0 ]]; then
-    echo " Restart Process Failed. Will Stop Trying"
-    CONFIG_MODE=STOP
-fi
+
+#####################################
+# Start NEPI
+
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
@@ -546,6 +535,15 @@ update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
 NEPI_FAIL_COUNT=-1
 echo "Updating ${DOCKER_CONFIG_FILE} with fail count ${NEPI_FAIL_COUNT}"
 update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
+
+
+
+echo "NEPI STARTING"
+NEPI_START_FUNCTION
+if [[ ! "$?" -eq 0 ]]; then
+    echo " Restart Process Failed. Will Stop Trying"
+    CONFIG_MODE=STOP
+fi
 
 #####################################
 # Run Monitoring and Upadate Loop
