@@ -136,6 +136,16 @@ function dcheck() {
     return 0
 }
 
+
+################## 
+# Fix Folder Owners
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage
+
 echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
 echo "${DOCKER_RUN_COMMAND}"
 eval "$DOCKER_RUN_COMMAND"

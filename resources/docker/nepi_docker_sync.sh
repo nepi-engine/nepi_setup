@@ -165,6 +165,6 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chmod 0750 /mnt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-sudo chmod 0750 /mnt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage

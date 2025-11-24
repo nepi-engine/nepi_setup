@@ -94,7 +94,7 @@ rm_cmd="--rm"
 
 ########
 # Initialize Run Command
-DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user nepi:nepi \
+DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user 0:0 \
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
@@ -154,9 +154,9 @@ function dcheck() {
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chmod 0750 /mnt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-sudo chmod 0750 /mnt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage
 
 
 echo ""

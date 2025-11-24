@@ -132,7 +132,7 @@ if [[ "$NEPI_CONFIG" != "/mnt/nepi_config" && ! -d "$NEPI_CONFIG" ]]; then
     sudo ln -sf $sconfig "/mnt/nepi_config/system_cfg"
 
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-    sudo chmod -R 0755 /mnt/nepi_config
+    sudo chmod -R 0775 /mnt/nepi_config
 fi
 
 ##############################
