@@ -16,6 +16,8 @@
 #echo "########################"
 
 
+
+
 export NEPI_HOME=/home/nepihost
 
 export NEPI_BASE=/opt/nepi
@@ -28,7 +30,15 @@ export NEPI_STORAGE=/mnt/nepi_storage
 NEPI_UTILS_FILE=/home/nepihost/.nepi_bash_utils
 
 source $NEPI_UTILS_FILE
+##########################################
 
+BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+#echo "BASH_FOLDER = ${BASH_FOLDER}"
+CONFIG_USER=$(id -un)
+if [[ "$CONFIG_USER" == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
+USER=$CONFIG_USER
 
 ########################
 # Help Msg Initialization
@@ -398,6 +408,14 @@ export -f nepiconfig
 
 
 
+
+## NEPI build shortcuts
+alias nepibld="
+sudo -v
+source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh"
+
+
+
 HELPN="${HELPN}
 ################################
 ## NEPI Docer Shortcut Functions ##
@@ -424,6 +442,7 @@ nepirestart = Restart NEPI docker service.
 nepistatus = Show the systemctl status for nepi_docker service.
 nepilogs = Show live NEPI Docker service journal file.
 nepireset = Reset all NEPI Config Folders.
+nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
 nepiupdate = Run update process on NEPI Docker config file.
 nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 

@@ -13,14 +13,11 @@
 
 sudo -v
 
-CONFIG_USER=$(id -un)
-if [[ "$CONFIG_USER" == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
-fi
+CONFIG_USER=nepihost
 
-    bfile=/home/${CONFIG_USER}/.bashrc
-    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -28,6 +25,7 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
+
 
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -146,10 +144,10 @@ if [[ -d "${SOURCE_PATH}" ]]; then
 
     if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
         echo "Fix ${CONFIG_USER} bash files"
-        sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+        sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
-    sudo rsync -av --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
     sudo chmod 755 ${SOURCE_PATH}

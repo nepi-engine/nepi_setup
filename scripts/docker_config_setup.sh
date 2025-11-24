@@ -12,12 +12,29 @@
 
 # This file configures a NEPI Docker installation environment
 
-sudo -v
+if [[ -z "$1" ]]; then
+    DEMO_INSTALL=0
+else
+    DEMO_INSTALL=$1
+fi
 
-export CONFIG_USER=$(id -un 1000)
+export CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    export CONFIG_USER=$SUDO_USER
+fi
+
+if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+    exit 1
+fi
+
+sudo -v
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
 
 
 

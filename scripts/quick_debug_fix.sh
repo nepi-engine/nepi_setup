@@ -11,12 +11,30 @@
 
 
 # This file runs setup script debug fixes 
-CONFIG_USER=$(id -un 1000)
+sudo -v
 
-if [[ -z "$SCRIPT_FOLDER" ]]; then
-    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
+if [[ ${CONFIG_USER} != 'nepi' || ${CONFIG_USER} != 'nepihost' ]]; then
+    CONFIG_USER=nepihost
 fi
 
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+    exit 1
+fi
+
+if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
+    exit 1
+fi
 ####################
 # Add your commands to test
 ####################

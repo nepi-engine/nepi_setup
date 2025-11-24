@@ -21,9 +21,9 @@ BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 #echo "BASH_FOLDER = ${BASH_FOLDER}"
 CONFIG_USER=$(id -un)
 if [[ "$CONFIG_USER" == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
+    CONFIG_USER=$SUDO_USER
 fi
-USER=$CONFIG_USER
+
 
 utilsn=""
 

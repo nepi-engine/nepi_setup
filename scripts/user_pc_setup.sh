@@ -20,7 +20,9 @@ echo "########################"
 
 echo "Running Intitialization Scripts"
 
-export CONFIG_USER=$USER # Required User
+sudo -v
+
+CONFIG_USER=$(id -un)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 

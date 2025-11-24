@@ -16,7 +16,7 @@ if ! [ $(id -u) = 0 ]; then
 fi
 
 
-
+sudo -v
 
 CONFIG_USER=nepihost
 
@@ -32,84 +32,15 @@ else
 fi
 
 
-###############################
-# Load NEPI Config File
-NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
-    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
-    source $NEPI_CONFIG_LOAD_FILE
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
-    fi
-else
-    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
-fi
-
-
-echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-echo "Reseting Network Config"
-echo "Got NEPI_IP = ${NEPI_IP}"
-echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
-
-
-enable_dhcp=0
-if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
-    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
-fi
-
-
-if [[ "$enable_dhcp" -eq 1 ]]; then
-    echo "Running ninet"
-    ninet
-    wait
-    sleep 2
-else
-    echo "Running nnet"
-    nnet
-    wait
-fi
 
 
 
-####################################
-# Run NEPI Bash Setup Script
 
-SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
-script_file=nepi_bash_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
-
-
-####################################
-# Run NEPI Folder Setup Script
-SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
-script_file=nepi_folders_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
-
-
-####################################
-# Run NEPI Files Setup Script
-SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
-script_file=nepi_files_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
 
 
 ########################
 # Redefine any nepi_bash_util functions that require without sudo
+######################
 
 function nipa(){
   file=/etc/network/interfaces.d/nepi_static_ip
@@ -426,107 +357,135 @@ function NEPI_START_FUNCTION(){
 }
 
 
-
-########################
-# Service Processes
-
-
+#####################################
+# Start NEPI Docker Service Processes
+#####################################
 
 
+echo ""
 echo "##########################"
 echo "*** NEPI DOCKER SERVICE ***"
 echo "##########################"
-
-
-
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
-
-#echo "Updating Network and Clock"
-#ninet > /dev/null 2>&1
-
-########################
-# Update Docker Config
 echo ""
-echo "Updating Docker Config Files"
-bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
-wait
 
-########################
-# Update Docker Config
+
+# ###############################
+# # Load NEPI Config File
+# # Rebuild NEPI Docker File System From Source If available
+# echo ""
+# echo "---------------------------------"
+# echo "Updating NEPI Docker File System"
+# nepibld
+
+
+###############################
+# Load NEPI Config File
+NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
+    source $NEPI_CONFIG_LOAD_FILE
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
+    fi
+else
+    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
+fi
+
 echo ""
-echo "Updating Docker Config File"
-bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-wait
+echo "---------------------------------"
+echo "Reseting Network Config"
+echo "Got NEPI_IP = ${NEPI_IP}"
+echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
+
+
+enable_dhcp=0
+if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
+    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
+fi
+
+
+if [[ "$enable_dhcp" -eq 1 ]]; then
+    echo "Running ninet"
+    ninet
+    wait
+    sleep 2
+else
+    echo "Running nnet"
+    nnet
+    wait
+fi
 
 
 
-# ####################################
-# # Update NEPI Docker Config Link
-# sfolder=${NEPI_DOCKER_PATH}
-# lfolder=${NEPI_CONFIG}/docker_cfg
-# if [ ! -e "$dfolder" ]; then
-#     mkdir -p $dfolder
-# fi
-# if [ -e "$lfolder" ]; then
-#     rm -r -p $lfolder
-# fi
-# echo "Creating NEPI Docker Config Symlink: source: ${dfolder} target: ${lfolder}"
-# ln -sf $dfolder $lfolder
 
 ####################################
+# Run in Recovery Mode if Needed
+
+nepi_ip=192.168.179.103
+if [[ -n "$NEPI_IP" ]]; then
+    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$NEPI_IP" != "$nepi_ip" ]]; then
+        echo "##########################"
+        echo "Starting Recovery Mode"
+        echo "##########################"
+        echo "Got NEPI_IP = ${NEPI_IP}"
+        echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - 192.168.179.103"
+
+        # Load NEPI FACTORY CONFIG
+        echo "Setting Static IP to 192.168.179.103"
+        # Load NEPI FACTORY CONFIG
+        export NEPI_IP=192.168.179.103
+        LOAD_NEPI_CONFIG=0
+        source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
+        if [[ "$?" -eq 0 ]]; then
+            echo "Sleeping for 10 seconds"
+            sleep 10
+        else
+            echo "Failed to run recovery mode setup"
+        fi
+    fi
+fi
+
+
+
+
+
+
+#####################################
+# Start NEPI
+echo ""
+echo "-----------------------------"
+echo "LAUNCING NEPI CONTAINER"
+
 # Define CONFIG FOLDERS
 NEPI_CONFIG=/mnt/nepi_config
 SETC_FOLDER=${NEPI_CONFIG}/system_cfg/etc
 FETC_FOLDER=${NEPI_CONFIG}/factory_cfg/etc
 RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 
-#####################################
-# Start NEPI Docker Service Processes
-#####################################
-
-####################################
-# Run in Recovery Mode if Needed
-
-nepi_ip=192.168.179.103
-if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$NEPI_IP" != "$nepi_ip" ]]; then
-    echo "##########################"
-    echo "Starting Recovery Mode"
-    echo "##########################"
-    echo "Got NEPI_IP = ${NEPI_IP}"
-    echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - 192.168.179.103"
-
-    # Load NEPI FACTORY CONFIG
-    echo "Setting Static IP to 192.168.179.103"
-    # Load NEPI FACTORY CONFIG
-    export NEPI_IP=192.168.179.103
-    LOAD_NEPI_CONFIG=0
-    source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-    if [[ "$?" -eq 0 ]]; then
-        echo "Sleeping for 10 seconds"
-        sleep 10
-    else
-        echo "Failed to run recovery mode setup"
-    fi
-fi
-
-
-#####################################
-# Initialize Start Variables
-
-
-source ${DOCKER_FOLDER}/load_docker_config.sh
-#source ${SETC_FOLDER}/update_etc_files.sh
-
-
-
-#####################################
-# Start NEPI
-
-
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+
+
+
+########################
+# Update Docker Config
+echo ""
+echo "Syncing Docker Config Files"
+bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
+wait
+
+# ########################
+# # Update Docker Config
+# echo ""
+# echo "Updating Docker Config File"
+# bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+# wait
+
+
+# source ${DOCKER_FOLDER}/load_docker_config.sh
+# #source ${SETC_FOLDER}/update_etc_files.sh
+
 
 
 CONFIG_MODE=SYSTEM
@@ -538,7 +497,7 @@ update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
 
 
 
-echo "NEPI STARTING"
+
 NEPI_START_FUNCTION
 if [[ ! "$?" -eq 0 ]]; then
     echo " Restart Process Failed. Will Stop Trying"
@@ -548,7 +507,7 @@ fi
 #####################################
 # Run Monitoring and Upadate Loop
 
- echo "Starting NEPI Services Monitoring"
+ echo "Starting NEPI Service Monitoring"
  while [[ 1 ]]; do
 
     DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

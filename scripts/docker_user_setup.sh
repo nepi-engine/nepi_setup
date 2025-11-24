@@ -12,29 +12,29 @@
 
 # This file sets up NEPI Docker users
 
-
-if ! [ $(id -u) = 0 ]; then
-   echo 'This scripts must be run as root user. Type "sudo su" and retry'
-   exit 1
+if [[ -z "$1" ]]; then
+    DEMO_INSTALL=0
+else
+    DEMO_INSTALL=$1
 fi
 
-###############
-# Ask Some Questions
+export CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    export CONFIG_USER=$SUDO_USER
+fi
 
-DEMO_INSTALL=1
+if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+    exit 1
+fi
 
-echo "Is this a DEMO installation"
-read -p "$1 ([y]es or [N]o): " choice
-case "$(echo "$choice" | tr '[:upper:]' '[:lower:]')" in
-    y|yes) DEMO_INSTALL=1 ;;
-    *) DEMO_INSTALL=0 ;;
-esac
-
-
+sudo -v
 
 
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
 
 
 ###############

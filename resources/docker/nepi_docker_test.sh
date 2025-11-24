@@ -10,14 +10,11 @@
 ##
 sudo -v
 
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
-fi
+CONFIG_USER=nepihost
 
-    bfile=/home/${CONFIG_USER}/.bashrc
-    ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-    afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -25,6 +22,7 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
+
 
 export NEPI_ACTIVE_FS=nepi_fs_a
 export NEPI_FSA_TAG=nepi-3p2p0_rc6c-20251115-0543-jetson-ubuntu20p04_cuda11p4-20251115-dev1_0552

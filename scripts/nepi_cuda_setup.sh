@@ -13,6 +13,23 @@
 # This file configigues an installed NEPI File System
 
 
+sudo -v
+
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
+
+if [[ "$CONFIG_USER" != 'nepi' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
+    exit 1
+fi
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+
 echo "########################"
 echo "NEPI CUDA SETUP"
 echo "########################"
@@ -22,14 +39,6 @@ source $(dirname $(pwd))/config/load_system_config.sh
 if [ $? -eq 1 ]; then
     echo "Failed to load ${SYSTEM_CONFIG_FILE}"
     exit 1
-fi
-
-# Check User Account
-CONFIG_USER=$NEPI_USER
-if [[ "$USER" != "$CONFIG_USER" ]]; then
-    echo "This script must be run by user account ${CONFIG_USER}."
-    echo "Log in as ${CONFIG_USER} and run again"
-    exit 2
 fi
 
 echo ""

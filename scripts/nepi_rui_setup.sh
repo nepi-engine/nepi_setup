@@ -14,17 +14,26 @@
 
 sudo -v
 
-echo "########################"
-echo "NEPI RUI Setup"
-echo "########################"
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
 
-
-
+if [[ "$CONFIG_USER" != 'nepi' ]]; then
+    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
+    exit 1
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+echo "########################"
+echo "NEPI RUI Setup"
+echo "########################"
+
+
 
 
 
