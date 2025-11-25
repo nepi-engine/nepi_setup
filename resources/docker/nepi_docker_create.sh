@@ -52,7 +52,7 @@ else
 
     if [[ "$NEPI_RUNNING" -eq 1 ]]; then
         echo "Exporting Running NEPI Container ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ID:${NEPI_RUNNING_ID}"
-        bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh clean
+        bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh #clean
         wait
         echo ""
         echo "Updating Docker Config File"
