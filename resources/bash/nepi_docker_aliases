@@ -442,7 +442,6 @@ nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. 
 nepipull = Import a NEPI image from a remote repository given the PULL_URL.
 nepitag = Update the Software Description field in the active NEPI container.
 nepiconfig = Configure NEPI System settings.
-nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file.
 nepienable = Enable NEPI Docker service on next boot.
 nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.

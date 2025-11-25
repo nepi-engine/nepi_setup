@@ -1,40 +1,51 @@
-# NEPI Docker Production Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Production installation on a suitable edge processor.
+# NEPI Docker Build Setup Instructions
+This tutorial will walk you through setting up, configuring, and building a NEPI Docker production container on a suitable edge processor.
 
-**NOTE:** NEPI Docker Production installation will make significant changes to your device's operating system configuration and 
-setup NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, DOCKER ...) that support both local and remote
-real-time management of these services through User Interface and API controls.
+For additional support, see the documentation, tuturials, videos, and community forum available at NEPI.com:
+[NEPI Website](https://www.nepi.com)
 
-If you want to first try a **DEMO installation** with no NEPI managed operating system services, but all of the other functionality,
-see the NEPI DOCKER DEMO SETUP instructions at [here](NEPI_DOCKER_DEMO_SETUP.md)
+################################################################
+### NEPI Docker Host Setup
 
-**If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.**
+Configure an edge processor with a NEPI Docker production installation
 
-**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
-See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
+See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
 
 
-For a detailed tutorials and videos on this process see the "NEPI Docker Production Setup" tutorial under the "NEPI Installation" section at:
+################################################################
+### NEPI Development PC Setup
+
+Setup a Linux Ubuntu PC for NEPI development
+
+
+
+See the NEPI User PC Setup instructions at [here](NEPI_USER_PC_SETUP.md)
+See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
+
+For a detailed tutorial on this process see the "NEPI Docker Host Setup" tutorial under the "NEPI Installation" section at:
 [NEPI Tutorials](https://www.nepi.com/tutorials)
+
+
+Clone the NEPI Engine repo:
+
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
 
 
 
 ################################################################
 ### NEPI Docker User Setup
 
-This step will setup NEPI Docker required user accounts on your device
+This step will create the 'nepihost' user account on your device
 
-Log into a user account on the device with 'Adminstrator' privilages, **or 'nepihost' if exists**.
+Log into a user account on the device with 'Adminstrator' privilages, or 'nepihost' if exists.
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Make sure your system has internet access by running the following command:
 
-    ping -c 1 google.com
-
-Update Git application:
-
-    sudo apt update && sudo apt install -y git
 
 Clone the NEPI Setup repo:
 
@@ -83,28 +94,13 @@ Log into the `nepihost` user using password  'nepi'
 (sudo password is 'nepi')
 
 
-**OPTIONAL:** IF YOU WANT TO HAVE REMOTE NETWORK ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
+**NOTE:** IF YOU WANT TO HAVE REMOTE ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
           USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
           CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
-
-            **NOTE:** If you skip this step, the following folders will be created in your 
-            main File System's partition.  Make sure you have at least 60 GB of free space
-            on that partition using 'df -h' and checking the 'Avail' column for your
-            main File System's patition (i.e. /dev/nvme0n1p1 or something like that)
-
-            **NOTE:** There are many tutorials on line for creating new partitions
-
-            **NOTE:** If you need to reduce the size of your main File System partition to
-            free space for the following new partitions, don't reduce it below 40 GB.
-
-            **NOTE:** If these folders allready exist, you should delete them before creating
-            and mounting the following partitions.
+            1) /mnt/nepi_storage -> 20 GB Minimum - 60 GB Recommended
+            2) /mnt/nepi_config -> 200 MB Minimum
+            3) /mnt/nepi_storage -> 20 GB Minimum - 150+ GB Recommended
             
-             FILE_SYSTEM   LABEL_NAME      MOUNT_POINT       MIN_SIZE     RECOMMENDED_SIZE 
-            1)  ext4      nepi_docker     /mnt/nepi_docker    30 GB           100 GB
-            2)  ext4      nepi_config     /mnt/nepi_config    200 MB          200 MB
-            3)  ext4      nepi_config     /mnt/nepi_storage   30 GB           150+ GB
-
 
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
@@ -184,31 +180,27 @@ After the initialization script completes, you can print the current installed N
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
-    nepistart = Start the NEPI docker container.
-    nepidev = Start the NEPI docker container in a dev mode with no processes running, and an OPTIONAL_RUN_COMMAND.
-    nepistop = Stop the running NEPI docker container.
-    nepilogin = Log into the running NEPI container as user 'nepi'.
-    nepiloginroot = Log into the running NEPI container as user 'root'.
-    nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
-    nepicommit = Commit the running NEPI container.
-    nepiinit = Reset, clear, and import new NEPI Image.
-    nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
-    nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
-    nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
-    nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
+    nepistart = Start the NEPI docker container
+    nepidev = Start the NEPI docker container in a dev mode with no processes running
+    nepistop = Stop the running NEPI docker container
+    nepilogin = Log into the running NEPI container as user 'nepi'
+    nepiloginroot = Log into the running NEPI container as user 'root'
+    nepiswitch = Switch to Inactive NEPI container on next boot or reststat
+    nepicommit = Commit the running NEPI container
+    nepiinit = Reset, clear, and import new NEPI Image
+    nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
     nepipull = Import a NEPI image from a remote repository given the PULL_URL.
-    nepitag = Update the Software Description field in the active NEPI container.
-    nepiconfig = Configure NEPI System settings.
-    nepienable = Enable NEPI Docker service on next boot.
-    nepidisable = Disable NEPI Docker service on next boot.
-    nepirestart = Restart NEPI docker service.
-    nepistatus = Show the systemctl status for nepi_docker service.
-    nepilogs = Show live NEPI Docker service journal file.
-    nepireset = Reset all NEPI Config Folders.
-    nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
-    nepiupdate = Run update process on NEPI Docker config file.
-    nepicreate = Export and Import a new NEPI Docker Image from running container
-    nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings.
+    nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
+    nepiconfig = Configure NEPI System settings
+    nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
+    nepienable = Enable NEPI Docker service on next boot
+    nepidisable = Disable NEPI Docker service on next boot
+    nepirestart = Restart NEPI docker service
+    nepistatus = Show the systemctl status for nepi_docker service
+    nepilogs = Show live NEPI Docker service journal file
+    nepireset = Reset all NEPI Config Folders
+    nepiupdate = Run update process on NEPI Docker config file
+    nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
@@ -261,59 +253,25 @@ Check that your NEPI Container is running after reboot:
 
 ################################################################
 ### NEPI Docker Remote PC Connections
-Setup and test a network connected PC connection to your NEPI device following these instructions.
-
-**NOTE:** For Linux and Mac PC's, run through the NEPI Dev PC Setup first following the
-instructions at [here](NEPI_DEV_PC_SETUP.md). 
-
-**NOTE:** For Windows PC's just follow the instructions provided in the turial links below.
 
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
 
-**NOTE:** If you skipped setting up seperate mounted partitions for the NEPI Folders in the NEPI Docker Config Setup section, 
-then the NEPI Storage and NEPI Config drives will only be available locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
-Learn more about the NEPI Folders content, see this torial for remote access.
+Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
+See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
 
-   Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
-   See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+Configure NEPI through the RUI interface.
+See a tutorial at [NEPI Configuration](https:///)
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
 See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
-################################################################
-### NEPI Software Tutorials
-
-Learn more about using and configuring the NEPI software, as well as building and deploying custom AI Models
-at nepi.com.
-
-See the documentation, tuturials, videos, and community forum available at NEPI.com:
-[NEPI Website](https://www.nepi.com)
 
 
 ################################################################
 ### NEPI Docker Customization
 
-While most NEPI device settings are configurable real-time through the RUI (Resident User Interface),
-you can configure NEPI Docker's custom run-time settings following these instructions:
 
-See NEPI Docker Customization instructions at [here](NEPI_DOCKER_CUSTOMIZE.md)
-
-################################################################
-### NEPI Container Customization
-
-You can update or custimize the NEPI software running in a NEPI Docker Container from source code,
-then export it as a new sharable NEPI Docker Container:
-
-See NEPI Container Customization instructions at [here](NEPI_CONTAINER_CUSTOMIZE.md)
-
-################################################################
-### NEPI Container Build
-
-If you need to build a NEPI Docker Container from scratch for a particular installation environment,
-you can do so starting with a sutable Ubuntu container for the device's environment:
-
-See NEPI Container Build instructions at [here](NEPI_BUILD_CUSTOMIZE.md)
 
 
 ################################################################
@@ -355,18 +313,18 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
 
         # Once Inside the container, start and stop the NEPI software 
 
-            nepistatus
+            nepi_status
 
             # Check if any of the NEPI services are not running in the printout. If any are not running, 
             # you can examine the process messages by running one of the following status commants:
 
-            nepistatus_engine
+            nepi_status_engine
 
-            nepistatus_rui
+            nepi_status_rui
 
-            nepistatus_license
+            nepi_status_license
 
-            nepistatus_ssh
+            nepi_status_ssh
 
             # To bug issues with the core NEPI Engine software process, you can start and stop NEPI Engine to visually look for run-time errors:
 
@@ -382,11 +340,11 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
                 nepibld = Build and deploy all nepi repos and RUI
                 codebld = Build and deploy all nepi repos
                 ruibld = Build and deploy rui system
-                nepistatus = Print running status of all NEPI processes
-                nepistatus_engine = Print tail of nepi_engine process
-                nepistatus_rui = Print tail of nepi_rui process
-                nepistatus_license = Print tail of nepi_license process
-                nepistatus_ssh = Print tail of nepi_ssh process
+                nepi_status = Print running status of all NEPI processes
+                nepi_status_engine = Print tail of nepi_engine process
+                nepi_status_rui = Print tail of nepi_rui process
+                nepi_status_license = Print tail of nepi_license process
+                nepi_status_ssh = Print tail of nepi_ssh process
 
 **********************
 
