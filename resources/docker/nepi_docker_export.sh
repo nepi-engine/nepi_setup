@@ -154,51 +154,60 @@ else
         EXPORT_FILE_PATH=${EXPORT_PATH}/${NEPI_EXPORT_TAG}
         parent_path=$(dirname "$EXPORT_FILE_PATH")
         if [[ ${parent_path:0:1} != '.' && ${parent_path:0:1} != '/' && ! -d "${parent_path}" ]]; then
-            echo "Export Parent Path Not Found ${parent_path}"
+            echo "Export Folder Not Found ${parent_path}"
         else
         
-            EXPORT_FILE_PATH="${EXPORT_FILE_PATH%.*}"
-            TAR_EXPORT_PATH="${EXPORT_FILE_PATH}.tar"
-            if [[ -f $TAR_EXPORT_PATH ]]; then
-                TAR_EXPORT_PATH="${TAR_EXPORT_PATH%.*}"
-                TAR_EXPORT_PATH=$TAR_EXPORT_PATH"-$(date +%S)"
-                TAR_EXPORT_PATH="${TAR_EXPORT_PATH}.tar"
-            fi
-            TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
-            echo "Exporting FS to: ${TAR_EXPORT_PATH}"
-
-            update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_EXPORTING" 1 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$DOCKER_CONFIG_FILE"
-
-
-
-
-            sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
-
-            ########################
-            # Update Docker Config
-            echo ""
-            echo "Updating Docker Config File"
-            bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-            wait
-
-            if [[ "$?" -eq 0 ]]; then
-                echo ""
-                echo "--------------------------"
-                echo "NEPI Image Export Complete"
-                echo ""
-                ls /mnt/nepi_storage/nepi_images
-
-
-
+            avail_space=$(path_space_gb $parent_path)
+            req_space=$(sudo docker ps --size --filter "id=$NEPI_RUNNING_ID" | tail -n1 | tail -n1) && req_space="${req_space##* }" && req_space="${req_space%%'.'*}" && req_space=$((req_space + 1))
+            if [[ "$avial_space" -lt "$req_space" ]]; then
+                echo "--------------------------------------------------------------"
+                echo "FAILED TO EXPORT, NOT ENOUGH SPACE AVAILABLE AT: ${parent_path}"
+                echo "--------------------------------------------------------------"
             else
+
+                EXPORT_FILE_PATH="${EXPORT_FILE_PATH%.*}"
+                TAR_EXPORT_PATH="${EXPORT_FILE_PATH}.tar"
+                if [[ -f $TAR_EXPORT_PATH ]]; then
+                    TAR_EXPORT_PATH="${TAR_EXPORT_PATH%.*}"
+                    TAR_EXPORT_PATH=$TAR_EXPORT_PATH"-$(date +%S)"
+                    TAR_EXPORT_PATH="${TAR_EXPORT_PATH}.tar"
+                fi
+                TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
+                echo "Exporting FS to: ${TAR_EXPORT_PATH}"
+
+                update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
+                update_yaml_value "NEPI_EXPORTING" 1 "$DOCKER_CONFIG_FILE"
+                update_yaml_value "NEPI_EXPORT_FILE" $TAR_EXPORT_PATH "$DOCKER_CONFIG_FILE"
+                update_yaml_value "NEPI_EXPORT_FS" $NEPI_EXPORT_FS "$DOCKER_CONFIG_FILE"
+                update_yaml_value "NEPI_EXPORT_TAG" $NEPI_EXPORT_TAG "$DOCKER_CONFIG_FILE"
+
+
+
+
+                sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
+
+                ########################
+                # Update Docker Config
                 echo ""
-                echo "--------------------------"
-                echo "NEPI Image Failed to Export: ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG}"
-                echo "  to file ${EXPORT_FILE_PATH}"
+                echo "Updating Docker Config File"
+                bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+                wait
+
+                if [[ "$?" -eq 0 ]]; then
+                    echo ""
+                    echo "--------------------------"
+                    echo "NEPI Image Export Complete"
+                    echo ""
+                    ls /mnt/nepi_storage/nepi_images
+
+
+
+                else
+                    echo ""
+                    echo "--------------------------"
+                    echo "NEPI Image Failed to Export: ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG}"
+                    echo "  to file ${EXPORT_FILE_PATH}"
+                fi
             fi
 
         fi

@@ -155,9 +155,9 @@ function ndhcp(){
 export -f ndhcp
 
 
+
 function nclock(){
-  if [[ "$(date +%Y)" -lt 2025 ]]; then
-      
+
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
@@ -171,33 +171,37 @@ function nclock(){
         fi
       fi
 
-      sleep 1
-      #  chronyc -a makestep > /dev/null 2>&1
-      #chronyc waitsync 10
+      if [[ "$(date +%Y)" -lt 2025 ]]; then
+        echo "NTP Server connection detected. Will try to sync clocks"
+        echo "Restarting chrony time service"
+        systemctl restart chronyd
+        sleep 1
+        chronyc -a makestep > /dev/null 2>&1
+      fi
+      # sudo chronyc -a makestep > /dev/null 2>&1
       # echo "Forcing clock sync"
-       chronyc -a makestep > /dev/null 2>&1
+      #sudo chronyc -a makestep > /dev/null 2>&1
 
-      #  echo "Restarting chrony time service"
-      #   systemctl restart chronyd
-
-
-  fi
-
+      # echo "Restarting chrony time service"
+      # sudo systemctl restart chronyd
+    if [[ "$(date +%Y)" -lt 2025 ]]; then
+        echo "Clock Not Updated"
+        return 1
+    else
+        echo "Clock Updated"
+    fi
 }
 export -f nclock
 
 
 function ninet(){
-  
-  if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
-    wait
-    if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
+  echo "Running NEPI Internet Update Processes"
+  ndhcp # Enable DHCP internet connection if needed
+  wait
+  sleep 1
+  if ! nclock; then # Connect to NTP server
       return 1
-    fi
-  else
-    return 1
   fi
-
 }
 export function ninet
 
@@ -414,12 +418,12 @@ fi
 
 if [[ "$enable_dhcp" -eq 1 ]]; then
     echo "Running ninet"
-    ninet
+    ninet  >/dev/null 2>&1
     wait
     sleep 2
 else
     echo "Running nnet"
-    nnet
+    nnet  >/dev/null 2>&1
     wait
 fi
 

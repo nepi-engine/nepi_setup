@@ -21,12 +21,6 @@
 # This file installs the NEPI Engine File System installation
 
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
-    DEMO_INSTALL=$1
-fi
-
 sudo -v
 
 CONFIG_USER=$(id -un)
@@ -124,7 +118,7 @@ UPDATE_NEPI_STORAGE=yes
 echo ""
 echo "-------------------------------"
 echo ""
-echo " Do you want to install NEPI Demo AI Models and Data?"
+echo " Do you want to install NEPI Demo AI Models, Sample Data, and User Config files?"
 UPDATE_NEPI_STORAGE=$(ask_yes_no)
 echo ""
 echo "-------------------------------"
@@ -149,52 +143,29 @@ if [[ "$UPDATE_NEPI_IMAGE" == 'yes' ]]; then
 
 
 
-    HW_TYPE=jetson
-
-    # HW_TYPE=unknown
-    # if is_valid_jetson; then
-    #     HW_TYPE=jetson
-    # elif is_valid_arm64; then
-    #     HW_TYPE=arm64
-    # elif is_valid_amd64; then
-    #     HW_TYPE=amd64
-    # else
-    #     arch_val=$(uname -m)
-    #     echo "Arch ${arch_val} not supported yet"
-    #     exit 1
-    # fi
+    HW_TYPE=unknown
+    if is_valid_jetson; then
+        HW_TYPE=jetson
+    elif is_valid_arm64; then
+        HW_TYPE=arm64
+    elif is_valid_amd64; then
+        HW_TYPE=amd64
+    else
+        arch_val=$(uname -m)
+        echo "Arch ${arch_val} not supported yet"
+        exit 1
+    fi
 
     if [[ "$HW_TYPE" == 'jetson' ]]; then
-        nepi_latest_link='https://www.dropbox.com/scl/fi/jopn4tmak3b8c67hm62yb/nepi-jetson-latest.zip?rlkey=c6709sxktzaxegcymg0hvueak&st=xwd3lrpr&dl=0'
-        nepi_latest_zip=nepi-jetson-latest.zip
+        nepi_latest_link='https://dl.dropbox.com/scl/fo/a3zquicze0g7x00vwgo45/ALAZUgfpkcmqqM7Xxacj8Ok?rlkey=aolze0l4albuczba94bzu0ui7&st=8muurhlu&dl=1'
     else
         echo "No NEPI Image File available for hardware architecture ${arch_val}"
         exit 1    
     fi
 
-
-    if [[ ! -f ${storagenepi_latest_zip_latest_zip} ]]; then
-        sudo wget ${nepi_latest_link} -O ${nepi_latest_zip}
-        if [[ "$?" -ne 0 ]]; then
-            echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
-            sudo rm ${nepi_latest_zip}
-        fi
-    else
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
-    fi
-
-    if [[ -f ${nepi_latest_zip} ]]; then
-        chown -R ${CONFIG_USER}:${CONFIG_USER} ${nepi_latest_zip}
-        unzip -o ${nepi_latest_zip}
-        if [ $? -eq 0 ]; then
-            sudo rm ${nepi_latest_zip} > /dev/null 2>&1
-            success_image=1
-        else
-            echo "Failed to unzip NEPI Image file: ${nepi_latest_zip}"
-            sudo rm ${nepi_latest_zip} > /dev/null 2>&1
-        fi
-    else
-        echo "Failed to download NEPI Image from link: ${nepi_latest}"
+    sudo wget ${nepi_latest_link}
+    if [[ "$?" -ne 0 ]]; then
+            echo "Failed to download NEPI Image from link: ${nepi_latest}"
     fi
 fi
 
@@ -205,7 +176,7 @@ cd $CURRENT_FOLDER
 
 
 ###################################
-Download Storage Extras
+# Download Storage Extras
 
 
 if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
@@ -219,13 +190,8 @@ if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
     cd $NEPI_STORAGE
 
 
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
-    sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
-
-    storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+    storage_latest_link='https://www.dropbox.com/scl/fi/116ktcw07rcjbqxa070vh/nepi_storage-test.zip?rlkey=few0xjaxs4jvhaah18fxq8gcb&st=j6ayg4xu&dl=0'
+    #storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
     storage_latest_zip=nepi_storage-latest.zip
 
 
@@ -253,13 +219,15 @@ if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
         echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
     fi
 
-fi
+    if [[ -f ${storage_latest_zip} ]]; then
+        sudo rm ${storage_latest_zip} > /dev/null 2>&1
+    fi
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/ai_models  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/sample_data  > /dev/null 2>&1
-sudo chown ${CONFIG_USER}:${CONFIG_USER}${NEPI_STORAGE}/nepi_src  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_src/rui_logo_update  > /dev/null 2>&1
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/user_cfg  > /dev/null 2>&1
+    if [[ -f ${storage_latest_zip} ]]; then
+        sudo rm ${storage_latest_zip} > /dev/null 2>&1
+    fi
+
+fi
 
 cd $CURRENT_FOLDER
 

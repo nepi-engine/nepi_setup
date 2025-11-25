@@ -517,7 +517,6 @@ export -f ndhcp
 
 
 function nclock(){
-  if [[ "$(date +%Y)" -lt 2025 ]]; then
       sudo -v
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
@@ -532,33 +531,40 @@ function nclock(){
         fi
       fi
 
-      sleep 1
+      
+     
+      if [[ "$(date +%Y)" -lt 2025 ]]; then
+        echo "NTP Server connection detected. Will try to sync clocks"
+        echo "Restarting chrony time service"
+        sudo systemctl restart chronyd
+        sleep 1
+        sudo chronyc -a makestep > /dev/null 2>&1
+      fi
+      #chronyc waitsync 1
       # sudo chronyc -a makestep > /dev/null 2>&1
-      #chronyc waitsync 10
       # echo "Forcing clock sync"
-      sudo chronyc -a makestep > /dev/null 2>&1
-
-      #  echo "Restarting chrony time service"
-      #  sudo systemctl restart chronyd
+      #sudo chronyc -a makestep > /dev/null 2>&1
 
 
-  fi
-
+    if [[ "$(date +%Y)" -lt 2025 ]]; then
+        echo "Clock Not Updated"
+        return 1
+    else
+        echo "Clock Updated"
+    fi
 }
 export -f nclock
 
 
 function ninet(){
   sudo -v
-  if ndhcp  > /dev/null 2>&1; then # Enable DHCP internet connection if needed
-    wait
-    if ! nclock  > /dev/null 2>&1; then # Connect to NTP server
+  echo "Running NEPI Internet Update Processes"
+  ndhcp # Enable DHCP internet connection if needed
+  wait
+  sleep 1
+  if ! nclock; then # Connect to NTP server
       return 1
-    fi
-  else
-    return 1
   fi
-
 }
 export function ninet
 
@@ -1355,8 +1361,9 @@ export -f get_sw_desc
 
 function cmd_loop() {
   if [[ ! -v "$1" && -n "$1" ]]; then
+    SECONDS=0
     while $1; do 
-      echo ""
+      echo "$SECONDS"
       sleep 1
     done
   else

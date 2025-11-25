@@ -95,11 +95,13 @@ else
         done
     fi
 
-            echo ""
-            echo "--------------------------"
-            echo "NEPI Stop Process Complete"
-            echo ""
-            #dps
+    sudo docker system prune -f
+
+    echo ""
+    echo "--------------------------"
+    echo "NEPI Stop Process Complete"
+    echo ""
+    #dps
 
     update_yaml_value "NEPI_RUNNING" 0 "${DOCKER_CONFIG_FILE}"
     update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
