@@ -135,7 +135,7 @@ Export and Import the new NEPI Docker Image from the running NEPI Container (pas
 **NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
 the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
 
-    nepicreate # OR 'nepiexport clean' to just export the new image without importing back in
+    nepicreate # OR 'nepiexport' to just export the new image without importing back in
 
 
 
