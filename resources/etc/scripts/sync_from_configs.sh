@@ -1,12 +1,20 @@
 #!/bin/bash
 
 ##
-## Copyright (c) 2024 Numurus, LLC <https://www.numurus.com>.
+## Copyright (c) 2024 Numurus <https://www.numurus.com>.
 ##
-## This file is part of nepi-engine
-## (see https://github.com/nepi-engine).
+## This file is part of nepi setup tools (nepi_setup) repo
+## (see https://github.com/nepi-engine/nepi_setup)
 ##
-## License: 3-clause BSD, see https://opensource.org/licenses/BSD-3-Clause
+## License: nepi setup tools are licensed under the "Numurus Software License", 
+## which can be found at: <https://numurus.com/wp-content/uploads/Numurus-Software-License-Terms.pdf>
+##
+## Redistributions in source code must retain this top-level comment block.
+## Plagiarizing this software to sidestep the license obligations is illegal.
+##
+## Contact Information:
+## ====================
+## - mailto:nepi@numurus.com
 ##
 
 # This script syncs from NEPI config folder
@@ -86,10 +94,10 @@ if [[ -d "${SOURCE_PATH}" ]]; then
 
     if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
         echo "Fix ${CONFIG_USER} bash files"
-        sudo rsync -av --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+        sudo rsync -ah --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 
-    sudo rsync -av --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -ah --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
     sudo chmod 755 ${SOURCE_PATH}

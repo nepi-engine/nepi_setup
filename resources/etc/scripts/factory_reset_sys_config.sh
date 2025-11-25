@@ -17,7 +17,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# This script creates a backup of the NEPI Host's original system configuration
+# This script syncs the factory and system config folders to the current etc folder
 sudo -v
 
 CONFIG_USER=$(id -un)
@@ -27,7 +27,6 @@ fi
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     CONFIG_USER=nepihost
 fi
-
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -39,27 +38,26 @@ else
     exit 1
 fi
 
-back_ext=nepi
-overwrite=1
 
-### Backup ETC folder
-folder=/etc
-folder_back=${folder}.${back_ext}
-path_backup $folder $folder_back $overwrite
+ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
-### Backup USR LIB SYSTEMD folder
-folder=/usr/lib/systemd/system
-folder_back=${folder}.${back_ext}
-path_backup $folder $folder_back $overwrite
 
-### Backup RUN SYSTEMD folder
-folder=/run/systemd/system
-folder_back=${folder}.${back_ext}
-path_backup $folder $folder_back $overwrite
+###########################
+## Factory Reset System Config
+SOURCE_PATH=/mnt/nepi_config/factory_cfg
+UPDATE_PATH=/mnt/nepi_config/system_cfg
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ -d "${SOURCE_PATH}" ]]; then
 
-### Backup USR LIB SYSTEMD USER folder
-folder=/usr/lib/systemd/user
-folder_back=${folder}.${back_ext}
-path_backup $folder $folder_back $overwrite
+    sudo rsync -arh --delete ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+    sudo chmod 755 ${SOURCE_PATH}
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+    sudo chmod 755 ${UPDATE_PATH}
+else
+    echo "No Factory Config found at: ${SOURCE_PATH}"
+fi
 
