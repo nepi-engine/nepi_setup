@@ -1,8 +1,14 @@
-# NEPI Docker Host Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker production installation on a suitable edge processor.
+# NEPI Docker Production Setup Instructions
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Production installation on a suitable edge processor.
 
-**NOTE:** NEPI Docker production installation will make significant changes to your device's operating system configuration.  
-If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.
+**NOTE:** NEPI Docker Production installation will make significant changes to your device's operating system configuration and 
+setup NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, DOCKER ...) that support both local and remote
+real-time management of these services through User Interface and API controls.
+
+If you want to first try a **DEMO installation** with no NEPI managed operating system services, but all of the other functionality,
+see the NEPI DOCKER DEMO SETUP instructions at [here](NEPI_DOCKER_DEMO_SETUP.md)
+
+**If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.**
 
 **NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
@@ -18,9 +24,9 @@ For additional support, see the documentation, tuturials, videos, and community 
 ################################################################
 ### NEPI Docker User Setup
 
-This step will create the 'nepihost' user account on your device
+This step will setup NEPI Docker required user accounts on your device
 
-Log into a user account on the device with 'Adminstrator' privilages, or 'nepihost' if exists.
+Log into a user account on the device with 'Adminstrator' privilages, **or 'nepihost' if exists**.
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
@@ -165,27 +171,32 @@ After the initialization script completes, you can print the current installed N
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
-    nepistart = Start the NEPI docker container
-    nepidev = Start the NEPI docker container in a dev mode with no processes running
-    nepistop = Stop the running NEPI docker container
-    nepilogin = Log into the running NEPI container as user 'nepi'
-    nepiloginroot = Log into the running NEPI container as user 'root'
-    nepiswitch = Switch to Inactive NEPI container on next boot or reststat
-    nepicommit = Commit the running NEPI container
-    nepiinit = Reset, clear, and import new NEPI Image
-    nepiimport = Import a NEPI image tar file. Optional: Enter a file name or full file path.
+    nepistart = Start the NEPI docker container.
+    nepidev = Start the NEPI docker container in a dev mode with no processes running, and an OPTIONAL_RUN_COMMAND.
+    nepistop = Stop the running NEPI docker container.
+    nepilogin = Log into the running NEPI container as user 'nepi'.
+    nepiloginroot = Log into the running NEPI container as user 'root'.
+    nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
+    nepicommit = Commit the running NEPI container.
+    nepiinit = Reset, clear, and import new NEPI Image.
+    nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
+    nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
+    nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
+    nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
     nepipull = Import a NEPI image from a remote repository given the PULL_URL.
-    nepiexport = Export the running NEPI container to a tar file. Enter a file name or full file path.
-    nepiconfig = Configure NEPI System settings
-    nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file
-    nepienable = Enable NEPI Docker service on next boot
-    nepidisable = Disable NEPI Docker service on next boot
-    nepirestart = Restart NEPI docker service
-    nepistatus = Show the systemctl status for nepi_docker service
-    nepilogs = Show live NEPI Docker service journal file
-    nepireset = Reset all NEPI Config Folders
-    nepiupdate = Run update process on NEPI Docker config file
-    nepisettings = Print current NEPI DOCKER and SYSTEM configuration settings
+    nepitag = Update the Software Description field in the active NEPI container.
+    nepiconfig = Configure NEPI System settings.
+    nepiupdate = Reconfigure NEPI System settings using the stored System Config settings file.
+    nepienable = Enable NEPI Docker service on next boot.
+    nepidisable = Disable NEPI Docker service on next boot.
+    nepirestart = Restart NEPI docker service.
+    nepistatus = Show the systemctl status for nepi_docker service.
+    nepilogs = Show live NEPI Docker service journal file.
+    nepireset = Reset all NEPI Config Folders.
+    nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
+    nepiupdate = Run update process on NEPI Docker config file.
+    nepicreate = Export and Import a new NEPI Docker Image from running container
+    nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings.
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 

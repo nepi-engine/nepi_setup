@@ -18,10 +18,13 @@ else
     DEMO_INSTALL=$1
 fi
 
-export CONFIG_USER=$(id -un)
+sudo -v
+
+CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
+    CONFIG_USER=$SUDO_USER
 fi
+export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
@@ -29,15 +32,6 @@ if [[ "$CONFIG_USER" != 'nepihost' ]]; then
 fi
 
 sudo -v
-
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
-
-
-
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -130,6 +124,7 @@ sudo apt install htop -y
 sudo apt install ncdu -y
 sudo apt install snap -y
 sudo apt install curl -y
+sudo apt install gparted -y
 
 sudo apt install python3-pip -y
 #sudo apt install usbmount -y
@@ -140,54 +135,57 @@ echo "Installing NEPI required python packages"
 echo "######################################"
 
 
+if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+    ###################################
+    # Install NEPI Managed Services Apps
+    ###################################
 
-###################################
-# Install NEPI Managed Services Apps
-###################################
-
-echo "######################################"
-echo "Installing Hostname Apps"
-echo "######################################"
-sudo apt install hostapd -y # WiFi access point setup
+    echo "######################################"
+    echo "Installing Hostname Apps"
+    echo "######################################"
+    sudo apt install hostapd -y # WiFi access point setup
 
 
-echo "######################################"
-echo "Installing Time Apps"
-echo "######################################"
-echo "Installing NEPI TIME Management Software"
-sudo apt-get install chrony -y
+    echo "######################################"
+    echo "Installing Time Apps"
+    echo "######################################"
+    echo "Installing NEPI TIME Management Software"
+    sudo apt-get install chrony -y
 
-echo "######################################"
-echo "Installing SSH Apps"
-echo "######################################"
+    echo "######################################"
+    echo "Installing SSH Apps"
+    echo "######################################"
 
-echo "Installing NEPI SSH Management Software"
+    echo "Installing NEPI SSH Management Software"
 
-echo "Installing NEPI SSH Management Software"
-#sudo apt install --reinstall openssh-server
+    echo "Installing NEPI SSH Management Software"
+    #sudo apt install --reinstall openssh-server
 
-sudo apt-get remove --purge openssh-server -y
-sudo apt-get autoclean 
-sudo apt-get install --fix-broken -y
-sudo apt-get install openssh-server -y
-if [[ ! -f "/run/sshd" ]]; then
-    sudo mkdir "/run/sshd"
-fi
-sudo chmod 0755 /run/sshd
-sudo chown root:root /run/sshd
+    sudo apt-get remove --purge openssh-server -y
+    sudo apt-get autoclean 
+    sudo apt-get install --fix-broken -y
+    sudo apt-get install openssh-server -y
+    if [[ ! -f "/run/sshd" ]]; then
+        sudo mkdir "/run/sshd"
+    fi
+    sudo chmod 0755 /run/sshd
+    sudo chown root:root /run/sshd
 
-echo "######################################"
-echo "Installing Network Apps"
-echo "######################################"
+    echo "######################################"
+    echo "Installing Network Apps"
+    echo "######################################"
 
-#sudo apt install netplan.io -y
-sudo apt install ifupdown -y
-sudo apt install net-tools -y 
-sudo apt install iproute2 -y
-sudo apt install isc-dhcp-client -y
-sudo apt install wpasupplicant -y
-sudo apt install nmap -y
-sudo apt install gparted -y
+    #sudo apt install netplan.io -y
+    sudo apt install ifupdown -y
+    sudo apt install net-tools -y 
+    sudo apt install iproute2 -y
+    sudo apt install isc-dhcp-client -y
+    sudo apt install wpasupplicant -y
+    sudo apt install nmap -y
+
+
+fi 
+
 
 
 echo "######################################"
@@ -323,6 +321,7 @@ echo "########################"
 
 
 #######
+
 echo ""
 echo "Installing Chromium Browser"
 sudo snap remove --purge chromium
@@ -379,5 +378,7 @@ echo ""
 echo 'NEPI Docker Environment Setup Complete'
 ##################################
 
-echo ""
-echo "*** REBOOT YOUR DEVICE ***"
+if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+    echo ""
+    echo "*** REBOOT YOUR DEVICE ***"
+fi

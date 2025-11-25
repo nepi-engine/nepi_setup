@@ -12,16 +12,26 @@
 
 # This file configures a NEPI Docker installation environment
 
+
 export DEMO_INSTALL=1
-
-export CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
-fi
-
 
 sudo -v
 
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+
+
+if ! is_valid_internet; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+    exit 1
+fi
+
+if ! [ $(id -u) = 0 ]; then
+   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   exit 1
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -42,7 +52,9 @@ if ! source_script $script_path $DEMO_INSTALL; then
     exit 1
 fi
 
+echo "Changing user to 'nepihost'"
 sudo su nepihost
+source /home/nepihost/.bashrc
 
 ####################################
 # Run NEPI Environment Setup Script
@@ -107,9 +119,10 @@ fi
 ####################################
 echo ""
 echo "##################################"
-echo 'NEPI Docker Config Setup Complete'
+echo 'NEPI Docker DEMO Setup Complete'
 echo "##################################"
 echo ""
+
 
 
 ####################################
@@ -197,7 +210,6 @@ fi
 
 # fi
 
-echo ""
-echo "*** REBOOT YOUR DEVICE ***"
+
 
 

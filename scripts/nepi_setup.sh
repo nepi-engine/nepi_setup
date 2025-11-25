@@ -12,6 +12,13 @@
 
 # This file installs the NEPI Engine File System installation
 
+
+if [[ -z "$1" ]]; then
+    DEMO_INSTALL=0
+else
+    DEMO_INSTALL=$1
+fi
+
 sudo -v
 
 CONFIG_USER=$(id -un)
@@ -39,7 +46,6 @@ fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
-
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
@@ -47,28 +53,6 @@ source $NEPI_UTILS_SOURCE
 echo "########################"
 echo "NEPI CONFIG SETUP"
 echo "########################"
-
-
-
-echo "Checking Requirements"
-
-# Check Valid Software
-if command -v yq &>/dev/null; then
-    : # Do nothing here
-elif is_valid_internet; then
-    echo "Installing yq software"
-    sudo add-apt-repository ppa:rmescandon/yq -y
-    sudo apt update
-    sudo apt install yq -y
-fi
-if command -v yq &>/dev/null; then
-    : # Do nothing here
-else
-    echo "EXITING"
-    echo "yq application is not installed"
-    echo "Connect to internet and rerun this script"
-    exit 1
-fi
 
 
 #######################################################################################
@@ -160,7 +144,7 @@ echo "Updating Samba ETC config file"
 if [[ "$CONFIG_USER" == "nepi" ]]; then
     source_file=${SOURCE_ETC_PATH}/samba/smb.conf
 else
-    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf4SERVICES_MANAGED
 fi
 dest_file=/etc/samba/smb.conf
 if [[ -f "$source_file" ]]; then
@@ -168,6 +152,43 @@ if [[ -f "$source_file" ]]; then
 fi
 
 
+
+#################################
+# Update Managed Service Settings
+
+NEPI_INSTALL=DEMO
+SERVICES_MANAGED=0
+if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+    NEPI_INSTALL=PRODUCTION
+    SERVICES_MANAGED=1
+fi
+
+echo "Updating NEPI Config File"
+
+export NEPI_INSTALL=$NEPI_INSTALL
+update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_HOSTNAME=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_HOSTNAME" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_NETWORK=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_NETWORK" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_TIME=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_TIME" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+
+export NEPI_MANAGES_SSH=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_SSH" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SHARE=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_SHARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_SOFTWARE=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_SOFTWARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+export NEPI_MANAGES_DOCKER=$SERVICES_MANAGED
+update_yaml_value "NEPI_MANAGES_DOCKER" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
 
 ################################
 # Update ETC files if systemd is running (Not in Container)
@@ -494,7 +515,6 @@ if [[ -n "$DISPLAY" ]]; then
 
     sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
     sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
-    sudo cp -p ${SOURCE_INSTR_PATH}/NEPI_DOCKER_HOST_SETUP.md /home/${CONFIG_USER}/Desktop/
     sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
 
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}

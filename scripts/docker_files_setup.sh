@@ -19,10 +19,13 @@ else
     DEMO_INSTALL=$1
 fi
 
-export CONFIG_USER=$(id -un)
+sudo -v
+
+CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
+    CONFIG_USER=$SUDO_USER
 fi
+export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"

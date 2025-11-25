@@ -27,15 +27,7 @@
             "name": "nepi-engine · GitHub",
             "type": "url",
             "url": "https://github.com/nepi-engine"
-         }, {
-            "date_added": "13407011326794161",
-            "date_last_used": "0",
-            "guid": "11ae0103-fdea-4828-a321-828cef62319a",
-            "id": "7",
-            "name": "nepi_setup/NEPI_DOCKER_HOST_SETUP.md at main · nepi-engine/nepi_setup · GitHub",
-            "type": "url",
-            "url": "https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_DOCKER_HOST_SETUP.md"
-         } ],
+         }],
          "date_added": "13406483504298536",
          "date_last_used": "0",
          "date_modified": "13407011366721992",

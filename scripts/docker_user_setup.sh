@@ -18,17 +18,19 @@ else
     DEMO_INSTALL=$1
 fi
 
-export CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
-fi
-
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    exit 1
-fi
-
 sudo -v
+
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
+
+
+if ! [ $(id -u) = 0 ]; then
+   echo 'This scripts must be run as root user. Type "sudo su" and retry'
+   exit 1
+fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -428,5 +430,8 @@ echo "########################"
 echo "NEPI User Account Setup Complete"
 echo "########################"
 
-echo ""
-echo "*** REBOOT YOUR DEVICE ***"
+
+if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+    echo ""
+    echo "*** REBOOT YOUR DEVICE ***"
+fi
