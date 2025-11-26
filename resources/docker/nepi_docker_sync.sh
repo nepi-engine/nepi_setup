@@ -148,10 +148,13 @@ fi
 SOURCE_PATH=/home/${CONFIG_USER} 
 UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ -d "${SOURCE_PATH}" ]]; then
-
+if [[ ! -d "${UPDATE_PATH}" ]]; then
+    echo "Creating update folder ${UPDATE_PATH}"
+    sudo mkdir -p $UPDATE_PATH
+    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+else
     if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
-        echo "Fix ${CONFIG_USER} bash files"
+        echo "Update saved bash files ${CONFIG_USER} bash files"
         sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     fi
 

@@ -82,6 +82,18 @@ if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
 fi
 
 
+script_file=nepi_docker_sync.sh
+script_path=$(dirname "${SCRIPT_FOLDER}")/resources/docker/${script_file}
+if [[ -f "$script_path" ]]; then
+	echo ""
+	echo "Running ${script_file} script"
+	source $script_path
+	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
+fi
+
 ####################################
 # Run NEPI Bash Setup Script
 
@@ -97,3 +109,6 @@ else
     echo "Setup script not found ${script_file}"
     exit 1
 fi
+
+
+
