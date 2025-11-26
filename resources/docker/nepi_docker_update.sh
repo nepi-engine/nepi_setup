@@ -281,66 +281,59 @@ else
     ################
     # Update Running NEPI Image
 
+    RUN_FS=''
     RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSA}" | awk '{print $2}'))
     RUN_NAME=${RUN_NAME[0]}
     if [[ -n "$RUN_NAME" ]]; then
-        RUN_ID=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_NAME}" | awk '{print $1}')
-        RUN_TAG="${RUN_NAME#*:}"
+        RUN_FS=$NEPI_FSA
+    else
+        RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
+        RUN_NAME=${RUN_NAME[0]}
+        if [[ -n "$RUN_NAME" ]]; then
+            RUN_FS=$NEPI_FSB
+        fi
+    fi
+
+    if [[ -n "$RUN_FS" ]]; then
+        RUN_ID=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_FS}" | awk '{print $1}')
+        RUN_TAG="${RUN_FS#*:}"
         started_at_str=$(sudo docker inspect --format='{{.State.StartedAt}}' "$RUN_ID")
         
         started_at_human=$(echo "$started_at_str" | sed 's/\..*Z/ /; s/T/ /')
         start_epoch=$(date --date="$started_at_human" "+%s")
         now_epoch=$(date "+%s")
         uptime_seconds=$((now_epoch - START_EPOCH))
-        NEPI_RUNNING_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
+        RUN_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
         size_gb=$(sudo docker ps --size --filter "id=$RUN_ID" | tail -n1 | tail -n1) && size_gb="${size_gb##* }" && size_gb="${size_gb%%'.'*}" && size_gb=$((size_gb + 1))       
-        NEPI_RUNNING_SIZE_GB=$size_gb
+        RUN_SIZE_GB=$size_gb
         #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${CONTAINER_ID}"
         #echo "Updating NEPI Docker Config Runnning Values"
         update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
-        update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_RUNNING_FS" "$RUN_FS" "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_FILE}"
-        update_yaml_value "NEPI_RUNNING_SIZE_GB" $NEPI_RUNNING_SIZE_GB "${DOCKER_CONFIG_FILE}"
-        update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_SIZE_GB" $RUN_SIZE_GB "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_TIME" $RUN_TIME "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
 
     else 
-        RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
-        RUN_NAME=${RUN_NAME[0]}
-        if [[ -n "$RUN_NAME" ]]; then
-            RUN_ID=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_NAME}" | awk '{print $1}')
-            RUN_TAG="${RUN_NAME#*:}"
-            started_at_str=$(sudo docker inspect --format='{{.State.StartedAt}}' "$CONTAINER_ID")
-            started_at_human=$(echo "$started_at_str" | sed 's/\..*Z/ /; s/T/ /')
-            START_EPOCH=$(date --date="$started_at_human" "+%s")
-            now_epoch=$(date "+%s")
-            uptime_seconds=$((now_epoch - START_EPOCH))
-            NEPI_RUNNING_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
-            #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${RUN_ID}"
-            #echo "Updating NEPI Docker Config Runnning Values"
-            update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
-        else
-            #echo "NEPI Container NOT Running"
-            #echo "Updating NEPI Docker Config Runnning Values"
-            update_yaml_value "NEPI_RUNNING" 0 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_RUNNING_FS" "unknown" "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RUNNING_ID" "unknown" "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "0:0:0" "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
-            update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
+       
 
-        fi
+        #echo "NEPI Container NOT Running"
+        #echo "Updating NEPI Docker Config Runnning Values"
+        update_yaml_value "NEPI_RUNNING" 0 "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_RUNNING_FS" "unknown" "$DOCKER_CONFIG_FILE"
+        update_yaml_value "NEPI_RUNNING_TAG" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_ID" "unknown" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_SIZE_GB" 0 "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "0:0:0" "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
 
     fi
+
+  
 
     ##########################
     # Update Active and Inactive FS
@@ -378,6 +371,11 @@ else
     pname="docker export"
     pcount=$(process_count $pname)
     if [[ "$process_count" -eq 0 ]]; then
+        export_file=$(basename $NEPI_EXPORT_PATH)
+        if [[ "$export_file" == 'nepi_export_staging' ]]; then
+            echo "Cleaning up left over nepi_export_staging files"
+            sudo rm $NEPI_EXPORT_PATH
+        fi
         update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_EXPORTING" 0 "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FS_EXPORT" 0 "${DOCKER_CONFIG_FILE}"
