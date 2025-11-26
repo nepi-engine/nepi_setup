@@ -293,12 +293,15 @@ else
         now_epoch=$(date "+%s")
         uptime_seconds=$((now_epoch - START_EPOCH))
         NEPI_RUNNING_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
+        size_gb=$(sudo docker ps --size --filter "id=$RUN_ID" | tail -n1 | tail -n1) && size_gb="${size_gb##* }" && size_gb="${size_gb%%'.'*}" && size_gb=$((size_gb + 1))       
+        NEPI_RUNNING_SIZE_GB=$size_gb
         #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${CONTAINER_ID}"
         #echo "Updating NEPI Docker Config Runnning Values"
         update_yaml_value "NEPI_RUNNING" 1 "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_RUNNING_FS" "$NEPI_FSA" "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_RUNNING_TAG" "$RUN_TAG" "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_FILE}"
+        update_yaml_value "NEPI_RUNNING_SIZE_GB" $NEPI_RUNNING_SIZE_GB "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RUNNING_TIME" $NEPI_RUNNING_TIME "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
@@ -360,8 +363,8 @@ else
 
     ##########################
     # Resetting Import and Export if needed
-    pnmae="docker import"
-    pcount=$(process_count)
+    pname="docker import"
+    pcount=$(process_count $pname)
     if [[ "$process_count" -eq 0 ]]; then
         update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
         update_yaml_value "NEPI_IMPORT_ID" "unknown" "$DOCKER_CONFIG_FILE"
@@ -370,13 +373,17 @@ else
         update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
     fi
 
-    pnmae="docker export"
-    pcount=$(process_count)
+
+    
+    pname="docker export"
+    pcount=$(process_count $pname)
     if [[ "$process_count" -eq 0 ]]; then
         update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_EXPORTING" 0 "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FS_EXPORT" 0 "${DOCKER_CONFIG_FILE}"
     fi
+    avail_space=$(path_space_gb $NEPI_EXPORT_PATH)
+    update_yaml_value "NEPI_EXPORT_SPACE_GB" $avail_space "${DOCKER_CONFIG_FILE}"
 
 
 fi
