@@ -55,7 +55,7 @@ then
 
 ################################################################
 ### NEPI Docker Init Setup
-This section will initialize and test your NEPI Docker solution.  
+This section will initialize and test your NEPI Docker installation.  
 
 Log back into `nepihost` using password 'nepi' 
 
@@ -63,11 +63,21 @@ Check for internet connection
 
     pingi
 
-Run the NEPI Docker storage initialization script (sudo password is now 'nepi'). If prompted enter: `y` or 'yes' :
+
+Run the NEPI Docker Storage initialization script (sudo password is now 'nepi'):
+**NOTE:** This script will download the Demo AI models, AI training scripts, 
+sample data files, and user_configurations to folders in /mnt/nepi_storage.
 
     source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
 
-Initialize NEPI docker image installation by typing:
+Run the NEPI Docker Image initialization script (sudo password is now 'nepi'):
+**NOTE:** This script will download the latest NEPI Docker Image for your system's
+architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
+
+
+    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
+
+Initialize NEPI Docker with an the downloaded NEPI Image:
 
     nepiinit
 

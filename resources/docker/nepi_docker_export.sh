@@ -166,8 +166,10 @@ else
                 avail_space=$(path_space_gb $parent_path)
                 req_space=$(sudo docker ps --size --filter "id=$NEPI_RUNNING_ID" | tail -n1 | tail -n1) && req_space="${req_space##* }" && req_space="${req_space%%'.'*}" && req_space=$((req_space + 1))
                 if [[ "$avial_space" -lt "$req_space" ]]; then
+                    need_space_gb=$((req_space - avail_space))
                     echo "--------------------------------------------------------------"
                     echo "FAILED TO EXPORT, NOT ENOUGH SPACE AVAILABLE AT: ${parent_path}"
+                    echo "Free up ${need_space_gb} GB in that folders partition and try again"
                     echo "--------------------------------------------------------------"
                 else
 

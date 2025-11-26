@@ -18,7 +18,7 @@
 ##
 
 
-# This file installs the NEPI Engine File System installation
+# This file installs the NEPI Storage Demo Files
 
 
 sudo -v
@@ -51,215 +51,134 @@ echo ""
 echo "########################"
 echo "NEPI DOCKER STORAGE INIT"
 echo "########################"
-echo ""
+
+DOCKER_FOLDER=/mnt/nepi_config/docker_cfg
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 
 
-####################################
-# Check NEPI Storage Folder
+if [[ ! -f "$DOCKER_CONFIG_LOAD_FILE" ]]; then
+    echo "Docker Config Load file not found at: ${DOCKER_CONFIG_LOAD_FILE}"
+    echo "Run 'nepiupdate' and try again"
 
-CURRENT_FOLDER=$(pwd)
-NEPI_STORAGE=/mnt/nepi_storage
+else
+    source ${DOCKER_CONFIG_LOAD_FILE}
+    if [[ "$?" -eq 1 ]]; then
+        echo "Failed to load ${DOCKER_CONFIG_FILE}"
 
-if [[ ! -d "$NEPI_STORAGE" ]]; then
-    #echo "Creating NEPI Folder: ${NEPI_STORAGE}"
-    sudo mkdir -p $NEPI_STORAGE
-fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
-
-
-
-if [[ ! -d "$NEPI_STORAGE/nepi_images" ]]; then
-    #echo "Creating NEPI Folder: ${NEPI_STORAGE}/nepi_images"
-    sudo mkdir -p $NEPI_STORAGE/nepi_images
-fi
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
-
-
-####################################
-# Run User Checks
-
-##################
-## NEPI Image Check
-
-success_image=1
-cd $NEPI_STORAGE/nepi_images
-sudo rm ARCHIVE > /dev/null 2>&1
-
-
-# UPDATE_NEPI_IMAGE=yes
-# echo ""
-# tar_files=$(find ./ -name "*.tar")
-# if [[ -n "$tar_files" ]]; then
-#     echo ""
-#     echo "Existing NEPI Image files found"
-#     echo "-------------------------------"
-#     find ./ -name "*.tar"
-#     echo "-------------------------------"
-#     echo ""
-#     echo " Do you want to download the Latest NEPI Image?"
-#     echo ""
-#     UPDATE_NEPI_IMAGE=$(ask_yes_no)
-#     echo ""
-# fi
-
-
-
-cd $CURRENT_FOLDER
-
-
-##################
-## NEPI Storage Check
-
-success_storage=1
-cd $NEPI_STORAGE
-
-sudo rm ARCHIVE > /dev/null 2>&1
-
-# UPDATE_NEPI_STORAGE=yes
-# echo ""
-# echo "-------------------------------"
-# echo ""
-# echo " Do you want to install NEPI Demo AI Models, Sample Data, and User Config files?"
-# UPDATE_NEPI_STORAGE=$(ask_yes_no)
-# echo ""
-# echo "-------------------------------"
-
-
-cd $CURRENT_FOLDER
-
-
-
-
-####################################
-# Download NEPI Image
-
-if [[ "$UPDATE_NEPI_IMAGE" == 'yes' ]]; then
-    echo ""
-    echo "########################"
-    echo "Installing the Latest NEPI Image"
-    echo ""
-
-    success_image=0
-    cd $NEPI_STORAGE/nepi_images
-
-
-
-    HW_TYPE=unknown
-    if is_valid_jetson; then
-        HW_TYPE=jetson
-    elif is_valid_arm64; then
-        HW_TYPE=arm64
-    elif is_valid_amd64; then
-        HW_TYPE=amd64
+    elif [[ ! -n "$NEPI_IMPORT_PATH" ]]; then
+        echo "NEPI Docker Import Folder not defined in variable NEPI_IMPORT_PATH"
+        echo "Run 'nepiconfig' to fix path location and try again"
+    elif [[ ! -d "$NEPI_IMPORT_PATH" ]]; then
+        echo "NEPI Docker Import Folder not found at ${NEPI_IMPORT_PATH}"
+        echo "Create import path or run 'nepiconfig' to fix path location and try again"
     else
-        arch_val=$(uname -m)
-        echo "Arch ${arch_val} not supported yet"
-        exit 1
-    fi
 
-    if [[ "$HW_TYPE" == 'jetson' ]]; then
-        nepi_latest_link='https://dl.dropbox.com/scl/fo/a3zquicze0g7x00vwgo45/ALAZUgfpkcmqqM7Xxacj8Ok?rlkey=aolze0l4albuczba94bzu0ui7&st=8muurhlu&dl=1'
-    else
-        echo "No NEPI Image File available for hardware architecture ${arch_val}"
-        exit 1    
-    fi
-
-    sudo wget ${nepi_latest_link}
-    if [[ "$?" -ne 0 ]]; then
-            echo "Failed to download NEPI Image from link: ${nepi_latest}"
-    fi
-fi
-
-
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
-
-cd $CURRENT_FOLDER
-
-
-###################################
-# Download Storage Extras
-
-
-if [[ "$UPDATE_NEPI_STORAGE" == 'yes' ]]; then
-
-    echo ""
-    echo "########################"
-    echo "Initializing NEPI Storage Folders"
-    echo ""
-
-    success_storage=0
-    cd $NEPI_STORAGE
-
-
-    storage_latest_link='https://www.dropbox.com/scl/fi/116ktcw07rcjbqxa070vh/nepi_storage-test.zip?rlkey=few0xjaxs4jvhaah18fxq8gcb&st=j6ayg4xu&dl=0'
-    #storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
-    storage_latest_zip=nepi_storage-latest.zip
-
-
-    if [[ ! -f ${storage_latest_zip} ]]; then
-        sudo wget ${storage_latest_link} -O ${storage_latest_zip}
-        if [[ "$?" -ne 0 ]]; then
-            echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
-            sudo rm ${storage_latest_zip}
-        fi
-    else
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
-    fi
-
-    if [[ -f ${storage_latest_zip} ]]; then
-        echo "Unzipping storage folders from ${storage_latest_zip}"
-        sudo unzip -o -q $storage_latest_zip
-        if [ $? -eq 0 ]; then
-            #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-            success_storage=1
+        CURRENT_FOLDER=$(pwd)
+        ####################################
+        # Check NEPI Storage Folder
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_IMPORT_PATH
+        avail_space_gb=$(path_space_gb $NEPI_IMPORT_PATH)
+        req_space_gb=1
+        if [[ "$avail_space_gb" -lt "$req_space_gb" ]]; then
+            need_space_gb=$((req_space_gb - avail_space_gb))
+            echo "Not enough free drive space in import path ${NEPI_IMPORT_PATH}"
+            echo "Free up ${need_space_gb} GB in that folders partition and try again"
         else
-            echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
-            #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+
+
+            echo ""
+            echo "#################################"
+            echo "Initializing NEPI Storage Folders"
+            echo "#################################"
+            echo ""
+
+            ###################################
+            # Download Storage Extras
+            NEPI_STORAGE=/mnt/nepi_storage
+            sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
+
+
+            success_storage=0
+            cd $NEPI_STORAGE
+            sudo rm ARCHIVE > /dev/null 2>&1
+
+
+            storage_latest_link='https://www.dropbox.com/scl/fi/116ktcw07rcjbqxa070vh/nepi_storage-test.zip?rlkey=few0xjaxs4jvhaah18fxq8gcb&st=j6ayg4xu&dl=0' 
+            #storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+            storage_latest_zip=nepi_storage-latest.zip
+
+
+            if [[ ! -f ${storage_latest_zip} ]]; then
+                sudo wget ${storage_latest_link} -O ${storage_latest_zip}
+                if [[ "$?" -ne 0 ]]; then
+                    echo ""
+                    echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
+                    echo ""
+                    sudo rm ${storage_latest_zip}
+                fi
+            else
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
+            fi
+
+            if [[ -f ${storage_latest_zip} ]]; then
+                echo ""
+                echo "Unzipping storage folders from ${storage_latest_zip}"
+                echo ""
+                sudo unzip -o -q $storage_latest_zip
+                if [ $? -eq 0 ]; then
+                    #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+                    success_storage=1
+                else
+                    echo ""
+                    echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
+                    echo ""
+                    #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+                fi
+            else
+                echo ""
+                echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
+                echo ""
+            fi
+
+            if [[ -f ${storage_latest_zip} ]]; then
+                sudo rm ${storage_latest_zip} > /dev/null 2>&1
+            fi
+
+            if [[ -f ${storage_latest_zip} ]]; then
+                sudo rm ${storage_latest_zip} > /dev/null 2>&1
+            fi
+
+            sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
+
+            cd $CURRENT_FOLDER
+
+
+
+
+
+            ####################################
+            # Cleanup
+
+            if [[ "$success_storage" -eq 0 ]]; then
+                echo "NEPI Storage Setup Failed"
+                echo ""
+            else
+                echo ""
+                echo "NEPI Storage Setup Succeeded"
+            fi
+
+
+            if [[ "$success_storage" -eq 1 && "$success_image" -eq 1 ]]; then
+                echo ""
+                echo "########################"
+                echo "NEPI Docker Storage Init Complete"
+                echo "########################"
+                echo ""
+
+            fi
         fi
-    else
-        echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
     fi
-
-    if [[ -f ${storage_latest_zip} ]]; then
-        sudo rm ${storage_latest_zip} > /dev/null 2>&1
-    fi
-
-    if [[ -f ${storage_latest_zip} ]]; then
-        sudo rm ${storage_latest_zip} > /dev/null 2>&1
-    fi
-
-fi
-
-cd $CURRENT_FOLDER
-
-
-
-
-
-####################################
-# Cleanup
-
-
-if [[ "$success_image" -eq 0 ]]; then
-    echo ""
-    echo "NEPI Image Install Failed"
-    echo ""
-fi
-
-if [[ "$success_storage" -eq 0 ]]; then
-    echo ""
-    echo "NEPI Storage Install Failed"
-    echo ""
-fi
-
-
-if [[ "$success_storage" -eq 1 && "$success_image" -eq 1 ]]; then
-    echo ""
-    echo "########################"
-    echo "NEPI Docker Storage Init Complete"
-    echo "########################"
-    echo ""
-
 fi
 
 
