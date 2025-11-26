@@ -215,7 +215,7 @@ After the initialization script completes, you can print the current installed N
     nepilogs = Show live NEPI Docker service journal file.
     nepireset = Reset all NEPI Config Folders.
     nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
-    nepiupdate = Run update process on NEPI Docker config file.
+    nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
     nepicreate = Export and Import a new NEPI Docker Image from running container
     nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings.
 
