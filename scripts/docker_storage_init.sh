@@ -83,25 +83,26 @@ sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_STORAGE}/nepi_images
 
 success_image=1
 cd $NEPI_STORAGE/nepi_images
-sudo rm *.zip > /dev/null 2>&1
 sudo rm ARCHIVE > /dev/null 2>&1
 
 
-UPDATE_NEPI_IMAGE=yes
-echo ""
-tar_files=$(find ./ -name "*.tar")
-if [[ -n "$tar_files" ]]; then
-    echo ""
-    echo "Existing NEPI Image files found"
-    echo "-------------------------------"
-    find ./ -name "*.tar"
-    echo "-------------------------------"
-    echo ""
-    echo " Do you want to download the Latest NEPI Image?"
-    echo ""
-    UPDATE_NEPI_IMAGE=$(ask_yes_no)
-    echo ""
-fi
+# UPDATE_NEPI_IMAGE=yes
+# echo ""
+# tar_files=$(find ./ -name "*.tar")
+# if [[ -n "$tar_files" ]]; then
+#     echo ""
+#     echo "Existing NEPI Image files found"
+#     echo "-------------------------------"
+#     find ./ -name "*.tar"
+#     echo "-------------------------------"
+#     echo ""
+#     echo " Do you want to download the Latest NEPI Image?"
+#     echo ""
+#     UPDATE_NEPI_IMAGE=$(ask_yes_no)
+#     echo ""
+# fi
+
+
 
 cd $CURRENT_FOLDER
 
@@ -114,14 +115,14 @@ cd $NEPI_STORAGE
 
 sudo rm ARCHIVE > /dev/null 2>&1
 
-UPDATE_NEPI_STORAGE=yes
-echo ""
-echo "-------------------------------"
-echo ""
-echo " Do you want to install NEPI Demo AI Models, Sample Data, and User Config files?"
-UPDATE_NEPI_STORAGE=$(ask_yes_no)
-echo ""
-echo "-------------------------------"
+# UPDATE_NEPI_STORAGE=yes
+# echo ""
+# echo "-------------------------------"
+# echo ""
+# echo " Do you want to install NEPI Demo AI Models, Sample Data, and User Config files?"
+# UPDATE_NEPI_STORAGE=$(ask_yes_no)
+# echo ""
+# echo "-------------------------------"
 
 
 cd $CURRENT_FOLDER

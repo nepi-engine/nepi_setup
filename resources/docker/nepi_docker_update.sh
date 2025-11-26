@@ -371,10 +371,10 @@ else
     pname="docker export"
     pcount=$(process_count $pname)
     if [[ "$process_count" -eq 0 ]]; then
-        export_file=$(basename $NEPI_EXPORT_PATH)
-        if [[ "$export_file" == 'nepi_export_staging' ]]; then
-            echo "Cleaning up left over nepi_export_staging files"
-            sudo rm $NEPI_EXPORT_PATH
+        export_file=${NEPI_EXPORT_PATH}/nepi_export_staging
+        if [[ -f "$export_file" ]]; then
+            echo "Cleaning up left over nepi_export_staging file"
+            sudo rm $export_file
         fi
         update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_EXPORTING" 0 "${DOCKER_CONFIG_FILE}"

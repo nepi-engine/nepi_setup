@@ -46,7 +46,11 @@ CONFIG_USER=$(id -un)
 if [[ "$CONFIG_USER" == 'root' ]]; then
     CONFIG_USER="$(id -un 1000)"
 fi
-USER=$CONFIG_USER
+
+if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
+  CONFIG_USER=nepihost
+fi
+export CONFIG_USER=$CONFIG_USER
 
 ########################
 # Help Msg Initialization
@@ -57,7 +61,7 @@ HELPN="${UTILSN}"
 ###################################
 # NEPI DEV Util Functions
 ###################################
-export SOURCE_FOLDER=/home/${USER}/nepi_engine_ws
+export SOURCE_FOLDER=/home/${CONFIG_USER}/nepi_engine_ws
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
@@ -349,11 +353,6 @@ function nepiconfig(){
 }
 export -f nepiconfig
 
-function nepiupdate(){
-  sudo -v
-  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
-}
-export -f nepiupdate
 
 function nepistatus(){
   sudo -v
@@ -400,6 +399,43 @@ export -f nepirestart
 
 function nepiupdate() {
   sudo -v
+  ####################################
+  # Run NEPI Bash Setup Script
+
+  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  script_file=nepi_bash_setup.sh
+  script_path=${SCRIPT_FOLDER}/${script_file}
+  if ! source_script $script_path; then
+      script_error=$?
+      echo "Script ${script_path} failed with error ${script_error}"
+      exit 1
+  fi
+
+
+  ####################################
+  # Run NEPI Folder Setup Script
+  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  script_file=nepi_folders_setup.sh
+  script_path=${SCRIPT_FOLDER}/${script_file}
+  if ! source_script $script_path; then
+      script_error=$?
+      echo "Script ${script_path} failed with error ${script_error}"
+      exit 1
+  fi
+
+
+  ####################################
+  # Run NEPI Files Setup Script
+  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  script_file=nepi_files_setup.sh
+  script_path=${SCRIPT_FOLDER}/${script_file}
+  if ! source_script $script_path; then
+      script_error=$?
+      echo "Script ${script_path} failed with error ${script_error}"
+      exit 1
+  fi
+
+
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_update.sh
 }
 export -f nepiupdate
@@ -457,7 +493,7 @@ nepistatus = Show the systemctl status for nepi_docker service.
 nepilogs = Show live NEPI Docker service journal file.
 nepireset = Reset all NEPI Config Folders.
 nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
-nepiupdate = Run update process on NEPI Docker config file.
+nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
 nepicreate = Export and Import a new NEPI Docker Image from running container
 nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 
@@ -547,7 +583,7 @@ alias scfg="cd $SCFG"
 alias ucfg="cd $UCFG"
 
 
-export NSETUP="/home/${USER}/nepi_setup/scripts"
+export NSETUP="/home/${CONFIG_USER}/nepi_setup/scripts"
 alias nsetup="cd ${NSETUP}"
 
 export NDSETUP="/mnt/nepi_config/docker_cfg"
@@ -577,7 +613,7 @@ fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/factory_cfg
 ucfg = /mnt/nepi_storage/user_cfg
 
-nsetup = /home/${USER}/nepi_setup/scripts
+nsetup = /home/${CONFIG_USER}/nepi_setup/scripts
 ndsetup = /mnt/nepi_config/docker_config
 
 nfw = Show Installed NEPI FW Version"
