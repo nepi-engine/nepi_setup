@@ -635,7 +635,7 @@ function update_text_value(){
     if grep -q "$KEY" "$FILE"; then
       sed -i "/^$KEY/c\\$UPDATE" "$FILE"
     else
-      echo "$UPDATE" | sudo tee -a $FILE
+      echo -e "$UPDATE" | sudo tee -a $FILE
     fi
   else
     echo "File not found ${FILE}"
@@ -796,13 +796,13 @@ export -f sync_yaml_files
 
 function load_yaml_file(){
     config_file=$1
-    echo $config_file
+    #echo $config_file
     if [ -f "$config_file" ]; then
     
       success=0
       eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $config_file)"  #2>/dev/null"
       eval "$eval_cmd"
-
+      
       for entry in $load_vals; do
          export ${entry}
       done

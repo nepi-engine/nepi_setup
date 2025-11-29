@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d3", DRIVERS=="usb", RUN+="/sbin/modprobe usbserial vendor=0x1a86 product=0x55d3"

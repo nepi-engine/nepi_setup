@@ -32,6 +32,7 @@ import yaml
 print_list=[]
 def read_yaml_2_dict(file_path):
     dict_from_file = dict()
+    dict_return=dict()
     if os.path.exists(file_path):
         try:
             with open(file_path) as f:
@@ -39,10 +40,25 @@ def read_yaml_2_dict(file_path):
         except Exception as e:
            pass
         if dict_from_file is None:
-           print_list.append("success=-1")
+           print_list.append("success=-2")
+        else:
+            for key in dict_from_file.keys():
+                
+                if isinstance(dict_from_file[key], dict) == False:
+                    dict_return[key] = dict_from_file[key]
+                else:
+                    dict_level2=dict_from_file[key]
+                    for subkey2 in dict_level2.keys():
+                        if isinstance(dict_level2[subkey2], dict) == False:
+                            dict_return[subkey2] = dict_level2[subkey2]
+                        else:
+                            dict_level3=dict_from_file[key][subkey2]
+                            for subkey3 in dict_level2.keys.subkey2():
+                                if isinstance(dict_level3[subkey3], dict) == False:
+                                    dict_return[subkey3] = dict_level3[subkey3]
     else:
-       print_list.append("success=-2")
-    return dict_from_file
+       print_list.append("success=-3")
+    return dict_return
 
 if len(sys.argv) > 1:
     YAML_FILE = sys.argv[1]
@@ -56,10 +72,10 @@ if len(sys.argv) > 1:
                 print_list.append(print_string)
             print_list.append("success=1")
         else:
-            print_list.append("success=-3")
+            print_list.append("success=-4")
     
 else:
-    print_list.append("success=0")
+    print_list.append("success=-1")
 
 print_string="\'"
 for entry in print_list:
