@@ -15,13 +15,26 @@ sudo gpasswd --add ${USER} dialout
 # STANDARD_BUAD_RATES = [110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
 sudo ls
 export TEST_PORT=USB0
-sudo stty -F /dev/tty${TEST_PORT} 115200
+stty -F /dev/tty${TEST_PORT} icanon
+sudo stty -F /dev/tty${TEST_PORT} 9600
 sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
+
+
+export TEST_PORT=ACM0
+stty -F /dev/tty${TEST_PORT} icanon
+sudo stty -F /dev/tty${TEST_PORT} 9600
+sudo stty -F /dev/tty${TEST_PORT} -echo
+stty -F /dev/tty${TEST_PORT}
+echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
+
+
+
 
 sudo ls
 export TEST_PORT=TCU0
+stty -F /dev/tty${TEST_PORT} icanon
 sudo chmod 666 /dev/tty${TEST_PORT}
 sudo stty -F /dev/tty${TEST_PORT} 115200
 sudo stty -F /dev/tty${TEST_PORT} -echo
@@ -29,6 +42,7 @@ stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
 export TEST_PORT=THS0
+stty -F /dev/tty${TEST_PORT} icanon
 sudo chmod 666 /dev/tty${TEST_PORT}
 sudo stty -F /dev/tty${TEST_PORT} 115200
 sudo stty -F /dev/tty${TEST_PORT} -echo
@@ -38,6 +52,7 @@ echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
 sudo ls
 export TEST_PORT=THS0
+stty -F /dev/tty${TEST_PORT} icanon
 sudo stty -F /dev/tty${TEST_PORT} 9600
 sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
@@ -53,6 +68,10 @@ sudo chmod 666 /dev/tty${TEST_PORT}
 sudo cat /dev/tty${TEST_PORT}
 
 export TEST_PORT=USB0
+sudo chmod 666 /dev/tty${TEST_PORT}
+sudo cat /dev/tty${TEST_PORT}
+
+export TEST_PORT=ACM0
 sudo chmod 666 /dev/tty${TEST_PORT}
 sudo cat /dev/tty${TEST_PORT}
 
@@ -135,3 +154,42 @@ AMMF0000W
 echo -e '$AMMF0000W/r/n' > /dev/tty${TEST_PORT}
 
 echo -e '$BMSP0009W/r/n' > /dev/tty${TEST_PORT}
+
+
+
+
+#Light
+#SN:
+echo -e '&ADSN0000R/r/n' > /dev/tty${TEST_PORT}
+
+echo -e '!AGSP0000R/r/n' > /dev/tty${TEST_PORT}
+
+!AGSP0000R
+
+&ALIN0070W
+#temp:
+echo -e '&ADTM0003R/r/n' > /dev/tty${TEST_PORT}
+
+#intensity
+echo -e '&ALIN0070W/r/n' > /dev/tty${TEST_PORT}
+
+echo -e '&ALIN0000R/r/n' > /dev/tty${TEST_PORT}
+
+
+
+#on
+echo -e '&ALON0000W/r/n' > /dev/tty${TEST_PORT}
+
+
+#off
+echo -e '&ALOF0000W/r/n' > /dev/tty${TEST_PORT}
+
+
+
+
+
+echo -e '&ALMX0100W/r/n' > /dev/tty${TEST_PORT}
+
+
+echo -e '&ALMX0000R/r/n' > /dev/tty${TEST_PORT}
+

@@ -96,7 +96,7 @@ if [[ "$?" -eq 0 ]]; then
         if [[ "$NEPI_ALIAS_IPS" != "NONE" ]]; then
             echo "Updating Alias IP Addresses"
             position=1
-            alias_name=${NEPI_ALIAS_IPS}":"${position}
+            alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 
 
             sudo echo 'auto '${alias_name} | sudo tee -a $file
