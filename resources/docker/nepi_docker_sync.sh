@@ -54,8 +54,8 @@ sudo chmod 0750 /mnt/nepi_storage
 
 # Sync to docker_cfg
 
-SOURCE_PATH=/mnt/nepi_config/docker_cfg
-UPDATE_PATH=/opt/nepi/docker_cfg
+SOURCE_PATH=/opt/nepi/docker_cfg
+UPDATE_PATH=/mnt/nepi_config/docker_cfg
 
 SOURCE_FILE=${SOURCE_PATH}/nepi_docker_config.yaml
 UPDATE_FILE=${UPDATE_PATH}/nepi_docker_config.yaml
@@ -72,7 +72,7 @@ else
     
     sudo rsync -ar --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -ar --exclude='nepi_docker_config.yaml'${SOURCE_PATH}/ ${UPDATE_PATH}/
     
 
 fi
@@ -108,7 +108,7 @@ else
 
     sudo rsync -ar --exclude='nepi_system_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
     sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    sudo rsync -ar --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 fi
 

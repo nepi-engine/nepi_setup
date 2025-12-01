@@ -72,6 +72,19 @@ echo ''
 ## Pull and Run Base Image
 
 
+##########################
+NEPI_ARCH=unknown
+if is_valid_jetson; then
+    NEPI_ARCH=jetson
+elif is_valid_arm64; then
+    NEPI_ARCH=arm64
+elif is_valid_amd64; then
+    NEPI_ARCH=amd64
+else
+    arch_val=$(uname -m)
+    echo "Arch ${arch_val} not supported yet"
+    exit 1
+fi
 
 #base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
 base_image=ultralytics/ultralytics:latest-jetson-jetpack5
