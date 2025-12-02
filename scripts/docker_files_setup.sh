@@ -68,7 +68,7 @@ NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
 SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
 UPDATE_PATH=/opt/nepi/docker_cfg
 
-echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
+echo "Updating NEPI Config Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
 if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
 
     if [[ ! -d "$UPDATE_PATH" ]]; then

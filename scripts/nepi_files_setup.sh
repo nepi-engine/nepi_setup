@@ -123,6 +123,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${NEPI_ETC_PATH}
 if [ ! -e "$NEPI_SYS_CONFIG_FILE" ] || [ ! -s "$NEPI_SYS_CONFIG_FILE" ]; then
     sudo cp -p $SOURCE_SYS_CONFIG_FILE $NEPI_SYS_CONFIG_FILE
 fi
+
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_SYS_CONFIG_FILE}
 
 
@@ -163,39 +164,6 @@ if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
     sudo chmod +x ${UPDATE_PATH}/*
 fi
-
-
-################
-# Update NEPI System Config Files
-
-echo "Updating NEPI Config File Settings"
-
-source $NEPI_SYS_CONFIG_LOAD
-if [[ "$?" -ne 0 ]]; then
-    echo "Failed to find load config file at: ${NEPI_SYS_CONFIG_LOAD}"
-    exit 1
-fi
-
-# min_docker_gb=$((NEPI_GB_CONTAINER * 3))
-
-# check_drive=/mnt/nepi_config/docker_cfg
-# check_space=$min_docker_gb
-# if is_space_avail_gb $check_drive $check_space; then
-#     if [[ "$NEPI_AB_FS" -nq 1 ]]; then
-#         echo "Would you like to enable NEPI AB Backup/Recovery file system support"
-#         enable_ab=$(ask_yes_no)
-#         if [[ "$enable_ab" == 'yes' ]]; then
-#             export NEPI_AB_FS=1
-#         else
-#             export NEPI_AB_FS=0
-#         fi
-#     fi
-# fi
-
-# if [[ -z $NEPI_AB_FS ]]; then
-#     NEPI_AB_FS=0
-# fi
-# update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS $NEPI_DOCKER_CONFIG_FILE
 
 
 #######################################################################################

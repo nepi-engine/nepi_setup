@@ -17,7 +17,9 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# This script syncs to NEPI Docker files and folders
+# This script syncs to NEPI Docker files and folders 
+# First from /opt/nepi to /mnt/nepi_config
+# Then back from /mnt/nepi_config to /opt/nepi
 
 sudo -v
 
@@ -56,117 +58,98 @@ sudo chmod 0750 /mnt/nepi_storage
 
 SOURCE_PATH=/opt/nepi/docker_cfg
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
+CONFIG_FILENAME=nepi_docker_config.yaml
 
-SOURCE_FILE=${SOURCE_PATH}/nepi_docker_config.yaml
-UPDATE_FILE=${UPDATE_PATH}/nepi_docker_config.yaml
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${SOURCE_PATH}" ]]; then
-    sudo rsync -ar $UPDATE_FILE $SOURCE_FILE
-else
+sync_yaml_files $SOURCE_PATH $UPDATE_PATH 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-    if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
-        echo "Fix ${SOURCE_PATH} file"
-        sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    fi
-    
-    sudo rsync -ar --exclude='nepi_docker_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -ar --exclude='nepi_docker_config.yaml'${SOURCE_PATH}/ ${UPDATE_PATH}/
-    
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
-fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-    sudo chmod 755 ${SOURCE_PATH}
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-    sudo chmod 755 ${UPDATE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 
 #############
 # Sync Config Folders
 
-SOURCE_PATH=/mnt/nepi_config/system_cfg/etc
-UPDATE_PATH=/opt/nepi/system_cfg/etc
+SOURCE_PATH=/opt/nepi/system_cfg/etc
+UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
+CONFIG_FILENAME=nepi_system_config.yaml
 
-SOURCE_FILE=${SOURCE_PATH}/nepi_system_config.yaml
-UPDATE_FILE=${UPDATE_PATH}/nepi_system_config.yaml
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "$SOURCE_PATH" && -d "$UPDATE_PATH" ]]; then
-    sudo rsync -ar $UPDATE_FILE $SOURCE_FILE
-else
+sync_yaml_files $SOURCE_PATH $UPDATE_PATH 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-    if [[ ! -d "$UPDATE_PATH" ]]; then
-        sudo mkdir -p $UPDATE_PATH
-    fi
-    if [ ! -e "$SOURCE_FILE" ] || [ ! -s "$SOURCE_FILE" ]; then
-        echo "Fix ${SOURCE_PATH} file"
-        sudo rsync ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    fi
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
-    sudo rsync -ar --exclude='nepi_system_config.yaml' ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-    sudo rsync -ar --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
 
-fi
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-    sudo chmod 755 ${SOURCE_PATH}
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-    sudo chmod 755 ${UPDATE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 ######################################
 ## Sync License Files
 
 SOURCE_PATH=/mnt/nepi_storage/license
 UPDATE_PATH=/opt/nepi/license
+
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ -d "${SOURCE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+fi
 
-    sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-    fix_folder ${UPDATE_PATH} 775 
-
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+if [[ -d "${UPDATE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
 fi
 
 
-SOURCE_PATH=/opt/nepi/license
-UPDATE_PATH=/mnt/nepi_storage/license
-echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ -d "${SOURCE_PATH}" ]]; then
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
 
-    sudo rsync -arh ${SOURCE_PATH}/ ${UPDATE_PATH}/
-    fix_folder ${UPDATE_PATH} 775 
-
-fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 
 ######################################
 ## Sync Bash Files
+
 SOURCE_PATH=/home/${CONFIG_USER} 
 UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
+
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ ! -d "${UPDATE_PATH}" ]]; then
-    echo "Creating update folder ${UPDATE_PATH}"
-    sudo mkdir -p $UPDATE_PATH
+if [[ -d "${SOURCE_PATH}" ]]; then
     sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
-else
-    if [ ! -e "$bfile" ] || [ ! -s "$bfile" ]; then
-        echo "Update saved bash files ${CONFIG_USER} bash files"
-        sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
-    fi
-
-    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-    sudo chmod 755 ${SOURCE_PATH}
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-    sudo chmod 755 ${UPDATE_PATH}
-
 fi
+
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+if [[ -d "${UPDATE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+fi
+
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+
 
 
 ################## 
