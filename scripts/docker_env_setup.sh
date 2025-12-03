@@ -197,6 +197,7 @@ if [[ "$DEMO_INSTALL" -eq 0 ]]; then
     sudo apt install isc-dhcp-client -y
     sudo apt install wpasupplicant -y
     sudo apt install nmap -y
+    sudo apt install trash-cli -y
 
 
 fi 
