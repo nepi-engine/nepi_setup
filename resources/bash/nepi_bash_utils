@@ -759,9 +759,9 @@ function sync_yaml_files(){
     SOURCE_FILE=$1
     TARGET_FILE=$2
     REPLACE_ENTRIES=0
-    if [[ -v "$3" ]]; then
-      REPLACE_ENTRIES=$3
-    fi
+    # if [[ -v "$3" ]]; then
+    #   REPLACE_ENTRIES=$3
+    # fi
 
     if [[ ! -f "$SOURCE_FILE" ]]; then
         echo "Source file does not exist: ${SOURCE_FILE}"
@@ -769,7 +769,9 @@ function sync_yaml_files(){
     fi
 
     if [[ ! -f "$TARGET_FILE" ]]; then
+        echo "Targetr file does not exist: ${TARGET_FILE}"
         target_path=$(dirname $TARGET_FILE)
+        
         if fix_path $target_path; then
             sudo cp $SOURCE_FILE $TARGET_FILE
             fix_path $TARGET_FILE
@@ -1141,65 +1143,6 @@ function select_file_from_folder() {
 }
 export -f select_file_from_folder
 
-function sync_to_config_folder() {
-    if [[ -n "$1" && -n "$2" ]]; then
-
-        source_config_path=$1
-        source_etc_path=${source_config_path}/etc
-        source_sys_config_file=${source_etc_path}/nepi_system_config.yaml
-
-        if [[ "$2" == 'nepi_cfg' ]]; then
-            update_config_path=/opt/nepi
-            update_etc_path=${update_config_path}/etc
-            update_scripts_path=${update_etc_path}/scripts
-            update_config_file=${update_etc_path}/nepi_system_config.yaml
-        else
-            update_folder=$2
-            update_config_path=/mnt/nepi_config/${2}
-            update_etc_path=${update_config_path}/etc
-            update_scripts_path=${update_etc_path}/scripts
-            update_config_file=${update_etc_path}/nepi_system_config.yaml
-        fi
-        
-        echo "Syncing NEPI Config Folder from ${source_etc_path} to  ${update_etc_path} "
-
-        if [[ ! -d "$update_etc_path" ]]; then
-            sudo mkdir -p $update_etc_path
-        fi
-
-          if is_nepi_path $update_etc_path; then
-            config_user=$(id -un 1000)
-            sudo chown ${config_user}:${config_user} $update_etc_path
-          else
-            echo "Update path is not a valid NEPI path: ${update_etc_path}"
-            return 1
-          fi
-
-        # Update from dest
-        if is_nepi_path $source_config_path; then
-            ################
-            SOURCE_PATH=$source_etc_path
-            UPDATE_PATH=$update_etc_path
-
-            sudo rsync -arh --exclude='nepi_system_config.yaml' ${SOURCE_PATH}/ ${UPDATE_PATH}/
-
-      
-            ############
-
-            if [[ ! -f "$update_config_file" ]]; then
-                sudo cp -p $source_sys_config_file $update_config_file
-            fi
-
-            SOURCE_PATH=${source_sys_config_file}
-            UPDATE_PATH=${update_config_file}
-            echo "Syncing NEPI System Config File from ${SOURCE_PATH} to ${UPDATE_PATH}"
-            sync_yaml_files $SOURCE_PATH $UPDATE_PATH
-
-        fi
-    fi
-}
-export -f sync_to_config_folder
-
 function run_script(){
   if [[ ! -v "$1" && -n "$1" ]]; then
     script_path=$1
@@ -1401,7 +1344,6 @@ path_space_gb = Echos available GB space for SOURCE_PATH. Echos 0 if path not va
 path_size_kb = Echos size of path (file or folder) in KB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
-sync_to_config_folder = Sync CONFIG_FOLDER_NAME from /opt/nepi config folders
 run_script = Uses 'bash' to run script at provided SCRIPT_PATH
 source_script = Uses 'source' to run script at provided SCRIPT_PATH, with an optional SCRIPT_OPTION passed to script
 process_count = Echos number of processes running for provide PROCESS_NAME

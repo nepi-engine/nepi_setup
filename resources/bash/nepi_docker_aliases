@@ -384,11 +384,6 @@ function nepidisable(){
 }
 export -f nepidisable
 
-function nepireset(){
-  sudo -v
-  bash /opt/nepi/etc/scripts/sync_to_configs.sh
-}
-export -f nepireset
 
 
 function nepirestart(){
@@ -491,7 +486,6 @@ nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.
 nepistatus = Show the systemctl status for nepi_docker service.
 nepilogs = Show live NEPI Docker service journal file.
-nepireset = Reset all NEPI Config Folders.
 nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
 nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
 nepicreate = Export and Import a new NEPI Docker Image from running container

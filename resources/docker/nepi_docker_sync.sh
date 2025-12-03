@@ -38,9 +38,6 @@ fi
 
 
 
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-
 ################## 
 # Fix Folder Owners
 echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
@@ -51,12 +48,48 @@ sudo chmod 0750 /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
 sudo chmod 0750 /mnt/nepi_storage
 
+
+
+
+
+#############################
+echo ""
+echo "Updating System Files and Folders"
+
+#############################
+# Sync System Config ETC Files and Folders
+
+# Sync from /mnt/nepi_config/system_cfg/etc first
+
+SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
+UPDATE_PATH=/opt/nepi/etc
+CONFIG_FILENAME=nepi_system_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+
+
 #############################
 # Sync Docker Config folders
 
-# Sync to docker_cfg
+# Synce from /opt/nepi first
 
-SOURCE_PATH=/opt/nepi/docker_cfg
+SOURCE_PATH=/opt/nepi/docker
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
 CONFIG_FILENAME=nepi_docker_config.yaml
 
@@ -64,7 +97,7 @@ SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-sync_yaml_files $SOURCE_PATH $UPDATE_PATH 
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
@@ -78,29 +111,6 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 755 ${UPDATE_PATH}
 
 
-#############
-# Sync Config Folders
-
-SOURCE_PATH=/opt/nepi/system_cfg/etc
-UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
-CONFIG_FILENAME=nepi_system_config.yaml
-
-SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
-UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
-
-echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-sync_yaml_files $SOURCE_PATH $UPDATE_PATH 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
-
-echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
-
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
-
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
 
 ######################################
 ## Sync License Files

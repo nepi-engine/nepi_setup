@@ -17,59 +17,55 @@
 ## - mailto:nepi@numurus.com
 ##
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
-source $LICENSE_CHECK_FILE
-if [[ "$?" -ne 0 ]]; then
-    exit 1
-fi
 
-
-# This file configures a NEPI Docker installation Files and Folders
-
-
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
-    DEMO_INSTALL=$1
-fi
+# This script syncs the /opt/nepi folders with system wide folders
 
 sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+    CONFIG_USER="$(id -un 1000)"
 fi
-export CONFIG_USER=$CONFIG_USER
+if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
+    CONFIG_USER=nepihost
+fi
 
-if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
+bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
 
-sudo -v
+
+################## 
+# Fix Folder Owners
+echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0750 /mnt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0750 /mnt/nepi_storage
 
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
 
 
 
+#############################
 echo ""
-echo "########################"
-echo "NEPI Docker Files SETUP"
-echo "########################"
-echo ""
+echo "Updating System Files and Folders"
 
+#############################
+# Sync System Config ETC Files and Folders
 
-############
-echo ""
-echo "Updating NEPI Config Folders"
+# Sync from /opt/nepi/etc first
 
-SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
-UPDATE_PATH=/opt/nepi/etc
+SOURCE_PATH=/opt/nepi/etc
+UPDATE_PATH=/mnt/nepi_config/system_cfg/etc 
 CONFIG_FILENAME=nepi_system_config.yaml
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
@@ -90,11 +86,13 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 755 ${UPDATE_PATH}
 
 
-#############################
-echo ""
-echo "Updating Docker Config Files and Folders"
 
-SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+#############################
+# Sync Docker Config folders
+
+# Synce from /mnt/nepi_config/docker_cfg first
+
+SOURCE_PATH=/mnt/nepi_config/docker_cfg
 UPDATE_PATH=/opt/nepi/docker
 CONFIG_FILENAME=nepi_docker_config.yaml
 
@@ -117,45 +115,22 @@ sudo chmod 755 ${UPDATE_PATH}
 
 
 
+######################################
+## Sync License Files
 
-
-#############################
-echo ""
-echo "Updating System Config Files and Folders"
-
-script_file=nepi_system_sync.sh
-script_path=$(dirname "${SCRIPT_FOLDER}")/resources/etc/scripts/${script_file}
-if [[ -f "$script_path" ]]; then
-	echo ""
-	echo "Running ${script_file} script"
-	source $script_path
-	wait
-else
-    echo "Setup script not found ${script_file}"
-    exit 1
-fi
-
-
-
-#############################
-echo ""
-echo "Updating Factory Config Files and Folders"
-
-SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
-UPDATE_PATH=/mnt/nepi_config/factory_cfg/etc 
-CONFIG_FILENAME=nepi_system_config.yaml
-
-
-SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
-UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+SOURCE_PATH=/mnt/nepi_storage/license
+UPDATE_PATH=/opt/nepi/license
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+if [[ -d "${SOURCE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+fi
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
+if [[ -d "${UPDATE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+fi
+
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 755 ${SOURCE_PATH}
@@ -163,8 +138,38 @@ sudo chmod 755 ${SOURCE_PATH}
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 755 ${UPDATE_PATH}
 
-echo ""
-echo "########################"
-echo "NEPI Files Setup Complete"
-echo "########################"
-echo ""
+
+######################################
+## Sync Bash Files
+
+SOURCE_PATH=/home/${CONFIG_USER} 
+UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ -d "${SOURCE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+fi
+
+echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+if [[ -d "${UPDATE_PATH}" ]]; then
+    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+fi
+
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+
+
+
+################## 
+# Fix Folder Owners
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+sudo chmod 0775 /opt/nepi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chmod 0775 /mnt/nepi_config
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chmod 0775 /mnt/nepi_storage

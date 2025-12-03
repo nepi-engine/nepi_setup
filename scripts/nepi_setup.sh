@@ -159,7 +159,7 @@ echo "Updating Samba ETC config file"
 if [[ "$CONFIG_USER" == "nepi" ]]; then
     source_file=${SOURCE_ETC_PATH}/samba/smb.conf
 else
-    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf4SERVICES_MANAGED
+    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
 fi
 dest_file=/etc/samba/smb.conf
 if [[ -f "$source_file" ]]; then
@@ -489,18 +489,20 @@ echo "########################"
 echo "Syncing Config Files and Folders"
 echo "########################"
 echo ""
-############
-# Update Config Folders
 
-source_config_path=/mnt/nepi_config/system_cfg
-sync_to_config_folder $source_config_path 'factory_cfg' 
-sync_to_config_folder $source_config_path 'recovery_cfg' 
 
-source /opt/nepi/etc/scripts/sync_from_configs.sh
-source /opt/nepi/docker_cfg/nepi_docker_sync.sh
+echo ""
+config_update_file=/mnt/nepi_config/system_cfg/etc/scripts/nepi_system_sync.sh
+echo "Running System Config Sync Script: ${config_update_file}"
+source $config_update_file
 
 
 
+
+
+# #####################################
+# UPDATE USER DESKTOP FILES
+# #####################################
 
 if [[ -n "$DISPLAY" ]]; then
 

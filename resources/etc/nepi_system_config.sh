@@ -528,10 +528,6 @@ source ${SYSTEM_ETC_PATH}/update_etc_files.sh
 #     exit 1
 # fi
 
-####################
-echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
-source /opt/nepi/etc/scripts/sync_from_configs.sh
-
 
 
 #################
@@ -547,20 +543,9 @@ if is_valid_ipv4 $NEPI_IP; then
 fi
 
 
-# ###############
-# echo ""
-# echo "########################"
-# echo "Fixing NEPI Folder Permissions"
-# echo "########################"
-# echo ""
-# echo "Fixing Permissions in: /mnt/nepi_config"
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-# sudo chmod 775 /mnt/nepi_config
-
-# echo "Fixing Permissions in: /mnt/nepi_storage"
-# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-# sudo chmod -R 775 /mnt/nepi_storage
-
+####################
+echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
+source ${SYSTEM_ETC_PATH}/scripts/nepi_system_sync.sh
 
 
 echo ""

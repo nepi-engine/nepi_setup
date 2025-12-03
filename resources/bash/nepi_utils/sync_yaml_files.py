@@ -68,18 +68,19 @@ if len(sys.argv) > 1:
             if os.path.exists(TARGET_YAML_FILE) == True:
                 success=1
         else:
-            if len(sys.argv) > 2:
-                if sys.argv[2] == 1:
-                    overwrite = True
+            # if len(sys.argv) > 3:
+            #     if sys.argv[3] == 1:
+            #         overwrite = True
 
             [success,source_dict] = read_yaml_2_dict(SOURCE_YAML_FILE)
             if success == 1:
                 success = 0
                 [success,target_dict] = read_yaml_2_dict(TARGET_YAML_FILE)
-                for key in source_dict.keys():
-                    if key not in target_dict.keys() or overwrite == True:
-                        target_dict[key] = source_dict[key]
-                success=write_dict_to_file(target_dict, TARGET_YAML_FILE)
+                if success == 1:
+                    for key in source_dict.keys():
+                        if key not in target_dict.keys():
+                            target_dict[key] = source_dict[key]
+                    success=write_dict_to_file(target_dict, TARGET_YAML_FILE)
 
     else:
          print("Source file not found " + str(SOURCE_YAML_FILE))

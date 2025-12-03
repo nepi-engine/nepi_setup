@@ -84,7 +84,7 @@ fi
 ####################################
 # Run NEPI Files Setup Script
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=nepi_files_setup.sh
+script_file=docker_files_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
@@ -111,37 +111,37 @@ echo 'NEPI Docker Config Setup Complete'
 echo "##################################"
 echo ""
 
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
-    echo ""
-    echo "*** REBOOT YOUR DEVICE ***"
-    echo ""
-fi
-####################################
-# RUN CHECKS
-####################################
+# if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+#     echo ""
+#     echo "*** REBOOT YOUR DEVICE ***"
+#     echo ""
+# fi
+# ####################################
+# # RUN CHECKS
+# ####################################
 
-dev_docker=$(stat -c '%d' "$NEPI_DOCKER")
-dev_storage=$(stat -c '%d' "$NEPI_STORAGE")
+# dev_docker=$(stat -c '%d' "$NEPI_DOCKER")
+# dev_storage=$(stat -c '%d' "$NEPI_STORAGE")
 
-min_docker_gb=$((NEPI_GB_CONTAINER * 1))
-min_storage_gb=$NEPI_GB_CONTAINER
-min_total=$((min_docker_gb + min_storage_gb))
-
-
-check_failed=0
-
-check_drive=$NEPI_DOCKER
-check_space=$min_docker_gb
-if ! is_space_avail_gb $check_drive $check_space; then
-    check_failed=1
-fi
+# min_docker_gb=$((NEPI_GB_CONTAINER * 1))
+# min_storage_gb=$NEPI_GB_CONTAINER
+# min_total=$((min_docker_gb + min_storage_gb))
 
 
-check_drive=$NEPI_STORAGE
-check_space=$min_storage_gb
-if ! is_space_avail_gb $check_drive $check_space; then
-    check_failed=1
-fi
+# check_failed=0
+
+# check_drive=$NEPI_DOCKER
+# check_space=$min_docker_gb
+# if ! is_space_avail_gb $check_drive $check_space; then
+#     check_failed=1
+# fi
+
+
+# check_drive=$NEPI_STORAGE
+# check_space=$min_storage_gb
+# if ! is_space_avail_gb $check_drive $check_space; then
+#     check_failed=1
+# fi
 
  
 # echo ""

@@ -72,6 +72,7 @@ if [[ "$ETC_FOLDER" != "$CONFIG_FOLDER" ]]; then
 fi
 
 
+
 #############################
 # Load the config file
 
@@ -88,18 +89,13 @@ fi
 
 
 
-#############################
-# Sync from factory and system configs if needed
-#############################
-if [[ "$ETC_SAVE" -eq 1 ]]; then
-    load_config=0
-    source ${ETC_FOLDER}/scripts/sync_from_configs.sh $load_config
-fi
-
 
 #######################################
 ### Initialize NEPI Docker Service Files
 #######################################
+
+
+
 LOAD_NEPI_CONFIG=0
 
 

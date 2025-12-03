@@ -57,6 +57,7 @@ else
         ########################
         # Start Processes
         EXPORT_PATH=$NEPI_EXPORT_PATH
+        sudo rm -r /mnt/nepi_storage/.Trash*
         export_clean=0
         if [[ -z "$1" ]]; then
             if [[ "$1" == 'clean' ]]; then
@@ -142,6 +143,9 @@ else
                     NEW_DESC=$(clean_tag_string $NEW_DESC)
                     NEW_DESC="-${NEPI_DESC}"
                 fi
+                if [[ "$NEW_DESC" == '-' ]]; then
+                    NEW_DESC=''
+                fi
 
         
         
@@ -163,15 +167,16 @@ else
                 echo "Export Folder Not Found ${parent_path}"
             else
             
-                avail_space=$(path_space_gb $parent_path)
-                req_space=$(sudo docker ps --size --filter "id=$NEPI_RUNNING_ID" | tail -n1 | tail -n1) && req_space="${req_space##* }" && req_space="${req_space%%'.'*}" && req_space=$((req_space + 1))
-                if [[ "$avial_space" -lt "$req_space" ]]; then
-                    need_space_gb=$((req_space - avail_space))
-                    echo "--------------------------------------------------------------"
-                    echo "FAILED TO EXPORT, NOT ENOUGH SPACE AVAILABLE AT: ${parent_path}"
-                    echo "Free up ${need_space_gb} GB in that folders partition and try again"
-                    echo "--------------------------------------------------------------"
-                else
+                # avail_space=$(path_space_gb $parent_path)
+                # req_space=$(sudo docker ps --size --filter "id=$NEPI_RUNNING_ID" | tail -n1 | tail -n1) && req_space="${req_space##* }" && req_space="${req_space%%'.'*}" && req_space=$((req_space + 1))
+                # if [[ "$avial_space" -lt "$req_space" ]]; then
+                #     need_space_gb=$((req_space - avail_space))
+                #     echo "--------------------------------------------------------------"
+                #     echo "FAILED TO EXPORT, NOT ENOUGH SPACE AVAILABLE AT: ${parent_path}"
+                #     echo "Free up ${need_space_gb} GB in that folders partition and try again"
+                #     echo "--------------------------------------------------------------"
+                # else
+
 
                     EXPORT_FILE_PATH="${EXPORT_FILE_PATH%.*}"
                     TAR_EXPORT_PATH="${EXPORT_FILE_PATH}.tar"
@@ -192,7 +197,7 @@ else
 
 
 
-                    sudo docker export $NEPI_RUNNING_ID > $TAR_EXPORT_PATH
+                    sudo docker export $NEPI_RUNNING_ID > $EXPORT_STAGING_PATH
                     if [[ "$?" -eq 0 ]]; then
                         echo "Export succeeded"
                         echo "Moving Image to: ${TAR_EXPORT_PATH}"
@@ -220,7 +225,7 @@ else
                     echo "Updating Docker Config File"
                     bash ${DOCKER_FOLDER}/nepi_docker_update.sh
                     wait
-                fi
+                #fi
 
             fi
         else
