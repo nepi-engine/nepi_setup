@@ -27,10 +27,10 @@ fi
 
 # This file installs NEPI Docker required software packages
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
+if [[ -v "$1" ]]; then
     DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
 fi
 
 sudo -v

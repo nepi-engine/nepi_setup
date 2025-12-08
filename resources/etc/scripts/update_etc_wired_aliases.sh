@@ -76,51 +76,52 @@ if [[ "$?" -eq 0 ]]; then
         ###########################
         # NEPI_HOST UPDATE PROCESS
 
-        # Update Network ETC Files
-        if is_valid_ipv4 $NEPI_ALIAS_IPS; then
-
-            if ping $NEPI_ALIAS_IPS; then
-                : # Do Nothing
-            else
-                echo "Adding Network alias ips in interfaces.d"
-                sudo ip addr add ${NEPI_ALIAS_IPS}'/24' dev ${NEPI_WIRED_INTERFACE}
-
-
-                file=/etc/network/interfaces.d/nepi_user_ip_aliases
-                echo "Updating Alias IP file ${file}"
-                if [ ! -f "${file}" ]; then
-                    if [ -d "/etc/network/interfaces.d" ]; then
-                        sudo mkdir -p /etc/network/interfaces.d
-                    fi
-                    sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
-                fi
+        # file=/etc/network/interfaces.d/nepi_user_ip_aliases
+        # echo "Updating Alias IP file ${file}"
+        # if [ ! -f "${file}" ]; then
+        #     if [ -d "/etc/network/interfaces.d" ]; then
+        #         sudo mkdir -p /etc/network/interfaces.d
+        #     fi
+        #     sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
+        # fi
+        # sudo chmod +x -R /etc/network/interfaces.d
+        # sudo bash -c "cat /dev/null > $file"
 
 
-                sudo chmod +x -R /etc/network/interfaces.d
-                sudo bash -c "cat /dev/null > $file"
-                if [[ "$NEPI_ALIAS_IPS" != "NONE" ]]; then
-                    echo "Updating Alias IP Addresses"
+
+        for i in {1..10}; do
+            alias_ip_var="NEPI_ALIAS_IP_"${i}
+            ip_address="${!alias_ip_var}"
+            #echo "Checking alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
+            if is_valid_ipv4 $ip_address >/dev/null 2>&1; then
+                #echo "Pinging alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
+                if ping -c 1 $ip_address >/dev/null 2>&1; then
+                    : # DO NOTHING
+                    #echo "Pinged alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
+                else
+                    echo "Adding Network alias ips in interfaces.d"
+                    sudo ip addr add ${ip_address}'/24' dev ${NEPI_WIRED_INTERFACE}
+
+                    echo "Updating Alias IP Address"
                     position=1
                     alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 
 
-                    sudo echo 'auto '${alias_name} | sudo tee -a $file
-                    sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
-                    sudo echo '    address '${NEPI_ALIAS_IPS}'/24' | sudo tee -a $file
-                    sudo echo '' | sudo tee -a $file
+                    # sudo echo 'auto '${alias_name} | sudo tee -a $file
+                    # sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
+                    # sudo echo '    address '${ip_address}'/24' | sudo tee -a $file
+                    # sudo echo '' | sudo tee -a $file
                 fi
 
-                echo "Updated Alias IP file"
-                sudo bash -c "cat $file"
-
-                sudo systemctl restart networking
-
-
-           
             fi
 
-        fi 
-    
+
+        done
+
+        # echo "Updated Alias IP file"
+        # sudo bash -c "cat $file"
+        # sudo systemctl restart networking
+
             
     fi    
 

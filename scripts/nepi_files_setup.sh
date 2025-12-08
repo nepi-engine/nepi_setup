@@ -59,9 +59,10 @@ source $NEPI_UTILS_SOURCE
 
 echo ""
 echo "########################"
-echo "NEPI Docker Files SETUP"
+echo "NEPI Files SETUP"
 echo "########################"
 echo ""
+
 
 
 ############
@@ -79,16 +80,29 @@ echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
-
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 755 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 755 ${UPDATE_PATH}
 
+
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
+CONFIG_FILENAME=nepi_system_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 #############################
 echo ""
@@ -105,10 +119,6 @@ echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
-
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 755 ${SOURCE_PATH}
 
@@ -116,6 +126,22 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 755 ${UPDATE_PATH}
 
 
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+UPDATE_PATH=/mnt/nepi_config/docker_cfg
+CONFIG_FILENAME=nepi_docker_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 
 
@@ -153,9 +179,6 @@ echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 755 ${SOURCE_PATH}

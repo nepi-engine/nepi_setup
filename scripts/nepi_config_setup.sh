@@ -187,7 +187,7 @@ fi
 
 # fi
 
-echo ""
-echo "*** REBOOT YOUR DEVICE ***"
+# echo ""
+# echo "*** REBOOT YOUR DEVICE ***"
 
 

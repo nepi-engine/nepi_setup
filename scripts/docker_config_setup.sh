@@ -27,10 +27,10 @@ fi
 
 # This file configures a NEPI Docker installation environment
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
+if [[ -v "$1" ]]; then
     DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
 fi
 
 sudo -v
@@ -60,7 +60,7 @@ source $NEPI_UTILS_SOURCE
 # Run NEPI Bash Setup Script
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=nepi_bash_setup.sh
+script_file=docker_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
@@ -69,10 +69,11 @@ if ! source_script $script_path; then
 fi
 
 
+
 ####################################
 # Run NEPI Folder Setup Script
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=nepi_folders_setup.sh
+script_file=docker_folders_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?

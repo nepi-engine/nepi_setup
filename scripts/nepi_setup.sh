@@ -28,10 +28,10 @@ fi
 # This file installs the NEPI Engine File System installation
 
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
+if [[ -v "$1" ]]; then
     DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
 fi
 
 sudo -v
@@ -161,6 +161,7 @@ if [[ "$CONFIG_USER" == "nepi" ]]; then
 else
     source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
 fi
+
 dest_file=/etc/samba/smb.conf
 if [[ -f "$source_file" ]]; then
     sudo cp -d $source_file $dest_file
@@ -171,12 +172,17 @@ fi
 #################################
 # Update Managed Service Settings
 
-NEPI_INSTALL=DEMO
-SERVICES_MANAGED=0
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
-    NEPI_INSTALL=PRODUCTION
-    SERVICES_MANAGED=1
+NEPI_INSTALL=PRODUCTION
+SERVICES_MANAGED=1
+echo $DEMO_INTSTALL
+if [[ "$DEMO_INSTALL" -eq 1 ]]; then
+    NEPI_INSTALL=DEMO
+    SERVICES_MANAGED=0
 fi
+
+echo "Running setup in ${NEPI_INSTALL} mode"
+
+NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 
 echo "Updating NEPI Config File"
 
@@ -257,14 +263,63 @@ if [[ "$?" -eq 0 ]]; then
            
         echo "Enabling ifupdown Networking Service"
         sudo systemctl enable networking
-        sudo systemctl start networking
         wait
         sleep 2
+
+        echo "Updating Wired Static IP Addresses"
         source /opt/nepi/etc/scripts/update_etc_wired_static.sh
 
 
-    fi
+        echo "Updating Wired Alias IP Addresses"
+        NETMASK_CIDR="24" # e.g., 24 for 255.255.255.0
+        ###########################
+        # NEPI_HOST UPDATE PROCESS
 
+        file=/etc/network/interfaces.d/nepi_user_ip_aliases
+        echo "Updating Alias IP file ${file}"
+        if [ ! -f "${file}" ]; then
+            if [ -d "/etc/network/interfaces.d" ]; then
+                sudo mkdir -p /etc/network/interfaces.d
+            fi
+            sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
+        fi
+        sudo chmod +x -R /etc/network/interfaces.d
+        sudo bash -c "cat /dev/null > $file"
+
+
+
+        for i in {1..10}; do
+
+            alias_ip_var="NEPI_ALIAS_IP_"${i}
+            ip_address="${!alias_ip_var}"
+            #echo "Checking alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
+            if is_valid_ipv4 $ip_address >/dev/null 2>&1; then
+                if ping -c 1 $ip_address >/dev/null 2>&1; then
+                    : #DO NOTHING
+                else
+                    echo "Adding Network alias ips in interfaces.d"
+                    sudo ip addr add ${ip_address}'/24' dev ${NEPI_WIRED_INTERFACE}
+
+                    echo "Updating Alias IP Address"
+                    position=$i
+                    alias_name=${NEPI_WIRED_INTERFACE}":"${position}
+
+
+                    sudo echo 'auto '${alias_name} | sudo tee -a $file
+                    sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
+                    sudo echo '    address '${ip_address}'/24' | sudo tee -a $file
+                    sudo echo '' | sudo tee -a $file
+                fi
+
+            fi
+
+        done
+
+        echo "Updated Alias IP file"
+        sudo bash -c "cat $file"
+        sudo systemctl restart networking
+
+    fi
 
     if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
         echo ""

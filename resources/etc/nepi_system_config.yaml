@@ -39,15 +39,16 @@ NEPI_WIRED_INTERFACE: eth0
 NEPI_IP: 192.168.179.103
 # Set the NEPI device's primary IP Gatway address, or set to NONE
 NEPI_IP_GATEWAY: NONE
-# Add an IP address Alias on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
+# Add IP address Aliases on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
 # NOTE: NEPI IP aliases are useful if you need to connect to other devices on the Network
 #  like IP cameras configured with a different IP subnet then the NEPI_IP value. 
-NEPI_ALIAS_IPS: NONE
+NEPI_ALIAS_IP_1: 192.168.0.103
+NEPI_ALIAS_IP_2: 192.168.1.103
 # Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
-NEPI_NTP_IPS: 192.168.179.5
+NEPI_NTP_IP: 192.168.179.5
 # Enable Wired DHCP Wired Internet Connectivity on Startup. 
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
 #  a router with internet access. 
