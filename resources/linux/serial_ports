@@ -15,11 +15,16 @@ sudo gpasswd --add ${USER} dialout
 # STANDARD_BUAD_RATES = [110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
 sudo ls
 export TEST_PORT=USB0
-stty -F /dev/tty${TEST_PORT} icanon
+#sudo stty -F /dev/tty${TEST_PORT} icanon
 sudo stty -F /dev/tty${TEST_PORT} 9600
 sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
+
+
+export TEST_PORT=USB0
+sudo chmod 666 /dev/tty${TEST_PORT}
+sudo cat /dev/tty${TEST_PORT}
 
 
 export TEST_PORT=ACM0
@@ -29,7 +34,9 @@ sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
-
+export TEST_PORT=ACM0
+sudo chmod 666 /dev/tty${TEST_PORT}
+sudo cat /dev/tty${TEST_PORT}
 
 
 sudo ls

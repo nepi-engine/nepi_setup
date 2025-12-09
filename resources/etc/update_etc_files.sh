@@ -72,6 +72,7 @@ if [[ "$ETC_FOLDER" != "$CONFIG_FOLDER" ]]; then
 fi
 
 
+
 #############################
 # Load the config file
 
@@ -88,18 +89,13 @@ fi
 
 
 
-#############################
-# Sync from factory and system configs if needed
-#############################
-if [[ "$ETC_SAVE" -eq 1 ]]; then
-    load_config=0
-    source ${ETC_FOLDER}/scripts/sync_from_configs.sh $load_config
-fi
-
 
 #######################################
 ### Initialize NEPI Docker Service Files
 #######################################
+
+
+
 LOAD_NEPI_CONFIG=0
 
 
@@ -114,6 +110,7 @@ source ${ETC_FOLDER}/scripts/update_etc_hostname.sh $LOAD_NEPI_CONFIG
 ###########################################
 # CHRONY TIME UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_time_ntps.sh $LOAD_NEPI_CONFIG
+
 
 #############################
 # WIRED NETWORK STATIC IP UPDATES

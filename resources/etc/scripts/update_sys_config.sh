@@ -31,9 +31,14 @@ else
     exit 1
 fi
 
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
+echo ""
+echo "Loading NEPI System Config"
+source /mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if [[ "$?" -ne 0 ]]; then
+    echo "ERROR! Failed to load system configuration values from /mnt/nepi_config/system_cfg/etc/load_system_config.sh"
+    return 1
+fi
 
 
 ##############################
@@ -43,11 +48,6 @@ ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     
-    # sync system config with latest nepi config file
-    SOURCE_PATH=/opt/nepi/etc/nepi_system_config.yaml
-    echo "Syncing NEPI System Config File from ${SOURCE_PATH} to ${UPDATE_PATH}"
-    sync_yaml_files $SOURCE_PATH $UPDATE_PATH
-
 
     ###########
     # UPDATE NEPI VERSION

@@ -28,10 +28,10 @@ fi
 # This file configures a NEPI Docker installation environment
 
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
+if [[ -v "$1" ]]; then
     DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
 fi
 
 sudo -v

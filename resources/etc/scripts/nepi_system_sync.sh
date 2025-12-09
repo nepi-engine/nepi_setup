@@ -17,17 +17,21 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# This script syncs to NEPI Docker files and folders 
-# First from /opt/nepi to /mnt/nepi_config
-# Then back from /mnt/nepi_config to /opt/nepi
+
+# This script syncs the /opt/nepi folders with system wide folders
 
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER="$(id -un 1000)"
+fi
+if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
+    CONFIG_USER=nepihost
+fi
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_docker_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -35,7 +39,6 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
-
 
 
 ################## 
@@ -59,10 +62,10 @@ echo "Updating System Files and Folders"
 #############################
 # Sync System Config ETC Files and Folders
 
-# Sync from /mnt/nepi_config/system_cfg/etc first
+# Sync from /opt/nepi/etc first
 
-SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
-UPDATE_PATH=/opt/nepi/etc
+SOURCE_PATH=/opt/nepi/etc
+UPDATE_PATH=/mnt/nepi_config/system_cfg/etc 
 CONFIG_FILENAME=nepi_system_config.yaml
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
@@ -87,10 +90,10 @@ sudo chmod 755 ${UPDATE_PATH}
 #############################
 # Sync Docker Config folders
 
-# Synce from /opt/nepi first
+# Synce from /mnt/nepi_config/docker_cfg first
 
-SOURCE_PATH=/opt/nepi/docker
-UPDATE_PATH=/mnt/nepi_config/docker_cfg
+SOURCE_PATH=/mnt/nepi_config/docker_cfg
+UPDATE_PATH=/opt/nepi/docker
 CONFIG_FILENAME=nepi_docker_config.yaml
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}

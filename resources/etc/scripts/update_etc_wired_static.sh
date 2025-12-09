@@ -81,10 +81,10 @@ if [[ "$?" -eq 0 ]]; then
             ##################
             echo "Updating /etc/network files"
             if [ -d "${ETC_FOLDER}/network" ]; then
-                if [[ ! -d "/etc/network" ]]; then
-                    sudo mkdir -p "/etc/network"
+                if [[ ! -d "/etc/network/interfaces.d" ]]; then
+                    sudo mkdir -p "/etc/network/interfaces.d"
                 fi
-                sudo cp -a -r ${ETC_FOLDER}/network/* /etc/network/
+                sudo cp ${ETC_FOLDER}/network/* /etc/network/
             else
                 echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network files"
             fi
@@ -115,10 +115,7 @@ if [[ "$?" -eq 0 ]]; then
 
 
             ###########################
-            cur_ips=($(ip -4 addr show dev ${NEPI_WIRED_INTERFACE} | grep "inet " | awk '{print $2}' | cut -d/ -f1))
-            cur_ip=${cur_ips[0]}
-            echo "Checking current IP ${cur_ip} against set IP ${NEPI_IP}"
-            if [[ "${NEPI_IP}" != "${cur_ip}"  && -f "$file" ]]; then
+            if ! nnet; then
                 echo "Running networking ifup flush and ifdown processes"
                 sudo ifdown ${NEPI_WIRED_INTERFACE} 2>/dev/null
                 sudo ip addr flush ${NEPI_WIRED_INTERFACE}

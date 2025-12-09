@@ -73,7 +73,7 @@ fi
 
 if [[ -f "$bfile" ]]; then
     echo ""
-    echo "UPDATING BASH VARIABLES"
+    echo "Updating Bash Variables"
     if is_valid_did $NEPI_DEVICE_ID; then
         update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
     fi

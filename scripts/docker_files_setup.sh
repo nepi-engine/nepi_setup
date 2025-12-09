@@ -17,6 +17,7 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -25,13 +26,13 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 
-# This file configures a NEPI Docker installation environment
+# This file configures a NEPI Docker installation Files and Folders
 
 
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
+if [[ -v "$1" ]]; then
     DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
 fi
 
 sudo -v
@@ -56,31 +57,97 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-SOURCE_DOCKER_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
-SOURCE_DOCKER_CONFIG_FILE=${SOURCE_DOCKER_SCRIPTS_PATH}/nepi_docker_config.yaml
 
-NEPI_CONFIG_PATH=/opt/nepi
-NEPI_DOCKER_CONFIG_PATH=${NEPI_CONFIG_PATH}/docker_cfg
-NEPI_DOCKER_CONFIG_FILE=${NEPI_DOCKER_CONFIG_PATH}/nepi_docker_config.yaml
+echo ""
+echo "########################"
+echo "NEPI Docker Files SETUP"
+echo "########################"
+echo ""
+
 
 ############
-# Install NEPI Docker Sciprts
-SOURCE_PATH=${SOURCE_DOCKER_SCRIPTS_PATH}
-UPDATE_PATH=/opt/nepi/docker_cfg
+echo ""
+echo "Updating NEPI Config Folders"
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+UPDATE_PATH=/opt/nepi/etc
+CONFIG_FILENAME=nepi_system_config.yaml
 
-echo "Updating NEPI Folder ${UPDATE_PATH} from ${SOURCE_PATH}"
-if [[ -n "$SOURCE_PATH" && "$SOURCE_PATH" != '/' ]]; then
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
-    if [[ ! -d "$UPDATE_PATH" ]]; then
-        sudo mkdir -p $UPDATE_PATH 
-    fi
-    sudo rm -r $UPDATE_PATH/*
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-    sudo rsync -arh  ${SOURCE_PATH}/ ${UPDATE_PATH}/
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-    sudo chmod +x ${UPDATE_PATH}/*
-fi
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
 
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
+CONFIG_FILENAME=nepi_system_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+#############################
+echo ""
+echo "Updating Docker Config Files and Folders"
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+UPDATE_PATH=/opt/nepi/docker
+CONFIG_FILENAME=nepi_docker_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+UPDATE_PATH=/mnt/nepi_config/docker_cfg
+CONFIG_FILENAME=nepi_docker_config.yaml
+
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+
+
+#############################
+echo ""
+echo "Updating System Config Files and Folders"
 
 script_file=nepi_docker_sync.sh
 script_path=$(dirname "${SCRIPT_FOLDER}")/resources/docker/${script_file}
@@ -94,21 +161,33 @@ else
     exit 1
 fi
 
-####################################
-# Run NEPI Bash Setup Script
 
 
-script_file=nepi_files_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if [[ -f "$script_path" ]]; then
-	echo ""
-	echo "Running ${script_file} script"
-	source $script_path
-	wait
-else
-    echo "Setup script not found ${script_file}"
-    exit 1
-fi
+#############################
+echo ""
+echo "Updating Factory Config Files and Folders"
+
+SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
+UPDATE_PATH=/mnt/nepi_config/factory_cfg/etc 
+CONFIG_FILENAME=nepi_system_config.yaml
 
 
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+
+echo ""
+echo "########################"
+echo "NEPI Docker Files Setup Complete"
+echo "########################"
+echo ""

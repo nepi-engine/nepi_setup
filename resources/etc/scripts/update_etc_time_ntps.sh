@@ -88,12 +88,12 @@ if [[ "$?" -eq 0 ]]; then
       
 
 
-            if [[ "$NEPI_NTP_IPS" != "NONE" &&  "$NEPI_NTP_IPS" != "None" ]]; then
-                echo "Updating NEPI IP in ${file} with NTP Server ${NEPI_NTP_IPS}"
+            if [[ "$NEPI_NTP_IP" != "NONE" &&  "$NEPI_NTP_IP" != "None" ]]; then
+                echo "Updating NEPI IP in ${file} with NTP Server ${NEPI_NTP_IP}"
                 # update with NTP IP address
 APPEND_SECTION="#### NEPI NTP SOURCES #### 
-allow ${NEPI_NTP_IPS%.*}/24 
-server ${NEPI_NTP_IPS} iburst minpoll 2"
+allow ${NEPI_NTP_IP%.*}/24 
+server ${NEPI_NTP_IP} iburst minpoll 2"
                 sudo echo "$APPEND_SECTION" >> $file
 
             fi

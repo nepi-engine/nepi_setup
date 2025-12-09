@@ -177,8 +177,9 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
     NEPI_DEVICE_MD \
     NEPI_DEVICE_SN \
     NEPI_IP \
-    NEPI_ALIAS_IPS \
-    NEPI_NTP_IPS \
+    NEPI_ALIAS_IP_1 \
+    NEPI_ALIAS_IP_2 \
+    NEPI_NTP_IP \
     NEPI_AB_FS \
     NEPI_IMPORT_PATH \
     NEPI_EXPORT_PATH
@@ -193,8 +194,9 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
         CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
         CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
         CURRENT_NEPI_IP="$NEPI_IP"
-        CURRENT_NEPI_ALIAS_IPS="$NEPI_ALIAS_IPS"
-        CURRENT_NEPI_NTP_IPS="$NEPI_NTP_IPS"
+        CURRENT_NEPI_ALIAS_IP_1="$NEPI_ALIAS_IP_1"
+        CURRENT_NEPI_ALIAS_IP_2="$NEPI_ALIAS_IP_2"
+        CURRENT_NEPI_NTP_IP="$NEPI_NTP_IP"
         CURRENT_NEPI_AB_FS="$NEPI_AB_FS"
         CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
         CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
@@ -236,8 +238,9 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
         echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
         echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
         echo "NEPI_IP: ${CURRENT_NEPI_IP}"
-        echo "NEPI_ALIAS_IPS: ${CURRENT_NEPI_ALIAS_IPS}"
-        echo "NEPI_NTP_IPS: ${CURRENT_NEPI_NTP_IPS}"
+        echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
+        echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
+        echo "NEPI_NTP_IP: ${CURRENT_NEPI_NTP_IP}"
         echo "NEPI_AB_FS: ${CURRENT_NEPI_AB_FS}"
         echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
         echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
@@ -253,8 +256,9 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
         update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
         update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
         update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_ALIAS_IPS" $CURRENT_NEPI_ALIAS_IPS $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_NTP_IPS" $CURRENT_NEPI_NTP_IPS $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
         update_yaml_value "NEPI_AB_FS" $CURRENT_NEPI_AB_FS $SYSTEM_SYS_CONFIG_FILE
         update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
         update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
@@ -271,7 +275,7 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
         
         select opt in "APPLY SETTINGS" "VIEW SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                 "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
-                "Update NEPI_IP" "Update NEPI_ALIAS_IPS" "Update NEPI_NTP_IPS" \
+                "Update NEPI_IP" "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2" "Update NEPI_NTP_IP" \
                 "Update NEPI_AB_FS" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
                 "FACTORY RESET" "QUIT" \
                 ; do
@@ -346,25 +350,37 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
                     fi
 
                     ;;
-                "Update NEPI_ALIAS_IPS")
+                "Update NEPI_ALIAS_IP_1")
                     read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
                     if [[ "${USER_INPUT}" == "" ]]; then
                         USER_INPUT=None
                     fi
                     if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_ALIAS_IPS=$USER_INPUT
+                        CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
                     else
                         echo "Not A Valid IP Format"
                     fi
                     print_current_config
                     ;;
-                "Update NEPI_NTP_IPS")
+                "Update NEPI_ALIAS_IP_2")
+                    read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
+                    if [[ "${USER_INPUT}" == "" ]]; then
+                        USER_INPUT=None
+                    fi
+                    if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                        CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
+                    else
+                        echo "Not A Valid IP Format"
+                    fi
+                    print_current_config
+                    ;;
+                "Update NEPI_NTP_IP")
                     read -p "Enter a new NTP Source IP Address, or Empty Line to Clear: " USER_INPUT
                     if [[ "${USER_INPUT}" == "" ]]; then
                         USER_INPUT=None
                     fi
                     if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_NTP_IPS=$USER_INPUT
+                        CURRENT_NEPI_NTP_IP=$USER_INPUT
                     else
                         echo "Not A Valid IP Format"
                     fi
@@ -528,10 +544,6 @@ source ${SYSTEM_ETC_PATH}/update_etc_files.sh
 #     exit 1
 # fi
 
-####################
-echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
-source /opt/nepi/etc/scripts/sync_from_configs.sh
-
 
 
 #################
@@ -547,20 +559,9 @@ if is_valid_ipv4 $NEPI_IP; then
 fi
 
 
-# ###############
-# echo ""
-# echo "########################"
-# echo "Fixing NEPI Folder Permissions"
-# echo "########################"
-# echo ""
-# echo "Fixing Permissions in: /mnt/nepi_config"
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-# sudo chmod 775 /mnt/nepi_config
-
-# echo "Fixing Permissions in: /mnt/nepi_storage"
-# sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
-# sudo chmod -R 775 /mnt/nepi_storage
-
+####################
+echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
+source ${SYSTEM_ETC_PATH}/scripts/nepi_system_sync.sh
 
 
 echo ""
