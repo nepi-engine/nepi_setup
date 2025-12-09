@@ -382,6 +382,8 @@ else
         update_yaml_value "NEPI_FS_EXPORT" 0 "${DOCKER_CONFIG_FILE}"
     fi
     avail_space=$(path_space_gb $NEPI_EXPORT_PATH)
+    # avail_space_bytes=$(df -B1 $NEPI_EXPORT_PATH | awk 'NR==2{print $4}')
+    # avail_space_gigabytes=$(echo "scale=2; $avail_space_bytes / 1000000000" | bc)
     update_yaml_value "NEPI_EXPORT_SPACE_GB" $avail_space "${DOCKER_CONFIG_FILE}"
 
 
