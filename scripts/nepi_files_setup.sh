@@ -145,49 +145,49 @@ sudo chmod 755 ${UPDATE_PATH}
 
 
 
-# #############################
-# echo ""
-# echo "Updating System Config Files and Folders"
+#############################
+echo ""
+echo "Updating System Config Files and Folders"
 
-# script_file=nepi_system_sync.sh
-# script_path=$(dirname "${SCRIPT_FOLDER}")/resources/etc/scripts/${script_file}
-# if [[ -f "$script_path" ]]; then
-# 	echo ""
-# 	echo "Running ${script_file} script"
-# 	source $script_path
-# 	wait
-# else
-#     echo "Setup script not found ${script_file}"
-#     exit 1
-# fi
-
-
-
-# #############################
-# echo ""
-# echo "Updating Factory Config Files and Folders"
-
-# SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
-# UPDATE_PATH=/mnt/nepi_config/factory_cfg/etc 
-# CONFIG_FILENAME=nepi_system_config.yaml
+script_file=nepi_system_sync.sh
+script_path=$(dirname "${SCRIPT_FOLDER}")/resources/etc/scripts/${script_file}
+if [[ -f "$script_path" ]]; then
+	echo ""
+	echo "Running ${script_file} script"
+	source $script_path
+	wait
+else
+    echo "Setup script not found ${script_file}"
+    exit 1
+fi
 
 
-# SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
-# UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
-# echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-# sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-# sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+#############################
+echo ""
+echo "Updating Factory Config Files and Folders"
+
+SOURCE_PATH=/mnt/nepi_config/system_cfg/etc 
+UPDATE_PATH=/mnt/nepi_config/factory_cfg/etc 
+CONFIG_FILENAME=nepi_system_config.yaml
 
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 755 ${SOURCE_PATH}
+SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
+UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-# sudo chmod 755 ${UPDATE_PATH}
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-# echo ""
-# echo "########################"
-# echo "NEPI Files Setup Complete"
-# echo "########################"
-# echo ""
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
+
+echo ""
+echo "########################"
+echo "NEPI Files Setup Complete"
+echo "########################"
+echo ""

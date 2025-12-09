@@ -97,23 +97,22 @@ if [[ "$?" -eq 0 ]]; then
             # 0 indicates success (internet connection)
             # Non-zero indicates failure (no internet connection)
             if [ $? -ne 0 ]; then
-            echo "No internet connection detected. Will try and connect"
+                echo "No internet connection detected. Will try and connect"
 
-            echo "Enabling DHCP internet connection"
-            echo "Killing existing DHCP clients"
-            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-            echo "Renewing dhclient"
-            sudo dhclient -nw
-            sleep 2
-            nnet # Restart network
-            wait
-            if ! pingi; then
-                return 1
-            fi
+                echo "Enabling DHCP internet connection"
+                echo "Killing existing DHCP clients"
+                sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+                echo "Renewing dhclient"
+                sudo dhclient -nw
+                sleep 2
+                nnet # Restart network
+                wait
+                if ! pingi; then
+                    return 1
+                fi
             fi
             sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
         fi
-
 
     fi  
 
