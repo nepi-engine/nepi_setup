@@ -68,56 +68,52 @@ echo 'source ~/nepi_engine_ws/deploy_nepi_complete.sh'
 echo ''
 
 
-#######################################
+##########################
 ## Pull and Run Base Image
 
-
 ##########################
+## Link: https://hub.docker.com/r/ultralytics/ultralytics
+
 NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=jetson
+    base_image=ultralytics/ultralytics:latest-jetson-jetpack5
 elif is_valid_arm64; then
     NEPI_ARCH=arm64
+    base_image=ultralytics/ultralytics:latest-arm64
 elif is_valid_amd64; then
     NEPI_ARCH=amd64
+    base_image=ultralytics/ultralytics:latest-cpu
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
     exit 1
 fi
 
-#base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
-base_image=ultralytics/ultralytics:latest-jetson-jetpack5
-
+# base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
+# base_image=ultralytics/ultralytics:latest-jetson-jetpack5
 
 echo "Pulling Base Image ${base_image}"
 nepipull $base_image
-
 
 # wait
 # nepidev
 # wait
 # nepiloginroot
 
-
-
 #cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts/
 #bash ./nepi_user_setup
 #exit
 
-
-
 #############
 # users
 # . nepi_users_setup.sh
-
 
 # nepicommit
 # nepistop
 # nepistart
 # nepilogin
 #######################################
-
 
 # nsetup
 # . nepi_env_setup.sh
@@ -128,10 +124,6 @@ nepipull $base_image
 
 # folders
 # . nepi_files_setup.sh
-
-
-
-
 
 # echo "Running Base Image ${base_image}"
 # sudo docker run --privileged -it -e UDEV=1  \
@@ -148,9 +140,6 @@ nepipull $base_image
 #     -v /tmp/.X11-unix/:/tmp/.X11-unix \
 #     ${base_image} /bin/bash 
 
-
-
-
 # sudo add-apt-repository ppa:rmescandon/yq
 # sudo apt update
 # sudo apt install yq -y
@@ -164,7 +153,6 @@ nepipull $base_image
 # cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
 # . nepi_bash_setup.sh
 # source ~/.bashrc
-
 
 # ## NOTE:If you have CV2 installed and have issues installing ros in the next commands,
 # #   try removing CV2 first
@@ -183,11 +171,8 @@ nepipull $base_image
 # . ros_setup.sh
 # sbrc
 
-
-
 # nsetup
 # . nepi_config_setup.sh
-
 
 # nsetup
 # . nepi_config_setup.sh
@@ -200,10 +185,6 @@ nepipull $base_image
 # nepibld
 
 # nepistart
-
-
-
-
 
 # echo '
 # #################################################"
@@ -230,4 +211,3 @@ nepipull $base_image
 
 # #sudo docker ps
 # sudo docker export $ndid > $EXPORT_IMAGE_PATH
-
