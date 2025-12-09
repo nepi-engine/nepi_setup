@@ -111,6 +111,7 @@ source ${ETC_FOLDER}/scripts/update_etc_hostname.sh $LOAD_NEPI_CONFIG
 # CHRONY TIME UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_time_ntps.sh $LOAD_NEPI_CONFIG
 
+
 #############################
 # WIRED NETWORK STATIC IP UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG

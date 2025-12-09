@@ -71,22 +71,10 @@ if [[ "$?" -eq 0 ]]; then
 
         NETMASK_CIDR="24" # e.g., 24 for 255.255.255.0
 
-        echo "Updating Wired Alias IP Addresses"
+        echo "Checking Wired Alias IP Addresses"
 
         ###########################
         # NEPI_HOST UPDATE PROCESS
-
-        # file=/etc/network/interfaces.d/nepi_user_ip_aliases
-        # echo "Updating Alias IP file ${file}"
-        # if [ ! -f "${file}" ]; then
-        #     if [ -d "/etc/network/interfaces.d" ]; then
-        #         sudo mkdir -p /etc/network/interfaces.d
-        #     fi
-        #     sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
-        # fi
-        # sudo chmod +x -R /etc/network/interfaces.d
-        # sudo bash -c "cat /dev/null > $file"
-
 
 
         for i in {1..10}; do
@@ -99,18 +87,8 @@ if [[ "$?" -eq 0 ]]; then
                     : # DO NOTHING
                     #echo "Pinged alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
                 else
-                    echo "Adding Network alias ips in interfaces.d"
                     sudo ip addr add ${ip_address}'/24' dev ${NEPI_WIRED_INTERFACE}
 
-                    echo "Updating Alias IP Address"
-                    position=1
-                    alias_name=${NEPI_WIRED_INTERFACE}":"${position}
-
-
-                    # sudo echo 'auto '${alias_name} | sudo tee -a $file
-                    # sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
-                    # sudo echo '    address '${ip_address}'/24' | sudo tee -a $file
-                    # sudo echo '' | sudo tee -a $file
                 fi
 
             fi
@@ -118,11 +96,7 @@ if [[ "$?" -eq 0 ]]; then
 
         done
 
-        # echo "Updated Alias IP file"
-        # sudo bash -c "cat $file"
-        # sudo systemctl restart networking
-
-            
+           
     fi    
 
 fi

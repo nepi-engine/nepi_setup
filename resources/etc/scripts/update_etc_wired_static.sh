@@ -81,10 +81,10 @@ if [[ "$?" -eq 0 ]]; then
             ##################
             echo "Updating /etc/network files"
             if [ -d "${ETC_FOLDER}/network" ]; then
-                if [[ ! -d "/etc/network" ]]; then
-                    sudo mkdir -p "/etc/network"
+                if [[ ! -d "/etc/network/interfaces.d" ]]; then
+                    sudo mkdir -p "/etc/network/interfaces.d"
                 fi
-                sudo cp -a -r ${ETC_FOLDER}/network/* /etc/network/
+                sudo cp ${ETC_FOLDER}/network/* /etc/network/
             else
                 echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network files"
             fi

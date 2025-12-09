@@ -278,7 +278,7 @@ if [[ "$?" -eq 0 ]]; then
         file=/etc/network/interfaces.d/nepi_user_ip_aliases
         echo "Updating Alias IP file ${file}"
         if [ ! -f "${file}" ]; then
-            if [ -d "/etc/network/interfaces.d" ]; then
+            if [ ! -d "/etc/network/interfaces.d" ]; then
                 sudo mkdir -p /etc/network/interfaces.d
             fi
             sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
@@ -294,9 +294,6 @@ if [[ "$?" -eq 0 ]]; then
             ip_address="${!alias_ip_var}"
             #echo "Checking alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
             if is_valid_ipv4 $ip_address >/dev/null 2>&1; then
-                if ping -c 1 $ip_address >/dev/null 2>&1; then
-                    : #DO NOTHING
-                else
                     echo "Adding Network alias ips in interfaces.d"
                     sudo ip addr add ${ip_address}'/24' dev ${NEPI_WIRED_INTERFACE}
 
@@ -309,7 +306,6 @@ if [[ "$?" -eq 0 ]]; then
                     sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
                     sudo echo '    address '${ip_address}'/24' | sudo tee -a $file
                     sudo echo '' | sudo tee -a $file
-                fi
 
             fi
 

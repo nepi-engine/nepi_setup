@@ -55,7 +55,7 @@ NEPI_BASE=/opt/nepi
 declare -a rfolders=( 
 "${NEPI_BASE}" 
 "${NEPI_BASE}/etc" 
-"${NEPI_BASE}/scipts" 
+"${NEPI_BASE}/scripts" 
 "${NEPI_BASE}/docker" 
 )
 
