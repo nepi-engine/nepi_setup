@@ -73,7 +73,10 @@ echo ''
 
 ##########################
 ## Link: https://hub.docker.com/r/ultralytics/ultralytics
+<<<<<<< HEAD
 
+=======
+>>>>>>> 930cac33db44ea3000a0d09c0cfe3ec45ab3f87c
 NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=jetson
@@ -92,6 +95,7 @@ fi
 
 # base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
 # base_image=ultralytics/ultralytics:latest-jetson-jetpack5
+
 
 echo "Pulling Base Image ${base_image}"
 nepipull $base_image
