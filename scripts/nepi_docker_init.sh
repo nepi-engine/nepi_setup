@@ -73,10 +73,6 @@ echo ''
 
 ##########################
 ## Link: https://hub.docker.com/r/ultralytics/ultralytics
-<<<<<<< HEAD
-
-=======
->>>>>>> 930cac33db44ea3000a0d09c0cfe3ec45ab3f87c
 NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=jetson
