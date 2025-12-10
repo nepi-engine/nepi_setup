@@ -76,7 +76,7 @@ Scroll up through the process messages looking for any errors and correct.  Reru
 ################################################################
 ### NEPI Docker Config Setup
 
-This step will configure the NEPI Docker configuration using the defualt settings. 
+This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
 
 Log into the `nepihost` user using password  'nepi'
@@ -97,8 +97,8 @@ Log into the `nepihost` user using password  'nepi'
             **NOTE:** If you need to reduce the size of your main File System partition to
             free space for the following new partitions, don't reduce it below 40 GB.
 
-            **NOTE:** If these folders allready exist, you should delete them before creating
-            and mounting the following partitions.
+            **NOTE:** If these folders allready exist as folders and not mounted partitions,
+            you should delete them before creating and mounting the following partitions.
             
              FILE_SYSTEM   LABEL_NAME      MOUNT_POINT       MIN_SIZE     RECOMMENDED_SIZE 
             1)  ext4      nepi_docker     /mnt/nepi_docker    30 GB           100 GB
@@ -110,7 +110,7 @@ Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
     source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
 
-This process will create the following NEPI Folders:
+This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
     This is where NEPI processes store user files such as:
         **Saved Data**, **AI models**, **Import/Export Docker Images**, and **User Saved Configurations**.
@@ -120,10 +120,10 @@ This process will create the following NEPI Folders:
 
 **NOTE:**  After this process, the following changes will be made:
 1) Desktop background and sidebar applications menu updates.
-2) NEPI bash alias and util functions added to user bash profile.
+2) NEPI bash alias and util functions added to 'nepihost user bash profile.
 3) NEPI folder shortcuts added to File Manager folder bookmarks.
 4) Chromium browser updated with useful NEPI browser bookmarks.
-5) The NEPI Docker install instructions file is added to the Desktop.
+
 
 
 **NOTE:** After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. 
