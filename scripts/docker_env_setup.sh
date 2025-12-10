@@ -245,6 +245,12 @@ if systemctl is-active --quiet "$SERVICE_NAME"; then
     sudo systemctl stop $SERVICE_NAME
 fi
 
+echo ""
+echo "######################################"
+echo "NEPI ARCHITECTURE: ${NEPI_ARCH}"
+echo "######################################"
+echo ""
+
 if [[ "$NEPI_ARCH" == 'arm64' ]]; then
     echo "Checking for Docker software"
     if command -v docker &>/dev/null; then
@@ -273,7 +279,23 @@ if [[ "$NEPI_ARCH" == 'arm64' ]]; then
     sudo docker info
     docker compose version
 elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-    sudo apt install docker -y
+    echo ""
+    echo "######################################"
+    echo "Installing Docker"
+    echo "######################################"
+    echo ""
+    sudo apt-get remove docker docker-engine docker.io containerd runc
+    sudo apt-get update
+    sudo apt-get install ca-certificates curl gnupg
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    echo \
+    "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    \"$(. /etc/os-release && echo \"$VERSION_CODENAME\")\" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 else 
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
