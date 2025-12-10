@@ -200,17 +200,13 @@ if [[ "$DEMO_INSTALL" -eq 0 ]]; then
     sudo apt install trash-cli -y
 
 
-fi 
-
-
-
 echo "######################################"
 echo "Installing Shared Drive Apps"
 echo "######################################"
 sudo apt install samba -y
 sudo apt install smbclient -y
 
-
+fi 
 
 if is_valid_jetson; then
     echo "######################################"

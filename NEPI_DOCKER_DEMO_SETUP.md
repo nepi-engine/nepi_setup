@@ -3,7 +3,7 @@ This tutorial will walk you through setting up, configuring, and running a NEPI 
 
 
 **NOTE:** NEPI Docker Demo installation will make minimal changes to your device's operating system configuration with
-no NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, DOCKER ...) 
+no NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, SAMBA SHARED DRIVES, DOCKER ...) 
 
 After testing with the Demo installation, you can upgrade your system to a Production installation with support for both local and remote
 real-time management of operating system services through User Interface and API controls.
@@ -65,29 +65,6 @@ Open Terminal Window - Right click on the desktop and select the "Open in Termin
 Make sure your system has internet access by running the following command:
 
     ping -c 1 google.com
-
-**OPTIONAL:** IF YOU WANT TO HAVE REMOTE NETWORK ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
-          USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
-          CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
-
-            **NOTE:** If you skip this step, the following folders will be created in your 
-            main File System's partition.  Make sure you have at least 60 GB of free space
-            on that partition using 'df -h' and checking the 'Avail' column for your
-            main File System's patition (i.e. /dev/nvme0n1p1 or something like that)
-
-            **NOTE:** There are many tutorials on line for creating new partitions
-
-            **NOTE:** If you need to reduce the size of your main File System partition to
-            free space for the following new partitions, don't reduce it below 40 GB.
-
-            **NOTE:** If these folders allready exist as folders and not mounted partitions,
-            you should delete them before creating and mounting the following partitions.
-            
-             FILE_SYSTEM   LABEL_NAME      MOUNT_POINT       MIN_SIZE     RECOMMENDED_SIZE 
-            1)  ext4      nepi_docker     /mnt/nepi_docker    30 GB           100 GB
-            2)  ext4      nepi_config     /mnt/nepi_config    200 MB          200 MB
-            3)  ext4      nepi_config     /mnt/nepi_storage   30 GB           150+ GB
-
 
 Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
 
@@ -240,15 +217,13 @@ Then reboot your NEPI Device and continue to the tutorials listed below.
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
 
-**NOTE:** While NEPI Docker Demo Installations do not support network access to
+**NOTE:** NEPI Docker Demo Installations do not configure NEPI's Network Shared Drive support, but
 the NEPI Storage and NEPI Config Folders, you can access them locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
-Learn more about the NEPI Folders content, see this torial for remote access.
 
-   Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
-   See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+**NOTE:** NEPI Docker Demo Installations do not configure NEPI Host SSH or NEPI Network Shared Drive support, but do support NEPI Container SSH connections. Learn more about the NEPI Folders content, see this tutorial for remote SSH access.
 
-SSH into either your NEPI Host device or NEPI running container following this tutorial.
-See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
+    SSH into either your NEPI Host device or NEPI running container following this tutorial.
+    See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 ################################################################
 ### NEPI Software Tutorials

@@ -144,13 +144,13 @@ NEPI_BOOT_TIME: 60
 NEPI_MANAGES_HOSTNAME: 0
 NEPI_MANAGES_NETWORK: 0
 NEPI_MANAGES_TIME: 0
-NEPI_MANAGES_SSH: 1
-NEPI_MANAGES_SHARE: 1
-NEPI_MANAGES_SOFTWARE: 1
+NEPI_MANAGES_SSH: 0
+NEPI_MANAGES_SHARE: 0
+NEPI_MANAGES_SOFTWARE: 0
 # If NEPI_IN_CONTAINER=1, set whether NEPI managine docker software system
 # Note: If enabled, NEPI will setup docker configuration,
 #   and use /mnt/nepi_docker as the folder docker images are stored
-NEPI_MANAGES_DOCKER: 1
+NEPI_MANAGES_DOCKER: 0
 
 ####################################################
 ### NEPI PARTITION SETTINGS
