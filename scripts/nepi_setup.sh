@@ -17,6 +17,13 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
+
+if [[ "$1" -eq 1 ]]; then
+    DEMO_INSTALL=$1
+else
+    DEMO_INSTALL=0
+fi
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -28,11 +35,6 @@ fi
 # This file installs the NEPI Engine File System installation
 
 
-if [[ -v "$1" ]]; then
-    DEMO_INSTALL=$1
-else
-    DEMO_INSTALL=0
-fi
 
 sudo -v
 
@@ -198,18 +200,18 @@ update_yaml_value "NEPI_MANAGES_NETWORK" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
 export NEPI_MANAGES_TIME=$SERVICES_MANAGED
 update_yaml_value "NEPI_MANAGES_TIME" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
 
-
+### ADD QUESION FOR DEMO
 export NEPI_MANAGES_SSH=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SSH" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+update_yaml_value "NEPI_MANAGES_SSH" 1 $NEPI_SYS_CONFIG_FILE
 
 export NEPI_MANAGES_SHARE=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SHARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+update_yaml_value "NEPI_MANAGES_SHARE" 1 $NEPI_SYS_CONFIG_FILE
 
 export NEPI_MANAGES_SOFTWARE=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SOFTWARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+update_yaml_value "NEPI_MANAGES_SOFTWARE" 1 $NEPI_SYS_CONFIG_FILE
 
 export NEPI_MANAGES_DOCKER=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_DOCKER" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+update_yaml_value "NEPI_MANAGES_DOCKER" 1 $NEPI_SYS_CONFIG_FILE
 
 ################################
 # Update ETC files if systemd is running (Not in Container)

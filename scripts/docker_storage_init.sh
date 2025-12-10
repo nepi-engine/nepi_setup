@@ -52,19 +52,19 @@ echo "########################"
 echo "NEPI DOCKER STORAGE INIT"
 echo "########################"
 
-DOCKER_FOLDER=/mnt/nepi_config/docker_cfg
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+SYSTEM_FOLDER=/mnt/nepi_config/system_cfg/etc
+SYSTEM_CONFIG_FILE=${SYSTEM_FOLDER}/nepi_system_config.yaml
+SYSTEM_CONFIG_LOAD_FILE=${SYSTEM_FOLDER}/load_system_config.sh
 
 
-if [[ ! -f "$DOCKER_CONFIG_LOAD_FILE" ]]; then
-    echo "Docker Config Load file not found at: ${DOCKER_CONFIG_LOAD_FILE}"
+if [[ ! -f "$SYSTEM_CONFIG_LOAD_FILE" ]]; then
+    echo "Docker Config Load file not found at: ${SYSTEM_CONFIG_LOAD_FILE}"
     echo "Run 'nepiupdate' and try again"
 
 else
-    source ${DOCKER_CONFIG_LOAD_FILE}
+    source ${SYSTEM_CONFIG_LOAD_FILE}
     if [[ "$?" -eq 1 ]]; then
-        echo "Failed to load ${DOCKER_CONFIG_FILE}"
+        echo "Failed to load ${SYSTEM_CONFIG_FILE}"
 
     elif [[ ! -n "$NEPI_IMPORT_PATH" ]]; then
         echo "NEPI Docker Import Folder not defined in variable NEPI_IMPORT_PATH"

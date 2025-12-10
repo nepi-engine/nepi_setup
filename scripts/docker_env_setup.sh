@@ -27,7 +27,7 @@ fi
 
 # This file installs NEPI Docker required software packages
 
-if [[ -v "$1" ]]; then
+if [[ "$1" -eq 1 ]]; then
     DEMO_INSTALL=$1
 else
     DEMO_INSTALL=0

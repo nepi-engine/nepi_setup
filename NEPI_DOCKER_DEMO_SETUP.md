@@ -18,9 +18,9 @@ For a detailed tutorials and videos on this process see the "NEPI Docker Demo Se
 
 
 ################################################################
-### NEPI Docker Demo Setup
+### NEPI Docker DEMO User Setup
 
-This step will setup NEPI Docker required user accounts, folders, files, software, system configurations.
+This step will setup NEPI Docker required user accounts on your device
 
 Log into a user account on the device with 'Adminstrator' privilages, **or 'nepihost' if exists**.
 
@@ -47,7 +47,68 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_demo_setup.sh
+    ./docker_demo_user_setup.sh
+
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
+
+################################################################
+### NEPI Docker DEMO Config Setup
+
+This step will configure the NEPI Docker installation using the defualt settings. 
+You can change settings later in the 'NEPI Docker Customization' section.
+
+Log into the `nepihost` user using password  'nepi'
+(sudo password is 'nepi')
+
+Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
+
+Make sure your system has internet access by running the following command:
+
+    ping -c 1 google.com
+
+**OPTIONAL:** IF YOU WANT TO HAVE REMOTE NETWORK ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
+          USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
+          CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
+
+            **NOTE:** If you skip this step, the following folders will be created in your 
+            main File System's partition.  Make sure you have at least 60 GB of free space
+            on that partition using 'df -h' and checking the 'Avail' column for your
+            main File System's patition (i.e. /dev/nvme0n1p1 or something like that)
+
+            **NOTE:** There are many tutorials on line for creating new partitions
+
+            **NOTE:** If you need to reduce the size of your main File System partition to
+            free space for the following new partitions, don't reduce it below 40 GB.
+
+            **NOTE:** If these folders allready exist as folders and not mounted partitions,
+            you should delete them before creating and mounting the following partitions.
+            
+             FILE_SYSTEM   LABEL_NAME      MOUNT_POINT       MIN_SIZE     RECOMMENDED_SIZE 
+            1)  ext4      nepi_docker     /mnt/nepi_docker    30 GB           100 GB
+            2)  ext4      nepi_config     /mnt/nepi_config    200 MB          200 MB
+            3)  ext4      nepi_config     /mnt/nepi_storage   30 GB           150+ GB
+
+
+Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
+
+    source /home/nepihost/nepi_setup/scripts/docker_demo_config_setup.sh
+
+This process will create (if not allready created) and setup the following NEPI Folders:
+- **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
+    This is where NEPI processes store user files such as:
+        data - **Saved Data**
+        ai_models - **AI models**
+        nepi_images - **Import/Export Docker Images**
+        user_cfg - **User Saved Configurations**
+- **NEPI Docker** folder created at '/mnt/nepi_docker'. This is where NEPI Docker Images are stored.
+- **NEPI Config** folder created at '/mnt/nepi_config, along with several config subfolders.
+
+
+**NOTE:**  After this process, the following changes will be made:
+1) Desktop background and sidebar applications menu updates.
+2) NEPI bash alias and util functions added to 'nepihost user bash profile.
+3) NEPI folder shortcuts added to File Manager folder bookmarks.
+4) Chromium browser updated with useful NEPI browser bookmarks.
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
@@ -61,7 +122,7 @@ Log back into `nepihost` using password 'nepi'
 
 Check for internet connection
 
-    pingi
+    ping -c 1 google.com
 
 
 Run the NEPI Docker Storage initialization script (sudo password is now 'nepi'):
@@ -125,7 +186,10 @@ Start your NEPI container running:
 
     nepistart
 
-The start script will let you know if the installed NEPI Image started successfully. 
+The start script will let you know if the installed NEPI Image started successfully.
+
+**NOTE** Newly installed NEPI Docker Images may take several attempts to start successfully
+the first time after installation.  Try running several times if it fails
 
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
 see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.

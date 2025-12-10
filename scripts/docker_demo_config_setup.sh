@@ -43,33 +43,12 @@ if ! is_valid_internet; then
     exit 1
 fi
 
-if ! [ $(id -u) = 0 ]; then
-   echo 'This scripts must be run as root user. Type "sudo su" and retry'
-   exit 1
-fi
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
-
-
-
-####################################
-# Run NEPI User Setup Script
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=docker_user_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $DEMO_INSTALL; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
-
-echo "Changing user to 'nepihost'"
-sudo su nepihost
-source /home/nepihost/.bashrc
 
 ####################################
 # Run NEPI Environment Setup Script
@@ -144,28 +123,28 @@ echo ""
 # RUN CHECKS
 ####################################
 
-dev_docker=$(stat -c '%d' "$NEPI_DOCKER")
-dev_storage=$(stat -c '%d' "$NEPI_STORAGE")
+# dev_docker=$(stat -c '%d' "$NEPI_DOCKER")
+# dev_storage=$(stat -c '%d' "$NEPI_STORAGE")
 
-min_docker_gb=$((NEPI_GB_CONTAINER * 1))
-min_storage_gb=$NEPI_GB_CONTAINER
-min_total=$((min_docker_gb + min_storage_gb))
-
-
-check_failed=0
-
-check_drive=$NEPI_DOCKER
-check_space=$min_docker_gb
-if ! is_space_avail_gb $check_drive $check_space; then
-    check_failed=1
-fi
+# min_docker_gb=$((NEPI_GB_CONTAINER * 1))
+# min_storage_gb=$NEPI_GB_CONTAINER
+# min_total=$((min_docker_gb + min_storage_gb))
 
 
-check_drive=$NEPI_STORAGE
-check_space=$min_storage_gb
-if ! is_space_avail_gb $check_drive $check_space; then
-    check_failed=1
-fi
+# check_failed=0
+
+# check_drive=$NEPI_DOCKER
+# check_space=$min_docker_gb
+# if ! is_space_avail_gb $check_drive $check_space; then
+#     check_failed=1
+# fi
+
+
+# check_drive=$NEPI_STORAGE
+# check_space=$min_storage_gb
+# if ! is_space_avail_gb $check_drive $check_space; then
+#     check_failed=1
+# fi
 
  
 

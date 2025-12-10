@@ -29,7 +29,7 @@ fi
 # This file configures a NEPI Docker installation Files and Folders
 
 
-if [[ -v "$1" ]]; then
+if [[ "$1" -eq 1 ]]; then
     DEMO_INSTALL=$1
 else
     DEMO_INSTALL=0
