@@ -138,9 +138,10 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
         
     if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
         if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
-            sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
+            sudo cp -R /home/${SUDO_USER}/nepi_setup /home/${CONFIG_USER}/nepi_setup
         fi
     fi
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
 
     # Updated the Desktop
     dfolder=/home/${CONFIG_USER}/Desktop
@@ -153,20 +154,9 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
         fi
     fi
    
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${user}
-        sudo chmod 0755 /home/${CONFIG_USER}
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+    sudo chmod 0755 /home/${CONFIG_USER}
 
-
-    sudo usermod -aG sudo $SUDO_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_1 $SUDO_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_2 $SUDO_USER >/dev/null 2>&1
-    sudo adduser ${SUDO_USER} dialout
-    sudo usermod -aG dialout ${SUDO_USER} >/dev/null 2>&1
-    sudo usermod -aG tty ${SUDO_USER} >/dev/null 2>&1
-    sudo usermod -aG i2c ${SUDO_USER} >/dev/null 2>&1
-    sudo usermod -aG video ${SUDO_USER} >/dev/null 2>&1
-    sudo usermod -aG docker ${SUDO_USER} >/dev/null 2>&1
-    sudo usermod -aG $CONFIG_USER ${SUDO_USER} >/dev/null 2>&1
 
 
 else
@@ -211,14 +201,14 @@ function new_system_user(){
         sudo usermod -aG video ${user} >/dev/null 2>&1
         sudo usermod -aG docker ${user} >/dev/null 2>&1
         sudo usermod -aG $SUDO_USER  ${user} >/dev/null 2>&1
-
+        sudo usermod -aG $user ${SUDO_USER} >/dev/null 2>&1
         sudo usermod -s /sbin/nologin $user
 		
         sudo chown ${user}:${user} /home/${user}
         sudo chmod 0755 /home/${user}
 
-        sudo usermod -aG $user ${SUDO_USER} >/dev/null 2>&1
-        
+       
+
     else
         echo "Failed to create user account $user"
         echo "Manual create an Adminstrator user account name ${user}"
