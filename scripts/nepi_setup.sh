@@ -112,7 +112,7 @@ if [[ "$?" -eq 0 ]]; then
     sudo systemctl stop apport  >/dev/null 2>&1
 fi
 etc_path=default/apport
-sudo rm /etc/${etc_path}
+sudo rm /etc/${etc_path} >/dev/null 2>&1
 sudo cp ${SOURCE_ETC_PATH}/${etc_path} /etc/${etc_path}  >/dev/null 2>&1
 
 sudo rm /var/crash/* 2>/dev/null
@@ -122,7 +122,7 @@ echo ""
 echo "########"
 echo "Configuring nepi_modprobe.conf"
 etc_path=modprobe.d/nepi_modprobe.conf
-sudo rm /etc/${etc_path}
+sudo rm /etc/${etc_path} >/dev/null 2>&1
 sudo cp ${SOURCE_ETC_PATH}/${etc_path} /etc/${etc_path}  >/dev/null 2>&1
 
 
@@ -137,7 +137,7 @@ echo "########"
 echo "Setting up Baumer GenTL Producers (Genicam support)"
 
 if [ ! -d "/opt/baumer" ]; then
-    sudo rm -r /opt/baumer
+    sudo rm -r /opt/baumer >/dev/null 2>&1
 fi
 sudo cp -r ${SOURCE_ETC_PATH}/opt/baumer /opt/baumer
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/baumer
@@ -148,26 +148,6 @@ ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_us
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_usb.cti
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14
 ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_gige.cti
-
-
-
-
-echo ""
-echo "########"
-echo "Configuring Samba Service"
-
-
-echo "Updating Samba ETC config file"
-if [[ "$CONFIG_USER" == "nepi" ]]; then
-    source_file=${SOURCE_ETC_PATH}/samba/smb.conf
-else
-    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-fi
-
-dest_file=/etc/samba/smb.conf
-if [[ -f "$source_file" ]]; then
-    sudo cp -d $source_file $dest_file
-fi
 
 
 
@@ -185,6 +165,7 @@ fi
 echo "Running setup in ${NEPI_INSTALL} mode"
 
 NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
+sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
 
 echo "Updating NEPI Config File"
 
@@ -211,6 +192,26 @@ update_yaml_value "NEPI_MANAGES_SOFTWARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FIL
 
 export NEPI_MANAGES_DOCKER=$SERVICES_MANAGED
 update_yaml_value "NEPI_MANAGES_DOCKER" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+
+
+if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
+    echo ""
+    echo "########"
+    echo "Configuring Samba Service"
+
+
+    echo "Updating Samba ETC config file"
+    if [[ "$CONFIG_USER" == "nepi" ]]; then
+        source_file=${SOURCE_ETC_PATH}/samba/smb.conf
+    else
+        source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+    fi
+
+    dest_file=/etc/samba/smb.conf
+    if [[ -f "$source_file" ]]; then
+        sudo cp -d $source_file $dest_file
+    fi
+fi
 
 ################################
 # Update ETC files if systemd is running (Not in Container)
@@ -577,7 +578,7 @@ if [[ -n "$DISPLAY" ]]; then
         if find "$dfolder" -maxdepth 0 -empty | read; then
             echo "Desktop folder cleaned"
         else
-            sudo rm ${dfolder}/*
+            sudo rm ${dfolder}/* >/dev/null 2>&1
             echo "Desktop folder cleaned"
         fi
     fi
