@@ -20,11 +20,9 @@
 
 # This file configigues an installed NEPI File System
 
-
-if [[ -z "$1" ]]; then
-    SHOW_CONFIG_MENU=0
-else
-    SHOW_CONFIG_MENU=$1
+SHOW_CONFIG_MENU=0
+if [[ "$1" -eq 1 ]]; then
+    SHOW_CONFIG_MENU=1
 fi
 
 sudo -v
@@ -159,129 +157,132 @@ update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $NEPI_SYS_CONFIG_FILE
 
 
 # ########################################
-# # Update NEPI System Config if needed
-
-if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
+# # Update NEPI System Config
 
 
+#####################################
+# Config Setup
 
-    #####################################
-    # Config Setup
+NEPI_USER_CONFIGS=(
+NEPI_USER_PW \
+NEPI_HOST_PW \
+NEPI_ADMIN_PW \
+NEPI_IP_INTERFACE \
+NEPI_DEVICE_ID \
+NEPI_DEVICE_MD \
+NEPI_DEVICE_SN \
+NEPI_IP \
+NEPI_GATEWAY_IP \
+NEPI_ALIAS_IP_1 \
+NEPI_ALIAS_IP_2 \
+NEPI_NTP_IP \
+NEPI_FS_AB \
+NEPI_IMPORT_PATH \
+NEPI_EXPORT_PATH
+)
 
-    NEPI_USER_CONFIGS=(
-    NEPI_USER_PW \
-    NEPI_HOST_PW \
-    NEPI_ADMIN_PW \
-    NEPI_IP_INTERFACE \
-    NEPI_DEVICE_ID \
-    NEPI_DEVICE_MD \
-    NEPI_DEVICE_SN \
-    NEPI_IP \
-    NEPI_ALIAS_IP_1 \
-    NEPI_ALIAS_IP_2 \
-    NEPI_NTP_IP \
-    NEPI_AB_FS \
-    NEPI_IMPORT_PATH \
-    NEPI_EXPORT_PATH
-    )
+function update_current_config() {
+    source ${SYSTEM_ETC_PATH}/load_system_config.sh
+    CURRENT_NEPI_USER_PW="$NEPI_USER_PW"
+    CURRENT_NEPI_HOST_PW="$NEPI_HOST_PW"
+    CURRENT_NEPI_ADMIN_PW="$NEPI_ADMIN_PW"
+    CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
+    CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
+    CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
+    CURRENT_NEPI_IP=$(fix_ip_netmask $NEPI_IP)
+    CURRENT_NEPI_GATEWAY_IP="$NEPI_GATEWAY_IP"
+    CURRENT_NEPI_ALIAS_IP_1=$(fix_ip_netmask $NEPI_ALIAS_IP_1)
+    CURRENT_NEPI_ALIAS_IP_2=$(fix_ip_netmask $NEPI_ALIAS_IP_2)
+    CURRENT_NEPI_NTP_IP="$NEPI_NTP_IP"
+    CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
+    CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
+    CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
+}
 
-    function update_current_config() {
-        source ${SYSTEM_ETC_PATH}/load_system_config.sh
-        CURRENT_NEPI_USER_PW="$NEPI_USER_PW"
-        CURRENT_NEPI_HOST_PW="$NEPI_HOST_PW"
-        CURRENT_NEPI_ADMIN_PW="$NEPI_ADMIN_PW"
-        CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
-        CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
-        CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
-        CURRENT_NEPI_IP="$NEPI_IP"
-        CURRENT_NEPI_ALIAS_IP_1="$NEPI_ALIAS_IP_1"
-        CURRENT_NEPI_ALIAS_IP_2="$NEPI_ALIAS_IP_2"
-        CURRENT_NEPI_NTP_IP="$NEPI_NTP_IP"
-        CURRENT_NEPI_AB_FS="$NEPI_AB_FS"
-        CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
-        CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-    }
+function print_user_config(){
+    config_file=${SYSTEM_SYS_CONFIG_FILE}
+    if [ -f "$config_file" ]; then
+        CONFIGN="#############################
+        ## NEPI Config Settings ##
+        #############################
+        FILE=${config_file}"
 
-    function print_user_config(){
-        config_file=${SYSTEM_SYS_CONFIG_FILE}
-        if [ -f "$config_file" ]; then
-            CONFIGN="#############################
-            ## NEPI Config Settings ##
-            #############################
-            FILE=${config_file}"
+        keys=($(yq e 'keys | .[]' ${config_file}))
+        for key in "${keys[@]}"; do
 
-            keys=($(yq e 'keys | .[]' ${config_file}))
-            for key in "${keys[@]}"; do
+            IF key in NEPI_USER_CONFIGS then
 
-                IF key in NEPI_USER_CONFIGS then
+                value=$(yq e '.'"$key"'' $config_file)
+                echo "${key}=${value}"
+                CONFIGN="${CONFIGN}
+                ${key}=${!key}"
+        done
+        echo $CONFIG
+    else
+        echo "Config file not found ${config_file}"
+    fi
+}
 
-                    value=$(yq e '.'"$key"'' $config_file)
-                    echo "${key}=${value}"
-                    CONFIGN="${CONFIGN}
-                    ${key}=${!key}"
-            done
-            echo $CONFIG
-        else
-            echo "Config file not found ${config_file}"
-        fi
-    }
+function print_current_config(){
+    echo ""
+    echo "######################"
+    echo "Current Settings"
+    echo "######################"
+    echo "NEPI_USER_PW: ${CURRENT_NEPI_USER_PW}"
+    echo "NEPI_HOST_PW: ${CURRENT_NEPI_HOST_PW}"
+    echo "NEPI_ADMIN_PW: ${CURRENT_NEPI_ADMIN_PW}"
+    echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
+    echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
+    echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
+    echo "NEPI_IP: ${CURRENT_NEPI_IP}"
+    echo "NEPI_GATEWAY_IP: ${CURRENT_NEPI_GATEWAY_IP}"
+    echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
+    echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
+    echo "NEPI_NTP_IP: ${CURRENT_NEPI_NTP_IP}"
+    echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
+    echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
+    echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
+    echo ""
+    echo "Select Config to Update:"
+}
 
-    function print_current_config(){
-        echo ""
-        echo "######################"
-        echo "Current Settings"
-        echo "######################"
-        echo "NEPI_USER_PW: ${CURRENT_NEPI_USER_PW}"
-        echo "NEPI_HOST_PW: ${CURRENT_NEPI_HOST_PW}"
-        echo "NEPI_ADMIN_PW: ${CURRENT_NEPI_ADMIN_PW}"
-        echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
-        echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
-        echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
-        echo "NEPI_IP: ${CURRENT_NEPI_IP}"
-        echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
-        echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
-        echo "NEPI_NTP_IP: ${CURRENT_NEPI_NTP_IP}"
-        echo "NEPI_AB_FS: ${CURRENT_NEPI_AB_FS}"
-        echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
-        echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
-        echo ""
-        echo "Select Config to Update:"
-    }
 
-    function udpate_config_file(){
-        update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_AB_FS" $CURRENT_NEPI_AB_FS $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
+function udpate_config_file(){
+    update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_GATEWAY_IP" $CURRENT_NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
 
-    }
+}
 
-    #####################################
-    # Update NEPI System Config if needed
-    #####################################
+#####################################
+# Update NEPI System Config if needed
+#####################################
 
-    if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
-        update_current_config
-        print_current_config
-        
+if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
+    update_current_config
+    print_current_config
+    
+    if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
+
         select opt in "APPLY SETTINGS" "VIEW SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                 "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
-                "Update NEPI_IP" "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2" "Update NEPI_NTP_IP" \
-                "Update NEPI_AB_FS" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
+                "Update NEPI_IP" "Update NEPI_GATEWAY_IP" "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2" "Update NEPI_NTP_IP" \
+                "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
                 "FACTORY RESET" "QUIT" \
                 ; do
             case $opt in
                 "APPLY SETTINGS")
-                    udpate_config_file
                     break
                     ;;
                 "VIEW SETTINGS")
@@ -332,45 +333,57 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
                     fi           
                     print_current_config
                 ;;
-               "Update NEPI_DEVICE_SN")
+            "Update NEPI_DEVICE_SN")
                     read -p "Enter a new 6 digit Serial Number: " USER_INPUT
-                    if is_valid_ipv4 "$USER_INPUT"; then
+                    if is_valid_sn "$USER_INPUT"; then
                         CURRENT_NEPI_IP=$USER_INPUT
                     else
-                        echo "Not A Valid IP Format"
+                        echo "Not A Valid Serial Number Format"
                     fi
                     print_current_config
                     ;;
                 "Update NEPI_IP")
-                    read -p "Enter a new Static IP Address: " USER_INPUT
-                    if is_valid_ipv4 "$USER_INPUT"; then
+                    read -p "Enter a new Static IP Address\Netmask: " USER_INPUT
+                    if is_valid_ipv4_netmask "$USER_INPUT"; then
                         CURRENT_NEPI_IP=$USER_INPUT
                     else
-                        echo "Not A Valid IP Format"
+                        echo "Not A Valid IP/Netmask Format"
                     fi
 
                     ;;
-                "Update NEPI_ALIAS_IP_1")
-                    read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
+                "Update NEPI_GATEWAY_IP")
+                    read -p "Enter a new Gateway IP Address, or Empty Line for None: " USER_INPUT
                     if [[ "${USER_INPUT}" == "" ]]; then
                         USER_INPUT=None
                     fi
                     if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
+                        CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
                     else
                         echo "Not A Valid IP Format"
                     fi
                     print_current_config
                     ;;
-                "Update NEPI_ALIAS_IP_2")
-                    read -p "Enter a new Alias IP Address, or Empty Line to Clear: " USER_INPUT
+                "Update NEPI_ALIAS_IP_1")
+                    read -p "Enter a new Alias IP Address\Netmask, or Empty Line for None: " USER_INPUT
                     if [[ "${USER_INPUT}" == "" ]]; then
                         USER_INPUT=None
                     fi
-                    if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                    if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                        CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
+                    else
+                        echo "Not A Valid IP/Netmask Format"
+                    fi
+                    print_current_config
+                    ;;
+                "Update NEPI_ALIAS_IP_2")
+                    read -p "Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
+                    if [[ "${USER_INPUT}" == "" ]]; then
+                        USER_INPUT=None
+                    fi
+                    if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
                         CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
                     else
-                        echo "Not A Valid IP Format"
+                        echo "Not A Valid IP/Netmask Format"
                     fi
                     print_current_config
                     ;;
@@ -387,10 +400,10 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
                     print_current_config
                     ;;
 
-                "Update NEPI_AB_FS")
+                "Update NEPI_FS_AB")
                     read -p "Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
                     if is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_AB_FS=$USER_INPUT
+                        CURRENT_NEPI_FS_AB=$USER_INPUT
                     else
                         echo "Not A Valid Input"
                     fi
@@ -436,40 +449,42 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
                     ;;
             esac
         done
-    else
-        echo "${SYSTEM_ETC_PATH} Is Not a Directory"
-        # sudo mkdir -p $SYSTEM_ETC_PATH
-        # sudo cp ${NEPI_SYSTEM_CONFIG_SOURCE} ${SYSTEM_SYS_CONFIG_FILE}
     fi
 
-
-
-    if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-        ###############
-        # Check for available key options
-        SYSTEM_SSH_AKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/
-        SYSTEM_SSH_AKEY_DEST=${SYSTEM_ETC_PATH}/ssh/authorized_keys
-        sel_ssh_path="${SYSTEM_SSH_AKEY_SOURCE}/nepi_engine_default_authorized_keys"
-
-
-        file_count=$(find "$SYSTEM_SSH_AKEY_SOURCE" -maxdepth 1 -type f | wc -l)
-        if [[ "$file_count" -gt 1 ]]; then
-            sel_ssh_file=$(select_file_from_folder $SYSTEM_SSH_AKEY_SOURCE | tail -n 1)
-            if [[ -n "$sel_ssh_file"  ]]; then
-                sel_ssh_path=${SYSTEM_SSH_AKEY_SOURCE}/${sel_ssh_file}
-            fi
-        fi
-
-        if [[ -f "$sel_ssh_path" ]]; then
-            NEPI_SSH_AKEY=$sel_ssh_file
-        fi
-        echo "Using SSH Key file: ${NEPI_SSH_AKEY}"
-        export NEPI_SSH_AKEY=$NEPI_SSH_AKEY
-        update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $NEPI_SYS_CONFIG_FILE
-    fi
-
-
+    udpate_config_file
+else
+    echo "${SYSTEM_ETC_PATH} Is Not a Directory"
+    # sudo mkdir -p $SYSTEM_ETC_PATH
+    # sudo cp ${NEPI_SYSTEM_CONFIG_SOURCE} ${SYSTEM_SYS_CONFIG_FILE}
 fi
+
+
+
+if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
+    ###############
+    # Check for available key options
+    SYSTEM_SSH_AKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/
+    SYSTEM_SSH_AKEY_DEST=${SYSTEM_ETC_PATH}/ssh/authorized_keys
+    sel_ssh_path="${SYSTEM_SSH_AKEY_SOURCE}/nepi_engine_default_authorized_keys"
+
+
+    file_count=$(find "$SYSTEM_SSH_AKEY_SOURCE" -maxdepth 1 -type f | wc -l)
+    if [[ "$file_count" -gt 1 ]]; then
+        sel_ssh_file=$(select_file_from_folder $SYSTEM_SSH_AKEY_SOURCE | tail -n 1)
+        if [[ -n "$sel_ssh_file"  ]]; then
+            sel_ssh_path=${SYSTEM_SSH_AKEY_SOURCE}/${sel_ssh_file}
+        fi
+    fi
+
+    if [[ -f "$sel_ssh_path" ]]; then
+        NEPI_SSH_AKEY=$sel_ssh_file
+    fi
+    echo "Using SSH Key file: ${NEPI_SSH_AKEY}"
+    export NEPI_SSH_AKEY=$NEPI_SSH_AKEY
+    update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $NEPI_SYS_CONFIG_FILE
+fi
+
+
 
 
 echo ""
@@ -554,8 +569,9 @@ bfile=/home/${USER}/.bashrc
 if is_valid_did $NEPI_DEVICE_ID; then
     update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
 fi
-if is_valid_ipv4 $NEPI_IP; then
-    update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${NEPI_IP}"
+ip="${NEPI_IP%%/*}"
+if is_valid_ipv4 $ip; then
+    update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${ip}"
 fi
 
 

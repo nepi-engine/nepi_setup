@@ -98,11 +98,14 @@ BASHRC=/home/${CONFIG_USER}/.bashrc
 rm $BASHRC
 cp /etc/skel/.bashrc $BASHRC
 
-if [[ -z "$NEPI_IP" ]]; then
-    NEPI_IP=192.168.179.103
+
+if [[ -n "${NEPI_IP%%/*}" ]]; then
+    nepi_ip="${NEPI_IP%%/*}"
+else
+    nepi_ip=192.168.179.103
 fi
-if ! is_valid_ipv4 $NEPI_IP; then
-    NEPI_IP=192.168.179.103
+if ! is_valid_ipv4 "${nepi_ip%%/*}"; then
+    nepi_ip=192.168.179.103
 fi
 
 
@@ -198,7 +201,7 @@ fi
 # Add NEPI SETTINGS
 echo ' ' | sudo tee -a $BASHRC
 echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
-echo 'export NEPI_IP='${NEPI_IP} | sudo tee -a $BASHRC
+echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
 echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC

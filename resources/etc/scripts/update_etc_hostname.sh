@@ -114,17 +114,17 @@ if [[ "$?" -eq 0 ]]; then
 
                 echo "Updating NEPI IP in ${file}"
 
-                entry="${NEPI_IP} ${NEPI_USER}"
+                entry="${NEPI_IP%%/*} ${NEPI_USER}"
                 echo "Adding NEPI IP in ${file}"
-                echo "${NEPI_IP} ${NEPI_DEVICE_ID}" | sudo tee -a $file
+                echo "${NEPI_IP%%/*} ${NEPI_DEVICE_ID}" | sudo tee -a $file
                 echo $entry | sudo tee -a $file
                 echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
-                entry="${NEPI_IP} ${NEPI_ADMIN_USER}"
+                entry="${NEPI_IP%%/*} ${NEPI_ADMIN_USER}"
                 echo $entry | sudo tee -a $file
                 echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
-                entry="${NEPI_IP} ${NEPI_HOST_USER}"
+                entry="${NEPI_IP%%/*} ${NEPI_HOST_USER}"
                 echo $entry | sudo tee -a $file
                 echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 

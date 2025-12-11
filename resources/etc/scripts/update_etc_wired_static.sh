@@ -90,27 +90,28 @@ if [[ "$?" -eq 0 ]]; then
             fi
 
             file=/etc/network/interfaces.d/nepi_static_ip
-            if is_valid_ipv4 "$NEPI_IP" ]]; then
+            nepi_ip=fix_ipv4_netmask $NEPI_IP
+            if is_valid_ipv4_netmask "$nepi_ip" ]]; then
                 if [[ -d "/etc/network/interfaces.d" ]]; then
                     echo "Updating Static IP file ${file}"
                     sudo chmod +x -R /etc/network/interfaces.d
                     sudo bash -c "cat /dev/null > $file"
                     sudo echo 'auto '${NEPI_WIRED_INTERFACE} | sudo tee -a $file
                     sudo echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
-                    sudo echo '    address '${NEPI_IP}'/24' | sudo tee -a $file
-                    if [[ "$NEPI_IP_GATEWAY" != "NONE" && "$NEPI_IP_GATEWAY" != "" ]]; then
-                        echo "Adding IP Gateway ${NEPI_IP_GATEWAY}"
-                        sudo echo '    gateway '${NEPI_IP_GATEWAY} | sudo tee -a $file
+                    sudo echo '    address '${nepi_ip} | sudo tee -a $file
+                    if is_valid_ipv4 $NEPI_GATEWAY_IP; then
+                        echo "Adding IP Gateway ${NEPI_GATEWAY_IP}"
+                        sudo echo '    gateway '${NEPI_GATEWAY_IP} | sudo tee -a $file
                     fi
                     echo "Updated Static IP file"
                     sudo bash -c "cat $file"
 
-                    echo "NEPI Static IP address updated to ${NEPI_IP}"
+                    echo "NEPI Static IP address updated to ${nepi_ip}"
                 else
-                    echo "Not A Valid IP Format ${NEPI_IP} "
+                    echo "Not A Valid IP Format ${nepi_ip} "
                 fi
             else
-                echo "Not Updating provided IP. Not A Valid IP Format ${NEPI_IP} "
+                echo "Not Updating provided IP. Not A Valid IP Format ${nepi_ip} "
             fi
 
 

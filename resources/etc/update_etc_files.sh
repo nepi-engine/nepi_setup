@@ -149,10 +149,10 @@ source ${ETC_FOLDER}/scripts/update_etc_ssh_keys.sh $LOAD_NEPI_CONFIG
 export NEPI_DEVICE_ID=$(hostname)
 update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID ${ETC_FOLDER}/nepi_system_config.yaml
 
-cur_ips=($(ip -4 addr show dev ${NEPI_WIRED_INTERFACE} | grep "inet " | awk '{print $2}' | cut -d/ -f1))
-cur_ip=${cur_ips[0]}
-export NEPI_IP=$cur_ip
-update_yaml_value "NEPI_IP" $NEPI_IP ${ETC_FOLDER}/nepi_system_config.yaml
+# cur_ips=($(ip -4 addr show dev ${NEPI_WIRED_INTERFACE} | grep "inet " | awk '{print $2}' | cut -d/ -f1))
+# cur_ip=${cur_ips[0]}
+# export NEPI_IP=$cur_ip
+# update_yaml_value "NEPI_IP" $NEPI_IP ${ETC_FOLDER}/nepi_system_config.yaml
 
 
 ###########################################

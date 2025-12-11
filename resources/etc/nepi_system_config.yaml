@@ -35,15 +35,18 @@ NEPI_SW_DESC: unknown
 ## WIRED NETWORK SETTINGS
 # Set the NEPI device's wired network interface name
 NEPI_WIRED_INTERFACE: eth0
-# Set the NEPI device's primary IP address
-NEPI_IP: 192.168.179.103
+# Set the NEPI device's primary IP address and netmask
+# If netmask if left out, 24 will be used
+NEPI_IP: 192.168.179.103/24
 # Set the NEPI device's primary IP Gatway address, or set to NONE
-NEPI_IP_GATEWAY: NONE
-# Add IP address Aliases on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
+NEPI_GATEWAY_IP: 192.168.179.1
+# Add up to 10 IP address and netmask Aliases on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
+# If netmask if left out, 24 will be used
 # NOTE: NEPI IP aliases are useful if you need to connect to other devices on the Network
 #  like IP cameras configured with a different IP subnet then the NEPI_IP value. 
-NEPI_ALIAS_IP_1: 192.168.0.103
-NEPI_ALIAS_IP_2: 192.168.1.103
+NEPI_ALIAS_IP_1: 192.168.0.103/24
+NEPI_ALIAS_IP_2: 192.168.1.103/24
+NEPI_ALIAS_IP_3: None
 # Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that

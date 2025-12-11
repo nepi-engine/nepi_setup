@@ -134,6 +134,7 @@ export -f is_valid_sn
 function is_valid_ipv4() {
     local input=$1
 
+
     # Check if the format matches a general IP pattern (e.g., 1.2.3.4)
     if ! [[ $input =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
         echo "Not a valid IP Address format #.#.#.#"
@@ -148,9 +149,44 @@ function is_valid_ipv4() {
         fi
     done
 
+
     return 0 # Valid IP address
 }
 export -f is_valid_ipv4
+  
+
+function is_valid_netmask() {
+    local input=$1
+
+    if [[ "$input" -ge 0 && "$input" -le 32 ]]; then
+      : # Valid
+    else
+      echo "Not a valid Netmask between 0 and 32"
+      return 1 # Invalid format
+    fi
+
+    return 0 # Valid Netmask address
+}
+export -f is_valid_netmask
+
+
+
+function is_valid_ipv4_netmask() {
+    local input=$1
+    ip="${input%%/*}"
+    nm=${input#*/}
+    if is_valid_ip $ip; then
+      if is_valid_netmask $nm; then
+        return 0 # Valid IP and Netmask
+      else
+        return 1 # Invalid Netmask
+      fi
+    else
+      return 1 # Invalid IP address format
+    fi
+}
+export -f is_valid_ipv4_netmask
+
 
 function is_valid_path() {
     local input=$1
@@ -334,6 +370,8 @@ is_valid_did = Check for valid device id name
 is_valid_string = Check that string is not empty
 is_valid_sn = Check for valid nepi serial number
 is_valid_ipv4 = Check for valid ip address
+is_valid_netmask = Check for valid ip netmask
+is_valid_ipv4_netmask = Check for valid ip and netmask
 is_valid_path = Check for path
 is_valid_folder = Check for folder
 is_valid_file = Check for file
@@ -373,11 +411,12 @@ export -f pingi
 
 # ping nepi
 function pingn(){
-    if ! ping -c 1 ${NEPI_IP} > /dev/null 2>&1; then
-        echo "No NEPI Connection at ${NEPI_IP}"
+    ip="${NEPI_IP%%/*}"
+    if ! ping -c 1 ${ip} > /dev/null 2>&1; then
+        echo "No NEPI Connection at ${ip}"
         return 1
     else
-        echo "NEPI Connected at ${NEPI_IP}"
+        echo "NEPI Connected at ${ip}"
     fi
 }
 export -f pingn
@@ -385,14 +424,13 @@ export -f pingn
 
 # ping nepi
 function pingnc(){
-  ping ${NEPI_IP}
+  ping "${NEPI_IP%%/*}"
 }
 export -f pingnc
 
 # source bashrc
 function sbrc(){
-    config_user=$(id -un 1000)
-    source /home/${config_user}/.bashrc
+    source /home/${CONFIG_USER}/.bashrc
 }
 export -f sbrc
 
@@ -576,14 +614,33 @@ function fix_chromium(){
   sudo rm -rf ~/.config/chromium/chommon/Singleton* > /dev/null 2>&1
   sudo rm -rf ~/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
 
-  config_user=$(id -un 1000)
-  sudo rm -rf /home/${config_user}/.cache/chromium > /dev/null 2>&1
-  sudo rm -rf /home/${config_user}/snap/.cache/chromium > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium > /dev/null 2>&1
 
-  #sudo rm -rf /home/${config_user}/.config/chromium/* 2>/dev/null
-  #sudo rm -rf /home/${config_user}/snap/chromium/* 2>/dev/null
+  #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
+  #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
 }
 export function fix_chromium
+
+
+function fix_ip_netmask() {
+    local input=$1
+    ip="${input%%/*}"
+    nm=${input#*/}
+    if is_valid_ip $ip; then
+      if is_valid_netmask $nm; then
+        echo "${ip}/${nm}"
+      else
+        echo "${ip}/24"
+      fi
+    else
+      echo ''
+      return 1 # Invalid IP address format
+    fi
+
+    return 0 # Valid IP address
+}
+export -f fix_ip_netmask
 
 
 function nls(){
@@ -607,6 +664,7 @@ nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 fix_chromium = Fix any Chromium config issues
+fix_ip_netmask = Check valid IP and add 24 netmask if not provided
 sbrc = Source the current user's bashrc files" 
 
 ###################################
@@ -651,12 +709,10 @@ function fix_path(){
       target_path=$1
       if [[ ! -e "$target_path" ]]; then
         sudo mkdir -p $target_path
-        config_user=$(id -un 1000)
         sudo chmod 0664 ${target_path} > /dev/null 2>&1
       elif is_nepi_path $target_path; then
         echo "Fixing permissions for path: ${target_path}"
-        config_user=$(id -un 1000)
-        sudo chown ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} ${target_path} > /dev/null 2>&1
         if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
           sudo chmod ${2} ${target_path} > /dev/null 2>&1
         fi
@@ -676,12 +732,10 @@ function fix_folder(){
   if [[ ! -v "$1" && -n "$1" ]]; then
       target_path=$1
       if [[ ! -e "$target_path" ]]; then
-        config_user=$(id -un 1000)
         sudo chmod 0664 ${target_path} > /dev/null 2>&1
       elif is_nepi_path $target_path; then
         echo "Fixing permissions for path: ${target_path}"
-        config_user=$(id -un 1000)
-        sudo chown -R ${config_user}:${config_user} ${target_path} > /dev/null 2>&1
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${target_path} > /dev/null 2>&1
         if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
           sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
         fi
@@ -713,8 +767,7 @@ function fix_scripts(){
 
     if is_nepi_path $target_path; then
       echo "Fixing permissions in script folder: ${target_path}"
-      config_user=$(id -un 1000)
-      sudo chown ${config_user}:${config_user} ${target_path}/* > /dev/null 2>&1
+      sudo chown ${CONFIG_USER}:${CONFIG_USER} ${target_path}/* > /dev/null 2>&1
       sudo chmod +x ${target_path}/* > /dev/null 2>&1
 
     else
