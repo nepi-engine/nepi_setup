@@ -46,7 +46,7 @@ NEPI_GATEWAY_IP: 192.168.179.1
 #  like IP cameras configured with a different IP subnet then the NEPI_IP value. 
 NEPI_ALIAS_IP_1: 192.168.0.103/24
 NEPI_ALIAS_IP_2: 192.168.1.103/24
-NEPI_ALIAS_IP_3: None
+NEPI_ALIAS_IP_3: NONE
 # Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
@@ -91,7 +91,7 @@ NEPI_ROS_PORT: 11311
 ####################################################
 # NEPI SOFTWARE Config
 ####################################################
-NEPI_INSTALL: DEMO
+NEPI_INSTALL: unknown
 NEPI_PYTHON: X.X
 NEPI_ROS: unknown
 NEPI_HAS_CUDA: 0

@@ -154,18 +154,28 @@ ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_gig
 #################################
 # Update Managed Service Settings
 
-NEPI_INSTALL=PRODUCTION
-SERVICES_MANAGED=1
-echo $DEMO_INTSTALL
-if [[ "$DEMO_INSTALL" -eq 1 ]]; then
-    NEPI_INSTALL=DEMO
-    SERVICES_MANAGED=0
-fi
-
-echo "Running setup in ${NEPI_INSTALL} mode"
-
+####################################
+# Run NEPI System Config Load if exists
 NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
+
+
+NEPI_SYS_CONFIG_LOAD=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+if ! source_script $NEPI_SYS_CONFIG_LOAD; then
+    script_error=$?
+    echo "Script ${NEPI_SYS_CONFIG_LOAD} failed with error ${script_error}"
+fi
+
+if [[ "$NEPI_INSTALL" == "DEMO" || "$DEMO_INSTALL" -eq 1 ]]; then
+    NEPI_INSTALL=DEMO
+    SERVICES_MANAGED=0
+else
+    NEPI_INSTALL=PRODUCTION
+    SERVICES_MANAGED=1
+fi
+
+
+echo "Running setup in ${NEPI_INSTALL} mode"
 
 echo "Updating NEPI Config File"
 

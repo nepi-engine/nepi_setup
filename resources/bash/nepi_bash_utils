@@ -642,7 +642,7 @@ function fix_ipv4_netmask() {
         return 2 # Invalid IP address format
       fi
     else
-      echo ''
+      echo ${input}
       return 1 # Invalid IP address format
     fi
 

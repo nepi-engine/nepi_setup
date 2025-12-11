@@ -458,7 +458,8 @@ export -f nepicreate
 ## NEPI build shortcuts
 alias nepibld="
 sudo -v
-source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh"
+source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh
+nnet"
 
 
 
