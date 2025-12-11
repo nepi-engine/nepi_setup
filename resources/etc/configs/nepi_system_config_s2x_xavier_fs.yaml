@@ -119,15 +119,6 @@ NEPI_GB_CONTAINER: 20
 #   NEPI factory config ip address 192.168.179.103 before switching to
 #   NEPI system config configured ip address for 10 seconds
 NEPI_RECOVERY_ENABLED: 1
-# If NEPI_IN_CONTAINER=1, set whether NEPI supports a dual A B files system structure for
-#  backup and recovery purposes.
-# NOTE: If NEPI_AB_FS is enabled, NEPI docker service will manage an Active NEPI container image,
-#   and an Inactive Image used for backup and recovery purposes. If NEPI_AB_FS is enabled, 
-#   you can switch between the current Active and Inactive A B containers
-#   with the terminal command "nepiswitch".
-# NOTE: If NEPI_AB_FS is enabled, an additional 100 GB of free drive space will be required
-#   for storing backup and staging of Docker images
-NEPI_AB_FS: 0
 # If NEPI_IN_CONTAINER=1, set the time in seconds to wait for 
 #   NEPI software to start and set success flags.
 # NOTE: This is the time NEPI Docker service will

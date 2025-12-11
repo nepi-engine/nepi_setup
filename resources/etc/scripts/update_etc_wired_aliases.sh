@@ -91,11 +91,20 @@ if [[ "$?" -eq 0 ]]; then
 
         for i in {1..10}; do
             alias_ip_var="NEPI_ALIAS_IP_"${i}
+            needs_update=0
             ip_address=$(fix_ipv4_netmask "${!alias_ip_var}")
-            #echo "Checking alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
+            if [[ "$?" -eq 2 ]]; then
+                needs_update=1
+            fi
+            
+            #echo "Checking alias_ip_alias ip var ${alias_ip_var} : ${ip_address}"
             if is_valid_ipv4_netmask $ip_address >/dev/null 2>&1; then
 
                 echo "Updating Alias IP Address ${ip_address}"
+                if [[ "$needs_update" -eq 1 ]]; then
+                    update_file=${ETC_FOLDER}/nepi_system_config.yaml
+                    update_yaml_value "${alias_ip_var}" $ip_address $update_file
+                fi
                 position=$i
                 alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 

@@ -77,7 +77,7 @@ if [[ -f "$bfile" ]]; then
     if is_valid_did $NEPI_DEVICE_ID; then
         update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
     fi
-    nepi_ip="${ip_address%%/*}"
+    nepi_ip="${NEPI_IP%%/*}"
     if is_valid_ipv4 $nepi_ip; then
         update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${nepi_ip}"
     fi

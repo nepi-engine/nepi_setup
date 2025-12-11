@@ -68,6 +68,8 @@ if ! source_script $script_path; then
     exit 1
 fi
 
+source /home/${CONFIG_USER}/.bashrc
+
 
 
 ####################################

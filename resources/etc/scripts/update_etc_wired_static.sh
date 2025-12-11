@@ -84,14 +84,28 @@ if [[ "$?" -eq 0 ]]; then
                 if [[ ! -d "/etc/network/interfaces.d" ]]; then
                     sudo mkdir -p "/etc/network/interfaces.d"
                 fi
-                sudo cp ${ETC_FOLDER}/network/* /etc/network/
+                sudo cp ${ETC_FOLDER}/network/* /etc/network/ 2>/dev/null
             else
                 echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network files"
             fi
 
             file=/etc/network/interfaces.d/nepi_static_ip
-            nepi_ip=fix_ipv4_netmask $NEPI_IP
+            echo "Fixing static ip ${NEPI_IP}"
+            needs_update=0
+            nepi_ip=$(fix_ipv4_netmask "$NEPI_IP")
+            if [[ "$?" -eq 2 ]]; then
+                needs_update=1
+            fi
+            
+            echo "Got fixed static ip ${nepi_ip}"
             if is_valid_ipv4_netmask "$nepi_ip" ]]; then
+                if [[ "$needs_update" -eq 1 ]]; then
+                    update_file=${ETC_FOLDER}/nepi_system_config.yaml
+                    echo "Updating NEPI System Config file ${file} with NEPI_IP: ${nepi_ip}"
+                    update_yaml_value "NEPI_IP" ${nepi_ip} $update_file
+                fi
+
+
                 if [[ -d "/etc/network/interfaces.d" ]]; then
                     echo "Updating Static IP file ${file}"
                     sudo chmod +x -R /etc/network/interfaces.d
@@ -100,6 +114,7 @@ if [[ "$?" -eq 0 ]]; then
                     sudo echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
                     sudo echo '    address '${nepi_ip} | sudo tee -a $file
                     if is_valid_ipv4 $NEPI_GATEWAY_IP; then
+                        sudo route add default gw $NEPI_GATEWAY_IP $NEPI_WIRED_INTERFACE
                         echo "Adding IP Gateway ${NEPI_GATEWAY_IP}"
                         sudo echo '    gateway '${NEPI_GATEWAY_IP} | sudo tee -a $file
                     fi

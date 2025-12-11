@@ -189,6 +189,7 @@ function update_current_config() {
     CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
     CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
     CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
+    CURRENT_NEPI_WIRED_INTERFACE="$NEPI_WIRED_INTERFACE"
     CURRENT_NEPI_IP=$(fix_ip_netmask $NEPI_IP)
     CURRENT_NEPI_GATEWAY_IP="$NEPI_GATEWAY_IP"
     CURRENT_NEPI_ALIAS_IP_1=$(fix_ip_netmask $NEPI_ALIAS_IP_1)
@@ -234,6 +235,7 @@ function print_current_config(){
     echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
     echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
     echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
+    echo "NEPI_IP: ${CURRENT_NEPI_WIRED_INTERFACE}"
     echo "NEPI_IP: ${CURRENT_NEPI_IP}"
     echo "NEPI_GATEWAY_IP: ${CURRENT_NEPI_GATEWAY_IP}"
     echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
@@ -254,6 +256,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_WIRED_INTERFACE" $CURRENT_NEPI_WIRED_INTERFACE
     update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_GATEWAY_IP" $CURRENT_NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
@@ -277,7 +280,8 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
         select opt in "APPLY SETTINGS" "VIEW SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                 "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
-                "Update NEPI_IP" "Update NEPI_GATEWAY_IP" "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2" "Update NEPI_NTP_IP" \
+                "Update NEPI_WIRED_INTERFACE" "Update NEPI_IP" "Update NEPI_GATEWAY_IP" \
+                "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2" "Update NEPI_NTP_IP" \
                 "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
                 "FACTORY RESET" "QUIT" \
                 ; do
@@ -342,6 +346,14 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     fi
                     print_current_config
                     ;;
+                "Update NEPI_WIRED_INTERFACE")
+                    read -p "Enter a new Wired Interface name: " USER_INPUT
+                    if [[ -n "$USER_INPUT" && "$USER_INPUT" != *" "* ]]; then
+                        CURRENT_NEPI_WIRED_INTERFACE=$USER_INPUT
+                    else
+                        echo "Not A Valid Wired Interface name"
+                    fi
+                    ;;
                 "Update NEPI_IP")
                     read -p "Enter a new Static IP Address\Netmask: " USER_INPUT
                     if is_valid_ipv4_netmask "$USER_INPUT"; then
@@ -349,7 +361,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     else
                         echo "Not A Valid IP/Netmask Format"
                     fi
-
                     ;;
                 "Update NEPI_GATEWAY_IP")
                     read -p "Enter a new Gateway IP Address, or Empty Line for None: " USER_INPUT

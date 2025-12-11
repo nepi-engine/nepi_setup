@@ -118,12 +118,6 @@ if ! is_valid_did $NEPI_DEVICE_ID; then
 fi
 
 
-if [[ "$?" -eq 1  && "$CONFIG_USER" != 'nepi' ]]; then
-    export NEPI_IN_CONTAINER=1
-else
-    export NEPI_IN_CONTAINER=0
-fi
-
 
 
 if grep -qnw $BASHRC -e "##### System Config #####" ; then
@@ -205,8 +199,6 @@ echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
 echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
-echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
-
 
 
 # Add NEPI Aliases
