@@ -69,8 +69,6 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-        NETMASK_CIDR="24" # e.g., 24 for 255.255.255.0
-
         echo "Checking Wired Alias IP Addresses"
 
         ###########################
@@ -105,7 +103,7 @@ if [[ "$?" -eq 0 ]]; then
                     update_file=${ETC_FOLDER}/nepi_system_config.yaml
                     update_yaml_value "${alias_ip_var}" $ip_address $update_file
                 fi
-                position=$i
+                position=$(i - 1) 
                 alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 
 

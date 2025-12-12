@@ -107,7 +107,7 @@ if [ ! -d "${nconfig}" ]; then
     sudo mkdir "${nconfig}"
 fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
-sudo rm -r ${nfolder}/.Trash*
+sudo rm -r ${nfolder}/.Trash* 2>/dev/null
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
 
 
@@ -162,7 +162,7 @@ if [ ! -d "${nfolder}" ]; then
     sudo mkdir "${nfolder}"
 fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
-sudo rm -r ${nfolder}/.Trash*
+sudo rm -r ${nfolder}/.Trash* 2>/dev/null
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $nfolder
 sudo chmod 0755 $nfolder
 

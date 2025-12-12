@@ -39,7 +39,7 @@ NEPI_WIRED_INTERFACE: eth0
 # If netmask if left out, 24 will be used
 NEPI_IP: 192.168.179.103/24
 # Set the NEPI device's primary IP Gatway address, or set to NONE
-NEPI_GATEWAY_IP: 192.168.179.1
+NEPI_GATEWAY_IP: NONE
 # Add up to 10 IP address and netmask Aliases on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
 # If netmask if left out, 24 will be used
 # NOTE: NEPI IP aliases are useful if you need to connect to other devices on the Network

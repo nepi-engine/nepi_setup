@@ -17,6 +17,19 @@
 ## - mailto:nepi@numurus.com
 ##
 
+DEMO_INSTALL=0
+if [[ "$1" -eq 1 ]] 2>/dev/null; then
+    DEMO_INSTALL=$1
+fi
+# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    exit 1
+fi
+
 
 # This file downloads the Latest NEPI Docker Image to the NEPI Devices Import Folder
 

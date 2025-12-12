@@ -12,7 +12,7 @@ NEPI_HOST_PW: nepi
 # Set NEPI_ALLOWS_USERS to 1 to allow non-NEPI user accounts
 # NOTE: if set to 0, all none-nepi user accounts will be removed
 #  during etc update processing
-NEPI_ALLOWS_USERS: 1
+NEPI_ALLOWS_USERS: 0
 
 ####################################################
 # NEPI SYSTEM SETTINGS
@@ -35,30 +35,25 @@ NEPI_SW_DESC: unknown
 ## WIRED NETWORK SETTINGS
 # Set the NEPI device's wired network interface name
 NEPI_WIRED_INTERFACE: eth0
-# Set the NEPI device's primary IP address and netmask
-# If netmask if left out, 24 will be used
-NEPI_IP: 192.168.179.103/24
+# Set the NEPI device's primary IP address
+NEPI_IP: 192.168.179.103
 # Set the NEPI device's primary IP Gatway address, or set to NONE
-NEPI_GATEWAY_IP: 192.168.179.1
-# Add IP addresse and netmask Aliases on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
-# If netmask if left out, 24 will be used
+NEPI_IP_GATEWAY: NONE
+# Add an IP address Alias on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
 # NOTE: NEPI IP aliases are useful if you need to connect to other devices on the Network
 #  like IP cameras configured with a different IP subnet then the NEPI_IP value. 
-NEPI_ALIAS_IP_1: 192.168.0.103/24
-NEPI_ALIAS_IP_2: 192.168.1.103/24
+NEPI_ALIAS_IPS: NONE
 # Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
-NEPI_NTP_IP: 192.168.179.5
+NEPI_NTP_IPS: 192.168.179.5
 # Enable Wired DHCP Wired Internet Connectivity on Startup. 
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
 #  a router with internet access. 
 NEPI_WIRED_DHCP_ENABLED: 1
 # Set the SSH Port that NEPI listens to, on top of the standard NEPI Host port (22).
 NEPI_SSH_PORT: 2222
-NEPI_SSH_AKEY: nepi_engine_default_authorized_keys
-NEPI_SSH_PKEY: nepi_engine_default_private_ssh_key
 ## WIFI NETWORK SETTINGS
 # Set the NEPI device's WiFi hardware interface name
 # NOTE: If set to "unknown", the first detected WiFi harware will be used
@@ -83,20 +78,14 @@ NEPI_WIFI_ACCESS_POINT_ENABLED: 0
 NEPI_WIFI_ACCESS_POINT_ID: nepi_device_ap
 NEPI_WIFI_ACCESS_POINT_PW: nepi_device_ap
 
-# SET ROS MASTER IP Address. Will fall back to NEPI_IP if not found
-NEPI_ROS_IP: 192.168.179.103
-NEPI_ROS_PORT: 11311
-
 ####################################################
 # NEPI SOFTWARE Config
 ####################################################
-NEPI_INSTALL: DEMO
 NEPI_PYTHON: X.X
 NEPI_ROS: unknown
 NEPI_HAS_CUDA: 0
 NEPI_CUDA_VERSION: X.X
 NEPI_HAS_XPU: 0
-NEPI_FS_AB: 0
 
 ####################################################
 ### NEPI HARDWARE SETTINGS
@@ -106,12 +95,11 @@ NEPI_HW_TYPE: unknown
 # NEPI Hardware Host Model Options: ORIN, XAVIER, TX2, NANO, RPI4, GENERIC.
 NEPI_HW_MODEL: unknown
 
-
 ####################################################
 # NEPI CONTAINER SETTINGS
 ####################################################
 # Set whether NEPI is running in a docker container
-NEPI_IN_CONTAINER: 0
+NEPI_IN_CONTAINER: 1
 NEPI_GB_CONTAINER: 20
 # If NEPI_IN_CONTAINER=1, set whether NEPI supports a recovery mode
 # Note: If NEPI_RECOVERY_ENABLED enabled and NEPI_IP is not 192.168.179.103,
@@ -119,6 +107,15 @@ NEPI_GB_CONTAINER: 20
 #   NEPI factory config ip address 192.168.179.103 before switching to
 #   NEPI system config configured ip address for 10 seconds
 NEPI_RECOVERY_ENABLED: 1
+# If NEPI_IN_CONTAINER=1, set whether NEPI supports a dual A B files system structure for
+#  backup and recovery purposes.
+# NOTE: If NEPI_AB_FS is enabled, NEPI docker service will manage an Active NEPI container image,
+#   and an Inactive Image used for backup and recovery purposes. If NEPI_AB_FS is enabled, 
+#   you can switch between the current Active and Inactive A B containers
+#   with the terminal command "nepiswitch".
+# NOTE: If NEPI_AB_FS is enabled, an additional 100 GB of free drive space will be required
+#   for storing backup and staging of Docker images
+NEPI_AB_FS: 0
 # If NEPI_IN_CONTAINER=1, set the time in seconds to wait for 
 #   NEPI software to start and set success flags.
 # NOTE: This is the time NEPI Docker service will

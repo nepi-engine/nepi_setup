@@ -130,26 +130,26 @@ if [[ "$?" -eq 0 ]]; then
             fi
 
 
-            ###########################
-            if ! nnet; then
-                echo "Running networking ifup flush and ifdown processes"
-                sudo ifdown ${NEPI_WIRED_INTERFACE} 2>/dev/null
-                sudo ip addr flush ${NEPI_WIRED_INTERFACE}
+        #     ###########################
+        #     if ! nnet; then
+        #         echo "Running networking ifup flush and ifdown processes"
+        #         sudo ifdown ${NEPI_WIRED_INTERFACE} 2>/dev/null
+        #         sudo ip addr flush ${NEPI_WIRED_INTERFACE}
 
 
-                # # Tune ethernet interfaces for fast sensor throughput (especially important for genicam)
-                # echo "Running pre-launch ethernet interface tuning"
-                # sudo python3 /opt/nepi/nepi_engine/etc/nepi_env/tune_ethernet_interfaces.py
+        #         # # Tune ethernet interfaces for fast sensor throughput (especially important for genicam)
+        #         # echo "Running pre-launch ethernet interface tuning"
+        #         # sudo python3 /opt/nepi/nepi_engine/etc/nepi_env/tune_ethernet_interfaces.py
 
 
-                sudo ifup ${NEPI_WIRED_INTERFACE}
+        #         sudo ifup ${NEPI_WIRED_INTERFACE}
 
-                #sudo systemctl restart networking
+        #         #sudo systemctl restart networking
 
 
-            fi
+        #     fi
 
-            source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
+        #     source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
         fi  
     fi
 fi
