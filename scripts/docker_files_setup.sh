@@ -18,11 +18,15 @@
 ## - mailto:nepi@numurus.com
 ##
 
+
+
 DEMO_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
     DEMO_INSTALL=$1
 fi
 # echo "DEMO_INSTALL=${DEMO_INSTALL}"
+
+sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -37,7 +41,7 @@ fi
 
 
 
-sudo -v
+
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then

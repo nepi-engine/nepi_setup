@@ -24,6 +24,8 @@ if [[ "$1" -eq 1 ]] 2>/dev/null; then
 fi
 # echo "DEMO_INSTALL=${DEMO_INSTALL}"
 
+sudo -v
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -35,7 +37,7 @@ fi
 # This file installs NEPI Docker required software packages
 
 
-sudo -v
+
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -214,7 +216,7 @@ if is_valid_jetson; then
     echo "######################################"
     echo "Installing Jetson Apps"
     echo "######################################"
-    sudo apt install nvidia-jetpack-dev
+    sudo apt install nvidia-jetpack-dev -y
 fi
 
 
