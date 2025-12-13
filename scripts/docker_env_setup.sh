@@ -202,6 +202,7 @@ if [[ "$DEMO_INSTALL" -eq 0 ]]; then
     sudo apt install wpasupplicant -y
     sudo apt install nmap -y
     sudo apt install trash-cli -y
+    sudo apt install nano -y
 
 
 echo "######################################"
