@@ -110,17 +110,11 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG $SUDO_USER ${CONFIG_USER} >/dev/null 2>&1
 
 	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
 	#sudo chsh -s /bin/bash ${CONFIG_USER} # Fix no login user
 
-
-        
-    if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
-        if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
-            sudo cp -r "/home/${SUDO_USER}/nepi_setup" "/home/${CONFIG_USER}/nepi_setup"
-        fi
-    fi
 
     # Updated the Desktop
     dfolder=/home/${CONFIG_USER}/Desktop
@@ -365,16 +359,11 @@ sudo chmod 0755 /home/${username}
 # done < /etc/passwd
 
 
-
 ####################
 # Remove the repo
-# if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-#     rm -r /home/nepihost/nepi_setup
-# else
-#     rm -r /home/nepi/nepi_setup
-# fi
-
-
+if [[ -d /home/${CONFIG_USER}/nepi_setup ]]; then
+    sudo rm -r /home/${CONFIG_USER}/nepi_setup
+fi
 
 # echo "###################################"
 # echo "Adding NEPI users to sudo users"

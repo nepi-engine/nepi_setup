@@ -61,6 +61,16 @@ This step will setup NEPI Docker required software environment.
 
 Log into the `nepihost` user using password  'nepi'
 
+Make sure your system has internet access by running the following command:
+
+    ping -c 1 google.com
+
+Clone the NEPI Setup repo:
+
+    cd /home/${USER}
+    git clone https://github.com/nepi-engine/nepi_setup.git
+
+
 Run the NEPI Docker environment setup script (sudo password is now 'nepi')
 
 If prompted enter: `y` or 'yes' :

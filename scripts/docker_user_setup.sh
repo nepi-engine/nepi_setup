@@ -138,12 +138,12 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
 
         
-    if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
-        if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
-            sudo cp -R /home/${SUDO_USER}/nepi_setup /home/${CONFIG_USER}/nepi_setup
-        fi
-    fi
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
+    # if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
+    #     if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
+    #         sudo cp -R /home/${SUDO_USER}/nepi_setup /home/${CONFIG_USER}/nepi_setup
+    #     fi
+    # fi
+    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
 
     # Updated the Desktop
     dfolder=/home/${CONFIG_USER}/Desktop
@@ -376,37 +376,12 @@ if [[ "$DEMO_INSTALL" -eq 0 ]]; then
 fi
 
 
-# echo "###################################"
-# echo "Adding NEPI users to existing groups"
-# echo "###################################"
-
-# UID_START=1000
-# UID_END=1999
-# # Read /etc/passwd and process users
-# while IFS=':' read -r username _ uid gid _ _ _; do
-#     if [[ $uid -ge $UID_START && $uid -le $UID_END ]]; then
-#         if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
-#             is_nepi_user=1
-#         else
-#             is_nepi_user=0
-#         fi
-#         if [[  "$is_nepi_user" -eq 0 ]]; then
-#             sudo usermod -aG $username nepihost 
-#             sudo usermod -aG $username nepi 
-#             sudo usermod -aG $username nepiadmin 
-#         fi
-#     fi
-# done < /etc/passwd
-
-
 
 ####################
 # Remove the repo
-# if [[ "$CONFIG_USER" == 'nepihost' ]]; then
-#     rm -r /home/nepihost/nepi_setup
-# else
-#     rm -r /home/nepi/nepi_setup
-# fi
+if [[ -d /home/${CONFIG_USER}/nepi_setup ]]; then
+    sudo rm -r /home/${CONFIG_USER}/nepi_setup
+fi
 
 
 

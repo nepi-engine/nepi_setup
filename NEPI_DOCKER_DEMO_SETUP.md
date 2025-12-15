@@ -66,6 +66,12 @@ Make sure your system has internet access by running the following command:
 
     ping -c 1 google.com
 
+Clone the NEPI Setup repo:
+
+    cd /home/${USER}
+    git clone https://github.com/nepi-engine/nepi_setup.git
+
+
 Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
 
     source /home/nepihost/nepi_setup/scripts/docker_demo_config_setup.sh
