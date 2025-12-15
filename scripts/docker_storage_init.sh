@@ -118,7 +118,7 @@ else
             sudo rm ARCHIVE > /dev/null 2>&1
 
 
-            storage_latest_link='https://www.dropbox.com/scl/fo/c7qap49hftrmi13ku49tg/h?rlkey=kbufq3lv04y9c2etc17kotk0j&st=hmqc234m&dl=0'
+            storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=x88guuv0&dl=0'
             storage_latest_zip=nepi_storage-latest.zip
 
 
