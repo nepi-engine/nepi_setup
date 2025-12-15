@@ -17,7 +17,7 @@ NEPI_LICENSE_EXTENSION = '.gpg'
 NEPI_LICENSE_REQUEST_BASENAME = NEPI_LICENSE_FOLDER + '/nepi_license_request_'
 NEPI_LICENSE_REQUEST_EXTENSION = '.yaml'
 NEPI_GPG_KEYPATH = '/home/nepi/.gnupg'
-NEPI_VERSION_FILE = '/opt/nepi/engine/etc/fw_version.txt'
+NEPI_VERSION_FILE = '/opt/nepi/nepi_engine/etc/fw_version.txt'
 
 LICENSE_WARNING_FILE = '/opt/nepi/etc/license/UNLICENSED_NEPI_ENGINE.txt'
 UNLICENSED_LICENSE_DICT = {'licensed_components':{'nepi_base':{'commercial_license_type': 'Unlicensed'}}}
@@ -64,7 +64,7 @@ def getHardwareId():
 
 def getNEPIVersion():
     if not os.path.exists(NEPI_VERSION_FILE):
-        raise Exception("Unable to determine NEPI version")
+        raise Exception("Unable to determine NEPI version from file " + NEPI_VERSION_FILE)
     with open(NEPI_VERSION_FILE, 'r') as f:
         return f.readline()
 
@@ -147,8 +147,9 @@ def generateLicenseRequest():
     version = getNEPIVersion()
     request_yaml = "license_request:\n" + "  hardware_key: " + hardware_id + "\n  date: " + date + "\n  version: " + version + \
                    "  instructions: To request a commercial license, email this file to nepi@numurus.com"
-    
+    #print("License Request: Created license request " + request_yaml)
     if not os.path.exists(NEPI_LICENSE_FOLDER):
+        print("License Request: Will create license folder at " + NEPI_LICENSE_FOLDER)
         os.mkdir(NEPI_LICENSE_FOLDER, mode=775)
 
     try:
@@ -157,6 +158,7 @@ def generateLicenseRequest():
         detected_key = '_BAD_HARDWARE_ID'
 
     request_file_full_path = NEPI_LICENSE_REQUEST_BASENAME + detected_key + NEPI_LICENSE_REQUEST_EXTENSION
+    #print("License Request: Creating license request file at " + request_file_full_path)
     with open(request_file_full_path, 'w') as f:
         f.write(request_yaml)
 
@@ -190,6 +192,7 @@ async def handleRequests(websocket, path):
 
 async def serverMain():
     print('Launching server')
+    print("Will try to recieve on websocket 9092")
     async with websockets.serve(handleRequests, "0.0.0.0", 9092):
         #print("Waiting for server handler")
         await asyncio.Future()
