@@ -1,2 +1,2 @@
 cd /mnt/nepi_storage
-zip -r nepi_storage-latest.zip ai_models sample_data user_cfg
+zip -r nepi_storage-latest.zip ai_models ai_training sample_data user_cfg

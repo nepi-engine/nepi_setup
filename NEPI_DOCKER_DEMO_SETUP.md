@@ -90,19 +90,13 @@ Log into the `nepihost` user using password  'nepi'
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Make sure your system has internet access by running the following command:
-
-    ping -c 1 google.com
-
-Clone the NEPI Setup repo:
-
-    cd /home/${USER}
-    git clone https://github.com/nepi-engine/nepi_setup.git
-
-
 Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
 
+If prompted enter: `y` or 'yes' :
+
     source /home/nepihost/nepi_setup/scripts/docker_demo_config_setup.sh
+
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
@@ -121,8 +115,6 @@ This process will create (if not allready created) and setup the following NEPI 
 3) NEPI folder shortcuts added to File Manager folder bookmarks.
 4) Chromium browser updated with useful NEPI browser bookmarks.
 
-
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 ################################################################
@@ -155,7 +147,7 @@ Initialize NEPI Docker with an the downloaded NEPI Image:
 
 After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
 
-    dps
+    dimg
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
@@ -215,50 +207,6 @@ This will take you to the NEPI RUI dashboard.  Once the NEPI core software syste
 **NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service running.
 
 
-
-################################################################
-### NEPI Docker Service Setup
-
-If everthing is working, you can enable the NEPI Docker Service which will automatically start the NEPI Container and Software on boot:
-
-    nepienable # You can disable the NEPI Docker Service with 'nepidisable'
-
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
-
-Log back into `nepihost` using password 'nepi' 
-
-Check that your NEPI Container is running after reboot:
-
-    dps
-
-    #If your container is not running, try to debug NEPI Docker Service issues with the following commands:
-
-        nepirestart
-        nepistatus
-        nepilogs
-
-
-################################################################
-### NEPI Docker Remote PC Connections
-Setup and test a network connected PC connection to your NEPI device following these instructions.
-
-**NOTE:** You will manually need to set your NEPI Device's network adapater IPV4 settings to 'Manual' 
-with the following values 
-    ADDRESS = 192.168.179.103
-    NETMADK = 255.255.255.0
-Then reboot your NEPI Device and continue to the tutorials listed below.
-
-Test that you can connect to your running conatiner from a network connected PC.
-See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
-
-**NOTE:** NEPI Docker Demo Installations do not configure NEPI's Network Shared Drive support, but
-the NEPI Storage and NEPI Config Folders, you can access them locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
-
-**NOTE:** NEPI Docker Demo Installations do not configure NEPI Host SSH or NEPI Network Shared Drive support, but do support NEPI Container SSH connections. Learn more about the NEPI Folders content, see this tutorial for remote SSH access.
-
-    SSH into either your NEPI Host device or NEPI running container following this tutorial.
-    See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
-
 ################################################################
 ### NEPI Software Tutorials
 
@@ -270,30 +218,8 @@ See the documentation, tuturials, videos, and community forum available at NEPI.
 
 
 ################################################################
-### NEPI Docker Customization
-
-While most NEPI device settings are configurable real-time through the RUI (Resident User Interface),
-you can configure NEPI Docker's custom run-time settings following these instructions:
-
-See NEPI Docker Customization instructions at [here](NEPI_DOCKER_CUSTOMIZE.md)
-
-################################################################
-### NEPI Container Customization
-
-You can update or custimize the NEPI software running in a NEPI Docker Container from source code,
-then export it as a new sharable NEPI Docker Container:
-
-See NEPI Container Customization instructions at [here](NEPI_CONTAINER_CUSTOMIZE.md)
-
-
-################################################################
 ### NEPI DOCKER INSTALLATION COMPLETE
 ################################################################
-
-
-### NEPI Docker Installation Notes
-The NEPI Docker system provides a full-featured AI and automation software environment that installs on top of your host device's native operating system.  To achieve this, the NEPI Docker solution interacts with the device's configuration. While the NEPI Docker installation privdes functions for reverting back to your orignal system configurations, it is recommended that you create a backup of your current device's hardrive to a seperate backup SSD card to ensure you are able to recover your original system if issues arise.  This can be done using a low cost SSD cloning device such as [Rosewill SSD Cloner](https://www.amazon.com/Duplicator-Enclosure-Clone-RS-N2-CL-PC-Mac-Android/dp/B0F51MMN7Q/?th=1) as long as you are cloning to the same SSD card type.
-
 
 ### Check Available Disk Space
 Before proceeding, make sure you device has the minimum free space (60 GB) required for NEPI Docker installation and run-time processes.  
