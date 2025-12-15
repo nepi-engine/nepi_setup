@@ -90,7 +90,7 @@ Log into the `nepihost` user using password  'nepi'
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker DEMO Configuration setup script (sudo password is now 'nepi'):
 
 If prompted enter: `y` or 'yes' :
 
@@ -128,26 +128,14 @@ Check for internet connection
     ping -c 1 google.com
 
 
-Run the NEPI Docker Storage initialization script (sudo password is now 'nepi'):
-**NOTE:** This script will download the Demo AI models, AI training scripts, 
-sample data files, and user_configurations to folders in /mnt/nepi_storage.
+Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
-
-Run the NEPI Docker Image initialization script (sudo password is now 'nepi'):
-**NOTE:** This script will download the latest NEPI Docker Image for your system's
-architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
-
-
-    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
-
-Initialize NEPI Docker with an the downloaded NEPI Image:
-
-    nepiinit
+    source /home/nepihost/nepi_setup/scripts/docker_demo_init_setup.sh
 
 After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
 
     dimg
+
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
@@ -179,6 +167,12 @@ After the initialization script completes, you can print the current installed N
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
+
+**NOTE:** This process downloads the Demo AI models, AI training scripts, 
+sample data files, and user_configurations to folders in /mnt/nepi_storage.
+
+**NOTE:** This process downolads the latest NEPI Docker Image for your system's
+architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
 
 ################################################################
 ### NEPI Docker Image Testing
