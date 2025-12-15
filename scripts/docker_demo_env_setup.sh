@@ -53,11 +53,11 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-
 ####################################
-# Run NEPI Config Setup Script
+# Run NEPI Environment Setup Script
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=nepi_setup.sh
+script_file=docker_env_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $DEMO_INSTALL; then
     script_error=$?
@@ -66,9 +66,47 @@ if ! source_script $script_path $DEMO_INSTALL; then
 fi
 
 ####################################
+# Run NEPI Bash Setup Script
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_bash_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $DEMO_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Folder Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $DEMO_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+####################################
+# Run NEPI Files Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_files_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $DEMO_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
+
+
+####################################
 echo ""
 echo "##################################"
-echo 'NEPI Docker DEMO Config Setup Complete'
+echo 'NEPI Docker DEMO Env Setup Complete'
 echo "##################################"
 echo ""
 

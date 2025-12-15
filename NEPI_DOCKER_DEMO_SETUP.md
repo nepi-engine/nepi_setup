@@ -51,6 +51,34 @@ then
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
+
+################################################################
+### NEPI Docker DEMO Environment Setup
+
+This step will configure the NEPI Docker installation using the defualt settings. 
+You can change settings later in the 'NEPI Docker Customization' section.
+
+Log into the `nepihost` user using password  'nepi'
+(sudo password is 'nepi')
+
+Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
+
+Make sure your system has internet access by running the following command:
+
+    ping -c 1 google.com
+
+Clone the NEPI Setup repo:
+
+    cd /home/${USER}
+    git clone https://github.com/nepi-engine/nepi_setup.git
+
+
+Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
+
+    source /home/nepihost/nepi_setup/scripts/docker_demo_env_setup.sh
+
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
+
 ################################################################
 ### NEPI Docker DEMO Config Setup
 

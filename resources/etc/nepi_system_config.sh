@@ -23,6 +23,8 @@
 SHOW_CONFIG_MENU=0
 if [[ "$1" -eq 1 ]]; then
     SHOW_CONFIG_MENU=1
+elif [[ "$1" -eq 0 ]]; then
+    SHOW_CONFIG_MENU=0
 fi
 
 sudo -v

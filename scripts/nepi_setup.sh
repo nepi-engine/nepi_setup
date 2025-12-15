@@ -227,23 +227,29 @@ fi
 # Update ETC files if systemd is running (Not in Container)
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
-    SYSTEMD_SERVICE_PATH=/etc/systemd/system
 
 
-    echo "Restarting Samba Service"
 
-    sudo systemctl enable smbd
-    sudo systemctl restart smbd
-    
+    if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
 
-    # echo "Updating Samba Users"
-    # echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+        SYSTEMD_SERVICE_PATH=/etc/systemd/system
 
-    # echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
-    # sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
 
-    # echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
-    # sudo usermod -a
+        echo "Restarting Samba Service"
+
+        sudo systemctl enable smbd
+        sudo systemctl restart smbd
+        
+
+        # echo "Updating Samba Users"
+        # echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+
+        # echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
+        # sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+        # echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
+        # sudo usermod -a
+    fi
 
 
     if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
@@ -442,8 +448,9 @@ echo "########################"
 echo ""
 sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/docker_cfg/
 config_update_file=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
+SHOW_CONFIG_MENU=0
 echo "Running System Config Update Script: ${config_update_file}"
-source $config_update_file
+bash $config_update_file $SHOW_CONFIG_MENU
 
 
 # #####################################
