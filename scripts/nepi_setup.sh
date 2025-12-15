@@ -585,9 +585,13 @@ if [[ -n "$DISPLAY" ]]; then
     echo "########"
     echo "Updating Chrome settings for user ${CONFIG_USER}"
 
+    xdg-settings set default-web-browser chromium-browser.desktop
+
     fix_chromium
 
-    xdg-settings set default-web-browser chromium-browser.desktop
+    chromium
+    wait
+   
 
     if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
         sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
