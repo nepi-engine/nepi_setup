@@ -589,6 +589,9 @@ if [[ -n "$DISPLAY" ]]; then
 
     xdg-settings set default-web-browser chromium-browser.desktop
 
+    if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+        sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
+    fi
     sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
 
