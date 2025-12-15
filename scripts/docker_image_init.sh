@@ -96,7 +96,7 @@ else
             echo ""
 
             sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
-            sudo chmod -R +x ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}/*
+            sudo chmod -R +x ${NEPI_IMPORT_PATH}/*
 
             success_image=0
             cd $NEPI_IMPORT_PATH
@@ -216,7 +216,7 @@ else
                 sudo rm $staging_image_path
             fi
             sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
-            sudo chmod -R +x ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}/*
+            sudo chmod -R +x ${NEPI_IMPORT_PATH}/*
             cd $CURRENT_FOLDER
 
 
