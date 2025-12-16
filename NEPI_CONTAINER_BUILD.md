@@ -11,7 +11,8 @@ If you device is not allready setup as a NEPI Docker Host,
 you will first need to configure an edge processor
 with a NEPI Docker production installation folowing these instructions:
 
-See NEPI Docker Host Setup instructions at [here](NEPI_DOCKER_HOST_SETUP.md)
+See NEPI Docker Lite and Docker Full Setup instructions at [here](NEPI_DOCKER_LITE_SETUP.md) and [here](NEPI_DOCKER_FULL_SETUP.md).  While either setup supports NEPI Docker Container Building, but the Full setup
+is recommended.
 
 
 ################################################################
