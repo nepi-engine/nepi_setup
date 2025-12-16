@@ -31,7 +31,7 @@ fi
 # This file configures a NEPI Docker installation environment
 
 
-export DEMO_INSTALL=1
+export LITE_INSTALL=1
 
 
 
@@ -55,36 +55,20 @@ source $NEPI_UTILS_SOURCE
 
 
 ####################################
-# Run NEPI Storage Init Setup Script
+# Run NEPI Config Setup Script
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=source docker_storage_init.sh
+script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $DEMO_INSTALL; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     exit 1
 fi
-
-####################################
-# Run NEPI Image Init Setup Script
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=source docker_image_init.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $DEMO_INSTALL; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
-
-####################################
-# Run NEPI Init Setup 
-nepiinit
-wait
 
 ####################################
 echo ""
 echo "##################################"
-echo 'NEPI Docker DEMO Config Setup Complete'
+echo 'NEPI Docker LITE Config Setup Complete'
 echo "##################################"
 echo ""
 

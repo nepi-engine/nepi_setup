@@ -17,11 +17,11 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
 
@@ -296,7 +296,7 @@ update_user_and_group() {
 
 
 
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+if [[ "$LITE_INSTALL" -eq 0 ]]; then
 
     # Read /etc/passwd and process users
     while IFS=':' read -r username _ uid gid _ _ _; do
@@ -413,7 +413,7 @@ echo "NEPI User Account Setup Complete"
 echo "########################"
 
 
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo ""
     echo "*** REBOOT YOUR DEVICE ***"
 fi

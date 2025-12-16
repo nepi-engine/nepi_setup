@@ -17,11 +17,11 @@
 ## - mailto:nepi@numurus.com
 ##
 
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
 

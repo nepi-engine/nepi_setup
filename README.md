@@ -1,13 +1,13 @@
 # NEPI_SETUP
 This repository contains scripts and resources for setting up a NEPI software environment.
 
-## NEPI Docker Demo Setup Instructions
+## NEPI Docker Lite Setup Instructions
 
-See NEPI Docker Demo Setup instructions at [here](NEPI_DOCKER_DEMO_SETUP.md)
+See NEPI Docker Lite Setup instructions at [here](NEPI_DOCKER_LITE_SETUP.md)
 
-## NEPI Docker Production Setup Instructions
+## NEPI Docker Full Setup Instructions
 
-See NEPI Docker Production Setup instructions at [here](NEPI_DOCKER_PRODUCTION_SETUP.md)
+See NEPI Docker Full Setup instructions at [here](NEPI_DOCKER_FULL_SETUP.md)
 
 ## NEPI Development PC Setup Instructions
 

@@ -1,11 +1,11 @@
-# NEPI Docker Demo Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Demo installation on a suitable edge processor.
+# NEPI Docker Lite Setup Instructions
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite installation on a suitable edge processor.
 
 
-**NOTE:** NEPI Docker Demo installation will make minimal changes to your device's operating system configuration with
+**NOTE:** NEPI Docker Lite installation will make minimal changes to your device's operating system configuration with
 no NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, SAMBA SHARED DRIVES, DOCKER ...) 
 
-After testing with the Demo installation, you can upgrade your system to a Production installation with support for both local and remote
+After testing with the Lite installation, you can upgrade your system to a Full installation with support for both local and remote
 real-time management of operating system services through User Interface and API controls.
 see the NEPI DOCKER PRODUCTION SETUP instructions at [here](NEPI_DOCKER_PRODUCTION_SETUP.md)
 
@@ -13,12 +13,12 @@ see the NEPI DOCKER PRODUCTION SETUP instructions at [here](NEPI_DOCKER_PRODUCTI
 **NOTE:** NEPI Docker installation will require a minimum of 60 GB of available free hard drive space. 
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
 
-For a detailed tutorials and videos on this process see the "NEPI Docker Demo Setup" tutorial under the "NEPI Installation" section at:
+For a detailed tutorials and videos on this process see the "NEPI Docker Lite Setup" tutorial under the "NEPI Installation" section at:
 [NEPI Tutorials](https://www.nepi.com/tutorials)
 
 
 ################################################################
-### NEPI Docker DEMO User Setup
+### NEPI Docker LITE User Setup
 
 This step will setup NEPI Docker required user accounts on your device
 
@@ -47,13 +47,13 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_demo_user_setup.sh
+    ./docker_lite_user_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 ################################################################
-### NEPI Docker DEMO Environment Setup
+### NEPI Docker LITE Environment Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
@@ -73,14 +73,14 @@ Clone the NEPI Setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI Docker DEMO configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker LITE configuration setup script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_demo_env_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_env_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 ################################################################
-### NEPI Docker DEMO Config Setup
+### NEPI Docker LITE Config Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
@@ -90,11 +90,11 @@ Log into the `nepihost` user using password  'nepi'
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Run the NEPI Docker DEMO Configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker LITE Configuration setup script (sudo password is now 'nepi'):
 
 If prompted enter: `y` or 'yes' :
 
-    source /home/nepihost/nepi_setup/scripts/docker_demo_config_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_config_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -130,7 +130,7 @@ Check for internet connection
 
 Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_demo_init_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_init_setup.sh
 
 After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
 
@@ -168,7 +168,7 @@ After the initialization script completes, you can print the current installed N
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
 
-**NOTE:** This process downloads the Demo AI models, AI training scripts, 
+**NOTE:** This process downloads the Lite AI models, AI training scripts, 
 sample data files, and user_configurations to folders in /mnt/nepi_storage.
 
 **NOTE:** This process downolads the latest NEPI Docker Image for your system's
@@ -199,6 +199,50 @@ Check that the NEPI Resident User Interface (RUI) is running by opening the Chro
 
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
 **NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service running.
+
+
+################################################################
+### NEPI Docker Service Setup
+
+If everthing is working, you can enable the NEPI Docker Service which will automatically start the NEPI Container and Software on boot:
+
+    nepienable # You can disable the NEPI Docker Service with 'nepidisable'
+
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
+
+Log back into `nepihost` using password 'nepi' 
+
+Check that your NEPI Container is running after reboot:
+
+    dps
+
+    #If your container is not running, try to debug NEPI Docker Service issues with the following commands:
+
+        nepirestart
+        nepistatus
+        nepilogs
+
+
+################################################################
+### (OPTIONAL) NEPI Docker Remote PC Connections
+If you want to connect to your NEPI device from a remote network connected PC, setup and test a remote connection following these instructions.
+
+**NOTE:** You will manually need to set your NEPI Device's network adapater IPV4 settings to 'Manual' 
+with the following values 
+    ADDRESS = 192.168.179.103
+    NETMADK = 255.255.255.0
+Then reboot your NEPI Device and continue to the tutorials listed below.
+
+Test that you can connect to your running conatiner from a network connected PC.
+See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
+
+**NOTE:** NEPI Docker Lite Installations do not configure NEPI's Network Shared Drive support, but
+the NEPI Storage and NEPI Config Folders, you can access them locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
+
+**NOTE:** NEPI Docker Lite Installations do not configure NEPI Host SSH, but do support NEPI Container SSH connections. Learn more about the NEPI Folders content, see this tutorial for remote SSH access.
+
+    SSH into either your NEPI Host device or NEPI running container following this tutorial.
+    See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 
 ################################################################

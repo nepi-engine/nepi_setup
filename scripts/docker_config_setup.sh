@@ -17,11 +17,11 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
 
@@ -102,7 +102,7 @@ fi
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $DEMO_INSTALL; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     exit 1
@@ -115,7 +115,7 @@ echo 'NEPI Docker Config Setup Complete'
 echo "##################################"
 echo ""
 
-# if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+# if [[ "$LITE_INSTALL" -eq 0 ]]; then
 #     echo ""
 #     echo "*** REBOOT YOUR DEVICE ***"
 #     echo ""

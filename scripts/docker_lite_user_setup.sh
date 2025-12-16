@@ -32,7 +32,7 @@ fi
 # This file configures a NEPI Docker installation environment
 
 
-export DEMO_INSTALL=1
+export LITE_INSTALL=1
 
 
 
@@ -67,7 +67,7 @@ fi
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_user_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $DEMO_INSTALL; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     exit 1

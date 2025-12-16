@@ -18,11 +18,11 @@
 ## - mailto:nepi@numurus.com
 ##
 
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh

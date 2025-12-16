@@ -18,11 +18,11 @@
 ## - mailto:nepi@numurus.com
 ##
 
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
 
@@ -154,7 +154,7 @@ echo "Installing NEPI required python packages"
 echo "######################################"
 
 
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+if [[ "$LITE_INSTALL" -eq 0 ]]; then
     ###################################
     # Install NEPI Managed Services Apps
     ###################################
@@ -417,7 +417,7 @@ echo ""
 echo 'NEPI Docker Environment Setup Complete'
 ##################################
 
-if [[ "$DEMO_INSTALL" -eq 0 ]]; then
+if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo ""
     echo "*** REBOOT YOUR DEVICE ***"
 fi

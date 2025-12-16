@@ -1,12 +1,12 @@
-# NEPI Docker Production Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Production installation on a suitable edge processor.
+# NEPI Docker Full Setup Instructions
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Full installation on a suitable edge processor.
 
-**NOTE:** NEPI Docker Production installation will make significant changes to your device's operating system configuration and 
+**NOTE:** NEPI Docker Full installation will make significant changes to your device's operating system configuration and 
 setup NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, DOCKER ...) that support both local and remote
 real-time management of these services through User Interface and API controls.
 
-If you want to first try a **DEMO installation** with no NEPI managed operating system services, but all of the other functionality,
-see the NEPI DOCKER DEMO SETUP instructions at [here](NEPI_DOCKER_DEMO_SETUP.md)
+If you want to first try a **LITE installation** with no NEPI managed operating system services, but all of the other functionality,
+see the NEPI DOCKER LITE SETUP instructions at [here](NEPI_DOCKER_LITE_SETUP.md)
 
 **If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.**
 
@@ -14,7 +14,7 @@ see the NEPI DOCKER DEMO SETUP instructions at [here](NEPI_DOCKER_DEMO_SETUP.md)
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
 
 
-For a detailed tutorials and videos on this process see the "NEPI Docker Production Setup" tutorial under the "NEPI Installation" section at:
+For a detailed tutorials and videos on this process see the "NEPI Docker Full Setup" tutorial under the "NEPI Installation" section at:
 [NEPI Tutorials](https://www.nepi.com/tutorials)
 
 
