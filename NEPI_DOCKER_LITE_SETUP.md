@@ -1,9 +1,11 @@
 # NEPI Docker Lite Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite installation on a suitable edge processor.
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite Installation on a suitable edge processor.
 
 
 **NOTE:** NEPI Docker Lite installation will make minimal changes to your device's operating system configuration with
 no NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, SAMBA SHARED DRIVES, DOCKER ...) 
+
+NEPI Lite Installations are recommended for PC base installations and trial Edge-Compute processor installations.
 
 After testing with the Lite installation, you can upgrade your system to a Full installation with support for both local and remote
 real-time management of operating system services through User Interface and API controls.
@@ -18,7 +20,7 @@ For a detailed tutorials and videos on this process see the "NEPI Docker Lite Se
 
 
 ################################################################
-### NEPI Docker LITE User Setup
+### NEPI Docker Lite User Setup
 
 This step will setup NEPI Docker required user accounts on your device
 
@@ -47,13 +49,13 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_lite_user_setup.sh
+    ./docker_Lite_user_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 
 ################################################################
-### NEPI Docker LITE Environment Setup
+### NEPI Docker Lite Environment Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
@@ -73,14 +75,14 @@ Clone the NEPI Setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI Docker LITE configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker Lite configuration setup script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_lite_env_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_Lite_env_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 ################################################################
-### NEPI Docker LITE Config Setup
+### NEPI Docker Lite Config Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
@@ -90,11 +92,11 @@ Log into the `nepihost` user using password  'nepi'
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-Run the NEPI Docker LITE Configuration setup script (sudo password is now 'nepi'):
+Run the NEPI Docker Lite Configuration setup script (sudo password is now 'nepi'):
 
 If prompted enter: `y` or 'yes' :
 
-    source /home/nepihost/nepi_setup/scripts/docker_lite_config_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_Lite_config_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -130,7 +132,7 @@ Check for internet connection
 
 Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_lite_init_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_Lite_init_setup.sh
 
 After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
 

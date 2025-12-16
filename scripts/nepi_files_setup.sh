@@ -27,13 +27,6 @@ fi
 
 # This file configures a NEPI Docker installation Files and Folders
 
-
-if [[ -z "$1" ]]; then
-    DEMO_INSTALL=0
-else
-    DEMO_INSTALL=$1
-fi
-
 sudo -v
 
 CONFIG_USER=$(id -un)

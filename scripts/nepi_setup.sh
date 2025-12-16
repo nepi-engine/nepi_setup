@@ -17,11 +17,11 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
-DEMO_INSTALL=0
+LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    DEMO_INSTALL=$1
+    LITE_INSTALL=$1
 fi
-# echo "DEMO_INSTALL=${DEMO_INSTALL}"
+# echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
 
@@ -166,11 +166,11 @@ if ! source_script $NEPI_SYS_CONFIG_LOAD; then
     echo "Script ${NEPI_SYS_CONFIG_LOAD} failed with error ${script_error}"
 fi
 
-if [[ "$NEPI_INSTALL" == "DEMO" || "$DEMO_INSTALL" -eq 1 ]]; then
-    NEPI_INSTALL=DEMO
+if [[ "$NEPI_INSTALL" == "LITE" || "$LITE_INSTALL" -eq 1 ]]; then
+    NEPI_INSTALL=LITE
     SERVICES_MANAGED=0
 else
-    NEPI_INSTALL=PRODUCTION
+    NEPI_INSTALL=FULL
     SERVICES_MANAGED=1
 fi
 
