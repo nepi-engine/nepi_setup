@@ -189,6 +189,8 @@ function nepicommit(){
   sudo -v
   commit_desc=$1
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
+  wait
+  nepistart
 }
 export -f nepicommit
 
@@ -473,7 +475,7 @@ nepistop = Stop the running NEPI docker container.
 nepilogin = Log into the running NEPI container as user 'nepi'.
 nepiloginroot = Log into the running NEPI container as user 'root'.
 nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
-nepicommit = Commit the running NEPI container.
+nepicommit = Commit the running NEPI container, then restart nepi using new commit image.
 nepiinit = Reset, clear, and import new NEPI Image.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.

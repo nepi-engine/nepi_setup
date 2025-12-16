@@ -48,7 +48,7 @@ fi
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     
-
+    echo "Updating NEPI System Config File: ${UPDATE_PATH}"
     ###########
     # UPDATE NEPI VERSION
     fw_version=$(cat /opt/nepi/nepi_engine/etc/fw_version.txt | tail -n1)
@@ -56,6 +56,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     if [[ -z "$fw_version" ]]; then
         fw_version=0p0p0        
     fi
+    echo "Updating NEPI_VERSION to ${fw_version}"
     update_yaml_value "NEPI_VERSION" $fw_version $UPDATE_PATH
 
 
@@ -67,6 +68,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     else
         pyver=3
     fi
+    echo "Updating NEPI_PYTHON to ${pyver}"
     update_yaml_value "NEPI_PYTHON" $pyver $UPDATE_PATH
 
 
@@ -84,6 +86,8 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     else
         cudaver=0
     fi
+    echo "Updating NEPI_HAS_CUDA to ${hascuda}"
+    echo "Updating NEPI_CUDA_VERSION to ${cudaver}"
     update_yaml_value "NEPI_HAS_CUDA" $hascuda $UPDATE_PATH
     update_yaml_value "NEPI_CUDA_VERSION" $cudaver $UPDATE_PATH
 
@@ -93,6 +97,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     if [[ -z "$sw_desc" ]]; then
         sw_desc="unknown"
     fi
+    echo "Updating NEPI_SW_DESC to ${sw_desc}"
     update_yaml_value "NEPI_SW_DESC" $sw_desc $UPDATE_PATH
 
 
@@ -113,12 +118,13 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     if [[ -z "$hw_type" ]]; then
         hw_type="unknown"
     fi
+    echo "Updating NEPI_HW_TYPE to ${hw_type}"
     update_yaml_value "NEPI_HW_TYPE" $hw_type $UPDATE_PATH
 
 
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $UPDATE_PATH
-    echo "Updating System Settings in ${UPDATE_PATH}"
+    echo "Updated System Settings in ${UPDATE_PATH}"
 
 else
     echo "Config file not found ${UPDATE_PATH}"
