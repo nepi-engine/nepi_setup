@@ -49,7 +49,7 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_Lite_user_setup.sh
+    ./docker_lite_user_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -77,7 +77,7 @@ Clone the NEPI Setup repo:
 
 Run the NEPI Docker Lite configuration setup script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_Lite_env_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_env_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -96,7 +96,7 @@ Run the NEPI Docker Lite Configuration setup script (sudo password is now 'nepi'
 
 If prompted enter: `y` or 'yes' :
 
-    source /home/nepihost/nepi_setup/scripts/docker_Lite_config_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_config_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
@@ -132,7 +132,7 @@ Check for internet connection
 
 Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_Lite_init_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_lite_init_setup.sh
 
 After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
 
