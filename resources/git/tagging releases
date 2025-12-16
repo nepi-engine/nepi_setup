@@ -1,5 +1,5 @@
 
-ntag=3.2.0-RC8c
+ntag=3.2.0-RC8d
 
 # Tag the repo
 git tag -a $ntag -m "${ntag}"

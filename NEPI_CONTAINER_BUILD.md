@@ -131,7 +131,8 @@ YOU ARE NOW IN THE NEPI HOST
 
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "user_setup"
+    RESTART=0
+    nepicommit "user_setup" $RESTART
 
 
 
@@ -176,9 +177,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "env_setup1"
-
-
+    RESTART=0
+    nepicommit "env_setup1" $RESTART
 
 
 ################################################################
@@ -223,7 +223,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "env_setup2"
+    RESTART=0
+    nepicommit "env_setup2" $RESTART
 
 
 ################################################################
@@ -264,7 +265,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "ros_setup"
+    RESTART=0
+    nepicommit "ros_setup" $RESTART
 
     
 
@@ -318,7 +320,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "config_setup"
+    RESTART=0
+    nepicommit "config_setup" $RESTART
 
 
 
@@ -363,7 +366,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "engine_setup"
+    RESTART=0
+    nepicommit "engine_setup" $RESTART
 
 
 
@@ -408,7 +412,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "rui_setup"
+    RESTART=0
+    nepicommit "rui_setup" $RESTART
 
 
 
