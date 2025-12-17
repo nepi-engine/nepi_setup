@@ -134,7 +134,11 @@ Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
     source /home/nepihost/nepi_setup/scripts/docker_lite_init_setup.sh
 
-After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
+Run the NEPI Docker Import command (sudo password is now 'nepi'):
+
+    nepiimport
+
+After the import completes, you can print the current installed NEPI Docker Image by typing:
 
     dimg
 

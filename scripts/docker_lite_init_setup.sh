@@ -76,10 +76,6 @@ if ! source_script $script_path $LITE_INSTALL; then
     exit 1
 fi
 
-####################################
-# Run NEPI Init Setup 
-nepiinit
-wait
 
 ####################################
 echo ""
