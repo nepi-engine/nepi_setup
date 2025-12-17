@@ -53,17 +53,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-####################################
-# Run NEPI Environment Setup Script
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=docker_env_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
-fi
 
 ####################################
 # Run NEPI Bash Setup Script
@@ -100,6 +90,19 @@ if ! source_script $script_path $LITE_INSTALL; then
     echo "Script ${script_path} failed with error ${script_error}"
     exit 1
 fi
+
+####################################
+# Run NEPI Environment Setup Script
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_env_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    exit 1
+fi
+
 
 
 
