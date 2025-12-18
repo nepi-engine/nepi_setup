@@ -130,7 +130,9 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG $SUDO_USER ${CONFIG_USER} >/dev/null 2>&1
+    echo $SUDO_USER
+    echo $CONFIG_USER
+    sudo usermod -aG ${SUDO_USER} ${CONFIG_USER} #>/dev/null 2>&1
 
 
 	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
@@ -157,7 +159,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     fi
    
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-    sudo chmod 0755 /home/${CONFIG_USER}
+    sudo chmod 0775 /home/${CONFIG_USER}
 
 
 
@@ -207,7 +209,7 @@ function new_system_user(){
         sudo usermod -s /sbin/nologin $user
 		
         sudo chown ${user}:${user} /home/${user}
-        sudo chmod 0755 /home/${user}
+        sudo chmod 0775 /home/${user}
 
        
 
@@ -348,7 +350,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0755 /home/${username}
+    sudo chmod 0775 /home/${username}
 
     username=${SYS_USER_1}
     uid=$(id -u "$username")
@@ -360,7 +362,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         sudo usermod -s /sbin/nologin $username
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0755 /home/${username}
+    sudo chmod 0775 /home/${username}
 
     username=${SYS_USER_2}
     uid=$(id -u "$username")
@@ -372,7 +374,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         sudo usermod -s /sbin/nologin $username
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0755 /home/${username}
+    sudo chmod 0775 /home/${username}
 fi
 
 

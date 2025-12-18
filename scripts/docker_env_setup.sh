@@ -187,7 +187,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     if [[ ! -f "/run/sshd" ]]; then
         sudo mkdir "/run/sshd"
     fi
-    sudo chmod 0755 /run/sshd
+    sudo chmod 0775 /run/sshd
     sudo chown root:root /run/sshd
 
     echo "######################################"
@@ -292,7 +292,7 @@ elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
     sudo apt-get remove docker docker-engine docker.io containerd runc
     sudo apt-get update
     sudo apt-get install ca-certificates curl gnupg
-    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo install -m 0775 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
     sudo chmod a+r /etc/apt/keyrings/docker.gpg
     echo \

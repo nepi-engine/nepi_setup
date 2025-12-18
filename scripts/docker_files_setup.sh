@@ -87,10 +87,10 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
@@ -105,10 +105,10 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 #############################
 echo ""
@@ -126,10 +126,10 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
@@ -144,10 +144,10 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 
@@ -186,10 +186,10 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 echo ""

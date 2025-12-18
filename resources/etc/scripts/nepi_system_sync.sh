@@ -80,10 +80,10 @@ sync_yaml_files $UPDATE_FILE $SOURCE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 
@@ -108,10 +108,10 @@ sync_yaml_files $UPDATE_FILE $SOURCE_FILE
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 
@@ -133,10 +133,10 @@ fi
 
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 ######################################
@@ -157,10 +157,10 @@ fi
 
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 
