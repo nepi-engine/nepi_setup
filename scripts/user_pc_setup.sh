@@ -16,7 +16,12 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
-
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    exit 1
+fi
 
 # This file sets up nepi bash aliases and util functions
 
@@ -42,6 +47,11 @@ source $NEPI_UTILS_SOURCE
 #####################################
 # Script Functions
 
+NEPI_IN_CONTAINER=1
+NEPI_DEVICE_ID=device1
+NEPI_IP=192.168.179.103
+
+
 NEPI_USER_CONFIGS=(
 NEPI_DEVICE_ID \
 NEPI_IP \
@@ -64,11 +74,6 @@ function udpate_config_file(){
     update_yaml_value "NEPI_IP" $NEPI_IP $config_file
 
 }
-
-
-
-
-
 
 
 #####################################
@@ -167,7 +172,7 @@ echo ""
 ###################
 # Check for default key
 
-NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys/private_keys
+NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys
 NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
 if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
     : # Do Nothing
