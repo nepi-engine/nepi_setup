@@ -1,6 +1,8 @@
 # NEPI User PC Setup
 
-This tutorial will walk you through setting up a Linux or MAC PC for connecting to a NEPI device. 
+This tutorial will walk you through setting up a Linux PC for connecting to a NEPI device. 
+The last section provides instructions for deploying and building NEPI from source for developers
+wanting the latest development version or deploying customized solutions.
 
 **NOTE:** For Window's PC's you can still connect and interact with the NEPI Device following the setup tutorials in the last section,
 but if you want to do actual NEPI Software development on your Windows PC, 
