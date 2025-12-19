@@ -254,14 +254,14 @@ NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_ut
 NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
-sudo chmod 755 $NEPI_UTILS_FILE_SOURCE
+sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
 sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
 NEPI_UTILS_DEST=/home/${CONFIG_USER}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
-sudo chmod 755 $NEPI_UTILS_SOURCE
+sudo chmod 775 $NEPI_UTILS_SOURCE
 sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
 
 ##############
@@ -283,7 +283,7 @@ path_backup $file $bfile
 
 sudo cp $bfile $BASHRC
 sudo chown ${USER}:${USER} $BASHRC
-sudo chmod 755 $BASHRC
+sudo chmod 775 $BASHRC
 
 # Add additional user bashrc statements
 # Add NEPI SETTINGS

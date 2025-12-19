@@ -776,7 +776,7 @@ function fix_scripts(){
     if is_nepi_path $target_path; then
       echo "Fixing permissions in script folder: ${target_path}"
       sudo chown ${CONFIG_USER}:${CONFIG_USER} ${target_path}/* > /dev/null 2>&1
-      sudo chmod +x ${target_path}/* > /dev/null 2>&1
+      sudo chmod 0776 ${target_path}/* > /dev/null 2>&1
 
     else
         echo "NEPI Script folder not found at ${target_path}"

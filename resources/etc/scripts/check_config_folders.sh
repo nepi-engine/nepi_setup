@@ -132,7 +132,7 @@ fi
 
 
 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG
-sudo chmod -R 0755 $NEPI_CONFIG
+sudo chmod -R 0775 $NEPI_CONFIG
 
 
 if [[ "$NEPI_CONFIG" != "/mnt/nepi_config" && ! -d "$NEPI_CONFIG" ]]; then
@@ -164,7 +164,7 @@ fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
 sudo rm -r ${nfolder}/.Trash* 2>/dev/null
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $nfolder
-sudo chmod 0755 $nfolder
+sudo chmod 0775 $nfolder
 
 declare -a rfolders=(  
 "${NEPI_STORAGE}/ai_models" 

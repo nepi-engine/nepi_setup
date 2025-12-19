@@ -294,7 +294,7 @@ else
     if [[ ! -f "/run/sshd" ]]; then
         sudo mkdir "/run/sshd"
     fi
-    sudo chmod 0755 /run/sshd
+    sudo chmod 0775 /run/sshd
     sudo chown root:root /run/sshd
 
 
