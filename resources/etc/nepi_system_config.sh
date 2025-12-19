@@ -259,7 +259,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
-    update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_SN $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_WIRED_INTERFACE" $CURRENT_NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_GATEWAY_IP" $CURRENT_NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
@@ -352,7 +352,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
             "Update NEPI_DEVICE_SN")
                     read -p "Enter a new 6 digit Serial Number: " USER_INPUT
                     if is_valid_sn "$USER_INPUT"; then
-                        CURRENT_NEPI_IP=$USER_INPUT
+                        CURRENT_NEPI_DEVICE_SN=$USER_INPUT
                     else
                         echo "Not A Valid Serial Number Format"
                     fi
