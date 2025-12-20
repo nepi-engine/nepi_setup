@@ -401,9 +401,9 @@ ucfg = /mnt/nepi_storage/user_cfg"
 
 
 if [[ -d "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts" ]]; then
-  setup_folder = "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
+  setup_folder="/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
 else
-  setup_folder = "/home/${CONFIG_USER}/nepi_setup/scripts"
+  setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
 fi
 
 export NSETUP=$setup_folder

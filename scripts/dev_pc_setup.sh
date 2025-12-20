@@ -32,7 +32,7 @@ fi
 
 
 echo "########################"
-echo "NEPI CONFIG_USER PC SETUP"
+echo "NEPI DEV PC SETUP"
 echo "########################"
 
 echo "Running Intitialization Scripts"
@@ -47,10 +47,6 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-
-echo "########################"
-echo "NEPI DEV PC SETUP"
-echo "########################"
 
 new_key=0
 
@@ -209,7 +205,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     fi
 
     ###############
-    echo "Check for available key options"
+    echo "Checking for available key options"
     sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
 
     echo $sel_ssh_file
@@ -437,7 +433,7 @@ fi
 
 echo " "
 echo "################################# "
-echo "NEPI CONFIG_USER PC Setup Complete"
+echo "NEPI DEV PC SETUP COMPLETE"
 echo "################################# "
 echo " "
 echo " "
