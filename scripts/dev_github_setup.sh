@@ -107,24 +107,21 @@ if [[ "$?" -gt 1 ]]; then
 
     echo "*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
     echo ""
-    echo "Log Into Your GitHub Account at www.github.com"
-    echo "Click on your User Icon, and select 'Settings"
-    echo "Select 'SSH and GPG keys' from the left sidebar menu"
-    echo "Click the 'New SSH key' button in the top right"
+    echo "1) Log Into Your GitHub Account at www.github.com"
+    echo "2) Click on your User Icon, and select 'Settings"
+    echo "3) Select 'SSH and GPG keys' from the left sidebar menu"
+    echo "4) Click the 'New SSH key' button in the top right"
+    echo "5) Enter the following information in the boxes provided,"
+    echo "   Then click the 'Add SSH key' button"
     echo ""
-    echo "Enter the following information in the boxes provided"
-    echo ""
-    echo "TITLE"
+    echo "<< TITLE >>"
     echo ${key_name}
     echo ""
-    echo "KEY_TYPE"
+    echo "<< KEY_TYPE >>"
     echo "Authentication Key"
     echo ""
-    echo "KEY"
+    echo "<< KEY >>"
     echo $(cat $key_file)
-    echo ""
-    echo "Then click the 'Add SSH key' button"
-    echo ""
-    echo "Rerun this script to test github ssh key authentication"
+
 fi
 
