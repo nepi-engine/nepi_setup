@@ -207,21 +207,25 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         sudo apt install snap -y
     fi
 
+    if command -v xclip &>/dev/null; then
+        : # Do nothing here
+    else
+        echo ">>>>>>>>>>>>>>>"
+        echo "Installing xclip software"
+        sudo apt install xclip -y
+    fi
+
 
     echo "########################"
     echo "Installing Utility Apps"
     echo ""
 
 
-
-    #######
-
-
     ######
     if command -v code &> /dev/null; then
         echo "Chromium is installed and accessible."
     else
-        echo ""
+        echo ">>>>>>>>>>>>>>>"
         echo "Installing Chromium Browser"
         #sudo snap remove --purge chromium
         sudo snap install chromium
@@ -231,18 +235,19 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     fi
 
 
-
-    #######
-    echo ""
-    echo "Installing mdview"
-    sudo snap install mdview
-
+    if command -v mdview &>/dev/null; then
+        : # Do nothing here
+    else
+        echo ">>>>>>>>>>>>>>>"
+        echo "Installing mdview software"
+        sudo snap install mdview
+    fi
 
     ######
     if command -v code &> /dev/null; then
         echo "Visual Studio Code is installed and accessible."
     else
-        echo ""
+        echo ">>>>>>>>>>>>>>>"
         echo "Installing visual code editor"
         
         if [[ "$NEPI_ARCH" == 'arm64' ]]; then
@@ -428,6 +433,12 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
 fi
+
+
+
+
+
+
 
 echo " "
 echo "################################# "

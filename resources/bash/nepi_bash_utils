@@ -362,6 +362,20 @@ function is_nepi_path(){
 }
 export -f is_nepi_path
 
+function is_valid_email() {
+    local email=$1
+    # A simple regex for email validation (approximates RFC 5322)
+    local regex="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$"
+
+    if [[ "$email" =~ $regex ]]; then
+        return 0  # Valid
+    else
+        return 1  # Invalid
+    fi
+}
+
+export -f is_valid_email
+
 
 utilsn="${utilsn}
 ################################
@@ -387,7 +401,8 @@ is_valid_amd64 = Check if device is amd64 arch
 is_valid_cuda = Check if system has CUDA
 is_space_avail_mb = Check SOURCE_FOLDER for REQ_SPACE in MB
 is_space_avail_gb = Check SOURCE_FOLDER for REQ_SPACE in GB
-is_nepi_path = Check if path in either a nepi managed folder"
+is_nepi_path = Check if path in either a nepi managed folder
+is_valid_email = Check if email is valid format"
 
 
 
@@ -649,6 +664,8 @@ function fix_ipv4_netmask() {
     return 0 # Valid IP address
 }
 export -f fix_ipv4_netmask
+
+
 
 
 function nls(){
@@ -1375,8 +1392,6 @@ function cmd_loop() {
   fi
 }
 export -f cmd_loop
-
-
 
 
 
