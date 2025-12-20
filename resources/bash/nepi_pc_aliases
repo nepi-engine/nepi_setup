@@ -20,11 +20,14 @@
 
 # This file contains nepi pc dev aliases and sources nepi bash utils
 
+CONFIG_USER=$(id -un)
+
 ### SOURCE NEPI UTIL FUNCTIONS
-NEPI_UTILS_FILE=/home/${USER}/.nepi_bash_utils
+NEPI_UTILS_FILE=/home/${CONFIG_USER}/.nepi_bash_utils
 source $NEPI_UTILS_FILE
 
 HELPN="${UTILSN}"
+
 
 
 ###################################
@@ -37,7 +40,7 @@ if [[ -z "$NEPI_SSH_KEY_FILE" ]]; then
   export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
 fi
 
-export NEPI_SSH_KEY_PATH=/home/${USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
 
 
 export NEPI_REMOTE_SETUP=1
@@ -50,7 +53,7 @@ export NEPI_TARGET_SRC_DIR=/mnt/nepi_storage/nepi_src # This is the default if u
 
 # Clear Known Host Keys
 function ckeys(){
-  kh_file=/home/${USER}/.ssh/known_hosts
+  kh_file=/home/${CONFIG_USER}/.ssh/known_hosts
   if [[ -f "$kh_file" ]]; then
     rm $kh_file
   fi
@@ -68,7 +71,7 @@ function switchnd(){
   fi
 
   ## Update NEPI_IN_CONTAINER
-  FILE=/home/${USER}/.bashrc
+  FILE=/home/${CONFIG_USER}/.bashrc
   KEY='export NEPI_IN_CONTAINER'
   sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
 
@@ -167,7 +170,7 @@ fi
 ###################################
 # NEPI DEV Util Functions
 ###################################
-export SOURCE_FOLDER=/home/${USER}/nepi_engine_ws
+export SOURCE_FOLDER=/home/${CONFIG_USER}/nepi_engine_ws
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
@@ -197,7 +200,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == 'nepi_engine_ws' || "$(pwd)" == "/home/${USER}/nepi_engine_ws/src" ]]; then
+    if [[ "$cur_folder" == 'nepi_engine_ws' || "$(pwd)" == "/home/${CONFIG_USER}/nepi_engine_ws/src" ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
@@ -396,14 +399,22 @@ fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/system_cfg
 ucfg = /mnt/nepi_storage/user_cfg"
 
-export NSETUP="/home/${USER}/nepi_engine_ws/nepi_setup/scripts"
+
+if [[ -d "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts" ]]; then
+  setup_folder = "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
+else
+  setup_folder = "/home/${CONFIG_USER}/nepi_setup/scripts"
+fi
+
+export NSETUP=$setup_folder
+
 alias nsetup="cd ${NSETUP}"
 
 HELPN="${HELPN}
 ################################
 ## NEPI folder shortcuts ##
 ################################
-nsetup = /home/${USER}/nepi_engine_ws/nepi_setup/scripts"
+nsetup = /home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
 
 
 export NTEST='NEPI'
