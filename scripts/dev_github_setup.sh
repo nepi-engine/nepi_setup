@@ -92,7 +92,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         else
             echo 'Host github.com' | sudo tee -a $config_file
             echo '   AddKeysToAgent yes' | sudo tee -a $config_file
-            echo '   UseKeychain yes' | sudo tee -a $config_file
             echo '   IdentityFile '${key_file} | sudo tee -a $config_file
         fi
       
@@ -132,5 +131,7 @@ if [[ "$?" -gt 1 ]]; then
     echo "<< KEY >>"
     echo $(cat ${key_file}.pub)
     echo ""
+    echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
+
 fi
 
