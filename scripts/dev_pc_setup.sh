@@ -32,7 +32,7 @@ fi
 
 
 echo "########################"
-echo "NEPI USER PC SETUP"
+echo "NEPI CONFIG_USER PC SETUP"
 echo "########################"
 
 echo "Running Intitialization Scripts"
@@ -164,7 +164,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     print_current_config
     echo ""
 
-    USER_CONFIG_FILE=/home/${USER}/nepi_system_config.yaml
+    USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
     echo "Updating NEPI CONFIG File: ${USER_CONFIG_FILE} "
     if [[ -f "$USER_CONFIG_FILE" ]]; then
         udpate_config_file $USER_CONFIG_FILE
@@ -193,22 +193,24 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     # Check for default key
 
     NEPI_SSH_PKEY_SOURCE=${ETC_SOURCE_FOLDER}/ssh/ssh_keys/private_keys
-    NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
+    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys=/home/${CONFIG_USER}/ssh_keys
     if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
     else
         echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys" ]]; then
-            mkdir -p $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys
+        if [[ ! -d "$NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys" ]]; then
+            mkdir -p $NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
         fi
-        sudo chmod 600 $NEPI_SSH_PKEY_SOURCE/*
-        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys
+        sudo chmod 0600 $NEPI_SSH_PKEY_SOURCE/*
+        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* /home/${CONFIG_USER}/ssh_keys/
     fi
-    sudo chown 0600 ${USER}:${USER} $NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys/*
+    if [ -d "/home/${CONFIG_USER}/ssh_keys" ]; then
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/ssh_keys/*
+    fi
 
     ###############
     # Check for available key options
-    NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
+    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys=/home/${CONFIG_USER}/ssh_keys
     sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DEST | tail -n 1)
     if [[ -n "$sel_ssh_file"  ]]; then
         sel_ssh_path=${NEPI_SSH_DEST}/${sel_ssh_file}
@@ -225,7 +227,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     #################
     # Update Key Path
     sudo chmod 0700 $NEPI_SSH_DEST
-    sudo chown -R ${USER}:${USER} $NEPI_SSH_DEST
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_DEST
 
 
 
@@ -262,7 +264,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo ""
 
     echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
-    BASHRC=/home/${USER}/.bashrc
+    BASHRC=/home/${CONFIG_USER}/.bashrc
 
 
     ##############
@@ -284,23 +286,23 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     ##############
     NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
-    NEPI_ALIASES_DEST=/home/${USER}/.nepi_pc_aliases
+    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
     if [ -f "$NEPI_ALIASES_DEST" ]; then
         sudo rm $NEPI_ALIASES_DEST
     fi
     sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
-    sudo chown -R ${USER}:${USER} $NEPI_ALIASES_DEST
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
 
     #############
     echo "Updating user bashrc files"
-    ### Backup USER BASHRC file if needed
+    ### Backup CONFIG_USER BASHRC file if needed
     file=$BASHRC
     bfile=${BASHRC}.org
     path_backup $file $bfile
 
     sudo cp $bfile $BASHRC
-    sudo chown ${USER}:${USER} $BASHRC
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
     sudo chmod 775 $BASHRC
 
     # Add additional user bashrc statements
@@ -325,7 +327,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo 'fi' | sudo tee -a $BASHRC
     fi
 
-    sudo chown ${USER}:${USER} ~/.bashrc
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
     sudo chmod 0644 ~/.bashrc
 
     echo ""
@@ -340,8 +342,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Clearing Known Hosts"
     echo ""
 
-    ssh-keygen -f "/home/${USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
-    ssh-keygen -f "/home/${USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
+    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
+    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
 
 
@@ -430,7 +432,7 @@ fi
 
 echo " "
 echo "################################# "
-echo "NEPI USER PC Setup Complete"
+echo "NEPI CONFIG_USER PC Setup Complete"
 echo "################################# "
 echo " "
 echo " "
