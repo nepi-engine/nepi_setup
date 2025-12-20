@@ -77,20 +77,23 @@ cd ${NEPI_HOME}"
 
   }
 
+  export -f nepistart
 
-    function nepistart(){
+  function nepistart(){
       sudo -v
       nepistop
       source ${NEPI_BASE}/scripts/nepi_engine_start
   }
+  export -f nepistop
 
-  CONFIG=${NEPI_STORAGE}/nepi_src/nepi_engine_ws/nepi_setup/scripts
-  ## NEPI build shortcuts
-  alias nepiconfig="
+
+  function nepiconfig(){
+  echo "Running nepi_system_config.sh"
   sudo -v
-  cd $CONFIG
-  show_menu=1
-  ./nepi_config_setup.sh $show_menu"
+  SHOW_CONFIG_MENU=1
+  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+  }
+  export -f nepiconfig
 
 
   BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws

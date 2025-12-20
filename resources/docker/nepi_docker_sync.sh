@@ -154,10 +154,10 @@ fi
 
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 775 ${SOURCE_PATH}
+sudo chmod 755 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 775 ${UPDATE_PATH}
+sudo chmod 755 ${UPDATE_PATH}
 
 
 

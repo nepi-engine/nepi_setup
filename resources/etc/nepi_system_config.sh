@@ -57,7 +57,7 @@ echo "########################"
 echo "NEPI SYSTEM CONFIG SETUP"
 echo "########################"
 
-
+echo "GOT SHOW_CONFIG_MENU ${SHOW_CONFIG_MENU}"
 
 
 

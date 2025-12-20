@@ -159,7 +159,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     fi
    
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-    sudo chmod 0775 /home/${CONFIG_USER}
+    sudo chmod 0755 /home/${CONFIG_USER}
 
 
 
@@ -209,7 +209,7 @@ function new_system_user(){
         sudo usermod -s /sbin/nologin $user
 		
         sudo chown ${user}:${user} /home/${user}
-        sudo chmod 0775 /home/${user}
+        sudo chmod 0755 /home/${user}
 
        
 
@@ -350,7 +350,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0775 /home/${username}
+    sudo chmod 0755 /home/${username}
 
     username=${SYS_USER_1}
     uid=$(id -u "$username")
@@ -362,7 +362,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         sudo usermod -s /sbin/nologin $username
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0775 /home/${username}
+    sudo chmod 0755 /home/${username}
 
     username=${SYS_USER_2}
     uid=$(id -u "$username")
@@ -374,7 +374,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
         sudo usermod -s /sbin/nologin $username
     fi
     sudo chown ${username}:${username} /home/${username}
-    sudo chmod 0775 /home/${username}
+    sudo chmod 0755 /home/${username}
 fi
 
 

@@ -54,17 +54,17 @@ echo ""
 
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 etc_folder=$CONFIG_FOLDER
-if [[ -n "$1" ]]; then
+if [[ ! -z "$1" ]]; then
     test_folder=$1
     if [ ! -f "${test_folder}/load_system_config.sh" ]; then
         echo "Could not find config file in requested config folder ${test_folder}/load_system_config.sh"
-        echo "Using current config folder file ${etc_folder}/load_system_config.sh"
     else
         echo "Running ETC Update from config file ${test_folder}/load_system_config.sh"
         etc_folder=$test_folder
     fi
 fi
 ETC_FOLDER=$etc_folder
+echo "Using config folder ${etc_folder}"
 
 ETC_SAVE=1
 if [[ "$ETC_FOLDER" != "$CONFIG_FOLDER" ]]; then

@@ -309,7 +309,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     update_user_and_group "$username" "$uid" "$gid" "$new_uid" "$new_gid"
 fi
 sudo chown ${username}:${username} /home/${username}
-sudo chmod 0775 /home/${username}
+sudo chmod 0755 /home/${username}
 
 username=${SYS_USER_1}
 uid=$(id -u "$username")
@@ -321,7 +321,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     sudo usermod -s /sbin/nologin $username
 fi
 sudo chown ${username}:${username} /home/${username}
-sudo chmod 0775 /home/${username}
+sudo chmod 0755 /home/${username}
 
 username=${SYS_USER_2}
 uid=$(id -u "$username")
@@ -333,7 +333,7 @@ if [[ "$uid" -ne "$new_uid" || "$gid" -ne "$new_gid" ]]; then
     sudo usermod -s /sbin/nologin $username
 fi
 sudo chown ${username}:${username} /home/${username}
-sudo chmod 0775 /home/${username}
+sudo chmod 0755 /home/${username}
 
 
 # echo "###################################"

@@ -80,7 +80,7 @@ echo "########################"
 
 echo ""
 echo "########################"
-echo "Configuring NEPI Managed Services"
+echo "Configuring NEPI ETC FILES"
 echo "########################"
 
 # Define Folders
@@ -222,6 +222,12 @@ if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
         sudo cp -d $source_file $dest_file
     fi
 fi
+
+
+echo ""
+echo "########################"
+echo "Updating NEPI Managed Services"
+echo "########################"
 
 ################################
 # Update ETC files if systemd is running (Not in Container)
@@ -411,7 +417,15 @@ if [[ "$?" -eq 0 ]]; then
 
 
 else
-
+    ###################
+    echo ""
+    echo "########"
+    echo "Updating SSH Service Config"
+    echo ""
+    source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
+    dest_file=/etc/ssh/sshd_config
+    echo "Copying ${source_file} to ${dest_file}"
+    sudo cp $source_file $dest_file
 
 
     ###################
@@ -420,8 +434,8 @@ else
     echo "Setting up Supervisor"
     echo ""
 
-    sudo chmod +x ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf
-    sudo cp -a ${NEPI_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
+    sudo chmod +x ${SOURCE_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf
+    sudo cp -a ${SOURCE_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
     sudo ln -sf /opt/nepi/scripts/nepi_start_all /nepi_start_all
     echo "Restarting Supervisor Process"
     sudo supervisorctl reread >/dev/null 2>&1
@@ -478,7 +492,7 @@ if [[ "$?" -eq 0 ]]; then
         echo "Setting Up NEPI Docker Service"
         echo ""
         
-        sudo cp -a ${NEPI_ETC_PATH}/docker/services/nepi_docker.service ${SYSTEMD_SERVICE_PATH}/nepi_docker.service
+        sudo cp -a ${SOURCE_ETC_PATH}/docker/services/nepi_docker.service ${SYSTEMD_SERVICE_PATH}/nepi_docker.service
 
         # sudo systemctl enable nepi_docker
         # sudo systemctl restart nepi_docker
@@ -488,9 +502,9 @@ if [[ "$?" -eq 0 ]]; then
         echo "############"
         echo "Setting Up NEPI Engine Service"
 
-        echo "Cofiguring NEPI Engine Service from ${NEPI_ETC_PATH}/services"
-        sudo chmod +x ${NEPI_ETC_PATH}/services/*
-        sudo cp -a ${NEPI_ETC_PATH}/services/* ${SYSTEMD_SERVICE_PATH}/
+        echo "Cofiguring NEPI Engine Service from ${SOURCE_ETC_PATH}/services"
+        sudo chmod +x ${SOURCE_ETC_PATH}/services/*
+        sudo cp -a ${SOURCE_ETC_PATH}/services/* ${SYSTEMD_SERVICE_PATH}/
         sudo systemctl enable nepi_engine
 
         echo ""
