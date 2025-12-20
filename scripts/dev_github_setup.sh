@@ -69,7 +69,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     else
         key_name=id_ed25519_nepi
         key_file=/home/${CONFIG_USER}/.ssh/${key_name}
-        if [[ ! -f key_file]]; then
+        if [[ ! -f key_file ]]; then
             echo "Creating NEPI GitHub ssh_key ${key_name}"
             echo ""
             ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "nepi_github_ssh_key"
@@ -77,7 +77,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         fi
         config_file=/home/${CONFIG_USER}/.ssh/config
         touch ${config_file}
-        if grep -qnw $config_file -e ${key_name} ; then
+        if grep -qnw $config_file -e ${key_name}; then
             : #echo "Already Done"
         else
             echo 'Host github.com' | sudo tee -a $config_file
