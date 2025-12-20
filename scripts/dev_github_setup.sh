@@ -121,7 +121,7 @@ if [[ "$?" -gt 1 ]]; then
     echo "Authentication Key"
     echo ""
     echo "<< KEY >>"
-    echo $(cat $key_file)
-
+    echo $(cat ${key_file}.pub)
+    echo ""
 fi
 
