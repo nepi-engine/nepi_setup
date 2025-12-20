@@ -41,7 +41,7 @@ Clone the NEPI setup repo:
 
 Run the NEPI User PC Setup script:
 
-    source /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
     source ~/.bashrc
 
 See the NEPI PC command line shortcuts menu:
