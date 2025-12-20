@@ -193,7 +193,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     # Check for default key
 
     NEPI_SSH_PKEY_SOURCE=${ETC_SOURCE_FOLDER}/ssh/ssh_keys/private_keys
-    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys=/home/${CONFIG_USER}/ssh_keys
+    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
     if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
     else
