@@ -210,24 +210,28 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     ###############
     echo "Check for available key options"
-    sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DEST | tail -n 1)
+    sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
+    
     echo $sel_ssh_file
     if [[ -n "$sel_ssh_file"  ]]; then
-        sel_ssh_path=${NEPI_SSH_DEST}/${sel_ssh_file}
+        sel_ssh_path=${NEPI_SSH_PKEY_DEST}/${sel_ssh_file}
         if [[ -f "$sel_ssh_path" ]]; then
             NEPI_SSH_FILE=$sel_ssh_file
             NEPI_SSH_SOURCE=$sel_ssh_path
+            echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
+            export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
         fi
+    echo "No SSH Key Found"
+
     fi
-    echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
-    export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
+
 
 
 
     #################
     # Update Key Path
-    sudo chmod 0700 $NEPI_SSH_DEST
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_DEST
+    sudo chmod 0700 $NEPI_SSH_PKEY_DEST
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
 
 
 
