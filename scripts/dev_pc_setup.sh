@@ -56,7 +56,7 @@ new_key=0
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
-    if ! is_valid_internet; then
+    if ! is_valid_internet >/dev/null 2>&1; then
         echo "No Internet Connection Detected.  Connect and rerun this script"
         exit 1
     fi

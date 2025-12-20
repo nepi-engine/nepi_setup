@@ -51,7 +51,7 @@ source $NEPI_UTILS_SOURCE
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
-    if ! is_valid_internet; then
+    if ! is_valid_internet >/dev/null 2>&1; then
         echo "No Internet Connection Detected.  Connect and rerun this script"
         exit 1
     fi
@@ -65,6 +65,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ssh -T git@github.com >/dev/null 2>&1
     if [[ "$?" -lt 2 ]]; then
         key_file=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
+        key_name=$(basename "${key_file}")
         echo "GitHub SSH key authenticated with key file ${key_file}"
     else
         key_name=id_ed25519_nepi
@@ -114,16 +115,16 @@ if [[ "$?" -gt 1 ]]; then
     echo "Enter the following information in the boxes provided"
     echo ""
     echo "TITLE"
-    echo "${nepi_key_name}"
+    echo ${key_name}
     echo ""
     echo "KEY_TYPE"
     echo "Authentication Key"
     echo ""
     echo "KEY"
-    echo cat $nepi_key_file
+    echo $(cat $key_file)
     echo ""
     echo "Then click the 'Add SSH key' button"
     echo ""
-    echo "Test your key using the following command: ssh -T git@github.com"
+    echo "Rerun this script to test github ssh key authentication"
 fi
 
