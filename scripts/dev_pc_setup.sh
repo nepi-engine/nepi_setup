@@ -167,15 +167,94 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     fi
 
 
+
+
+
+
     ####################################################
 
-    # sudo apt update
-    # git
-    # chromium
-    # vcode
-    # sudo apt install gnome-shell-extensions gnome-tweaks
 
-    # Download nepi repo
+    echo " "
+    echo "################################# "
+    echo "Installing Required Software"
+    echo ""
+
+    if command -v yq &>/dev/null; then
+        : # Do nothing here
+    else
+        echo ">>>>>>>>>>>>>>>"
+        echo "Installing yq software"
+        sudo add-apt-repository ppa:rmescandon/yq -y
+        sudo apt update
+        sudo apt install yq -y
+    fi
+    if command -v git &>/dev/null; then
+        : # Do nothing here
+    else
+        echo ">>>>>>>>>>>>>>>"
+        echo "Installing git software"
+        sudo apt install git -y
+        sudo apt install gitk -y
+    fi
+
+    #sudo apt install nmap -y
+
+    if command -v snap &>/dev/null; then
+        : # Do nothing here
+    else
+        echo ">>>>>>>>>>>>>>>"
+        echo "Installing snap software"
+        sudo apt install snap -y
+    fi
+
+
+    echo "########################"
+    echo "Installing Utility Apps"
+    echo ""
+
+
+
+    #######
+
+
+    ######
+    if command -v code &> /dev/null; then
+        echo "Chromium is installed and accessible."
+    else
+        echo ""
+        echo "Installing Chromium Browser"
+        #sudo snap remove --purge chromium
+        sudo snap install chromium
+        #sudo apt install chromium-browser -y
+        #chromium-browser --disable-features=DnsOverHttps
+
+    fi
+
+
+
+    #######
+    echo ""
+    echo "Installing mdview"
+    sudo snap install mdview
+
+
+    ######
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is installed and accessible."
+    else
+        echo ""
+        echo "Installing visual code editor"
+        
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+            sudo apt install ./code_arm64.deb
+            wait
+            sudo rm code_arm64.deb
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            sudo snap install code --channel=edge --classic
+        fi
+
+    fi
 
     ####################################################
 
@@ -348,87 +427,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
 
-    echo " "
-    echo "################################# "
-    echo "Installing Required Software"
-    echo ""
-
-    if command -v yq &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing yq software"
-        sudo add-apt-repository ppa:rmescandon/yq -y
-        sudo apt update
-        sudo apt install yq -y
-    fi
-    if command -v git &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing git software"
-        sudo apt install git -y
-        sudo apt install gitk -y
-    fi
-
-    #sudo apt install nmap -y
-
-    if command -v snap &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing snap software"
-        sudo apt install snap -y
-    fi
-
-
-    echo "########################"
-    echo "Installing Utility Apps"
-    echo "########################"
-
-
-
-    #######
-
-
-    ######
-    if command -v code &> /dev/null; then
-        echo "Chromium is installed and accessible."
-    else
-        echo ""
-        echo "Installing Chromium Browser"
-        #sudo snap remove --purge chromium
-        sudo snap install chromium
-        #sudo apt install chromium-browser -y
-        #chromium-browser --disable-features=DnsOverHttps
-
-    fi
-
-
-
-    #######
-    echo ""
-    echo "Installing mdview"
-    sudo snap install mdview
-
-
-    ######
-    if command -v code &> /dev/null; then
-        echo "Visual Studio Code is installed and accessible."
-    else
-        echo ""
-        echo "Installing visual code editor"
-        
-        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-            sudo apt install ./code_arm64.deb
-            wait
-            sudo rm code_arm64.deb
-        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-            sudo snap install code --channel=edge --classic
-        fi
-
-    fi
 fi
 
 echo " "
