@@ -41,6 +41,7 @@ echo "Running Intitialization Scripts"
 CONFIG_USER=$(id -un)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_SOURCE_FOLDER=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
@@ -191,7 +192,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ###################
     # Check for default key
 
-    NEPI_SSH_PKEY_SOURCE=${SCRIPT_FOLDER}/resources/etc/ssh/ssh_keys
+    NEPI_SSH_PKEY_SOURCE=${ETC_SOURCE_FOLDER}/ssh/ssh_keys
     NEPI_SSH_PKEY_DEST=/home/${USER}/ssh_keys=/home/${USER}/ssh_keys
     if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
