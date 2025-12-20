@@ -211,7 +211,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ###############
     echo "Check for available key options"
     sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
-    
+
     echo $sel_ssh_file
     if [[ -n "$sel_ssh_file"  ]]; then
         sel_ssh_path=${NEPI_SSH_PKEY_DEST}/${sel_ssh_file}
@@ -221,8 +221,9 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
             echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
             export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
         fi
-    echo "No SSH Key Found"
-
+    else
+        echo "No SSH Key Found"
+        export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
     fi
 
 
