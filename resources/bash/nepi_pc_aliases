@@ -164,7 +164,7 @@ if [ -f "${SSH_ENV}" ]; then
     start_ssh_agent;
   }
 else
-  start_ssh_agent;
+  : # Do Nothing
 fi
 
 ###################################
