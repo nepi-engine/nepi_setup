@@ -24,7 +24,7 @@ On your PC, create a new user account nameed 'nepidev' with 'administrator' priv
 
 
 ################################################################
-### NEPI Dev User Account Setup
+### NEPI Dev PC Account Setup
 
 Log into your 'nepidev' user account
 
@@ -39,9 +39,9 @@ Clone the NEPI setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI User PC Setup script:
+Run the NEPI Dev PC Setup script:
 
-    bash /home/${USER}/nepi_setup/scripts/user_pc_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/dev_pc_setup.sh
     source ~/.bashrc
 
 See the NEPI PC command line shortcuts menu:
