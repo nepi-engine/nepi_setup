@@ -198,8 +198,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
     else
         echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys" ]]; then
-            mkdir -p $NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
+        if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
+            mkdir -p $NEPI_SSH_PKEY_DEST
         fi
         sudo chmod 0600 $NEPI_SSH_PKEY_SOURCE/*
         sudo cp -p $NEPI_SSH_PKEY_SOURCE/* /home/${CONFIG_USER}/ssh_keys/
@@ -210,7 +210,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     ###############
     # Check for available key options
-    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys=/home/${CONFIG_USER}/ssh_keys
     sel_ssh_file=$(select_file_from_folder $NEPI_SSH_DEST | tail -n 1)
     if [[ -n "$sel_ssh_file"  ]]; then
         sel_ssh_path=${NEPI_SSH_DEST}/${sel_ssh_file}
