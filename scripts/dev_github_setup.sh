@@ -73,7 +73,16 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         if [[ ! -f $key_file ]]; then
             echo "Creating NEPI GitHub ssh_key ${key_name}"
             echo ""
-            ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "nepi_github_ssh_key"
+            while [[ -z "$ghub_email" ]]; do
+                read -p "Enter your GitHub email address: " USER_INPUT
+                if is_valid_email "$USER_INPUT"; then
+                    echo "Using email ${USER_INPUT}"
+                    ghub_email=$USER_INPUT
+                else
+                    echo "Not A Valid Email"
+                fi  
+            done   
+            ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "${ghub_email}"
 
         fi
         config_file=/home/${CONFIG_USER}/.ssh/config
