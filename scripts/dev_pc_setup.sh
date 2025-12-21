@@ -207,14 +207,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         sudo apt install snap -y
     fi
 
-    if command -v xclip &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing xclip software"
-        sudo apt install xclip -y
-    fi
-
 
     echo "########################"
     echo "Installing Utility Apps"
@@ -234,14 +226,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     fi
 
-
-    if command -v mdview &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing mdview software"
-        sudo snap install mdview
-    fi
 
     ######
     if command -v code &> /dev/null; then

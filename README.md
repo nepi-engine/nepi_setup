@@ -17,7 +17,7 @@ See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md)
 
 See NEPI Docker Customization instructions at [here](NEPI_DOCKER_CUSTOMIZE.md)
 
-### NEPI Container Customization Instructions
+## NEPI Container Customization Instructions
 
 See NEPI Container Customization instructions at [here](NEPI_CONTAINER_CUSTOMIZE.md)
 
