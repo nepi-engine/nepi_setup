@@ -81,7 +81,21 @@ See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-a
 
 
 ################################################################
-### NEPI Remote PC Software Developent Tutorials
+### NEPI Dev PC Software Developent Tools
+
+The NEPI Dev PC setup process includes a number of command line
+shortcuts to accelerate NEPI software development.
+
+sshn = SSH into NEPI Software System
+sshnh = SSH into NEPI Software Host System
+nepidpl = Deploy nepi source-code to nepi device
+
+See complete NEPI PC command line shortcuts menu:
+
+    nepihelp
+
+################################################################
+### NEPI Dev PC Software Developent Tools
 
 See the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 

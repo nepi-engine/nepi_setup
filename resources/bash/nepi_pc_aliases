@@ -129,14 +129,14 @@ HELPN="${HELPN}
 ################################
 ### NEPI SSH UTIL FUNCTIONS
 ################################
-ckeys = Clear known host keys
-sshn = SSH into NEPI 
+sshn = SSH into NEPI Software System
+sshnh = SSH into NEPI Host System
 scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
 sshnh = SSH into NEPI HOST
 scpnh = SCPN into NEPI HOST
 sftpnh = SFTP into NEPI HOST
-sshnh = SSH into NEPI Recovery IP if recovery enabled"
+ckeys = Clear known host keys"
 
 
 
