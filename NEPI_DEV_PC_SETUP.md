@@ -43,6 +43,25 @@ See the NEPI PC command line shortcuts menu:
     nepihelp
 
 ################################################################
+### NEPI GitHub PC Setup
+
+##OPTIONAL## If you need to clone the NEPI source-code GitHub repo for your development efforts,
+  this section will walk you through the github account and ssh key setup process.
+
+
+Create a user account at www.github.com if you don't allready have one.
+
+
+Run the NEPI GitHub PC Setup script:
+
+    bash /home/${USER}/nepi_setup/scripts/dev_github_setup.sh
+
+##NOTE:## If the script fails to authenticate a GitHub SSH connection, 
+    follow the printed instructions to configure your GitHub account with
+    the provided SSH Key information.
+
+
+################################################################
 ### NEPI Remote PC Connections Tutorials
 
 **NOTE:** The following section only applies to PC connected Dev Systems.  
@@ -58,48 +77,6 @@ See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutor
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
 See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
-
-
-################################################################
-### NEPI GitHub PC Setup
-
-##OPTIONAL## If you need to clone the NEPI source-code GitHub repo for your development efforts,
-  this section will walk you through the github account and ssh key setup process.
-
-
-Create a user account at www.github.com if you don't allready have one.
-
-
-Run the NEPI GitHub PC Setup script:
-
-    bash /home/${USER}/nepi_setup/scripts/dev_github_setup.sh
-
-##NOTE:## If the script failes to authenticate a GitHub SSH connection, 
-    follow the printed instructions to configure your GitHub account with
-    the provided SSH Key information.
-
-Clone (or Update) the NEPI source-code repo to your machine with one the following options:
-
-Clone the 'main' branch:
-
-    cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout main
-    git submodule update --init --recursive
-
-Or, clone the 'development' branch:
-
-    cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout develop
-    git submodule update --init --recursive
-
-If you just need to pull the latest updates to an existing cloned NEPI repo:
-
-    cd ~/nepi_engine_ws
-    git pull --recurse-submodules
 
 
 
