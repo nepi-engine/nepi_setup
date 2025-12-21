@@ -1,13 +1,17 @@
-# NEPI User PC Setup
+# NEPI Dev PC Setup
 
-This tutorial will walk you through setting up a Linux PC for connecting to a NEPI device. 
+This tutorial will walk you through setting up a NEPI software development environment. 
 The last section provides instructions for deploying and building NEPI from source for developers
 wanting the latest development version or deploying customized solutions.
 
-**NOTE:** For Window's PC's you can still connect and interact with the NEPI Device following the setup tutorials in the last section,
-but if you want to do actual NEPI Software development on your Windows PC, 
-you will first need to install and start a Ubuntu Virtual Environment on your PC with 
-both internet and either Wired or WiFi access from within the virtual environment.  There are many good 
+**NOTE:** NEPI Dev PC Setup supports can be performed on the following:
+1) Ubuntu Linux PC connected to a NEPI Device over a wired or WiFi connection
+2) NEPI device itself
+3) Windows or MAC PC running a Ubuntu Linux Virtual Environment (See the NOTE below)
+
+
+**NOTE:** for Windows and MAC PC's, you will first need to install and start a Ubuntu Virtual Environment with 
+network access from within the virtual environment.  There are many good 
 online tutorials on this process such as https://automaticaddison.com/how-to-install-ubuntu-22-04-virtual-machine-on-a-windows-pc/
 
 For detailed tutorials on NEPI User PC Setup processes see the "NEPI Getting Started" turoials at:
@@ -16,18 +20,8 @@ For detailed tutorials on NEPI User PC Setup processes see the "NEPI Getting Sta
 For additional support, visit the NEPI software community forum at:
 [NEPI Community](https://www.community.nepi.com)
 
-
 ################################################################
-### Create a NEPI Dev User Account
-
-On your PC, create a new user account nameed 'nepidev' with 'administrator' privileges
-
-
-################################################################
-### NEPI Dev PC Account Setup
-
-Log into your 'nepidev' user account
-
+### NEPI Dev PC Setup
 
 Update Git application (sudo password is #Nsetup4You):
 
@@ -48,9 +42,11 @@ See the NEPI PC command line shortcuts menu:
 
     nepihelp
 
-
 ################################################################
 ### NEPI Remote PC Connections Tutorials
+
+**NOTE:** The following section only applies to PC connected Dev Systems.  
+If you are running your NEPI Dev environment on a NEPI Device, you can skip this section.
 
 Setup and test your network or WiFi connected PC connection to your NEPI device following these instructions.
 
@@ -62,6 +58,49 @@ See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutor
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
 See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
+
+
+################################################################
+### NEPI GitHub PC Setup
+
+##OPTIONAL## If you need to clone the NEPI source-code GitHub repo for your development efforts,
+  this section will walk you through the github account and ssh key setup process.
+
+
+Create a user account at www.github.com if you don't allready have one.
+
+
+Run the NEPI GitHub PC Setup script:
+
+    bash /home/${USER}/nepi_setup/scripts/dev_github_setup.sh
+
+##NOTE:## If the script failes to authenticate a GitHub SSH connection, 
+    follow the printed instructions to configure your GitHub account with
+    the provided SSH Key information.
+
+Clone (or Update) the NEPI source-code repo to your machine with one the following options:
+
+Clone the 'main' branch:
+
+    cd ~/
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+
+Or, clone the 'development' branch:
+
+    cd ~/
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout develop
+    git submodule update --init --recursive
+
+If you just need to pull the latest updates to an existing cloned NEPI repo:
+
+    cd ~/nepi_engine_ws
+    git pull --recurse-submodules
+
 
 
 ################################################################
