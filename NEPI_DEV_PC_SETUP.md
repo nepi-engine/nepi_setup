@@ -45,7 +45,7 @@ See the NEPI PC command line shortcuts menu:
 ################################################################
 ### NEPI GitHub PC Setup
 
-##OPTIONAL## If you need to clone the NEPI source-code GitHub repo for your development efforts,
+**OPTIONAL** If you need to clone the NEPI source-code GitHub repo for your development efforts,
   this section will walk you through the github account and ssh key setup process.
 
 
