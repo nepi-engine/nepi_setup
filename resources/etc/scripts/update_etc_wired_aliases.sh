@@ -86,7 +86,7 @@ if [[ "$?" -eq 0 ]]; then
         sudo bash -c "cat /dev/null > $file"
 
 
-
+        pos=0
         for i in {1..10}; do
             alias_ip_var="NEPI_ALIAS_IP_"${i}
             needs_update=0
@@ -103,7 +103,7 @@ if [[ "$?" -eq 0 ]]; then
                     update_file=${ETC_FOLDER}/nepi_system_config.yaml
                     update_yaml_value "${alias_ip_var}" $ip_address $update_file
                 fi
-                position=$(i - 1) 
+                position=$((i - 1)) 
                 alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 
 
