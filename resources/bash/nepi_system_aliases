@@ -77,14 +77,16 @@ cd ${NEPI_HOME}"
 
   }
 
-  export -f nepistart
+  export -f nepistop
+  
 
   function nepistart(){
       sudo -v
       nepistop
       source ${NEPI_BASE}/scripts/nepi_engine_start
   }
-  export -f nepistop
+
+  export -f nepistart
 
 
   function nepiconfig(){
