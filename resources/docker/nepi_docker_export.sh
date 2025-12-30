@@ -57,7 +57,7 @@ else
         ########################
         # Start Processes
         EXPORT_PATH=$NEPI_EXPORT_PATH
-        sudo rm -r /mnt/nepi_storage/.Trash*
+        sudo rm -r /mnt/nepi_storage/.Trash* >/dev/null 2>&1
         export_clean=0
         if [[ -z "$1" ]]; then
             if [[ "$1" == 'clean' ]]; then
