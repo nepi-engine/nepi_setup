@@ -213,6 +213,8 @@ sudo apt install smbclient -y
 
 fi 
 
+
+
 if is_valid_jetson; then
     echo "######################################"
     echo "Installing Jetson Apps"
