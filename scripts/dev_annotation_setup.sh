@@ -45,7 +45,7 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-if pip list | grep labelImg; then
+if pip list | grep label-studio; then
     echo "labelImg package Installled"
 else
     sudo apt update
@@ -68,25 +68,31 @@ else
     echo ""
     sudo python3 -m pip install --ignore-installed label-studio
     
-    echo ""
-    echo "###################################"
-    echo " Installing labelImg software packages"
-    # echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
-    # echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
-    echo "###################################"
-    echo ""
-
-    # python3 -m venv annotate_env
-    # source annotate_env/bin/activate
-
-    #sudo python3 -m pip install --ignore-installed labelImg
-    sudo python3 -m pip install labelImg
-
-    # deactivate
-    # sudo rm -r annotate_env
 
     if pip list | grep labelImg; then
         echo "labelImg package Installled"
+    else
+
+        echo ""
+        echo "###################################"
+        echo " Installing labelImg software packages"
+        echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
+        echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
+        echo "###################################"
+        echo ""
+
+        # python3 -m venv annotate_env
+        # source annotate_env/bin/activate
+
+        #sudo python3 -m pip install --ignore-installed labelImg
+        sudo python3 -m pip install labelImg
+
+        # deactivate
+        # sudo rm -r annotate_env
+
+        if pip list | grep labelImg; then
+            echo "labelImg package Installled"
+        fi
     fi
 
 fi
