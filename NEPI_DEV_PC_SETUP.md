@@ -60,6 +60,22 @@ Run the NEPI GitHub PC Setup script:
     follow the printed instructions to configure your GitHub account with
     the provided SSH Key information.
 
+################################################################
+### NEPI Annotation PC Setup
+
+**OPTIONAL** If you need to label image data for AI model training,
+and want to use labelImg software to annotate the data,   
+this section will walk you through installing the labelImg software.
+
+
+Run the NEPI Annotation PC Setup script:
+
+    bash /home/${USER}/nepi_setup/scripts/dev_annotation_setup.sh
+
+Test that labelImg opens:
+
+    labelImg
+
 
 ################################################################
 ### NEPI Remote PC Connections Tutorials
