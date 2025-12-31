@@ -49,36 +49,41 @@ if pip list | grep labelImg; then
     echo "labelImg package Installled"
 else
     sudo apt update
+    sudo apt install snap
+    sudo snap install libxml2
+    sudo snap install libxslt
+    sudo apt install libxml2-dev libxslt1-dev -y
+    sudo python3 -m pip cache purge
     sudo apt install pyqt5-dev-tools python3-lxml git -y
     sudo apt install python3-venv python3-pip -y
     cd ~/
-    python3 -m venv annotate_env
-    source annotate_env/bin/activate
+
     sudo python -m pip install --upgrade pip
     sudo python -m pip install --upgrade setuptools wheel twine check-wheel-contents
 
-    # echo ""
-    # echo "###################################"
-    # echo " Installing label-studio software packages"
-    # echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
-    # echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
-    # echo "###################################"
-    # echo ""
-    # sudo python3 -m pip install --ignore-installed label-studio
+    echo ""
+    echo "###################################"
+    echo " Installing label-studio software packages"
+    echo "###################################"
+    echo ""
+    sudo python3 -m pip install --ignore-installed label-studio
     
     echo ""
     echo "###################################"
     echo " Installing labelImg software packages"
-    echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
-    echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
+    # echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
+    # echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
     echo "###################################"
     echo ""
 
-    sudo python3 -m pip install --ignore-installed labelImg
+    # python3 -m venv annotate_env
+    # source annotate_env/bin/activate
 
+    #sudo python3 -m pip install --ignore-installed labelImg
+    sudo python3 -m pip install labelImg
 
-    deactivate
-    sudo rm -r annotate_env
+    # deactivate
+    # sudo rm -r annotate_env
 
     if pip list | grep labelImg; then
         echo "labelImg package Installled"
