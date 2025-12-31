@@ -17,6 +17,9 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
+
+sudo -v 
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -27,11 +30,10 @@ fi
 
 # This file sets up nepi bash aliases and util functions
 
-sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
+    CONFIG_USER=$SUDO_USER
 fi
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     CONFIG_USER=nepihost
@@ -126,7 +128,6 @@ else
     echo ' ' | sudo tee -a $BASHRC
     echo '##### System Config #####' | sudo tee -a $BASHRC
     echo '#export CMAKE_POLICY_VERSION_MINIMUM=3.5' | sudo tee -a $BASHRC
-    echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $BASHRC
     echo 'export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}' | sudo tee -a $BASHRC
 
     echo 'if [[ -f "/usr/lib/aarch64-linux-gnu/libgomp.so.1" ]]; then' | sudo tee -a $BASHRC
@@ -161,6 +162,9 @@ else
     echo 'export PYTHONPATH='${NEPI_ENGINE}'/lib/nepi_drivers:${PYTHONPATH}' | sudo tee -a $BASHRC
     echo 'export PYTHONPATH=/usr/local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
     echo 'export PYTHONPATH=/home/'${CONFIG_USER}'/.local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
+    if [[ "$CONFIG_USER" == 'nepi' ]]; then
+        echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $BASHRC
+    fi
 fi
 
 
@@ -192,6 +196,16 @@ if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
 fi
 
 
+systemctl&> /dev/null
+res=$?
+if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepihost' ]]; then
+    export NEPI_IN_CONTAINER=1
+elif [[ "$?" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
+    export NEPI_IN_CONTAINER=0
+else
+    export NEPI_IN_CONTAINER=1
+fi
+
 # Add NEPI SETTINGS
 echo ' ' | sudo tee -a $BASHRC
 echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
@@ -199,6 +213,7 @@ echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
 echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
+echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
 
 
 # Add NEPI Aliases
