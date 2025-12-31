@@ -154,10 +154,14 @@ echo "Installing NEPI required python packages"
 echo "######################################"
 
 
+
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
     ###################################
     # Install NEPI Managed Services Apps
     ###################################
+
+
+
 
     echo "######################################"
     echo "Installing Hostname Apps"
@@ -205,11 +209,18 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     sudo apt install nano -y
 
 
-echo "######################################"
-echo "Installing Shared Drive Apps"
-echo "######################################"
-sudo apt install samba -y
-sudo apt install smbclient -y
+    echo "######################################"
+    echo "Installing Shared Drive Apps"
+    echo "######################################"
+    sudo apt install samba -y
+    sudo apt install smbclient -y
+
+    echo "######################################"
+    echo "Installing Data Annotation Software"
+    echo "######################################"
+    script_file=dev_annotation_setup.sh
+    script_path=${SCRIPT_FOLDER}/${script_file}
+    source $script_path
 
 fi 
 

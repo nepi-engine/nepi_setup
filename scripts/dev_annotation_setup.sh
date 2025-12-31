@@ -52,21 +52,33 @@ else
     sudo apt install pyqt5-dev-tools python3-lxml git -y
     sudo apt install python3-venv python3-pip -y
     cd ~/
-    python3 -m venv labelimg_env
-    source labelimg_env/bin/activate
+    python3 -m venv annotate_env
+    source annotate_env/bin/activate
     sudo python -m pip install --upgrade pip
     sudo python -m pip install --upgrade setuptools wheel twine check-wheel-contents
-    #sudo python3 -m pip install --ignore-installed label-studio
+
+    # echo ""
+    # echo "###################################"
+    # echo " Installing label-studio software packages"
+    # echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
+    # echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
+    # echo "###################################"
+    # echo ""
+    # sudo python3 -m pip install --ignore-installed label-studio
+    
     echo ""
     echo "###################################"
-    echo " Installing labelImg"
+    echo " Installing labelImg software packages"
     echo "  THIS MAY TAKE SEVERAL MINUTES TO COMPLETE"
     echo "  AND MAY LOOK LIKE PROCESS IF FROZEN"
     echo "###################################"
     echo ""
+
     sudo python3 -m pip install --ignore-installed labelImg
+
+
     deactivate
-    sudo rm -r labelimg_env
+    sudo rm -r annotate_env
 
     if pip list | grep labelImg; then
         echo "labelImg package Installled"
