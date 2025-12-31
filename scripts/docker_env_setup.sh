@@ -145,7 +145,7 @@ sudo apt install snap -y
 sudo apt install curl -y
 sudo apt install gparted -y
 
-sudo apt install python3-pip -y
+sudo apt install python3-venv python3-pip -y
 #sudo apt install usbmount -y
 
 

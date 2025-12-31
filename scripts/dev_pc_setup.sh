@@ -48,12 +48,6 @@ source $NEPI_UTILS_SOURCE
 
 
 
-new_key=0
-
-
-
-
-
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     if ! is_valid_internet >/dev/null 2>&1; then

@@ -49,60 +49,58 @@ source $NEPI_UTILS_SOURCE
 
 
 
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
+if ! is_valid_internet >/dev/null 2>&1; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+    exit 1
+fi
 
-    if ! is_valid_internet >/dev/null 2>&1; then
-        echo "No Internet Connection Detected.  Connect and rerun this script"
-        exit 1
+
+echo " "
+echo "################################# "
+echo "Checking Github SSH Key"
+echo ""
+
+ssh -T git@github.com >/dev/null 2>&1
+if [[ "$?" -lt 2 ]]; then
+    key_file=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
+    key_name=$(basename "${key_file}")
+    echo "GitHub SSH key authenticated with key file ${key_file}"
+else
+    key_name=id_ed25519_nepi
+    key_file=/home/${CONFIG_USER}/.ssh/${key_name}
+    if [[ ! -f $key_file ]]; then
+        echo "Creating NEPI GitHub ssh_key ${key_name}"
+        echo ""
+        while [[ -z "$ghub_email" ]]; do
+            read -p "Enter your GitHub email address: " USER_INPUT
+            if is_valid_email "$USER_INPUT"; then
+                echo "Using email ${USER_INPUT}"
+                ghub_email=$USER_INPUT
+            else
+                echo "Not A Valid Email"
+            fi  
+        done   
+        ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "${ghub_email}"
+
     fi
-
-
-    echo " "
-    echo "################################# "
-    echo "Checking Github SSH Key"
-    echo ""
-
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -lt 2 ]]; then
-        key_file=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
-        key_name=$(basename "${key_file}")
-        echo "GitHub SSH key authenticated with key file ${key_file}"
+    config_file=/home/${CONFIG_USER}/.ssh/config
+    touch ${config_file}
+    if grep -qnw $config_file -e ${key_name}; then
+        : #echo "Already Done"
     else
-        key_name=id_ed25519_nepi
-        key_file=/home/${CONFIG_USER}/.ssh/${key_name}
-        if [[ ! -f $key_file ]]; then
-            echo "Creating NEPI GitHub ssh_key ${key_name}"
-            echo ""
-            while [[ -z "$ghub_email" ]]; do
-                read -p "Enter your GitHub email address: " USER_INPUT
-                if is_valid_email "$USER_INPUT"; then
-                    echo "Using email ${USER_INPUT}"
-                    ghub_email=$USER_INPUT
-                else
-                    echo "Not A Valid Email"
-                fi  
-            done   
-            ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "${ghub_email}"
-
-        fi
-        config_file=/home/${CONFIG_USER}/.ssh/config
-        touch ${config_file}
-        if grep -qnw $config_file -e ${key_name}; then
-            : #echo "Already Done"
-        else
-            echo 'Host github.com' | sudo tee -a $config_file
-            echo '   AddKeysToAgent yes' | sudo tee -a $config_file
-            echo '   IdentityFile '${key_file} | sudo tee -a $config_file
-        fi
-      
-        eval "$(ssh-agent -s)"
-        ssh-add ${key_file}
-
+        echo 'Host github.com' | sudo tee -a $config_file
+        echo '   AddKeysToAgent yes' | sudo tee -a $config_file
+        echo '   IdentityFile '${key_file} | sudo tee -a $config_file
     fi
-
-
+    
+    eval "$(ssh-agent -s)"
+    ssh-add ${key_file}
 
 fi
+
+
+
+
 
 echo " "
 echo "################################# "
