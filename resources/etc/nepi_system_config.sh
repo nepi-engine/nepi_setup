@@ -136,10 +136,13 @@ fi
 #  Upated NEPI Config Settings
 
 systemctl&> /dev/null
-if [[ "$?" -eq 1  && "$CONFIG_USER" == 'nepihost' ]]; then
+res=$?
+if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepihost' ]]; then
     export NEPI_IN_CONTAINER=1
-else
+elif [[ "$?" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
     export NEPI_IN_CONTAINER=0
+else
+    export NEPI_IN_CONTAINER=1
 fi
 update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
 
