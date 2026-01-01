@@ -142,6 +142,14 @@ sudo apt install gitk -y
 sudo apt install htop -y
 sudo apt install ncdu -y
 sudo apt install snap -y
+if is_valid_jetson; then
+    snap download snapd --revision=24724
+    sudo snap ack snapd_24724.assert
+    sudo snap install snapd_24724.snap
+    sudo sudo snap refresh --hold snapd
+
+fi
+
 sudo apt install curl -y
 sudo apt install gparted -y
 

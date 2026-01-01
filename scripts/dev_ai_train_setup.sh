@@ -30,19 +30,14 @@ fi
 # This file sets up nepi bash aliases and util functions
 
 
-
 echo "########################"
-echo "NEPI DEV ANNOTATION SETUP"
+echo "NEPI AI TRAINING ENV SETUP"
 echo "########################"
 
 
 CONFIG_USER=$(id -un)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_SOURCE_FOLDER=$(dirname "${SCRIPT_FOLDER}")/resources/etc
-
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
 
 
 if pip list | grep label-studio; then
@@ -95,15 +90,15 @@ else
         fi
     fi
 
+    sudo pip3 install declxml
+    sudo pip3 install ultralytics
+
 fi
 
 
 
 echo " "
 echo "################################# "
-echo "NEPI DEV ANNOTATION SETUP"
+echo "NEPI AI TRAINING ENV SETUP COMPLETE"
 echo "################################# "
 echo " "
-
-
-

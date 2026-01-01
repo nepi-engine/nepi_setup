@@ -43,38 +43,46 @@ See the NEPI PC command line shortcuts menu:
     nepihelp
 
 ################################################################
-### NEPI GitHub PC Setup
+### NEPI GitHub SSH Key Setup
 
 **OPTIONAL** If you need to clone the NEPI source-code GitHub repo for your development efforts,
   this section will walk you through the github account and ssh key setup process.
 
 
-Create a user account at www.github.com if you don't allready have one.
+**NOTE** If you don't allready have a github user account, create a user account at www.github.com.
+
+**NOTE** If you don't allready have a github ssh private key setup on your dev PC, log into your account. 
+You will be adding an passkey to the account later in this process.
 
 
-Run the NEPI GitHub PC Setup script:
+Run the NEPI GitHub PC Setup script which will check for a valid github ssh key and create one if none available:
 
     bash /home/${USER}/nepi_setup/scripts/dev_github_setup.sh
 
-##NOTE:## If the script fails to authenticate a GitHub SSH connection, 
+**NOTE:** If the script fails to authenticate a GitHub SSH connection, 
     follow the printed instructions to configure your GitHub account with
     the provided SSH Key information.
 
 ################################################################
-### NEPI Annotation PC Setup
+### NEPI AI Training Software Setup
 
-**OPTIONAL** If you need to label image data for AI model training,
-and want to use labelImg software to annotate the data,   
+**OPTIONAL** If you need to label image data and traing custom AI models, 
 this section will walk you through installing the labelImg software.
 
 
 Run the NEPI Annotation PC Setup script:
 
-    bash /home/${USER}/nepi_setup/scripts/dev_annotation_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/dev_ai_train_setup.sh
+
+**NOTE:** After this process both label-studio and labelImg software packages will be installed.
 
 Test that labelImg opens:
 
     labelImg
+
+Test that label-studio opens:
+
+    label-studio
 
 
 ################################################################
