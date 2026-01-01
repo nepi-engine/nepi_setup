@@ -549,7 +549,8 @@ source $config_update_file
 # UPDATE USER DESKTOP FILES
 # #####################################
 
-if [[ -n "$DISPLAY" ]]; then
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
 
     echo ""
     echo "########################"
