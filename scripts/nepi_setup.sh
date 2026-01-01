@@ -598,20 +598,22 @@ if [[ -n "$DISPLAY" ]]; then
 
     echo "########"
     echo "Updating Chrome settings for user ${CONFIG_USER}"
-
+    echo "Killing any running Chromium processes"
+    sudo pkill -f chromium
+    echo "Setting Chromium as Defualt Browser"
     xdg-settings set default-web-browser chromium-browser.desktop
 
-    fix_chromium
 
-    chromium
-    wait
-   
-
-    if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+     if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+        echo "Creating Chromium Defualt Folder"
         sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
     fi
+    echo "Updating Chromium Defualt Files"
     sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
+
+    echo "Cleaning Chromium Files"
+    fix_chromium
 
 
     #sudo rm -rf ~/.config/chromium/Singleton* 
