@@ -54,12 +54,12 @@ echo "########################"
 echo "NEPI CUDA SETUP"
 echo "########################"
 
-# Load System Config File
-source $(dirname $(pwd))/config/load_system_config.sh
-if [ $? -eq 1 ]; then
-    echo "Failed to load ${SYSTEM_CONFIG_FILE}"
-    exit 1
-fi
+# # Load System Config File
+# source $(dirname $(pwd))resources/etc/load_system_config.sh
+# if [ $? -eq 1 ]; then
+#     echo "Failed to load ${SYSTEM_CONFIG_FILE}"
+#     exit 1
+# fi
 
 #***************************************
 
@@ -67,7 +67,7 @@ fi
 ##########################
 NEPI_ARCH=unknown
 if is_valid_jetson; then
-    NEPI_ARCH=arm64
+    NEPI_ARCH=jetson
 elif is_valid_arm64; then
     NEPI_ARCH=arm64
 elif is_valid_amd64; then
@@ -101,49 +101,51 @@ mkdir -p ${HOME}/.local/lib/python${NEPI_PYTHON}/site-packages
 
 
 
-####################################
-# Unistall existing packages
-####################################
-#echo "Will uninstall existing packages if exist"
+                        ####################################
+                        # Unistall existing packages
+                        ####################################
+                        #echo "Will uninstall existing packages if exist"
 
-## NOTE:If you have CV2 installed and have issues, find and rename folder before running
-# sudo python${NEPI_PYTHON} -c "import cv2; print(cv2.__version__);print(cv2.getBuildInformation())"
-# sudo python${NEPI_PYTHON} -c "import inspect; import cv2; print(inspect.getfile(cv2))"
-# sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input opencv-python
-# sudo python${NEPI_PYTHON} -m pip uninstall opencv-python
-# sudo apt-get purge -y '*opencv*'
-# sudo rm -r /usr/local/lib/python3.8/dist-packages/cv2
-# sudo rm -r /usr/lib/python3.8/dist-packages/cv2
-# sudo rm -r /usr/local/include/opencv2 /usr/local/include/opencv 
-# sudo rm -r /usr/include/opencv /usr/include/opencv2 
-# sudo rm -r /usr/local/share/opencv /usr/local/share/OpenCV /usr/share/opencv /usr/share/OpenCV 
-# sudo rm -r /usr/local/bin/opencv* /usr/local/lib/libopencv*
-
-
+                        ## NOTE:If you have CV2 installed and have issues, find and rename folder before running
+                        # sudo python${NEPI_PYTHON} -c "import cv2; print(cv2.__version__);print(cv2.getBuildInformation())"
+                        # sudo python${NEPI_PYTHON} -c "import inspect; import cv2; print(inspect.getfile(cv2))"
+                        # sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input opencv-python
+                        # sudo python${NEPI_PYTHON} -m pip uninstall opencv-python
+                        # sudo apt-get purge -y '*opencv*'
+                        # sudo rm -r /usr/local/lib/python3.8/dist-packages/cv2
+                        # sudo rm -r /usr/lib/python3.8/dist-packages/cv2
+                        # sudo rm -r /usr/local/include/opencv2 /usr/local/include/opencv 
+                        # sudo rm -r /usr/include/opencv /usr/include/opencv2 
+                        # sudo rm -r /usr/local/share/opencv /usr/local/share/OpenCV /usr/share/opencv /usr/share/OpenCV 
+                        # sudo rm -r /usr/local/bin/opencv* /usr/local/lib/libopencv*
 
 
 
-## Find missing deb files in
-##https://repo.download.nvidia.com/jetson/
-# find /var/lib/apt/lists -type f  |xargs rm -f >/dev/null 
-# sudo dpkg --configure -a
-# sudo apt-get clean
-# sudo apt-get autoremove
-# sudo apt-get update --fix-missing && sudo apt-get upgrade
-# sudo apt-get update
-# sudo apt --fix-broken install
-# sudo py3clean .
+
+
+                        ## Find missing deb files in
+                        ##https://repo.download.nvidia.com/jetson/
+                        # find /var/lib/apt/lists -type f  |xargs rm -f >/dev/null 
+                        # sudo dpkg --configure -a
+                        # sudo apt-get clean
+                        # sudo apt-get autoremove
+                        # sudo apt-get update --fix-missing && sudo apt-get upgrade
+                        # sudo apt-get update
+                        # sudo apt --fix-broken install
+                        # sudo py3clean .
 
 
 
-# sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input open3d
-# sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input tourch
-# sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input tourchvision
+                        # sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input open3d
+                        # sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input tourch
+                        # sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input tourchvision
 
+echo ""
+echo "######################################"
+echo "Installing Required Libriaries"
+echo "######################################"
+echo ""
 
-####################################
-# Install Required Libriaries
-####################################
 sudo apt update
 sudo apt install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
 sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
@@ -164,13 +166,16 @@ sudo apt-get update
 sudo apt --fix-broken install
 sudo py3clean .
 
+
+
+
 #########################################################
-# MAYBE Upgrade Cuda Version
+# Upgrade Cuda Version
 ########################################################
 
 MIN_CUDA_VERSION=118
 
-function get_cuda_version(){
+function find_cuda_version(){
     lspci | grep -i nvidia >/dev/null 2>&1
     if [[ "$?" -eq 0 ]]; then
           cuda_version=0
@@ -181,54 +186,93 @@ function get_cuda_version(){
                   cuda_version=${file##*-}
               fi
           done
-          echo $cuda_version
-        fi
     else
+        echo "Failed to get CUDA version"
         echo 0
         return 1
     fi
 }
-
-cuda_version=$(get_cuda_version)
-cuda_version="${cuda_version//./}"
-if [[ "$cuda_version" -lt $MIN_CUDA_VERSION ]]; then
-    echo "######################################"
+echo ""
+echo "######################################"
+echo "Checking for minimum CUDA version ${MIN_CUDA_VERSION}"
+cur_cuda_version=$(find_cuda_version)
+echo "Got CUDA version ${MIN_CUDA_VERSION}"
+cur_cuda_version="${cur_cuda_version//./}"
+if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
     echo "Installing Cuda ${MIN_CUDA_VERSION}"
     echo "######################################"
     cd $TMP
 
 
-    #https://forums.developer.nvidia.com/t/jetson-agx-orin-jetpack-5-1-and-cuda-upgrade-from-11-4-to-11-8-failed-need-a-bit-of-help/270185
-    apt-get install cuda-toolkit-11-8
+    if is_valid_jetson; then
+        #https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=aarch64-jetson&Compilation=Native&Distribution=Ubuntu&target_version=20.04&target_type=deb_local
+        # wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-ubuntu2004.pin
+
+        # sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        # wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda-tegra-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb
+        # sudo dpkg -i cuda-tegra-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb
+        # sudo cp /var/cuda-tegra-repo-ubuntu2004-11-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+        # sudo apt update
+        # sudo apt install -y cuda
+
+        sudo apt-get install cuda-toolkit-11-8
+    elif is_valid_arm64; then
+        sudo apt install cuda-11-8 cuda-drivers=520.61.05-1
+    elif is_valid_amd64; then
+        sudo apt install cuda-11-8 cuda-drivers=520.61.05-1
+    else
+        arch_val=$(uname -m)
+        echo "Arch ${arch_val} not supported yet"
+        exit 1
+    fi
+
+   
+
+    new_cuda_version=$(find_cuda_version)
+    echo "Got CUDA version ${MIN_CUDA_VERSION}"
+    new_cuda_version="${new_cuda_version//./}"
+    if [[ "$new_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
+        echo "Minimum CUDA Version not setup"
+        exit 0
+    else
+        #############################
+        echo ""
+        echo "Updating Bash Variables"
+        new_cuda_version=$(find_cuda_version)
+        sed -i "s/cuda-${cur_cuda_version}/cuda_${new_cuda_version}/g" /home/${CONFIG_USER}/.bashrc
+
+        # cat /home/${CONFIG_USER}/.bashrc
+
+        # Source nepi aliases before exit
+        echo " "
+        echo "Sourcing bashrc with CUDA SETUP"
+        sleep 1 & source /home/nepihost/.bashrc
+        wait
+
+        #sudo update-alternatives --config cuda-11
+
+    fi
+
+   
 
 
-    #############################
+else
+    echo "######################################"
     echo ""
-    echo "Updating Bash Variables"
-
-    sed -i 's/cuda-11.4/cuda_11.8/g' /home/${CONFIG_USER}/.bashrc
-
-    cat /home/${CONFIG_USER}/.bashrc
-
-    # Source nepi aliases before exit
-    echo " "
-    echo "Sourcing bashrc with CUDA SETUP"
-    sleep 1 & source /home/nepihost/.bashrc
-    wait
-
-    sudo update-alternatives --config cuda-11
-
-
 fi
 
 
 
 #################################
 # Install cupy-cuda
-##################################
+echo ""
+echo "######################################"
 echo 'Installing cupy'
+echo "######################################"
+echo ""
 
-CUDA_ARCH=11
+cur_cuda_version=$(find_cuda_version)
+CUDA_ARCH="${cur_cuda_version%%.*}"
 #sudo -H python${NEPI_PYTHON} -m pip install -upgrade cython
 sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 
@@ -237,39 +281,103 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 #################################
 # Install open3d with cuda support
 ##################################
+echo "######################################"
 echo 'Installing Open3d with Cuda Support'
+echo "######################################"
+#https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
+
+
+sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
+sudo apt-get install libosmesa6-dev -y
+
+
+                    # #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
+                    # cd $TMP
+
+
+                    # git clone --recursive https://github.com/devshank3/Open3D-for-Jetson.git
+                    # cd Open3D-for-Jetson/
+                    # cd util/scripts/
+                    # ./install-deps-ubuntu.sh
+                    # cd ../..
+                    # file=$(pwd)/CMakeLists.txt
+                    # sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
+                    # mkdir build
+                    # cd build
+
+                    # sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
+                    #     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+                    #     -DCMAKE_BUILD_TYPE=Release \
+                    #     -DBUILD_SHARED_LIBS=ON \
+                    #     -DBUILD_CUDA_MODULE=ON \
+                    #     -DBUILD_GUI=OFF \
+                    #     -DENABLE_HEADLESS_RENDERING=ON \
+                    #     -DUSE_SYSTEM_GLEW=OFF \
+                    #     -DUSE_SYSTEM_GLFW=OFF \
+                    #     -DBUILD_TENSORFLOW_OPS=OFF \
+                    #     -DBUILD_PYTORCH_OPS=OFF \
+                    #     -DBUILD_UNIT_TESTS=OFF \
+                    #     -DPYTHON_EXECUTABLE=$(which python) \
+                    #     ..
+
+                    # sudo make -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -j
+                    # #make -j3
+
+
+
 
 
 cd $TMP
+sudo rm -r Open3D >/dev/null 2>&1
 git clone --recursive https://github.com/intel-isl/Open3D
 cd Open3D
 git submodule update --init --recursive
 util/install_deps_ubuntu.sh
 
-
 #b)Edit the CMakeLists.txt 
-
+#############################
+echo ""
+echo "Updating Open3D CMakeLists"
 # Open3D build options
-vi CMakeLists.txt
+file=$(pwd)/CMakeLists.txt
 
-option(BUILD_SHARED_LIBS          "Build shared libraries"                   ON )
-option(BUILD_EXAMPLES             "Build Open3D examples programs"           ON )
-option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)
-option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)
-option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )
-option(BUILD_CUDA_MODULE          "Build the CUDA module"                    ON )
-option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )
+sed -i 's/option(BUILD_SHARED_LIBS          "Build shared libraries"                   OFF)/option(BUILD_SHARED_LIBS          "Build shared libraries"                   ON )/g' $file
+sed -i 's/option(BUILD_EXAMPLES             "Build Open3D examples programs"           ON )/option(BUILD_EXAMPLES             "Build Open3D examples programs"           OFF )/g' $file
+sed -i 's/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/g' $file
+sed -i 's/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/g' $file
+sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
+sed -i 's/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    OFF)/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    ON )/g' $file
+sed -i 's/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/g' $file
+sed -i 's/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/g' $file
 
 
-line 328. Change "find_package(Python3 3.6" line to
-find_package(Python3 3.8 EXACT COMPONENTS
+sed -i 's/find_package(Python3 3.6/find_package(Python3 3.8 EXACT COMPONENTS/g' $file
 
 
 #d) Build Open3D cpp and python modules
 
-cd /mnt/nepi_storage/tmp/Open3D
 mkdir build
 cd build
+
+
+##f) Build with GUI ON first
+sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_CUDA_MODULE=ON \
+    -DBUILD_GUI=ON \
+    -DENABLE_HEADLESS_RENDERING=OFF \
+    -DUSE_SYSTEM_GLEW=OFF \
+    -DUSE_SYSTEM_GLFW=OFF \
+    -DBUILD_TENSORFLOW_OPS=OFF \
+    -DBUILD_PYTORCH_OPS=OFF \
+    -DBUILD_UNIT_TESTS=OFF \
+    -DPYTHON_EXECUTABLE=$(which python) \
+    ..
+
+sudo make -j$(nproc)
+
+sudo make install
 
 
 ##f) For headless rendering, remake with the following options. Takes about 30min to rebuild.
@@ -294,62 +402,6 @@ sudo make install
 # Install Open3D python package (optional)
 sudo make install-pip-package -j$(nproc)
 
-
-# OR************
-
-# sudo CUDACXX=/usr/local/cuda-11/bin/nvcc cmake \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DBUILD_SHARED_LIBS=ON \
-#     -DBUILD_CUDA_MODULE=ON \
-#     -DBUILD_GUI=ON \
-#     -DBUILD_TENSORFLOW_OPS=OFF \
-#     -DBUILD_PYTORCH_OPS=OFF \
-#     -DBUILD_UNIT_TESTS=OFF \
-#     -DPYTHON_EXECUTABLE=$(which python) \
-#     ..
-
-# sudo make -j$(nproc)
-
-# *******************
-
-# sudo make install
-
-# # Install Open3D python package (optional)
-# sudo make install-pip-package -j$(nproc)
-
-
-# e) test the install. Run Open3D GUI (optional, available on when -DBUILD_GUI=ON)
-# ./Open3D/Open3D
-
-
-
-# c) First install the new cuda open3d package
-# # You will get an error on this step. Ignore it
-
-# cd /mnt/nepi_storage/tmp/Open3D/build/lib/python_package/pip_package/
-# pip install open3d-0.18.0+84b8e071e-cp38-cp38-manylinux_2_31_aarch64.whl --ignore-installedpyt
-# sudo pip install open3d-0.18.0+84b8e071e-cp38-cp38-manylinux_2_31_aarch64.whl --ignore-installed
-
-# # Check installed open3d module version
-
-# pip freeze | grep open3d
-
-# d) Next install standard open3d-cpu without overwriting the cuda version to fix python import error
-# # You will get an error on this step. Ignore it
-
-# pip install open3d --ignore-installed
-# sudo pip install open3d --ignore-installed
-
-# # Check installed open3d module version still the cuda version from step b
-
-# pip freeze | grep open3d
-
-# pip install setuptools==45.2.0
-# sudo pip install setuptools==45.2.0
-
-
-
-#e) check python open3d module import
 
 sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
 

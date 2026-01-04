@@ -154,38 +154,36 @@ sudo apt install curl -y
 sudo apt install gparted -y
 
 sudo apt install python3-venv python3-pip -y
-#sudo apt install usbmount -y
+
 
 
 echo "######################################"
-echo "Installing NEPI required python packages"
+echo "Installing NEPI python packages"
 echo "######################################"
-
 
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
-    ###################################
-    # Install NEPI Managed Services Apps
-    ###################################
-
-
-
-
     echo "######################################"
+    echo "Installing NEPI Managed Services Apps"
+    echo "######################################"
+
+
+
+
+    echo "############"
     echo "Installing Hostname Apps"
-    echo "######################################"
+    echo ""
     sudo apt install hostapd -y # WiFi access point setup
 
-
-    echo "######################################"
+    echo "############"
     echo "Installing Time Apps"
-    echo "######################################"
+    echo ""
     echo "Installing NEPI TIME Management Software"
     sudo apt-get install chrony -y
 
-    echo "######################################"
+    echo "############"
     echo "Installing SSH Apps"
-    echo "######################################"
+    echo ""
 
     echo "Installing NEPI SSH Management Software"
 
@@ -202,9 +200,9 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     sudo chmod 0775 /run/sshd
     sudo chown root:root /run/sshd
 
-    echo "######################################"
+    echo "############"
     echo "Installing Network Apps"
-    echo "######################################"
+    echo ""
 
     #sudo apt install netplan.io -y
     sudo apt install ifupdown -y
@@ -217,18 +215,25 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     sudo apt install nano -y
 
 
-    echo "######################################"
+    echo "############"
     echo "Installing Shared Drive Apps"
-    echo "######################################"
+    echo ""
     sudo apt install samba -y
     sudo apt install smbclient -y
 
-    echo "######################################"
-    echo "Installing Data Annotation Software"
-    echo "######################################"
-    script_file=dev_annotation_setup.sh
-    script_path=${SCRIPT_FOLDER}/${script_file}
-    source $script_path
+    # echo "############"
+    # echo "Installing Data Annotation Software"
+    # echo ""
+    # script_file=dev_ai_train_setup.sh
+    # script_path=${SCRIPT_FOLDER}/${script_file}
+    # source $script_path
+
+
+    echo "############"
+    echo "Installing USB Drive Auto Mount Software"
+    echo ""
+    sudo apt install usbmount -y
+
 
 fi 
 
