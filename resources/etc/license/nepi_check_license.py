@@ -25,7 +25,7 @@ UNLICENSED_LICENSE_DICT = {'licensed_components':{'nepi_base':{'commercial_licen
 
 NEPI_CONFIG_FILE = '/opt/nepi/etc/nepi_system_config.yaml'
 
-HARDWARE_ID=""
+HARDWARE_ID="Unknown"
 
 def read_dict_from_file(file_path):
     dict_from_file = None
@@ -41,6 +41,8 @@ def read_dict_from_file(file_path):
 
 
 def getHardwareId():
+    global HARDWARE_ID
+    if HARDWARE_ID == "Unknown":
         NEPI_WIRED_INTERFACE = 'eth0'
         NEPI_CONFIG_DICT=read_dict_from_file(NEPI_CONFIG_FILE)
         #print("Got NEPI CONFIG Dict: " + str(NEPI_CONFIG_DICT))
@@ -58,9 +60,8 @@ def getHardwareId():
         info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', bytes(NEPI_WIRED_INTERFACE, 'utf-8')[:15]))
         hardware_id = ''.join('%02x' % b for b in info[18:24])
         print("Got Hardware ID: " + str(hardware_id) + " for network interface id: " + str(NEPI_WIRED_INTERFACE))
-        global HARDWARE_ID
         HARDWARE_ID=hardware_id
-        return hardware_id
+    return HARDWARE_ID
 
 def getNEPIVersion():
     if not os.path.exists(NEPI_VERSION_FILE):
@@ -73,7 +74,7 @@ def checkLicense():
         detected_key = HARDWARE_ID #getHardwareId()
         license_fullpath = NEPI_LICENSE_BASENAME + detected_key + NEPI_LICENSE_EXTENSION
         if not os.path.exists(license_fullpath):
-            raise Exception("License file not found: " + license_fullpath)
+            raise Exception("License file not found")
 
         gpg = gnupg.GPG(gnupghome=NEPI_GPG_KEYPATH)
         
@@ -137,6 +138,12 @@ def checkLicense():
             f.write("Failed to validate commercial license: " + str(e) + "\n")
             #print("Debug: " + str(e))
         exception_license = UNLICENSED_LICENSE_DICT.copy()
+        try:
+            detected_key = getHardwareId()
+            exception_license['licensed_components']['hardware_key'] = str(detected_key)
+        except:
+            pass
+        
         exception_license['licensed_components']['nepi_base']['status'] = str(e)
         #print("Debug: License invalid: " + str(e))
         return yaml.dump(exception_license)
