@@ -305,7 +305,7 @@ else
         uptime_seconds=$((now_epoch - START_EPOCH))
         RUN_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
         # size_gb=${(sudo docker ps --size --filter "id=$RUN_ID" | tail -n1 | tail -n1) && size_gb="${size_gb##* }" && size_gb="${size_gb%%'.'*}" && size_gb=$((size_gb + 1))::-2}  
-        size_gb=$(docker ps --size --filter id="${RUN_ID}" --format "{{.Size}}" | awk '{print $NF}')
+        size_gb=$(sudo docker ps --size --filter id="${RUN_ID}" --format "{{.Size}}" | awk '{print $NF}')
         RUN_SIZE_GB=${size_gb%???}
         #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${CONTAINER_ID}"
         #echo "Updating NEPI Docker Config Runnning Values"
