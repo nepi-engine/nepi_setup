@@ -517,8 +517,9 @@ if [[ "$?" -eq 0 ]]; then
         gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
 
         sudo chown -R $(whoami) ~/.gnupg/
-        sudo chmod 600 ~/.gnupg/*
         sudo chmod 700 ~/.gnupg
+        find ~/.gnupg -type d -exec sudo chmod 700 {} \;
+        find ~/.gnupg -type f -exec sudo chmod 600 {} \;
 
         # Update ETC files if systemd is running (Not in Container)
         cp /opt/nepi/etc/services/nepi_check_license.service /etc/systemd/system/
@@ -541,7 +542,7 @@ elif [[ "$CONFIG_USER" == 'nepi' ]]; then
         sudo chown -R $(whoami) ~/.gnupg/
         sudo chmod 700 ~/.gnupg
         find ~/.gnupg -type d -exec sudo chmod 700 {} \;
-        find ~/.gnupg -type f -exec chmod 600 {} \;
+        find ~/.gnupg -type f -exec sudo chmod 600 {} \;
 
 
 fi
