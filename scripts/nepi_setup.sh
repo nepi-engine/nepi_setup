@@ -516,12 +516,33 @@ if [[ "$?" -eq 0 ]]; then
         chmod +x /opt/nepi/etc/license/nepi_check_license.py
         gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
 
+        sudo chown -R $(whoami) ~/.gnupg/
+        sudo chmod 600 ~/.gnupg/*
+        sudo chmod 700 ~/.gnupg
+
         # Update ETC files if systemd is running (Not in Container)
         cp /opt/nepi/etc/services/nepi_check_license.service /etc/systemd/system/
         sudo systemctl enable nepi_check_license
 
         echo "***** nepi_check_license license manager is installed... you must still provide a valid license file in /mnt/nepi_storage/license *****"
     fi
+
+elif [[ "$CONFIG_USER" == 'nepi' ]]; then
+
+        echo ""
+        echo "############"
+        echo "Setting Up NEPI License Service"
+
+
+        # Set up nepi_check_license (license management, etc.)
+        chmod +x /opt/nepi/etc/license/nepi_check_license.py
+        gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
+
+        sudo chown -R $(whoami) ~/.gnupg/
+        sudo chmod 700 ~/.gnupg
+        find ~/.gnupg -type d -exec sudo chmod 700 {} \;
+        find ~/.gnupg -type f -exec chmod 600 {} \;
+
 
 fi
 

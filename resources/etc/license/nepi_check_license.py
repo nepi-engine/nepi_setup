@@ -87,7 +87,7 @@ def checkLicense():
                     raise Exception("License decrypt failed: " + license_obj.status)
             license_text = str(license_obj)
 
-        license_contents = yaml.load(license_text)
+        license_contents = yaml.load(license_text, Loader=yaml.FullLoader)
         
         if ('licensed_components' not in license_contents) or ('nepi_base' not in license_contents['licensed_components']):
             raise Exception("Bad format")
