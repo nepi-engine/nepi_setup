@@ -8,6 +8,10 @@ sudo gpasswd --add ${USER} dialout
 #sudo chmod a+rw /dev/ttyUSB0
 #sudo chown root:dialout /dev/ttyUSB0
 
+
+#sudo chmod a+rw /dev/ttyACM0
+#sudo chown root:dialout /dev/ttyACM0
+
 ###################
 # Connect and Test
 
@@ -15,11 +19,37 @@ sudo gpasswd --add ${USER} dialout
 # STANDARD_BUAD_RATES = [110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
 sudo ls
 export TEST_PORT=USB0
-#sudo stty -F /dev/tty${TEST_PORT} icanon
+sudo stty -F /dev/tty${TEST_PORT} icanon
 sudo stty -F /dev/tty${TEST_PORT} 9600
 sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
+
+# Reset Pan 0 Position
+echo -e '#AMML2952W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# turn power cycle at when limit reached
+echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML7047W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# test 180 and -180 limits can be reached, then go to 0 deg
+echo -e '#AMML2950W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML7040W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML5000W/r/n' > /dev/tty${TEST_PORT}
+
+
+# Reset Tilt 0 Position
+echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
+# turn power cycle at when limit reached
+echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# test 75 and -75 limits can be reached, then go to 0 deg
+echo -e '$AMML4140W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5850W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
 
 
 export TEST_PORT=USB0
@@ -144,8 +174,20 @@ echo -e '$AMMF0000W/r/n' > /dev/tty${TEST_PORT}
 
 4943.
 #move 
-echo -e '$AMML5056W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML4943W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML4940W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML4943W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML4500W/r/n' > /dev/tty${TEST_PORT}
+
+echo -e '$AMMF0000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML4940W/r/n' > /dev/tty${TEST_PORT}
+
+#Get Position
+echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+
+
+#AMRL0000R
 
 4772
 #set speed
