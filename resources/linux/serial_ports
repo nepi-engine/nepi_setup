@@ -25,31 +25,7 @@ sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
-# Reset Pan 0 Position
-echo -e '#AMML2952W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
-# turn power cycle at when limit reached
-echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMML7047W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
-# test 180 and -180 limits can be reached, then go to 0 deg
-echo -e '#AMML2950W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMML7040W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMML5000W/r/n' > /dev/tty${TEST_PORT}
 
-
-# Reset Tilt 0 Position
-echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
-# turn power cycle at when limit reached
-echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
-# test 75 and -75 limits can be reached, then go to 0 deg
-echo -e '$AMML4140W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML5850W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
 
 
 export TEST_PORT=USB0
@@ -242,3 +218,28 @@ echo -e '&ALMX0100W/r/n' > /dev/tty${TEST_PORT}
 
 echo -e '&ALMX0000R/r/n' > /dev/tty${TEST_PORT}
 
+# Reset Pan 0 Position
+echo -e '#AMML2952W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# turn power cycle at when limit reached
+echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML7047W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# test 180 and -180 limits can be reached, then go to 0 deg
+echo -e '#AMML2950W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML7040W/r/n' > /dev/tty${TEST_PORT}
+echo -e '#AMML5000W/r/n' > /dev/tty${TEST_PORT}
+
+
+# Reset Tilt 0 Position
+echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
+# turn power cycle at when limit reached
+echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5853W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMPR5000W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+# test 75 and -75 limits can be reached, then go to 0 deg
+echo -e '$AMML4140W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5850W/r/n' > /dev/tty${TEST_PORT}
+echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
