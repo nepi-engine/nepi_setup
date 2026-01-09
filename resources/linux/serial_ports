@@ -26,7 +26,7 @@ stty -F /dev/tty${TEST_PORT}
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
 
-
+sudo -v
 
 export TEST_PORT=USB0
 sudo chmod 666 /dev/tty${TEST_PORT}
