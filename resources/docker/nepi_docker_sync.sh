@@ -112,28 +112,28 @@ sudo chmod 775 ${UPDATE_PATH}
 
 
 
-######################################
-## Sync License Files
+# ######################################
+# ## Sync License Files
 
-SOURCE_PATH=/mnt/nepi_storage/license
-UPDATE_PATH=/opt/nepi/license
+# SOURCE_PATH=/mnt/nepi_storage/license
+# UPDATE_PATH=/opt/nepi/license
 
-echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-if [[ -d "${SOURCE_PATH}" ]]; then
-    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
-fi
+# echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+# if [[ -d "${SOURCE_PATH}" ]]; then
+#     sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+# fi
 
-echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-if [[ -d "${UPDATE_PATH}" ]]; then
-    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
-fi
+# echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
+# if [[ -d "${UPDATE_PATH}" ]]; then
+#     sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+# fi
 
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 775 ${SOURCE_PATH}
+# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+# sudo chmod 775 ${SOURCE_PATH}
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 775 ${UPDATE_PATH}
+# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+# sudo chmod 775 ${UPDATE_PATH}
 
 
 ######################################
