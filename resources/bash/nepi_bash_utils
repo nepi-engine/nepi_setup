@@ -730,6 +730,7 @@ export -f update_text_value
 
 
 function fix_path(){
+  sudo -v
   if [[ ! -v "$1" && -n "$1" ]]; then
       target_path=$1
       if [[ ! -e "$target_path" ]]; then
@@ -754,6 +755,7 @@ function fix_path(){
 export -f fix_path
 
 function fix_folder(){
+  sudo -v
   if [[ ! -v "$1" && -n "$1" ]]; then
       target_path=$1
       if [[ ! -e "$target_path" ]]; then
@@ -777,6 +779,7 @@ export -f fix_folder
 
 
 function fix_scripts(){
+  sudo -v
   if [[ -v "$1" || -z "$1" ]]; then
     target_path=$(pwd)
   else
