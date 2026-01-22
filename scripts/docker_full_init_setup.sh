@@ -18,7 +18,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-export LITE_INSTALL=1
+export LITE_INSTALL=0
 
 ####################################
 # Run NEPI Storage Init Setup Script

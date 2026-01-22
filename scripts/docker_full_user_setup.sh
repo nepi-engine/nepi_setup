@@ -18,7 +18,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-export LITE_INSTALL=1
+export LITE_INSTALL=0
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_user_setup.sh

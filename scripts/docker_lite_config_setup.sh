@@ -18,41 +18,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-sudo -v
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
-source $LICENSE_CHECK_FILE
-if [[ "$?" -ne 0 ]]; then
-    exit 1
-fi
-
-
-# This file configures a NEPI Docker installation environment
-
-
 export LITE_INSTALL=1
-
-
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
-fi
-
-
-if ! is_valid_internet; then
-    echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
-fi
-
-
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
-
 
 ####################################
 # Run NEPI Config Setup Script
@@ -65,12 +31,60 @@ if ! source_script $script_path $LITE_INSTALL; then
     exit 1
 fi
 
-####################################
-echo ""
-echo "##################################"
-echo 'NEPI Docker LITE Config Setup Complete'
-echo "##################################"
-echo ""
+
+# sudo -v
+
+# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+# LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+# source $LICENSE_CHECK_FILE
+# if [[ "$?" -ne 0 ]]; then
+#     exit 1
+# fi
+
+
+# # This file configures a NEPI Docker installation environment
+
+
+# export LITE_INSTALL=1
+
+
+
+# CONFIG_USER=$(id -un)
+# if [[ ${CONFIG_USER} == 'root' ]]; then
+#     CONFIG_USER=$SUDO_USER
+# fi
+
+
+# if ! is_valid_internet; then
+#     echo "No Internet Connection Detected.  Connect and rerun this script"
+#     exit 1
+# fi
+
+
+
+# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+# NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+# source $NEPI_UTILS_SOURCE
+
+
+# ####################################
+# # Run NEPI Config Setup Script
+# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+# script_file=nepi_setup.sh
+# script_path=${SCRIPT_FOLDER}/${script_file}
+# if ! source_script $script_path $LITE_INSTALL; then
+#     script_error=$?
+#     echo "Script ${script_path} failed with error ${script_error}"
+#     exit 1
+# fi
+
+# ####################################
+# echo ""
+# echo "##################################"
+# echo 'NEPI Docker LITE Config Setup Complete'
+# echo "##################################"
+# echo ""
 
 
 
