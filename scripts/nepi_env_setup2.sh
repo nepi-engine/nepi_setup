@@ -196,6 +196,8 @@ else
 
 
 
+
+
     # Install support packages
     sudo apt install python${NEPI_PYTHON}-distutils -y
     sudo apt install python${NEPI_PYTHON}-venv -y
@@ -289,6 +291,10 @@ else
     #############
     # Other general python utilities
 
+    ########################
+    ## Remove issue packackes
+    sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing
+
 
     echo ""
     echo "########################"
@@ -340,7 +346,8 @@ else
         sudo python${NEPI_PYTHON} -m pip install --no-input open3d #--ignore-installed
     fi
 
-
+    # Uninstall Problem Packages
+    sudo python${NEPI_PYTHON} -m pip uninstall --no-input typing > /dev/null 2>&1
 
     #https://github.com/ultralytics/ultralytics/issues/21015
     #sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input ultralytics
