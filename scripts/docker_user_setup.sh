@@ -377,6 +377,10 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     fi
     sudo chown ${username}:${username} /home/${username}
     sudo chmod 0755 /home/${username}
+else 
+    sudo usermod -aG $cur_users  ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG $cur_users  ${SYS_USER_1} >/dev/null 2>&1
+    sudo usermod -aG $cur_users  ${SYS_USER_2} >/dev/null 2>&1
 fi
 
 

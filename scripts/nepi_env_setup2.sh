@@ -161,24 +161,35 @@ else
     # ssh into tmp folder on nepi
 
     # Remove old pythons
-    #sudo apt remove --purge python3.x
-    #sudo rm -r /usr/bin/python*
-    #sudo rm -r /usr/lib/python*
-    #sudo apt autoremove
+    
+    REQUIRED_VERSION="3.8.10"
+    PYTHON_COMMAND="python3" # Or "python" depending on your environment
 
-    # sudo apt install --reinstall ca-certificates -y
-    # sudo apt install software-properties-common -y
-    # sudo add-apt-repository ppa:deadsnakes/ppa -y 
-    # sudo apt update
-    # sudo apt install python${NEPI_PYTHON} -f -y 
+    # Get the installed Python version
+    CURRENT_VERSION=$($PYTHON_COMMAND -c 'import platform; print(platform.python_version())' 2>/dev/null)
 
-    # # Install pip
-    # sudo apt remove python-pip
-    # sudo apt remove python3-pip
-    # sudo cd /usr/local/bin
-    # sudo rm pip*
-    # for python 3.8
-    # sudo apt install python3-pip -y
+    if [[ "$REQUIRED_VERSION" != "$CURRENT_VERSION" ]]; then 
+        sudo apt remove --purge python3.x
+        sudo rm -r /usr/bin/python*
+        sudo rm -r /usr/lib/python*
+        sudo apt autoremove
+
+        sudo apt install --reinstall ca-certificates -y
+        sudo apt install software-properties-common -y
+        sudo add-apt-repository ppa:deadsnakes/ppa -y 
+        sudo apt update
+        sudo apt install python${NEPI_PYTHON} -f -y 
+
+        # Install pip
+        sudo apt remove python-pip
+        sudo apt remove python3-pip
+        sudo cd /usr/local/bin
+        sudo rm pip*
+        for python 3.8
+        sudo apt install python3-pip -y
+    else 
+        echo "Correct Python version"
+    fi
 
     #######################
     # # Make sure there is user local package
