@@ -74,7 +74,7 @@ the current NEPI Docker Image and all of it's commits will be replaced with the 
 If you have an installed NEPI Docker Image that you want to preserve, run 'nepiexport' first.
 
     nsetup # Switch to nepi setup repo folder
-    source ./nepi_docker_init
+    source ./nepi_docker_init.sh
     dimg # Show installed base image
 
 Start a NEPI container running in dev mode (password is 'nepi'):
