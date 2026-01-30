@@ -30,7 +30,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -47,7 +47,7 @@ export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    exit 1
+    return 
 fi
 
 sudo -v
@@ -61,7 +61,7 @@ source $NEPI_UTILS_SOURCE
 
 if ! is_valid_internet; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
+    return 
 fi
 
 echo "########################"
@@ -78,7 +78,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -90,7 +90,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 ##########################
@@ -104,7 +104,7 @@ elif is_valid_amd64; then
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
-    exit 1
+    return 
 fi
 
 
@@ -141,7 +141,7 @@ sudo apt install git -y
 sudo apt install gitk -y
 sudo apt install htop -y
 sudo apt install ncdu -y
-sudo apt install snap -y
+sudo apt install snap -y  2>/dev/null 
 if is_valid_jetson; then
     snap download snapd --revision=24724
     sudo snap ack snapd_24724.assert
@@ -379,26 +379,46 @@ echo "######################################"
 
 
 
-echo "########################"
-echo "Installing Utility Apps"
-echo "########################"
+
+
+if [[ -n "$DISPLAY" ]]; then
+    echo "########################"
+    echo "Installing Desktop Utility Apps"
+    echo "########################"
+    sudo apt update
+
+    #######
+    echo ""
+    echo "Installing mdview"
+    sudo snap install mdview
+
+    echo ""
+    echo "Installing Chromium Browser"
+    sudo snap remove --purge chromium
+    sudo snap install chromium
+    #sudo apt install chromium-browser -y
+    #chromium-browser --disable-features=DnsOverHttps
+
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is installed and accessible."
+    else
+        echo ""
+        echo "Installing visual code editor"
+        
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+            sudo apt install ./code_arm64.deb
+            wait
+            sudo rm code_arm64.deb
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            sudo snap install code --channel=edge --classic
+        fi
+
+    fi
+fi
 
 
 
-#######
-
-echo ""
-echo "Installing Chromium Browser"
-sudo snap remove --purge chromium
-sudo snap install chromium
-#sudo apt install chromium-browser -y
-#chromium-browser --disable-features=DnsOverHttps
-
-
-#######
-echo ""
-echo "Installing mdview"
-sudo snap install mdview
 
 
 ######

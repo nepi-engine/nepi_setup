@@ -37,7 +37,7 @@ INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
 source $LICENSE_CHECK_FILE
 source $INSTALL_CHECK_FILE $1
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -52,7 +52,7 @@ export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    exit 1
+    return 
 fi
 
 
@@ -74,7 +74,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 source /home/${CONFIG_USER}/.bashrc
@@ -89,7 +89,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -101,7 +101,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -113,7 +113,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 ####################################

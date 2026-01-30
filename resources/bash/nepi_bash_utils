@@ -665,7 +665,40 @@ function fix_ipv4_netmask() {
 }
 export -f fix_ipv4_netmask
 
+function nepiclone {
+  if is_valid_internet : then
+    cd ~/
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout main
+    git submodule update --init --recursive
+  fi
+}
 
+export -f nepiclonedev
+
+function nepiclone {
+  if is_valid_internet : then
+    cd ~/
+    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
+    cd nepi_engine_ws
+    git checkout develop
+    git submodule update --init --recursive
+  fi
+}
+
+export -f nepiclonedev
+
+export -f nepiclonedev
+
+function nepipullupdates {
+  if is_valid_internet : then
+    cd ~/nepi_engine_ws
+    git pull --recurse-submodules
+  fi
+}
+
+export -f nepipullupdates
 
 
 function nls(){
@@ -690,6 +723,9 @@ ninet = Restart network, connect to internet, and sync clock
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 fix_chromium = Fix any Chromium config issues
 fix_ipv4_netmask = Check valid IP and add 24 netmask if not provided
+nepiclone = Clone the latest NEPI source-code repo
+nepiclonedev = Clone the latest NEPI Development branch source-code repo
+nepipullupdates = Update to the latest NEPI source-code repo
 sbrc = Source the current user's bashrc files" 
 
 ###################################

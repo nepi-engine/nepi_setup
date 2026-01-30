@@ -28,7 +28,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -38,7 +38,7 @@ fi
 # LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 # source $LICENSE_CHECK_FILE
 # if [[ "$?" -ne 0 ]]; then
-#     exit 1
+#     return 
 # fi
 
 
@@ -57,7 +57,7 @@ fi
 
 # if ! is_valid_internet; then
 #     echo "No Internet Connection Detected.  Connect and rerun this script"
-#     exit 1
+#     return 
 # fi
 
 
@@ -76,7 +76,7 @@ fi
 # if ! source_script $script_path $LITE_INSTALL; then
 #     script_error=$?
 #     echo "Script ${script_path} failed with error ${script_error}"
-#     exit 1
+#     return 
 # fi
 
 # ####################################

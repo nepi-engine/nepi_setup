@@ -25,7 +25,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 CONFIG_USER=$(id -un)
@@ -35,7 +35,7 @@ fi
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    exit 1
+    return 
 fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -46,7 +46,7 @@ source $NEPI_UTILS_SOURCE
 
 if ! is_valid_internet; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
+    return 
 fi
 
 
@@ -58,7 +58,7 @@ echo "########################"
 # source $(dirname $(pwd))resources/etc/load_system_config.sh
 # if [ $? -eq 1 ]; then
 #     echo "Failed to load ${SYSTEM_CONFIG_FILE}"
-#     exit 1
+#     return 
 # fi
 
 #***************************************
@@ -75,7 +75,7 @@ elif is_valid_amd64; then
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
-    exit 1
+    return 
 fi
 
 pyver=$(python3 --version | awk '{print $2}')
@@ -223,7 +223,7 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
     else
         arch_val=$(uname -m)
         echo "Arch ${arch_val} not supported yet"
-        exit 1
+        return 
     fi
 
    
@@ -233,7 +233,7 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
     new_cuda_version="${new_cuda_version//./}"
     if [[ "$new_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         echo "Minimum CUDA Version not setup"
-        exit 0
+        return 
     else
         #############################
         echo ""

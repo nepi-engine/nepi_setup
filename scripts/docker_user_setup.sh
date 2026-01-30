@@ -31,7 +31,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -48,7 +48,7 @@ export CONFIG_USER=$CONFIG_USER
 
 if ! [ $(id -u) = 0 ]; then
    echo 'This scripts must be run as root user. Type "sudo su" and retry'
-   exit 1
+   return 
 fi
 
 
@@ -169,7 +169,7 @@ else
     echo "Failed to create user account $CONFIG_USER"
     echo "Manual create an Adminstrator user account name ${CONFIG_USER}"
     echo "Then rerun this script"
-    exit 1
+    return 
 fi
 
 
@@ -219,7 +219,7 @@ function new_system_user(){
         echo "Failed to create user account $user"
         echo "Manual create an Adminstrator user account name ${user}"
         echo "Then rerun this script"
-        exit 1
+        return 
     fi
 
 }
@@ -247,7 +247,7 @@ NEW_UID_START=2000
 # Require root privileges
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root."
-   exit 1
+   return 
 fi
 
 function update_text_value(){

@@ -21,7 +21,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -77,7 +77,7 @@ else
     if ! source_script $script_path; then
         script_error=$?
         echo "Script ${script_path} failed with error ${script_error}"
-        exit 1
+        return 
     fi
 
 
@@ -89,7 +89,7 @@ else
     if ! source_script $script_path; then
         script_error=$?
         echo "Script ${script_path} failed with error ${script_error}"
-        exit 1
+        return 
     fi
 
     TMP=/mnt/nepi_storage/tmp
@@ -108,7 +108,7 @@ else
     else
         arch_val=$(uname -m)
         echo "Arch ${arch_val} not supported yet"
-        exit 1
+        return 
     fi
 
     pyver=$(python3 --version | awk '{print $2}')
