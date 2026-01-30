@@ -71,7 +71,8 @@ else
 
             IFS='-' read -ra TAG_ARRAY <<< "$NEPI_FSA_TAG"
 
-            COMMIT_NAME="${TAG_ARRAY[0]}"
+            # COMMIT_NAME="${TAG_ARRAY[0]}"
+            COMMIT_NAME="nepi_fs_a"
             echo $COMMIT_NAME
             if [[ -z "$COMMIT_NAME" ]]; then
                 COMMIT_NAME="unknown"
@@ -109,11 +110,14 @@ else
 
                 COMMIT_ID=$(sudo docker images -q $COMMIT_NAME_TAG)
                 echo "Commited running nepi container to ID - ${COMMIT_ID}"
-
                 if [[ "$NEPI_RUNNING_FS" == 'nepi_fs_a' && -n "$COMMIT_ID" ]]; then
+                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
+                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
                     update_yaml_value "NEPI_FSA_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
                     update_yaml_value "NEPI_FSA_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
                 elif [[ "$NEPI_RUNNING_FS" == 'nepi_fs_b' && -n "$COMMIT_ID" ]]; then
+                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
+                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
                     update_yaml_value "NEPI_FSB_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
                     update_yaml_value "NEPI_FSB_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
                 fi

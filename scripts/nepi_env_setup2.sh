@@ -111,13 +111,8 @@ else
         exit 1
     fi
 
-    pyver=$(python3 --version | awk '{print $2}')
-    if [[ -n "$pyver" ]]; then
-        pyver="${pyver%.*}"
-    else
-        pyver=3
-    fi
-    NEPI_PYTHON=$pyver
+
+
 
 
     systemctl&> /dev/null
@@ -162,39 +157,32 @@ else
 
     # Remove old pythons
     
-    REQUIRED_VERSION="3.8.10"
-    PYTHON_COMMAND="python3" # Or "python" depending on your environment
+    REQUIRED_VERSION=3.8.10
+    
+    # sudo apt install python3.8 -y
 
-    # Get the installed Python version
-    CURRENT_VERSION=$($PYTHON_COMMAND -c 'import platform; print(platform.python_version())' 2>/dev/null)
 
-    if [[ "$REQUIRED_VERSION" != "$CURRENT_VERSION" ]]; then 
-        sudo apt remove --purge python3.x
-        sudo rm -r /usr/bin/python*
-        sudo rm -r /usr/lib/python*
-        sudo apt autoremove
+    pyver=$(python3 --version | awk '{print $2}')
 
-        sudo apt install --reinstall ca-certificates -y
-        sudo apt install software-properties-common -y
-        sudo add-apt-repository ppa:deadsnakes/ppa -y 
-        sudo apt update
-        sudo apt install python${NEPI_PYTHON} -f -y 
 
-        # Install pip
-        sudo apt remove python-pip
-        sudo apt remove python3-pip
-        sudo cd /usr/local/bin
-        sudo rm pip*
-        for python 3.8
-        sudo apt install python3-pip -y
+
+    if [[ $pyver != $REQUIRED_VERSION ]]; then 
+       echo "Incorrect Python version"
+       echo "Current version: ${pyver}"
+       echo "Required version ${REQUIRED_VERSION}"
+       exit 1
     else 
         echo "Correct Python version"
     fi
 
     #######################
     # # Make sure there is user local package
-
-
+    NEPI_PYTHON=3.8
+    sudo apt update
+    sudo apt install software-properties-common -y
+    sudo apt install --reinstall ca-certificates -y
+    sudo add-apt-repository ppa:deadsnakes/ppa -y 
+    sudo apt update
 
     # Create USER python folder
     mkdir -p $(python -m site --user-site)
@@ -204,21 +192,25 @@ else
     sudo ln -sf /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
 
 
-
-
-
-
-
     # Install support packages
     sudo apt install python${NEPI_PYTHON}-distutils -y
     sudo apt install python${NEPI_PYTHON}-venv -y
     sudo apt install python${NEPI_PYTHON}-dev -y 
+    ####
+
+    sudo apt update
+    sudo apt install python3-pip -y
+    # pip3 --version
+
+
 
     sudo apt update
     sudo apt-get install --fix-broken -y 
-
+    
     # Install and Configure pip
     #sudo python${NEPI_PYTHON} -m pip install --upgrade pip
+
+
 
     sudo ln -sfn /usr/bin/python${NEPI_PYTHON} /usr/bin/python3
     sudo ln -sfn /usr/bin/python3 /usr/bin/python
@@ -228,6 +220,8 @@ else
 
     # Downgrade stetup tools
     # sudo -H python${NEPI_PYTHON} -m pip install --upgrade setuptools
+
+
     sudo -H python${NEPI_PYTHON} -m pip install --no-input setuptools==68.0.0
 
 
@@ -264,10 +258,11 @@ else
     sudo -H python${NEPI_PYTHON} -m pip install --no-input harvesters 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input WSDiscovery 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input python-gnupg 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input pip install lxml
+    # sudo -H python${NEPI_PYTHON} -m pip install --no-input pip install lxml
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input lxml
 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif_zeep
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif 
+    # sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input PyUSB
     sudo -H python${NEPI_PYTHON} -m pip install --no-input usb
 
@@ -354,7 +349,11 @@ else
         sudo python3 -c "import open3d; print('Version:', open3d.__version__)"
     else
         echo "Python open3d is NOT installed. Will install"
-        sudo python${NEPI_PYTHON} -m pip install --no-input open3d #--ignore-installed
+        sudo python${NEPI_PYTHON} -m pip install --upgrade traitlets
+        sudo python${NEPI_PYTHON} -m pip install --upgrade packaging
+        sudo python${NEPI_PYTHON} -m pip install --upgrade ipython
+        sudo pip install jupyter-client==6.1.7
+        sudo python${NEPI_PYTHON} -m pip install --no-input open3d --ignore-installed
     fi
 
     # Uninstall Problem Packages

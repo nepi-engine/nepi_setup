@@ -17,6 +17,23 @@
 ## ====================
 ## - mailto:nepi@numurus.com
 ##
+
+if command -v sudo &> /dev/null
+then
+    echo "Sudo Installed"
+else
+    echo "Installing sudo..."
+    apt update && apt install sudo
+
+    echo "Installing Python..."
+    sudo apt update
+    sudo apt install software-properties-common -y
+    sudo apt install --reinstall ca-certificates -y
+    sudo add-apt-repository ppa:deadsnakes/ppa -y 
+    sudo apt install python3.8 -y
+    sudo apt update
+fi
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE

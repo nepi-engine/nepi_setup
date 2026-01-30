@@ -82,14 +82,14 @@ elif is_valid_arm64; then
     base_image=ultralytics/ultralytics:latest-arm64
 elif is_valid_amd64; then
     NEPI_ARCH=amd64
-    base_image=ultralytics/ultralytics:latest-cpu
+    base_image=ubuntu:20.04
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
     exit 1
 fi
 
-base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
+# base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
 # base_image=ultralytics/ultralytics:latest-jetson-jetpack5
 
 
