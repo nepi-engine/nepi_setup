@@ -284,6 +284,7 @@ else
     sudo -H python${NEPI_PYTHON} -m pip install --no-input colormath
     sudo -H python${NEPI_PYTHON} -m pip install --no-input pandas
     sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input scipy
+    sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input empty
     
 
 
