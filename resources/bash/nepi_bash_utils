@@ -666,7 +666,7 @@ function fix_ipv4_netmask() {
 export -f fix_ipv4_netmask
 
 function nepiclone {
-  if is_valid_internet : then
+  if is_valid_internet ; then
     cd ~/
     git clone git@github.com:nepi-engine/nepi_engine_ws.git 
     cd nepi_engine_ws
@@ -675,10 +675,10 @@ function nepiclone {
   fi
 }
 
-export -f nepiclonedev
+export -f nepiclone
 
-function nepiclone {
-  if is_valid_internet : then
+function nepiclonedev {
+  if is_valid_internet ; then
     cd ~/
     git clone git@github.com:nepi-engine/nepi_engine_ws.git 
     cd nepi_engine_ws
@@ -689,10 +689,9 @@ function nepiclone {
 
 export -f nepiclonedev
 
-export -f nepiclonedev
 
 function nepipullupdates {
-  if is_valid_internet : then
+  if is_valid_internet ; then
     cd ~/nepi_engine_ws
     git pull --recurse-submodules
   fi
