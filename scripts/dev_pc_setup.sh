@@ -95,7 +95,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo ""
     PS3="Please enter your choice by NUMBER: "
-    options=(  "Update Device ID Name" "Update Static IP Address" "CONTINUE" )
+    options=(  "Update Static IP Address" "Update Device ID Name" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -150,86 +150,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
 
-
-
-
-    ####################################################
-
-
-
-    if [[ -n "$DISPLAY" ]]; then
-
-
-        echo " "
-        echo "################################# "
-        echo "Installing Required Software"
-        echo ""
-
-        if command -v yq &>/dev/null; then
-            : # Do nothing here
-        else
-            echo ">>>>>>>>>>>>>>>"
-            echo "Installing yq software"
-            sudo add-apt-repository ppa:rmescandon/yq -y
-            sudo apt update
-            sudo apt install yq -y
-        fi
-        if command -v git &>/dev/null; then
-            : # Do nothing here
-        else
-            echo ">>>>>>>>>>>>>>>"
-            echo "Installing git software"
-            sudo apt install git -y
-            sudo apt install gitk -y
-        fi
-
-        #sudo apt install nmap -y
-
-        if command -v snap &>/dev/null; then
-            : # Do nothing here
-        else
-            echo ">>>>>>>>>>>>>>>"
-            echo "Installing snap software"
-            sudo apt install snap -y
-        fi
-
-
-
-
-        echo "########################"
-        echo "Installing Desktop Utility Apps"
-        echo "########################"
-        sudo apt update
-
-        #######
-        echo ""
-        echo "Installing mdview"
-        sudo snap install mdview
-
-        echo ""
-        echo "Installing Chromium Browser"
-        sudo snap remove --purge chromium
-        sudo snap install chromium
-        #sudo apt install chromium-browser -y
-        #chromium-browser --disable-features=DnsOverHttps
-
-        if command -v code &> /dev/null; then
-            echo "Visual Studio Code is installed and accessible."
-        else
-            echo ""
-            echo "Installing visual code editor"
-            
-            if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-                curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-                sudo apt install ./code_arm64.deb
-                wait
-                sudo rm code_arm64.deb
-            elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-                sudo snap install code --channel=edge --classic
-            fi
-
-        fi
-    fi
     ####################################################
 
     echo " "
