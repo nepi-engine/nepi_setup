@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
         ###########################
         # Run Tests
+        results = None
         random_int = random.randint(1, num_files)-1
         image_file=os.path.join(IMAGES_DIR, image_files[random_int])
         cv2_img = cv2.imread(image_file)
@@ -139,7 +140,7 @@ if __name__ == '__main__':
             ###########################
             # Run Tests
             print('')
-            print("Running Detection Speed Test with" + str(NUM_TESTS) + " Images")
+            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Images")
             elapsed_time=0
             for i in range(1, NUM_TESTS):
 
@@ -158,6 +159,9 @@ if __name__ == '__main__':
                     try:
                         # Inference
                         results = ai_model(cv2_img, conf=THRESHOLD, verbose=False, device=device)
+                        ids = results[0].boxes.cls.to('cpu').tolist()
+                        boxes = results[0].boxes.xyxy.to('cpu').tolist()
+                        confs = results[0].boxes.conf.to('cpu').tolist()
                     except Exception as e:
                         print("Failed to process detection with exception: " + str(e))
                     end_time = time.time()
@@ -166,52 +170,54 @@ if __name__ == '__main__':
                     detect_time = end_time - start_time
                     elapsed_time = elapsed_time + detect_time
 
+            if results is None:
+                print ("FAIL TO GET RESULTS FROM DETECTON PROCESS")
+            else:
+                ######################
+                # Print Results
+                rescale_ratio = 1
 
-            ######################
-            # Print Results
-            rescale_ratio = 1
-
-            cv2_img_shape = cv2_img.shape
-            cv2_img_width = cv2_img_shape[1]
-            cv2_img_height = cv2_img_shape[0]
-            cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
-            #print("image size: " + str(cv2_img.shape))
+                cv2_img_shape = cv2_img.shape
+                cv2_img_width = cv2_img_shape[1]
+                cv2_img_height = cv2_img_shape[0]
+                cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
+                #print("image size: " + str(cv2_img.shape))
 
 
-            detect_dict_list = []
-            for i, idf in enumerate(ids):
-                id = int(idf)
-                det_name = id #classes[id]
-                det_id = id
-                det_prob = confs[i]
-                det_box = boxes[i]
-                det_area = (det_box[2] - det_box[0]) * (det_box[3] - det_box[1])
-                detect_dict = {
-                    'name': det_name, # Class String Name
-                    'id': det_id, # Class Index from Classes List
-                    'uid': '', # Reserved for unique tracking by downstream applications
-                    'prob': det_prob, # Probability of detection
-                    'xmin': int(det_box[0] ),
-                    'ymin': int(det_box[1] ) ,
-                    'xmax': int(det_box[2] ),
-                    'ymax': int(det_box[3]),
-                    'area_pixels': int(det_area),
-                    'area_ratio': det_area / cv2_img_area
-                }
+                detect_dict_list = []
+                for i, idf in enumerate(ids):
+                    id = int(idf)
+                    det_name = id #classes[id]
+                    det_id = id
+                    det_prob = confs[i]
+                    det_box = boxes[i]
+                    det_area = (det_box[2] - det_box[0]) * (det_box[3] - det_box[1])
+                    detect_dict = {
+                        'name': det_name, # Class String Name
+                        'id': det_id, # Class Index from Classes List
+                        'uid': '', # Reserved for unique tracking by downstream applications
+                        'prob': det_prob, # Probability of detection
+                        'xmin': int(det_box[0] ),
+                        'ymin': int(det_box[1] ) ,
+                        'xmax': int(det_box[2] ),
+                        'ymax': int(det_box[3]),
+                        'area_pixels': int(det_area),
+                        'area_ratio': det_area / cv2_img_area
+                    }
 
-                # Rescale to orig image size
+                    # Rescale to orig image size
+                    
+                    detect_dict['xmin'] = int(detect_dict['xmin'] * rescale_ratio)
+                    detect_dict['ymin'] = int(detect_dict['ymin'] * rescale_ratio)
+                    detect_dict['xmax'] = int(detect_dict['xmax'] * rescale_ratio)
+                    detect_dict['ymax'] = int(detect_dict['ymax'] * rescale_ratio)
+                    detect_dict_list.append(detect_dict)
+
+                print("Got detect dict list: " + str(detect_dict_list))
                 
-                detect_dict['xmin'] = int(detect_dict['xmin'] * rescale_ratio)
-                detect_dict['ymin'] = int(detect_dict['ymin'] * rescale_ratio)
-                detect_dict['xmax'] = int(detect_dict['xmax'] * rescale_ratio)
-                detect_dict['ymax'] = int(detect_dict['ymax'] * rescale_ratio)
-                detect_dict_list.append(detect_dict)
-
-            print("Got detect dict list: " + str(detect_dict_list))
-            
-            drate=float(1.0)/elapsed_time * NUM_TESTS
-            print("")
-            print("")
-            print(f"Ran 100 detections in: {elapsed_time:.6f} seconds")
-            print(f"Average detection rate: {drate:.2f} hz")
+                drate=float(1.0)/elapsed_time * NUM_TESTS
+                print("")
+                print("")
+                print(f"Ran 100 detections in: {elapsed_time:.6f} seconds")
+                print(f"Average detection rate: {drate:.2f} hz")
 
