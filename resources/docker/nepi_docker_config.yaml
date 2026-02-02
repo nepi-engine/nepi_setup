@@ -64,6 +64,5 @@ NEPI_AB_FS: 0
 #   unless new images are commited or installed, or nepistop command is called.
 NEPI_RM_PS: 1
 NEPI_IMPORT_ID: unknown
-NEPI_FS_INITIALIZE: 0
 NEPI_EXPORT_PATH: unknown
 NEPI_EXPORT_SPACE_GB: 0
