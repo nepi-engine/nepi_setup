@@ -29,7 +29,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -44,7 +44,7 @@ export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    exit 1
+    return 
 fi
 
 
@@ -111,7 +111,7 @@ else
             else
                 arch_val=$(uname -m)
                 echo "Arch ${arch_val} not supported yet"
-                exit 1
+                return 
             fi
 
             staging_yaml_file=nepi_download_staging.yaml
@@ -133,7 +133,7 @@ else
                 nepi_latest_image_link='https://www.dropbox.com/scl/fi/k9ud25piid9v55f5yt7k4/nepi-jetson-latest.img?rlkey=ozvc32ui27m7fjdrrer91wvio&st=ni7afijz&dl=0'
             else
                 echo "No NEPI Image File available for hardware architecture ${arch_val}"
-                exit 1    
+                return     
             fi
 
             ################

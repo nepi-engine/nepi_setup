@@ -24,7 +24,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 # This file sets up nepi bash aliases and util functions
@@ -51,7 +51,7 @@ source $NEPI_UTILS_SOURCE
 
 if ! is_valid_internet >/dev/null 2>&1; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
+    return 
 fi
 
 

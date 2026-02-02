@@ -32,7 +32,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 
@@ -45,7 +45,7 @@ export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepihost' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    exit 1
+    return 
 fi
 
 
@@ -58,7 +58,7 @@ ninet > /dev/null 2>&1
 
 if ! is_valid_internet > /dev/null; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-    exit 1
+    return 
 fi
 
 echo ""

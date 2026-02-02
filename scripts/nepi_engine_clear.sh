@@ -21,7 +21,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return 
 fi
 
 sudo -v
@@ -33,7 +33,7 @@ fi
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    exit 1
+    return 
 fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

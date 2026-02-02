@@ -24,7 +24,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    exit 1
+    return
 fi
 
 # This file sets up nepi bash aliases and util functions
@@ -47,20 +47,23 @@ NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
-
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
-
-    if ! is_valid_internet >/dev/null 2>&1; then
-        echo "No Internet Connection Detected.  Connect and rerun this script"
-        exit 1
-    fi
-
-    #####################################
-    # Script Functions
 
     NEPI_IN_CONTAINER=1
     NEPI_DEVICE_ID=device1
     NEPI_IP=192.168.179.103
+
+    USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
+    if [[ -f "$USER_CONFIG_FILE" ]]; then
+        echo "Updating NEPI CONFIG from File: ${USER_CONFIG_FILE} "
+        load_yaml_file $USER_CONFIG_FILE 2>/dev/null
+    fi
+
+
+    #####################################
+    # Script Functions
+
+
 
 
     NEPI_USER_CONFIGS=(
@@ -73,16 +76,16 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo ""
         echo "Current Settings"
         echo "---------------------"
-        echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo "NEPI_IP: ${NEPI_IP}"
+        echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo ""
     }
 
     function udpate_config_file(){
         config_file=$1
-        update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $config_file
-        update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         update_yaml_value "NEPI_IP" $NEPI_IP $config_file
+        update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
+        
 
     }
 
@@ -90,45 +93,20 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     #####################################
     # Update NEPI System Config if needed
 
-    nepi_in_container=1
-    ## Check Selection
     echo ""
-    echo "Is NEPI running in a container on your Host device. Defualt is: Yes"
-    select ovw in "Yes" "No" "Quit"; do
-        case $ovw in
-            Yes ) nepi_in_container=1; break;;
-            No ) nepi_in_container=0; break;;
-            Quit ) exit 1
-        esac
-    done
-    export NEPI_IN_CONTAINER=$nepi_in_container
-
-
-
-    echo ""
-    PS3='Please enter your choice: '
-    options=( "USE CURRENT SETTINGS" "Update NEPI Device ID Name" "Update NEPI Static IP Address" "QUIT" )
+    PS3="Please enter your choice by NUMBER: "
+    options=(  "Update Static IP Address" "Update Device ID Name" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
 
         print_current_config
+        COLUMNS=1
         select opt in "${options[@]}" ; do
             case $opt in
-                "USE CURRENT SETTINGS")
-                    break 2 # Exit both the select and the while loop
-                    ;;
-                "Update NEPI Device ID Name")
-                    read -p "Enter a new Device Name (Default=device1): " USER_INPUT
-                    echo ""
-                    if is_valid_did "$USER_INPUT"; then
-                        export NEPI_DEVICE_ID=$USER_INPUT
-                    fi       
-                    echo ""
-                    break # Exit the select statement, re-display menu
-                ;;
-                "Update NEPI Static IP Address")
-                    read -p "Enter a new Static IP Address (Default=192.168.179.103): " USER_INPUT
+
+                "Update Static IP Address")
+                    read -p "Enter a new Static IP Address (Current = ${NEPI_IP}): " USER_INPUT
                     echo ""
                     if is_valid_ipv4 "$USER_INPUT"; then
                         export NEPI_IP=$USER_INPUT
@@ -136,8 +114,18 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
                     echo ""
                     break # Exit the select statement, re-display menu
                     ;;
-                "QUIT")
-                    exit 0
+                "Update Device ID Name")
+                    read -p "Enter a new Device Name (Current = ${NEPI_DEVICE_ID}): " USER_INPUT
+                    echo ""
+                    if is_valid_did "$USER_INPUT"; then
+                        export NEPI_DEVICE_ID=$USER_INPUT
+                    fi       
+                    echo ""
+                    break # Exit the select statement, re-display menu
+                ;;
+
+                "CONTINUE")
+                    break 2 # Exit both the select and the while loop
                     ;;
                 *)
                     echo "Invalid option, please try again."
@@ -161,83 +149,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     fi
 
 
-
-
-
-
-    ####################################################
-
-
-    echo " "
-    echo "################################# "
-    echo "Installing Required Software"
-    echo ""
-
-    if command -v yq &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing yq software"
-        sudo add-apt-repository ppa:rmescandon/yq -y
-        sudo apt update
-        sudo apt install yq -y
-    fi
-    if command -v git &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing git software"
-        sudo apt install git -y
-        sudo apt install gitk -y
-    fi
-
-    #sudo apt install nmap -y
-
-    if command -v snap &>/dev/null; then
-        : # Do nothing here
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing snap software"
-        sudo apt install snap -y
-    fi
-
-
-    echo "########################"
-    echo "Installing Utility Apps"
-    echo ""
-
-
-    ######
-    if command -v code &> /dev/null; then
-        echo "Chromium is installed and accessible."
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing Chromium Browser"
-        #sudo snap remove --purge chromium
-        sudo snap install chromium
-        #sudo apt install chromium-browser -y
-        #chromium-browser --disable-features=DnsOverHttps
-
-    fi
-
-
-    ######
-    if command -v code &> /dev/null; then
-        echo "Visual Studio Code is installed and accessible."
-    else
-        echo ">>>>>>>>>>>>>>>"
-        echo "Installing visual code editor"
-        
-        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-            sudo apt install ./code_arm64.deb
-            wait
-            sudo rm code_arm64.deb
-        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-            sudo snap install code --channel=edge --classic
-        fi
-
-    fi
 
     ####################################################
 

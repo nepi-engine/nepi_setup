@@ -49,7 +49,7 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_user_setup.sh
+    ./docker_full_user_setup.sh
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
@@ -75,7 +75,7 @@ Run the NEPI Docker environment setup script (sudo password is now 'nepi')
 
 If prompted enter: `y` or 'yes' :
 
-    /home/nepihost/nepi_setup/scripts/docker_env_setup.sh
+    /home/nepihost/nepi_setup/scripts/docker_full_env_setup.sh
 
 **NOTE:** If you get a popup window 'System program problem detected', just hit 'Cancel'
 
@@ -118,7 +118,7 @@ Log into the `nepihost` user using password  'nepi'
 
 Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_config_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_full_config_setup.sh
 
 This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
@@ -185,13 +185,13 @@ Run the NEPI Docker Storage initialization script (sudo password is now 'nepi'):
 **NOTE:** This script will download the latest NEPI Docker Image for your system's
 architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
 
-    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
+    source /home/nepihost/nepi_setup/scripts/docker_full_storage_init.sh
 
 Run the NEPI Docker Image initialization script (sudo password is now 'nepi'):
 **NOTE:** This script will download the Demo AI models, AI training scripts, 
 sample data files, and user_configurations to folders in /mnt/nepi_storage.
 
-    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
+    source /home/nepihost/nepi_setup/scripts/docker_full_image_init.sh
 
 Initialize NEPI Docker with an the downloaded NEPI Image:
 

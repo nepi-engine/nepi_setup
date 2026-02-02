@@ -175,6 +175,10 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 
 ## NEPI deploy complete
+alias nepisetup="
+source ${SOURCE_FOLDER}/nepi_setup/scripts/dev_pc_setup.sh"
+
+## NEPI deploy complete
 alias nepidpl="
 cd $SOURCE_FOLDER
 source ./deploy_nepi_complete.sh"
@@ -223,6 +227,7 @@ HELPN="${HELPN}
 ################################
 ### NEPI DEV UTIL FUNCTIONS
 ################################
+nepisetup = Rerun the pc_dev_setup script
 nepidpl = Deploy nepi complete to nepi device
 repodpl = Deploy repos to nepi device
 pushn = Add,commit,push repo changes with provided comment"

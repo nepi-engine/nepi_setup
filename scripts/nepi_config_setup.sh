@@ -36,7 +36,7 @@ fi
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    exit 1
+    return 
 fi
 
 
@@ -55,7 +55,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -67,7 +67,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -79,7 +79,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 
@@ -91,7 +91,7 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $SHOW_CONFIG_MENU; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    exit 1
+    return 
 fi
 
 ####################################

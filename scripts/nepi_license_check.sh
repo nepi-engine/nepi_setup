@@ -63,7 +63,7 @@ if [[ ! -f "$NEPI_LICENSE_DEST" ]]; then
     if [[ "$license_accepted" == 'no' ]]; then
         echo ""
         echo "License Terms NOT Accepted, Exiting"
-        exit 1
+        return 
     else
         echo ""
         echo "License Terms Accepted"
