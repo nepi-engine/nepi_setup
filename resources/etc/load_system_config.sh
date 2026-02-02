@@ -24,6 +24,10 @@ CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
 
+NEPI_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
+BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
+
+
 echo "Load Script = ${LOAD_SCRIPT}"
 
 
@@ -41,8 +45,28 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
 
       if [[ "$success" -ne 1 ]]; then
         #echo "Success = ${success}"
-        echo "System Config File failed to load"
-      fi
+        echo "NEPI System Config File failed to load"
+        echo "Checking for Backup Config File..."
+
+        if [[ -f "$BACKUP_FILE" ]]; then
+            echo "Backup File Exists Updating Config File"
+            sudo cp $BACKUP_FILE $NEPI_CONFIG_FILE
+            eval "$eval_cmd"
+            if [[ "$success" -ne 1 ]]; then
+                echo "Failed to Load Config File from Backup"
+                return 1
+            fi
+        else
+            echo "Backup File does not Exist"
+            return 1
+        fi
+    fi
+
+
+    if [[ "$success" -eq 1 ]]; then
+        echo "Backing Up NEPI System Config File..."
+        sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
+    fi
 
 
 else

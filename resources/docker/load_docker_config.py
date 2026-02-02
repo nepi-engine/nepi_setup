@@ -22,14 +22,12 @@
 
 
 import os
-import shutil
 import sys
 import yaml
 
 
 config_folder="/mnt/nepi_config/docker_cfg"
 config_file=config_folder + "/nepi_docker_config.yaml"
-back_file="/nepi_docker_config.yaml.bak"
 
 
 print_list=[]
@@ -57,9 +55,6 @@ if os.path.exists(config_file) == True:
                 print_string=(str(key) + "=" + str(config_dict[key]))
                 print_list.append(print_string)
             print_list.append("success=1")
-            # Create backup yaml file
-            shutil.copyfile(config_file, back_file)
-
         else:
             print_list.append("success=-3")
     
