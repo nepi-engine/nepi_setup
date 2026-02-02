@@ -97,6 +97,27 @@ sudo chmod 775 ${SOURCE_PATH}
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
+
+###########################
+############
+echo ""
+echo "Updating NEPI Scripts Folders"
+
+SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/scripts
+UPDATE_PATH=/opt/nepi/scripts
+
+
+echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+sudo rsync -ar  ${SOURCE_PATH}/ ${UPDATE_PATH}/
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
+
+
+
 #############################
 echo ""
 echo "Updating Docker Config Files and Folders"

@@ -20,5 +20,5 @@
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-NEPI_TESTS_FOLDER=$(dirname "${SCRIPT_FOLDER}")/etc/tests/
+NEPI_TESTS_FOLDER=$(dirname "${SCRIPT_FOLDER}")/etc/tests
 python ${NEPI_TESTS_FOLDER}/test_ai_detect/nepi_ai_yolov8_detection_test.py

@@ -360,6 +360,8 @@ else
     # Uninstall Problem Packages
     sudo python${NEPI_PYTHON} -m pip uninstall --no-input typing > /dev/null 2>&1
 
+    sudo python${NEPI_PYTHON} -m pip install ultralytics
+
     #https://github.com/ultralytics/ultralytics/issues/21015
     #sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input ultralytics
     # sudo pip install git+https://github.com/ultralytics/ultralytics.git@main
