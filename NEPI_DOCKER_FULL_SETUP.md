@@ -24,9 +24,12 @@ For a detailed tutorials and videos on this process see the "NEPI Docker Full Se
 
 This step will setup NEPI Docker required user accounts on your device
 
-Log into a user account on the device with 'Adminstrator' privilages, **or 'nepihost' if exists**.
+Log into a user account on the device with 'Adminstrator' privilages
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
+
+**NOTE:**  If you allready have a 'nepi_host' account created during a NEPI Docker Lite installation,
+You will want to delete the 'nepi_host' account using the Settings/User panel.
 
 Make sure your system has internet access by running the following command:
 
