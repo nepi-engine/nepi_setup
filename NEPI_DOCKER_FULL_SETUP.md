@@ -168,38 +168,27 @@ Check for internet connection
 
 ################################################################
 ### NEPI Docker Init Setup
-This section will initialize and test your NEPI Docker solution.  
+This section will initialize and test your NEPI Docker installation.  
 
 Log back into `nepihost` using password 'nepi' 
 
-Enable internet connection and sync clocks:
-
-    ninet
-
 Check for internet connection
 
-    pingi
+    ping -c 1 google.com
 
 
-Run the NEPI Docker Storage initialization script (sudo password is now 'nepi'):
-**NOTE:** This script will download the latest NEPI Docker Image for your system's
-architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
+Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_full_storage_init.sh
+    source /home/nepihost/nepi_setup/scripts/docker_full_init_setup.sh
 
-Run the NEPI Docker Image initialization script (sudo password is now 'nepi'):
-**NOTE:** This script will download the Demo AI models, AI training scripts, 
-sample data files, and user_configurations to folders in /mnt/nepi_storage.
+Run the NEPI Docker Import command (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_full_image_init.sh
+    nepiimport
 
-Initialize NEPI Docker with an the downloaded NEPI Image:
+After the import completes, you can print the current installed NEPI Docker Image by typing:
 
-    nepiinit
+    dimg
 
-After the initialization script completes, you can print the current installed NEPI Docker Images by typing:
-
-    dps
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
@@ -231,6 +220,12 @@ After the initialization script completes, you can print the current installed N
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
+
+**NOTE:** This process downloads the Lite AI models, AI training scripts, 
+sample data files, and user_configurations to folders in /mnt/nepi_storage.
+
+**NOTE:** This process downolads the latest NEPI Docker Image for your system's
+architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
 
 ################################################################
 ### NEPI Docker Image Testing

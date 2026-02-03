@@ -100,22 +100,25 @@ cd ${NEPI_HOME}"
 
   BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws
   ## NEPI build shortcuts
-  alias nepibld="
-  sudo -v
-  cd $BUILD
-  ./build_nepi_complete.sh"
+ function nepibld(){
+    sudo -v
+    cd $BUILD
+    source ./build_nepi_complete.sh
+  }
 
   # NEPI build shortcuts
-  alias codebld="
+  function codebld(){
   sudo -v
   cd $BUILD
-  ./build_nepi_code.sh"
+  source ./build_nepi_code.sh
+  }
 
   # NEPI build shortcuts
-  alias ruibld="
-  sudo -v
-  cd $BUILD
-  ./build_nepi_rui.sh"
+  function ruibld(){
+    sudo -v
+    cd $BUILD
+    source ./build_nepi_rui.sh
+  }
 
 
 function snvm(){

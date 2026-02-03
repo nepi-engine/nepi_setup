@@ -394,7 +394,7 @@ if [[ -n "$DISPLAY" ]]; then
 
     echo ""
     echo "Installing Chromium Browser"
-    sudo snap remove --purge chromium
+    #sudo snap remove --purge chromium
     sudo snap install chromium
     #sudo apt install chromium-browser -y
     #chromium-browser --disable-features=DnsOverHttps
