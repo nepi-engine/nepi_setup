@@ -28,30 +28,35 @@ NEPI_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
 
 
-echo "Load Script = ${LOAD_SCRIPT}"
 
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
 
 
-      success=0
-      eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
-      eval "$eval_cmd"
-      #echo "${load_vals}"
-      
-      for entry in $load_vals; do
-         export ${entry}
-      done
+    success=0
+    eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
+    eval "$eval_cmd"
+    #echo "${load_vals}"
+    
+    for entry in $load_vals; do
+        export ${entry}
+    done
 
-      if [[ "$success" -ne 1 ]]; then
+    if [[ "$success" -ne 1 ]]; then
         #echo "Success = ${success}"
-        echo "NEPI System Config File failed to load"
+        echo "NEPI Config File failed to load"
         echo "Checking for Backup Config File..."
 
         if [[ -f "$BACKUP_FILE" ]]; then
             echo "Backup File Exists Updating Config File"
-            sudo cp $BACKUP_FILE $NEPI_CONFIG_FILE
+            sudo cp $BACKUP_FILE $NEPI_CONFIG_FILE  
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
+            success=0
+            eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
             eval "$eval_cmd"
+            for entry in $load_vals; do
+                export ${entry}
+            done
             if [[ "$success" -ne 1 ]]; then
                 echo "Failed to Load Config File from Backup"
                 return 1
@@ -64,12 +69,13 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
 
 
     if [[ "$success" -eq 1 ]]; then
-        echo "Backing Up NEPI System Config File..."
+        echo "Backing Up NEPI Config File..."
         sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
     fi
 
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"
-    exit 1
+    return 1
 fi

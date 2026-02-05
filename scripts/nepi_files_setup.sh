@@ -65,9 +65,11 @@ echo "Updating NEPI Config Folders"
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 UPDATE_PATH=/opt/nepi/etc
 CONFIG_FILENAME=nepi_system_config.yaml
+BACKUP_FILENAME=nepi_system_config.yaml.bak
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
@@ -83,9 +85,11 @@ sudo chmod 775 ${UPDATE_PATH}
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
 CONFIG_FILENAME=nepi_system_config.yaml
+BACKUP_FILENAME=nepi_system_config.yaml.bak
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
@@ -96,6 +100,13 @@ sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
+
+#############################
+echo ""
+echo "Updating NEPI System Config Files and Folders"
+
+sudo cp $UPDATE_FILE $BACKUP_FILE
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
 
 
 ###########################
@@ -125,9 +136,11 @@ echo "Updating Docker Config Files and Folders"
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
 UPDATE_PATH=/opt/nepi/docker
 CONFIG_FILENAME=nepi_docker_config.yaml
+BACKUP_FILENAME=nepi_docker_config.yaml.bak
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
@@ -143,9 +156,11 @@ sudo chmod 775 ${UPDATE_PATH}
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
 CONFIG_FILENAME=nepi_docker_config.yaml
+BACKUP_FILENAME=nepi_docker_config.yaml.bak
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
+BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
@@ -156,6 +171,13 @@ sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
+
+#############################
+echo ""
+echo "Updating Docker Config Files and Folders"
+
+sudo cp $UPDATE_FILE $BACKUP_FILE
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
 
 
 
