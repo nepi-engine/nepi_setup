@@ -182,13 +182,18 @@ Check for internet connection
 
 Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
 
+**NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
+
     source /home/nepihost/nepi_setup/scripts/docker_full_init_setup.sh
 
 Run the NEPI Docker Import command (sudo password is now 'nepi'):
 
+**NOTE:** This step imports a large NEPI image file into the system which takes several minutes to complete.
+
     nepiimport
 
 After the import completes, you can print the current installed NEPI Docker Image by typing:
+
 
     dimg
 
