@@ -7,6 +7,6 @@ find . -type f -exec perl -i -pe 's|str2replace|replace_str|g' {} +
 
 Example
 
-find . -type f -exec perl -i -pe 's|userRestrictionsEnabledOptions|userRestrictionsOptons|g' {} +
+find . -type f -exec perl -i -pe 's|ImageViewersSelector|NepiIFImageViewersSelector|g' {} +
 
 
