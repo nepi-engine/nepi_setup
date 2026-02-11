@@ -208,6 +208,8 @@ fi
 
 # Add NEPI SETTINGS
 echo ' ' | sudo tee -a $BASHRC
+echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
+echo '' | sudo tee -a $BASHRC
 echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
 echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
 echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
