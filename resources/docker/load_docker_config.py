@@ -58,9 +58,17 @@ if os.path.exists(config_file) == True:
                 print_list.append("success=1")
             else:
                 print_list.append("success=-3")
+        else:
+            print_list.append("success=0")
     else:
-        print_list.append("success=0")
-    
+        config_dict = read_yaml_2_dict(config_file)
+        if config_dict is not None:
+                for key in config_dict.keys():
+                    print_string=(str(key) + "=" + str(config_dict[key]))
+                    print_list.append(print_string)
+                print_list.append("success=1")
+        else:
+            print_list.append("success=0")
 else:
     print_list.append("success=0")
 

@@ -59,11 +59,11 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
             done
             if [[ "$success" -ne 1 ]]; then
                 echo "Failed to Load Config File from Backup"
-                return 1
+                exit
             fi
         else
             echo "Backup File does not Exist"
-            return 1
+            exit
         fi
     fi
 
@@ -77,5 +77,5 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"
-    return 1
+    exit
 fi
