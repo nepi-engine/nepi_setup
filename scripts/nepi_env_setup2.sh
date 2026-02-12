@@ -186,9 +186,11 @@ else
 
     # Create USER python folder
     mkdir -p $(python -m site --user-site)
-    fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages"
-    fix_path  /home/${CONFIG_USER}/.local/bin
-    fix_folder /home/${CONFIG_USER}/.local
+    fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" 755
+    fix_path /home/${CONFIG_USER}/.local/bin 755
+    fix_folder /home/${CONFIG_USER}/.local 755
+    sudo chown -R nepi:nepi /home/nepi/.local
+    sudo chmod -R u+rwX /home/nepi/.local
     sudo ln -sf /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
 
 
