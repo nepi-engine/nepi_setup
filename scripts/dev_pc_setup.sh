@@ -94,7 +94,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     # Update NEPI System Config if needed
 
     echo ""
-    PS3="Please enter your choice by NUMBER: "
+    PS3=$'\n'"Please enter your choice by NUMBER: "
     options=(  "Update Static IP Address" "Update Device ID Name" "CONTINUE" )
 
     while true; do
@@ -106,22 +106,26 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
             case $opt in
 
                 "Update Static IP Address")
-                    read -p "Enter a new Static IP Address (Current = ${NEPI_IP}): " USER_INPUT
+                    read -p $'\n'"Enter a new Static IP Address (Current = ${NEPI_IP}): " USER_INPUT
                     echo ""
                     if is_valid_ipv4 "$USER_INPUT"; then
                         export NEPI_IP=$USER_INPUT
-                    fi
-                    echo ""
-                    break # Exit the select statement, re-display menu
+                        echo ""
+                        break # Exit the select statement, re-display menu
+                    else
+                        echo "Not A Valid Password"
+                    fi           
                     ;;
                 "Update Device ID Name")
-                    read -p "Enter a new Device Name (Current = ${NEPI_DEVICE_ID}): " USER_INPUT
+                    read -p $'\n'"Enter a new Device Name (Current = ${NEPI_DEVICE_ID}): " USER_INPUT
                     echo ""
                     if is_valid_did "$USER_INPUT"; then
                         export NEPI_DEVICE_ID=$USER_INPUT
-                    fi       
-                    echo ""
-                    break # Exit the select statement, re-display menu
+                        echo ""
+                        break # Exit the select statement, re-display menu
+                    else
+                        echo "Not A Valid Password"
+                    fi          
                 ;;
 
                 "CONTINUE")
