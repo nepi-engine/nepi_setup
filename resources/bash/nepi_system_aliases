@@ -328,10 +328,10 @@ HAS_ROS=$(dpkg -l | grep ros-)
 if [ 1 ]; then # [[ -z "$HAS_ROS" ]]; then
       # Source ROS Env
       if [[ -f "$NROS" ]]; then
-        echo "Sourcing ros bash ${NROS}"
+        #echo "Sourcing ros bash ${NROS}"
         source ${NROS}
       elif [[ -f "$ROS" ]]; then
-        echo "Sourcing ros bash ${ROS}" 
+        #echo "Sourcing ros bash ${ROS}" 
         source ${ROS}
       fi
       export NEEDS_ROS=0

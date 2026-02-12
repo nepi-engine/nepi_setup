@@ -95,11 +95,14 @@ sudo chmod 775 $NEPI_ALIASES_DEST
 
 #############
 echo "Updating user bashrc files"
-BASHRC=/home/${CONFIG_USER}/.bashrc
+BASHRC=/home/${CONFIG_USER}/.bashrc.tmp
 
-rm $BASHRC
-cp /etc/skel/.bashrc $BASHRC
+cp /etc/skel/.bashrc ${BASHRC}
 
+
+if [[ ! -v NEPI_ENGINE ]]; then
+    NEPI_ENGINE=/opt/nepi/nepi_engine
+fi
 
 if [[ -n "${NEPI_IP%%/*}" ]]; then
     nepi_ip="${NEPI_IP%%/*}"
@@ -208,15 +211,14 @@ fi
 
 # Add NEPI SETTINGS
 echo ' ' | sudo tee -a $BASHRC
-echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
-echo '' | sudo tee -a $BASHRC
 echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
 echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
 echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
 echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
 echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
-
+echo '' | sudo tee -a $BASHRC
+echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
 
 # Add NEPI Aliases
 echo ' ' | sudo tee -a $BASHRC
@@ -226,12 +228,14 @@ echo '    . '${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
 echo 'fi' | sudo tee -a $BASHRC
 
 
+#rm $/home/${CONFIG_USER}/.bashrc
+sudo cp $BASHRC /home/${CONFIG_USER}/.bashrc
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.bashrc
+sudo chmod 0664 /home/${CONFIG_USER}/.bashrc
+
 sudo rm /root/.bashrc
 sudo cp /home/${CONFIG_USER}/.bashrc /root/.bashrc
 sudo chmod 0644 /root/.bashrc
-
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.bashrc
-sudo chmod 0664 /home/${CONFIG_USER}/.bashrc
 
 ################
 echo "Fixing other user files"
