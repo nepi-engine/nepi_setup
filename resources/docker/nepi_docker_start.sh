@@ -135,6 +135,7 @@ if is_valid_jetson; then
     echo "Enabling Jetson GPU Support TRUE"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 -v /run/udev/data:/run/udev/data \
+-v /var/run/docker.sock:/var/run/docker.sock \
 -v /tmp/argus_socket:/tmp/argus_socket \
 -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
 fi 
