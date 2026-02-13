@@ -124,6 +124,10 @@ function sftpnl(){
 sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi:../.."$@"
 }
 
+function sftpnhl(){
+sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}:../.."$@"
+}
+
 
 HELPN="${HELPN}
 ################################
@@ -351,21 +355,25 @@ function drive(){
 	sftpnl $DRIVE
 }
 
-
+export DCFG="/mnt/nepi_config/docker_cfg"
 export FCFG="/mnt/nepi_config/factory_cfg"
 export SCFG="/mnt/nepi_config/system_cfg"
 export UCFG="/mnt/nepi_storage/user_cfg"
 
+function dcfg(){
+	sftpnhl $DCFG
+}
+
 function fcfg(){
-	sftpnl $FCFG
+	sftpnhl $FCFG
 }	
 
 function scfg(){
-	sftpnl $SCFG
+	sftpnhl $SCFG
 }	
 
 function ucfg(){
-	sftpnl $UCFG
+	sftpnhl $UCFG
 }	
 
 
@@ -400,6 +408,7 @@ share = /opt/nepi/nepi_engine/share
 src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
 srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src
 tmp = /mnt/nepi_storage/tmp
+dcfg = /mnt/nepi_config/docker_cfg
 fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/system_cfg
 ucfg = /mnt/nepi_storage/user_cfg"
