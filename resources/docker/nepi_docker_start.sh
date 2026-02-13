@@ -139,7 +139,7 @@ DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
 fi 
 
-#-v /dev:/dev 
+
 
 # Finish Run Command
 
