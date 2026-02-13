@@ -134,12 +134,12 @@ fi
 if is_valid_jetson; then
     echo "Enabling Jetson GPU Support TRUE"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
--v /dev:/dev -v /run/udev/data:/run/udev/data \
+-v /run/udev/data:/run/udev/data \
 -v /tmp/argus_socket:/tmp/argus_socket \
 -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
 fi 
 
-
+#-v /dev:/dev 
 
 # Finish Run Command
 
