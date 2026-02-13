@@ -308,6 +308,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             ;;
                         "VIEW ALL SETTINGS")
                             print_yaml_file $SYSTEM_SYS_CONFIG_FILE
+                            break # Exit the select statement, re-display menu
                             ;;
                         "Update NEPI_USER_PW")
                             read -p $'\n'"Enter a new password for 'nepi' user: " USER_INPUT
