@@ -55,7 +55,7 @@ NEPI_NTP_IP: 192.168.179.5
 # Enable Wired DHCP Wired Internet Connectivity on Startup. 
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
 #  a router with internet access. 
-NEPI_WIRED_DHCP_ENABLED: 1
+NEPI_WIRED_DHCP_ENABLED: 0
 # Set the SSH Port that NEPI listens to, on top of the standard NEPI Host port (22).
 NEPI_SSH_PORT: 2222
 NEPI_SSH_AKEY: nepi_engine_default_authorized_keys
