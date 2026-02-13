@@ -654,7 +654,7 @@ echo ""
 
 sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/info/ 2>/dev/null 
 sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/files/ 2>/dev/null
-sudo rm -r /tmp/* 2>/dev/null
+#sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 
 ##########

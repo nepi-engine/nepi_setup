@@ -128,6 +128,19 @@ DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 
 fi 
 
+
+# Set jetson support if needed
+
+if is_valid_jetson; then
+    echo "Enabling Jetson GPU Support TRUE"
+DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+-v /run/udev/data:/run/udev/data \
+-v /tmp/argus_socket:/tmp/argus_socket \
+-v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
+fi 
+
+
+
 # Finish Run Command
 
 echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
