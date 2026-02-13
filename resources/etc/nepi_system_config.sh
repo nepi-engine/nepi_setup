@@ -308,13 +308,18 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             ;;
                         "VIEW ALL SETTINGS")
                             print_yaml_file $SYSTEM_SYS_CONFIG_FILE
+                            break # Exit the select statement, re-display menu
                             ;;
                         "Update NEPI_USER_PW")
                             read -p $'\n'"Enter a new password for 'nepi' user: " USER_INPUT
-                            if is_valid_pw "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
                                 CURRENT_NEPI_USER_PW=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
+                            
                             else
                                 echo "Not A Valid Password"
                             fi           
@@ -322,7 +327,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         ;;
                         "Update NEPI_HOST_PW")
                             read -p $'\n'"Enter a new password for 'nepihost' user: " USER_INPUT
-                            if is_valid_pw "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
                                 CURRENT_NEPI_HOST_PW=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -332,7 +340,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         ;;
                         "Update NEPI_ADMIN_PW")
                             read -p $'\n'"Enter a new password for 'nepiadmin' user: " USER_INPUT
-                            if is_valid_pw "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
                                 CURRENT_NEPI_HOST_PW=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -342,7 +353,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         ;;
                         "Update NEPI_DEVICE_ID")
                             read -p $'\n'"Enter a new Device ID Name: " USER_INPUT
-                            if is_valid_did "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_did "$USER_INPUT"; then
                                 CURRENT_NEPI_DEVICE_ID=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -354,7 +368,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         ;;
                         "Update NEPI_DEVICE_MD")
                             read -p $'\n'"Enter a new Device Model Name: " USER_INPUT
-                            if is_valid_string "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_string "$USER_INPUT"; then
                                 CURRENT_NEPI_DEVICE_MD=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -365,7 +382,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         ;;
                     "Update NEPI_DEVICE_SN")
                             read -p $'\n'"Enter a new 6 digit Serial Number: " USER_INPUT
-                            if is_valid_sn "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_sn "$USER_INPUT"; then
                                 CURRENT_NEPI_DEVICE_SN=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -375,7 +395,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             ;;
                         "Update NEPI_WIRED_INTERFACE")
                             read -p $'\n'"Enter a new Wired Interface name: " USER_INPUT
-                            if [[ -n "$USER_INPUT" && "$USER_INPUT" != *" "* ]]; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif [[ -n "$USER_INPUT" && "$USER_INPUT" != *" "* ]]; then
                                 CURRENT_NEPI_WIRED_INTERFACE=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -385,7 +408,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             ;;
                         "Update NEPI_IP")
                             read -p $'\n'"Enter a new Static IP Address\Netmask: " USER_INPUT
-                            if is_valid_ipv4_netmask "$USER_INPUT"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_ipv4_netmask "$USER_INPUT"; then
                                 CURRENT_NEPI_IP=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -398,7 +424,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
-                            if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
                                 CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -461,7 +490,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
                         "Update NEPI_FS_AB")
                             read -p $'\n'"Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
-                            if is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
                                 CURRENT_NEPI_FS_AB=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -472,7 +504,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
                         "Update NEPI_IMPORT_PATH")
                             read -p $'\n'"Enter a Valid NEPI image Import path: " USER_INPUT
-                            if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
                                 CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -482,7 +517,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             ;;
                         "Update NEPI_EXPORT_PATH")
                             read -p $'\n'"Enter a Valid NEPI image Export path: " USER_INPUT
-                            if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
                                 CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
