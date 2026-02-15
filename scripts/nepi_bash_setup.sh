@@ -242,8 +242,11 @@ cp /etc/skel/.profile /home/${CONFIG_USER}/
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.profile
 sudo chmod 0644 /home/${CONFIG_USER}/.profile
 
-sudo mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
-sudo chmod 0664 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+if [[ ! -d /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages ]]; then
+    sudo mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+fi
+#echo "Udating user python permissions"
+sudo chmod 755 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
 
 
 ###############
