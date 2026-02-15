@@ -186,6 +186,7 @@ else
 
     # Create USER python folder
     mkdir -p $(python -m site --user-site)
+    NEPI_PYTHON=3.8
     fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" 755
     fix_path /home/${CONFIG_USER}/.local/bin 755
     fix_folder /home/${CONFIG_USER}/.local 755

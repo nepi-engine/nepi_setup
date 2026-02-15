@@ -104,6 +104,7 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=ho
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
+--mount type=bind,source=/etc/udev,target=/etc/udev \
 --cap-add=SYS_TIME --volume=/var/empty:/var/empty -v /etc/ntpd.conf:/etc/ntpd.conf \
 -e DISPLAY=$DISPLAY \
 --net=host \
@@ -134,9 +135,8 @@ fi
 if is_valid_jetson; then
     echo "Enabling Jetson GPU Support TRUE"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
--v /run/udev/data:/run/udev/data \
 -v /var/run/docker.sock:/var/run/docker.sock \
--v /tmp/argus_socket:/tmp/argus_socket \
+-v /tmp:/tmp \
 -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
 fi 
 
@@ -221,6 +221,11 @@ if [[ -z "$CONTAINER_ID" ]]; then
 
 else
 
+    if is_valid_jetson; then
+        echo ""
+        echo "Restarting nvargus-daemon"
+        sudo systemctl restart nvargus-daemon  >/dev/null 2>&1
+    fi
     echo ""
     dps
     echo ""
