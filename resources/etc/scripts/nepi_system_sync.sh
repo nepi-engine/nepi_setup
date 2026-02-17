@@ -73,11 +73,13 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
+sync_yaml_files $UPDATE_FILE ${SOURCE_FILE}.bak
+sudo rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -101,11 +103,13 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
+sync_yaml_files $UPDATE_FILE ${SOURCE_FILE}.bak
+sudo rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}

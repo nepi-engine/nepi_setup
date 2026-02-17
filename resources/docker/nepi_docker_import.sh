@@ -245,7 +245,8 @@ else
             else
                 #IMPORT_ID=debug
                 echo "Importing file ${INSTALL_IMAGE} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
-                echo "Staging import nepi_staging:${NEPI_IMPORT_TAG}"
+                echo "Importing NEPI image to nepi_staging:${NEPI_IMPORT_TAG}"
+                echo "*** The import process can take several minutes to complete ***"
                 res=$(sudo docker import $INSTALL_IMAGE nepi_staging:${NEPI_IMPORT_TAG})
                 wait
                 hash=${res##*sha256:}
