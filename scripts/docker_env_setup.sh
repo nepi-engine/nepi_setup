@@ -160,7 +160,8 @@ sudo apt install python3-venv python3-pip -y
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
-
+sudo -H python3 -m pip install --no-input cryptography
+sudo -H python3 -m pip install --no-input python-dotenv
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "######################################"

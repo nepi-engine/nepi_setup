@@ -209,6 +209,7 @@ else
     sudo apt update
     sudo apt install yq -y
     sudo apt install trash-cli -y
+    
 
 
     echo ""

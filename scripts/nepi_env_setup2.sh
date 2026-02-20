@@ -246,7 +246,8 @@ else
     sudo -H python${NEPI_PYTHON} -m pip install --no-input scikit-build 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input ninja 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input cmake
-
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input cryptography
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-dotenv
     sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy
 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input cffi
