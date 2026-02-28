@@ -52,22 +52,25 @@ else
     ########################
     # Start Processes
     ########################
-    NEPI_DOCKER_CONFIG_PATH=${DOCKER_FOLDER}/nepi_docker_config.yaml
-    #echo $NEPI_DOCKER_CONFIG_PATH
 
-    echo "Switcing NEPI ACTIVE CONTAINER from ${NEPI_ACTIVE_FS} to ${NEPI_INACTIVE_FS}"
+    if [[ $NEPI_AB_FS -eq 1 ]]; then
+        NEPI_DOCKER_CONFIG_PATH=${DOCKER_FOLDER}/nepi_docker_config.yaml
+        #echo $NEPI_DOCKER_CONFIG_PATH
 
-    ### SET INACTIVE DATA AS ACTIVE DATA
-    update_yaml_value "NEPI_ACTIVE_FS" "${NEPI_INACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
-    update_yaml_value "NEPI_INACTIVE_FS" "${NEPI_ACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
-    update_yaml_value "NEPI_FS_SWITCH" 0 "${NEPI_DOCKER_CONFIG_PATH}"
+        echo "Switcing NEPI ACTIVE CONTAINER from ${NEPI_ACTIVE_FS} to ${NEPI_INACTIVE_FS}"
 
-    ########################
-    # Update Docker Config
-    echo ""
-    echo "Updating Docker Config File"
-    bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-    wait
+        ### SET INACTIVE DATA AS ACTIVE DATA
+        update_yaml_value "NEPI_ACTIVE_FS" "${NEPI_INACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
+        update_yaml_value "NEPI_INACTIVE_FS" "${NEPI_ACTIVE_FS}" "${NEPI_DOCKER_CONFIG_PATH}"
+        update_yaml_value "NEPI_FS_SWITCH" 0 "${NEPI_DOCKER_CONFIG_PATH}"
+
+        ########################
+        # Update Docker Config
+        echo ""
+        echo "Updating Docker Config File"
+        bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+        wait
+    fi
 
 fi
 

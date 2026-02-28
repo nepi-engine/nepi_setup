@@ -36,14 +36,17 @@ fi
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
+DOCKER_CONFIG_UPDATE_SCRIPT=${DOCKER_FOLDER}/nepi_docker_update.sh
+DOCKER_SWITCH_SCRIPT=${DOCKER_FOLDER}/nepi_docker_switch.sh
+DOCKER_START_SCRIPT=${DOCKER_FOLDER}/nepi_docker_start.sh
+
 
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
 
-source $DOCKER_CONFIG_UPDATE_FILE
+source $DOCKER_CONFIG_UPDATE_SCRIPT
 if [[ "$?" -eq 1 ]]; then
     echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
@@ -295,6 +298,11 @@ else
                         echo "NEPI Image Import Complete"
                         echo ""
                         dimg
+
+                        source $DOCKER_SWITCH_SCRIPT
+                        source $DOCKER_START_SCRIPT
+
+
 
 
                 else
