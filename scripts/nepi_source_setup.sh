@@ -25,6 +25,7 @@ CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER="$(id -un 1000)"
 fi
+export CONFIG_USER=$CONFIG_USER
 
 if [[ "$CONFIG_USER" != 'nepi' ]]; then
     echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"

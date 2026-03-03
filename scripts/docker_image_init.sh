@@ -42,9 +42,12 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    return 
+
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+        return
+    fi
 fi
 
 

@@ -31,15 +31,11 @@ fi
 # This file sets up the OS software requirements for a NEPI File System installation
 
 
-export CONFIG_USER=$(id -un)
+CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
+    CONFIG_USER=$SUDO_USER
 fi
-
-if [[ "$CONFIG_USER" != 'nepi' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    return 
-fi
+export CONFIG_USER=$CONFIG_USER
 
 
 
