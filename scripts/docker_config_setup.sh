@@ -92,7 +92,6 @@ if ! source_script $script_path $LITE_INSTALL; then
     echo "Script ${script_path} failed with error ${script_error}"
     return 
 fi
-return
 
 ####################################
 # Run NEPI Files Setup Script
