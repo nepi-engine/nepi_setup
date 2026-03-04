@@ -36,16 +36,6 @@ fi
 
 # This file installs the NEPI Engine File System installation
 
-
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
-fi
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
-    CONFIG_USER=nepihost
-fi
-
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
@@ -56,15 +46,17 @@ else
     return 
 fi
 
-if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
-    return 
-fi
-
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
+
 
 
 echo "########################"
@@ -485,7 +477,7 @@ echo ""
 SYSTEMD_SERVICE_PATH=/etc/systemd/system
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
-    if [[ "$CONFIG_USER" == "nepihost" ]]; then
+    if [[ "$CONFIG_USER" != "nepi" ]]; then
         #############################
         echo ""
         echo "############"
@@ -572,72 +564,77 @@ source $config_update_file
 # #####################################
 
 systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
+if [[ "$?" -eq 0  ]]; then
 
-    echo ""
-    echo "########################"
-    echo "Updating USER Desktop Files"
-    echo "########################"
-    echo ""
-    ##############################################
-    # Update User Files
-    echo ""
-    echo "########"
-    echo "Updating Desktop settings for user ${CONFIG_USER}"
-    echo ""
+    if [[ $LITE_INSTALL -eq 0 ]]; then
+        echo ""
+        echo "########################"
+        echo "Updating USER Desktop Files"
+        echo "########################"
+        echo ""
+        ##############################################
+        # Update User Files
+        echo ""
+        echo "########"
+        echo "Updating Desktop settings for user ${CONFIG_USER}"
+        echo ""
+    
 
-
-    # Updated the Desktop
-    dfolder=/home/${CONFIG_USER}/Desktop
-    if [[ -d "$dfolder" ]]; then
-        if find "$dfolder" -maxdepth 0 -empty | read; then
-            echo "Desktop folder cleaned"
-        else
-            sudo rm ${dfolder}/* >/dev/null 2>&1
-            echo "Desktop folder cleaned"
+        # Updated the Desktop
+        dfolder=/home/${CONFIG_USER}/Desktop
+        if [[ -d "$dfolder" ]]; then
+            if find "$dfolder" -maxdepth 0 -empty | read; then
+                echo "Desktop folder cleaned"
+            else
+                sudo rm ${dfolder}/* >/dev/null 2>&1
+                echo "Desktop folder cleaned"
+            fi
         fi
+
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+
+        xdg-user-dirs-update --set DESKTOP "$dfolder"
+        gsettings set org.gnome.desktop.screensaver lock-enabled false
+        gsettings set org.gnome.desktop.session idle-delay 0
+        gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+        gsettings set org.gnome.nautilus.preferences show-hidden-files true
+        gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
+
+
+        gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
+        'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
+        'gnome-control-center.desktop']"
+
     fi
-
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
-    sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
-
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-
-    xdg-user-dirs-update --set DESKTOP "$dfolder"
-    gsettings set org.gnome.desktop.screensaver lock-enabled false
-    gsettings set org.gnome.desktop.session idle-delay 0
-    gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
-    gsettings set org.gnome.nautilus.preferences show-hidden-files true
-    gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
-
-
-    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
-    'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
-    'gnome-control-center.desktop']"
-
 
     ###################
 
-    echo "########"
-    echo "Updating Chrome settings for user ${CONFIG_USER}"
-    echo "Killing any running Chromium processes"
-    sudo pkill -f chromium
-    echo "Setting Chromium as Defualt Browser"
-    xdg-settings set default-web-browser chromium-browser.desktop
+    if command -v chromium >/dev/null 2>&1; then
+        echo "Chromium is Already Installed"
+    else
+        echo "########"
+        echo "Updating Chrome settings for user ${CONFIG_USER}"
+        echo "Killing any running Chromium processes"
+        sudo pkill -f chromium
+        echo "Setting Chromium as Defualt Browser"
+        xdg-settings set default-web-browser chromium-browser.desktop
 
 
-     if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
-        echo "Creating Chromium Defualt Folder"
-        sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
+        if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+            echo "Creating Chromium Defualt Folder"
+            sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
+        fi
+        echo "Updating Chromium Defualt Files"
+        sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
+
+        echo "Cleaning Chromium Files"
+        fix_chromium
     fi
-    echo "Updating Chromium Defualt Files"
-    sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
-
-    echo "Cleaning Chromium Files"
-    fix_chromium
-
 
     #sudo rm -rf ~/.config/chromium/Singleton* 
 

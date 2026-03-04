@@ -24,6 +24,7 @@ LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
     LITE_INSTALL=$1
 fi
+export LITE_INSTALL=$LITE_INSTALL
 
 # echo "LITE_INSTALL=${LITE_INSTALL}"
 
@@ -50,12 +51,12 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    return 
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+        return
+    fi
 fi
-
-
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -71,7 +72,7 @@ source $NEPI_UTILS_SOURCE
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
@@ -86,19 +87,18 @@ source /home/${CONFIG_USER}/.bashrc
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_folders_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
 fi
-
 
 ####################################
 # Run NEPI Files Setup Script
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_files_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 

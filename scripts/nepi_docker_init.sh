@@ -30,13 +30,9 @@ sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
+    CONFIG_USER=$SUDO_USER
 fi
-
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    return 
-fi
+export CONFIG_USER=$CONFIG_USER
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 

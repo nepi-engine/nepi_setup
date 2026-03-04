@@ -38,7 +38,6 @@ fi
 # This file sets up NEPI Docker users
 
 
-
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
@@ -46,9 +45,17 @@ fi
 export CONFIG_USER=$CONFIG_USER
 
 
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+        return
+    fi
+fi
+
+
 if ! [ $(id -u) = 0 ]; then
-   echo 'This scripts must be run as root user. Type "sudo su" and retry'
-   return 
+    echo 'This scripts must be run as root user. Type "sudo su" and retry'
+    return 
 fi
 
 
@@ -60,8 +67,8 @@ source $NEPI_UTILS_SOURCE
 
 ###############
 # Create a tmp folder for all users
-sudo mkdir -p /tmp/nepihost
-sudo chmod -R 0777 /tmp/nepihost
+sudo mkdir -p /tmp/$CONFIG_USER
+sudo chmod -R 0777 /tmp/$CONFIG_USER
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -74,7 +81,7 @@ echo "########################"
 
 
 ###########
-CONFIG_USER=nepihost
+CONFIG_USER=$CONFIG_USER
 SYS_USER_1=nepi
 SYS_USER_2=nepiadmin
 
@@ -121,7 +128,9 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     # sudo cp -r /etc/skel/. /home/${CONFIG_USER}/
     # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /
 
-    echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    if [[ $CONFIG_USER == "nepihost" ]]; then
+        echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    fi
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
     sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
     sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
@@ -149,14 +158,16 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     # fi
     # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
 
-    # Updated the Desktop
-    dfolder=/home/${CONFIG_USER}/Desktop
-    if [[ -d "$dfolder" ]]; then
-        if find "$dfolder" -maxdepth 0 -empty | read; then
-            echo "Desktop folder cleaned"
-        else
-            sudo rm ${dfolder}/*
-            echo "Desktop folder cleaned"
+    if [[ $CONFIG_USER == "nepihost" ]]; then
+        # Updated the Desktop
+        dfolder=/home/${CONFIG_USER}/Desktop
+        if [[ -d "$dfolder" ]]; then
+            if find "$dfolder" -maxdepth 0 -empty | read; then
+                echo "Desktop folder cleaned"
+            else
+                sudo rm ${dfolder}/*
+                echo "Desktop folder cleaned"
+            fi
         fi
     fi
    

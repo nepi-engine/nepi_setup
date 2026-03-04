@@ -549,8 +549,6 @@ echo "NEPI Docker Lite Enviorment Setup Complete"
 echo "########################"
 echo ""
 
-############################################ DO I NEED THIS ##############################
-
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
@@ -561,7 +559,54 @@ else
     return 
 fi
 
-############################################ DO I NEED THIS ##############################
+############################################################################################
+
+export LITE_INSTALL=1
+
+function source_script(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+    script_path=$1
+    if [[ -f "$script_path" ]]; then
+      echo "Sourcing script: $(basename $script_path)"
+      source ${script_path} $2
+      script_error=$?
+      if [[ "$script_error" -ne 0 ]]; then
+        echo "Script $(basename $script_path) returned error ${script_error}"
+        return $script_error
+      fi
+    else
+        echo "Script not found at ${script_path}"
+        return 1
+    fi
+  else
+    echo "No Script Path Provided"
+    return 1
+  fi
+}
+export -f source_script
+
+echo ""
+echo "########################"
+echo "NEPI LITE FILES SETUP"
+echo "########################"
+echo ""
+
+####################################
+# Run NEPI Files Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_files_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
+
+echo ""
+echo "########################"
+echo "NEPI LITE FILES SETUP"
+echo "########################"
+echo ""
 
 echo ""
 echo "########################"
@@ -569,292 +614,23 @@ echo "NEPI LITE CONFIG SETUP"
 echo "########################"
 echo ""
 
-echo ""
-echo "########################"
-echo "Configuring NEPI ETC FILES"
-echo "########################"
-
-# Define Folders
-SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
-SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
-SOURCE_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/scripts
-SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
-
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $SOURCE_ETC_PATH
-sudo chmod -R +x $SOURCE_ETC_PATH
-
-
-
-NEPI_CONFIG_PATH=/opt/nepi
-
-NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
-
-
-
-
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
-    SYSTEMD_SERVICE_PATH=/etc/systemd/system
-
-    echo ""
-    echo "########"
-    echo "Disable apport to avoid crash reports on a display"
-    sudo systemctl disable apport  >/dev/null 2>&1
-    sudo systemctl stop apport  >/dev/null 2>&1
-fi
-etc_path=default/apport
-sudo rm /etc/${etc_path} >/dev/null 2>&1
-sudo cp ${SOURCE_ETC_PATH}/${etc_path} /etc/${etc_path}  >/dev/null 2>&1
-
-sudo rm /var/crash/* 2>/dev/null
-
- 
-echo ""
-echo "########"
-echo "Configuring nepi_modprobe.conf"
-etc_path=modprobe.d/nepi_modprobe.conf
-sudo rm /etc/${etc_path} >/dev/null 2>&1
-sudo cp ${SOURCE_ETC_PATH}/${etc_path} /etc/${etc_path}  >/dev/null 2>&1
-
-
-echo ""
-echo "########"
-echo "Setting up udev rules"
-    # IQR Pan/Tilt
-sudo cp ${SOURCE_ETC_PATH}/udev/rules.d/* /etc/udev/rules.d/
-
-echo ""
-echo "########"
-echo "Setting up Baumer GenTL Producers (Genicam support)"
-
-if [ ! -d "/opt/baumer" ]; then
-    sudo rm -r /opt/baumer >/dev/null 2>&1
-fi
-sudo cp -r ${SOURCE_ETC_PATH}/opt/baumer /opt/baumer
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/baumer
-
-# Set up the shared object links in case they weren't copied properly when this repo was moved to target
-NEPI_BAUMER_PATH=${NEPI_ETC_PATH}/opt/baumer/gentl_producers
-sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14
-sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_usb.cti
-sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14
-sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_gige.cti
-
-
-#################################
-# Update Managed Service Settings
-
 ####################################
-# Run NEPI System Config Load if exists
-# NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
-# sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
-
-
-# NEPI_SYS_CONFIG_LOAD=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-# if ! source_script $NEPI_SYS_CONFIG_LOAD; then
-#     script_error=$?
-#     echo "Script ${NEPI_SYS_CONFIG_LOAD} failed with error ${script_error}"
-# fi
-
-echo ""
-echo "########################"
-echo "Updating NEPI Managed Services"
-echo "########################"
-
-################################
-# Update ETC files if systemd is running (Not in Container)
-systemctl&> /dev/null
-if [[ "$?" -ne 0 ]]; then
-    ###################
-    echo ""
-    echo "########"
-    echo "Updating SSH Service Config"
-    echo ""
-    source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
-    dest_file=/etc/ssh/sshd_config
-    echo "Copying ${source_file} to ${dest_file}"
-    sudo cp $source_file $dest_file
-
-
-    ###################
-    echo ""
-    echo "########"
-    echo "Setting up Supervisor"
-    echo ""
-
-    sudo chmod +x ${SOURCE_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf
-    sudo cp -a ${SOURCE_ETC_PATH}/supervisor/conf.d/supervisord_nepi.conf /etc/supervisor/conf.d/supervisord_nepi.conf
-    sudo ln -sf /opt/nepi/scripts/nepi_start_all /nepi_start_all
-    echo "Restarting Supervisor Process"
-    sudo supervisorctl reread >/dev/null 2>&1
-    sudo supervisorctl update >/dev/null 2>&1
-    # sudo supervisorctl status
-    # sudo supervisorctl tail nepi_engine
-    # sudo supervisorctl tail nepi_rui
-    # sudo supervisorctl tail nepi_license
-    # sudo supervisorctl tail nepi_ssh
-    # sudo supervisorctl tail nepi_samba
-fi
-
-# #####################################
-# NEPI ETC UPDATES
-# #####################################
-
-echo ""
-echo "########################"
-echo "Updating NEPI OS Config"
-echo "########################"
-echo ""
-sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/docker_cfg/
-config_update_file=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
-SHOW_CONFIG_MENU=0
-echo "Running System Config Update Script: ${config_update_file}"
-bash $config_update_file $SHOW_CONFIG_MENU
-
-
-# #####################################
-# NEPI Services Setup
-# #####################################
-
-
-# #####################################
-# NEPI Services Setup
-# #####################################
-
-
-echo "##################################"
-echo 'Setting Up NEPI Services'
-echo "##################################"
-echo ""
-
-SYSTEMD_SERVICE_PATH=/etc/systemd/system
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != "nepi" ]]; then
-        #############################
-        echo ""
-        echo "############"
-        echo "Setting Up NEPI Docker Service"
-        echo ""
-        
-        sudo cp -a ${SOURCE_ETC_PATH}/docker/services/nepi_docker.service ${SYSTEMD_SERVICE_PATH}/nepi_docker.service
-
-        # sudo systemctl enable nepi_docker
-        # sudo systemctl restart nepi_docker
-    else
-
-        echo ""
-        echo "############"
-        echo "Setting Up NEPI Engine Service"
-
-        echo "Cofiguring NEPI Engine Service from ${SOURCE_ETC_PATH}/services"
-        sudo chmod +x ${SOURCE_ETC_PATH}/services/*
-        sudo cp -a ${SOURCE_ETC_PATH}/services/* ${SYSTEMD_SERVICE_PATH}/
-        sudo systemctl enable nepi_engine
-
-        echo ""
-        echo "############"
-        echo "Setting Up NEPI License Service"
-
-
-        # Set up nepi_check_license (license management, etc.)
-        chmod +x /opt/nepi/etc/license/nepi_check_license.py
-        gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
-
-        sudo chown -R $(whoami) ~/.gnupg/
-        sudo chmod 700 ~/.gnupg
-        find ~/.gnupg -type d -exec sudo chmod 700 {} \;
-        find ~/.gnupg -type f -exec sudo chmod 600 {} \;
-
-        # Update ETC files if systemd is running (Not in Container)
-        cp /opt/nepi/etc/services/nepi_check_license.service /etc/systemd/system/
-        sudo systemctl enable nepi_check_license
-
-        echo "***** nepi_check_license license manager is installed... you must still provide a valid license file in /mnt/nepi_storage/license *****"
-    fi
-
-elif [[ "$CONFIG_USER" == 'nepi' ]]; then
-
-        echo ""
-        echo "############"
-        echo "Setting Up NEPI License Service"
-
-
-        # Set up nepi_check_license (license management, etc.)
-        chmod +x /opt/nepi/etc/license/nepi_check_license.py
-        gpg --import /opt/nepi/etc/license/nepi_license_management_public_key.gpg
-
-        sudo chown -R $(whoami) ~/.gnupg/
-        sudo chmod 700 ~/.gnupg
-        find ~/.gnupg -type d -exec sudo chmod 700 {} \;
-        find ~/.gnupg -type f -exec sudo chmod 600 {} \;
-
-
-fi
-
-
-# #####################################
-# SYNC FROM SYSTEM CONFIG
-# #####################################
-echo ""
-echo "########################"
-echo "Syncing Config Files and Folders"
-echo "########################"
-echo ""
-
-
-echo ""
-config_update_file=/mnt/nepi_config/system_cfg/etc/scripts/nepi_system_sync.sh
-echo "Running System Config Sync Script: ${config_update_file}"
-source $config_update_file
-
-systemctl&> /dev/null
-if [[ "$?" -eq 0  ]]; then
-    if command -v chromium >/dev/null 2>&1; then
-        echo "Chromium is Already Installed"
-    else
-        echo "########"
-        echo "Updating Chrome settings for user ${CONFIG_USER}"
-        echo "Killing any running Chromium processes"
-        sudo pkill -f chromium
-        echo "Setting Chromium as Defualt Browser"
-        xdg-settings set default-web-browser chromium-browser.desktop
-
-
-        if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
-            echo "Creating Chromium Defualt Folder"
-            sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
-        fi
-        echo "Updating Chromium Defualt Files"
-        sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
-
-        echo "Cleaning Chromium Files"
-        fix_chromium
-    fi
+# Run NEPI Config Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=nepi_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
 fi
 
 echo ""
 echo "########################"
-echo "Cleaning Config System"
+echo "NEPI LITE CONFIG SETUP Complete"
 echo "########################"
 echo ""
 
-
-sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/info/ 2>/dev/null 
-sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/files/ 2>/dev/null
-#sudo rm -r /tmp/* 2>/dev/null
-sudo rm /var/crash/* 2>/dev/null
-
-##########
-sudo journalctl --vacuum-size=50M  # Limits journal size to 50MB
-sudo journalctl --vacuum-time=7d   # Keeps logs for 7 days
-
-echo ""
-echo "##################################"
-echo 'NEPI Lite Config Setup Complete'
-echo "##################################"
-echo ""
 
 echo ""
 echo "########################"
@@ -862,326 +638,31 @@ echo "NEPI Lite Init SETUP"
 echo "########################"
 echo ""
 
+####################################
+# Run NEPI Storage Init Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_storage_init.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
+
+####################################
+# Run NEPI Image Init Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_image_init.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
+
 echo ""
 echo "########################"
-echo "NEPI DOCKER Lite STORAGE INIT"
+echo "NEPI Lite Init SETUP Complete"
 echo "########################"
-
-SYSTEM_FOLDER=/mnt/nepi_config/system_cfg/etc
-SYSTEM_CONFIG_FILE=${SYSTEM_FOLDER}/nepi_system_config.yaml
-SYSTEM_CONFIG_LOAD_FILE=${SYSTEM_FOLDER}/load_system_config.sh
-
-if [[ ! -f "$SYSTEM_CONFIG_LOAD_FILE" ]]; then
-    echo "Docker Config Load file not found at: ${SYSTEM_CONFIG_LOAD_FILE}"
-    echo "Run 'nepiupdate' and try again"
-
-else
-    source ${SYSTEM_CONFIG_LOAD_FILE}
-    if [[ "$?" -eq 1 ]]; then
-        echo "Failed to load ${SYSTEM_CONFIG_FILE}"
-
-    elif [[ ! -n "$NEPI_IMPORT_PATH" ]]; then
-        echo "NEPI Docker Import Folder not defined in variable NEPI_IMPORT_PATH"
-        echo "Run 'nepiconfig' to fix path location and try again"
-    elif [[ ! -d "$NEPI_IMPORT_PATH" ]]; then
-        echo "NEPI Docker Import Folder not found at ${NEPI_IMPORT_PATH}"
-        echo "Create import path or run 'nepiconfig' to fix path location and try again"
-    else
-
-        CURRENT_FOLDER=$(pwd)
-        ####################################
-        # Check NEPI Storage Folder
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_IMPORT_PATH
-        avail_space_gb=$(path_space_gb $NEPI_IMPORT_PATH)
-        req_space_gb=1
-        if [[ "$avail_space_gb" -lt "$req_space_gb" ]]; then
-            need_space_gb=$((req_space_gb - avail_space_gb))
-            echo "Not enough free drive space in import path ${NEPI_IMPORT_PATH}"
-            echo "Free up ${need_space_gb} GB in that folders partition and try again"
-        else
-            echo ""
-            echo "#################################"
-            echo "Initializing NEPI Storage Folders"
-            echo "#################################"
-            echo ""
-
-            ###################################
-            # Download Storage Extras
-            NEPI_STORAGE=/mnt/nepi_storage
-            sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
-
-            success_storage=0
-            cd $NEPI_STORAGE
-            sudo rm ARCHIVE > /dev/null 2>&1
-
-            storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=fci764l9&dl=0'
-            storage_latest_zip=nepi_storage-latest.zip
-
-            if [[ ! -f ${storage_latest_zip} ]]; then
-                sudo wget ${storage_latest_link} -O ${storage_latest_zip}
-                if [[ "$?" -ne 0 ]]; then
-                    echo ""
-                    echo "Failed to download NEPI Storage from link: ${storage_latest_link}"
-                    echo ""
-                    sudo rm ${storage_latest_zip}
-                fi
-            else
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $storage_latest_zip
-            fi
-
-            if [[ -f ${storage_latest_zip} ]]; then
-                echo ""
-                echo "Unzipping storage folders from ${storage_latest_zip}"
-                echo ""
-                sudo unzip -o -q $storage_latest_zip
-                if [ $? -eq 0 ]; then
-                    #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-                    success_storage=1
-                else
-                    echo ""
-                    echo "Failed to unzip NEPI Storage file: ${storage_latest_zip}"
-                    echo ""
-                    #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-                fi
-            else
-                echo ""
-                echo "Failed to find NEPI Storage file: ${storage_latest_zip}"
-                echo ""
-            fi
-
-            if [[ -f ${storage_latest_zip} ]]; then
-                sudo rm ${storage_latest_zip} > /dev/null 2>&1
-            fi
-
-            if [[ -f ${storage_latest_zip} ]]; then
-                sudo rm ${storage_latest_zip} > /dev/null 2>&1
-            fi
-
-            sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
-
-            cd $CURRENT_FOLDER
-
-            ####################################
-            # Cleanup
-
-            if [[ "$success_storage" -eq 0 ]]; then
-                echo "NEPI Storage Setup Failed"
-                echo ""
-            else
-                echo ""
-                echo "NEPI Storage Setup Succeeded"
-            fi
-
-            if [[ "$success_storage" -eq 1 && "$success_image" -eq 1 ]]; then
-                echo ""
-                echo "########################"
-                echo "NEPI Docker Lite Storage Init Complete"
-                echo "########################"
-                echo ""
-
-            fi
-        fi
-    fi
-fi
-
-ninet > /dev/null 2>&1
-
-if ! is_valid_internet > /dev/null; then
-    echo "No Internet Connection Detected.  Connect and rerun this script"
-
-else
-
-    echo ""
-    echo "########################"
-    echo "NEPI Docker Lite Image Init"
-    echo "########################"
-
-    SYSTEM_FOLDER=/mnt/nepi_config/system_cfg/etc
-    SYSTEM_CONFIG_FILE=${SYSTEM_FOLDER}/nepi_system_config.yaml
-    SYSTEM_CONFIG_LOAD_FILE=${SYSTEM_FOLDER}/load_system_config.sh
-
-
-    if [[ ! -f "$SYSTEM_CONFIG_LOAD_FILE" ]]; then
-        echo "Docker Config Load file not found at: ${SYSTEM_CONFIG_LOAD_FILE}"
-        echo "Run 'nepiupdate' and try again"
-
-    else
-        source ${SYSTEM_CONFIG_LOAD_FILE}
-        if [[ "$?" -eq 1 ]]; then
-            echo "Failed to load ${SYSTEM_CONFIG_FILE}"
-
-        elif [[ ! -n "$NEPI_IMPORT_PATH" ]]; then
-            echo "NEPI Docker Import Folder not defined in variable NEPI_IMPORT_PATH"
-            echo "Run 'nepiconfig' to fix path location and try again"
-        elif [[ ! -d "$NEPI_IMPORT_PATH" ]]; then
-            echo "NEPI Docker Import Folder not found at ${NEPI_IMPORT_PATH}"
-            echo "Create import path or run 'nepiconfig' to fix path location and try again"
-        else
-
-            CURRENT_FOLDER=$(pwd)
-
-
-            echo ""
-            echo "#################################"
-            echo "Installing the Latest NEPI Image"
-            echo ""
-
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
-            sudo chmod -R +x ${NEPI_IMPORT_PATH}/*
-
-            success_image=0
-            cd $NEPI_IMPORT_PATH
-
-            HW_TYPE=unknown
-            if is_valid_jetson; then
-                HW_TYPE=jetson
-            elif is_valid_arm64; then
-                HW_TYPE=arm64
-            elif is_valid_amd64; then
-                HW_TYPE=amd64
-            else
-                arch_val=$(uname -m)
-                echo "Arch ${arch_val} not supported yet"
-                return 
-            fi
-
-            staging_yaml_file=nepi_download_staging.yaml
-            staging_yaml_path=${NEPI_IMPORT_PATH}/${staging_yaml_file}
-            staging_image_file=nepi_download_staging.img
-            staging_image_path=${NEPI_IMPORT_PATH}/${staging_image_file}
-            # Cleanup
-            if [[ -f "$staging_yaml_path" ]]; then
-                sudo rm $staging_yaml_path
-            fi
-            if [[ -f "$staging_image_path" ]]; then
-                sudo rm $staging_image_path
-            fi
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
-
-
-            if [[ "$HW_TYPE" == 'jetson' ]]; then
-                nepi_latest_yaml_link='https://www.dropbox.com/scl/fi/j3ewsgmy22f6tsxyr70i7/nepi-jetson-latest.yaml?rlkey=p5imjukvwlxuonw9v5burnr0j&st=06e983zv&dl=0'
-                nepi_latest_image_link='https://www.dropbox.com/scl/fi/k9ud25piid9v55f5yt7k4/nepi-jetson-latest.img?rlkey=ozvc32ui27m7fjdrrer91wvio&st=ni7afijz&dl=0'
-            else
-                echo "No NEPI Image File available for hardware architecture ${arch_val}"
-                return     
-            fi
-
-            ################
-            #Check if file exists
-            echo ""
-            echo "Downloading NEPI Docker Image filename file: ${staging_yaml_file}"
-            echo ""
-            sudo wget ${nepi_latest_yaml_link} -O ${staging_yaml_file}
-
-            
-            if [[ ! -f "$staging_yaml_path" ]]; then
-                echo ""
-                echo "Failed to download NEPI filename file from link: ${nepi_latest_yaml_link}"
-                echo ""
-            else
-
-                echo ""
-                echo "Download Succeeded"
-                echo ""
-
-                ### Get Image info from yaml file
-                NEPI_LATEST_FILENAME=''
-                NEPI_LATEST_GB=''
-                load_yaml_file $staging_yaml_path
-                if [[ -z "$NEPI_LATEST_FILENAME" || -z "$NEPI_LATEST_GB" ]]; then
-                    echo ""
-                    echo "Failed to get NEPI Image name from : ${staging_yaml_path}"
-                    echo ""
-                else
-    
-                    nepi_image_path=${NEPI_IMPORT_PATH}/${NEPI_LATEST_FILENAME}
-                    echo ""
-                    echo "Installing NEPI Docker Image: ${NEPI_LATEST_FILENAME}"
-                    echo ""
-                    if [[ -f "$nepi_image_path" ]]; then
-                        echo ""
-                        echo "Latest NEPI Docker Image allready installed: ${NEPI_LATEST_FILENAME}"
-                        echo ""
-                        success_image=1
-                    else
-
-                        echo ""
-                        echo "Checking for available space NEPI Docker Image: ${NEPI_LATEST_FILENAME}"
-                        echo ""
-                        avail_space_gb=$(path_space_gb $NEPI_IMPORT_PATH)
-                        req_space_gb=$NEPI_LATEST_GB
-                        if [[ "$avail_space_gb" -lt "$req_space_gb" ]]; then
-                            need_space_gb=$((req_space_gb - avail_space_gb))
-                            echo "Not enough free drive space in import path ${NEPI_IMPORT_PATH}"
-                            echo "Free up ${need_space_gb} GB in that folders partition and try again"
-                        else
-                            echo ""
-                            echo "Downloading NEPI Docker Image file: ${staging_image_file}"
-                            echo ""
-                            
-                            sudo wget ${nepi_latest_image_link} -O ${staging_image_file}
-                            if [[ "$?" -ne 0 ]]; then
-                                    echo ""
-                                    echo "Failed to download NEPI image file from link: ${nepi_latest_image_link}"
-                                    echo ""
-                            fi
-                            if [[ -f "$staging_image_path" ]]; then
-                                echo ""
-                                echo "NEPI Docker Image downloaded to: ${staging_image_path}"
-                                echo "Renaming to: ${NEPI_LATEST_FILENAME}"
-                                echo ""
-                                sudo mv $staging_image_path $nepi_image_path
-                                success_image=1
-                            fi
-                        fi
-                    fi
-                
-                fi
-            fi                        
-            # Cleanup
-            if [[ -f "$staging_yaml_path" ]]; then
-                sudo rm $staging_yaml_path
-            fi
-            if [[ -f "$staging_image_path" ]]; then
-                sudo rm $staging_image_path
-            fi
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
-            sudo chmod -R +x ${NEPI_IMPORT_PATH}/*
-            cd $CURRENT_FOLDER
-
-
-
-            ####################################
-            # Cleanup
-
-            echo ""
-            echo "########################"
-            if [[ "$success_image" -eq 0 ]]; then
-                echo ""
-                echo "NEPI Image Install Failed"
-            else
-                echo ""
-                echo "NEPI Image Install Succeeded"
-            fi
-
-
-            if [[ "$success_storage" -eq 1 && "$success_image" -eq 1 ]]; then
-                echo ""
-                echo "########################"
-                echo "NEPI Docker Lite Image Init Complete"
-                echo "########################"
-                echo ""
-
-            fi
-        fi
-    fi
-fi
-
-##########################
-# Remove the repo
-##########################
-if [[ -d /home/${CONFIG_USER}/nepi_setup ]]; then
-    sudo rm -r /home/${CONFIG_USER}/nepi_setup
-fi
+echo ""
 
