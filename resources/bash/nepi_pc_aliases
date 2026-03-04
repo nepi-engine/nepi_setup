@@ -117,7 +117,9 @@ alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nep
 
 alias sshnr="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@nepirecovery"
 
-
+function sshnhc(){
+  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "if [ $(date +%Y) -lt 2026 ]; then sudo -S date --set=@$(date +%s); fi"
+}
 
 
 function sftpnl(){
@@ -135,6 +137,7 @@ HELPN="${HELPN}
 ################################
 sshn = SSH into NEPI Software System
 sshnh = SSH into NEPI Host System
+sshnhc = Sync NEPI Host System Clock
 scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
 sshnh = SSH into NEPI HOST
