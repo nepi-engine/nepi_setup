@@ -333,7 +333,17 @@ echo "################################# "
 echo "Configuring NTP Server"
 echo ""
 
-sudo apt-get install ntp
+if dpkg -l | grep ntp >/dev/null 2>&1; then
+    echo "NTP application installed"
+else
+    
+    if ! dpkg -l | grep chrony >/dev/null 2>&1; then
+        echo "Installing NTP application"
+        sudo apt-get install chrony
+    fi
+    echo "Installing NTP application"
+    sudo apt-get install ntp
+fi
 sudo service ntp start
 ntpq -p
 

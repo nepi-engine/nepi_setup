@@ -106,19 +106,37 @@ fi
 
 
 # Setup Connection Shortcuts
+# Setup Connection Shortcuts
 alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 
 
 function sshnhc(){
-  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "if [ $(date +%Y) -lt 2026 ]; then sudo -S date --set=@$(date +%s); fi"
+  echo "Checking NEPI Device Clock"
+  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
+  year_str="${date_str%%-*}"
+  if [[ $year_str -lt 2026 ]]; then
+    echo "Upating Clock"
+    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
+  fi
+  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
+  year_str="${date_str%%-*}"
+  if [[ $year_str -lt 2026 ]]; then
+    echo "Failed to Update Clock"
+    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
+    return 1
+  else
+    echo "Remote Clock Updated to ${date_str}"
+    return 0
+  fi  
 }
 # Setup Connection Shortcuts
 function sshnh(){
   sshnhc
   ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}
 }
+
 
 alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
 alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
