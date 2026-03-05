@@ -110,16 +110,22 @@ alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH 
 alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 
+
+function sshnhc(){
+  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "if [ $(date +%Y) -lt 2026 ]; then sudo -S date --set=@$(date +%s); fi"
+}
 # Setup Connection Shortcuts
-alias sshnh="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
+function sshnh(){
+  sshnhc
+  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}
+}
+
 alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
 alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
 
 alias sshnr="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@nepirecovery"
 
-function sshnhc(){
-  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "if [ $(date +%Y) -lt 2026 ]; then sudo -S date --set=@$(date +%s); fi"
-}
+
 
 
 function sftpnl(){

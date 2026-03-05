@@ -327,10 +327,15 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 fi
 
+#####################################
+echo " "
+echo "################################# "
+echo "Configuring NTP Server"
+echo ""
 
-
-
-
+sudo apt-get install ntp
+sudo service ntp start
+ntpq -p
 
 
 echo " "
