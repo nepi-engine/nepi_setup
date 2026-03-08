@@ -112,6 +112,9 @@ NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
 NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
 
+FACTORY_CONFIG_PATH=/mnt/nepi_config/factory_cfg
+FACTORY_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
+
 SYSTEM_CONFIG_PATH=/mnt/nepi_config/system_cfg
 SYSTEM_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
 
@@ -285,12 +288,12 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     echo ""
     PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(  "APPLY SETTINGS" "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
+    options=(   "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                         "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
                         "Update NEPI_WIRED_INTERFACE" "Update NEPI_IP" "Update NEPI_GATEWAY_IP" \
                         "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                         "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
-                        "FACTORY RESET" "QUIT" )
+                        "FACTORY RESET" "APPLY SETTINGS" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -300,9 +303,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         select opt in "${options[@]}" ; do
             case $opt in
 
-                        "APPLY SETTINGS")
-                            break 2 # Exit both the select and the while loop
-                            ;;
+
                         "VIEW ALL SETTINGS")
                             print_yaml_file $SYSTEM_SYS_CONFIG_FILE
                             break # Exit the select statement, re-display menu
@@ -530,17 +531,19 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             echo "ARE YOU SURE"
                             choice=$(ask_yes_no)
                             if [[ "$choice" == 'yes' ]]; then
-                                source ${SYSTEM_ETC_PATH}/load_system_config.sh
+                                source_path ${FACTORY_ETC_PATH}
+                                dest_path ${SYSTEM_ETC_PATH}
+                                if [[ ! -d ${dest_path} && -d ${source_path} ]]; then
+                                    sudo rm -r ${dest_path}/*
+                                    sudo cp -r ${source_path}/* ${dest_path}/
                                 update_current_config
-                                udpate_config_file
-                                print_current_config
                                 break
                             else
                                 break
                             fi
                             ;;
-                        "QUIT")
-                            exit 0
+                        "APPLY SETTINGS")
+                            break 2 # Exit both the select and the while loop
                             ;;
                         *)
                             echo "Invalid option, please try again."
