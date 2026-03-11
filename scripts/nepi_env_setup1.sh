@@ -205,8 +205,12 @@ else
     sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install yq -y
+
+    
     sudo apt install trash-cli -y
     sudo apt install ncdu -y
+
+
     
 
 
@@ -256,6 +260,9 @@ else
     sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev 
     sudo apt -y install libopenblas-dev
     sudo apt install -y libxml2-dev libxslt1-dev
+
+    sudo apt install libgpiod2 -y
+
     sudo apt update
     sudo apt-get install --fix-broken -y 
 

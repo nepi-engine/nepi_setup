@@ -135,7 +135,7 @@ sudo cp -r ${SOURCE_ETC_PATH}/opt/baumer /opt/baumer
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/baumer
 
 # Set up the shared object links in case they weren't copied properly when this repo was moved to target
-NEPI_BAUMER_PATH=${NEPI_ETC_PATH}/opt/baumer/gentl_producers
+NEPI_BAUMER_PATH=/opt/baumer/gentl_producers
 sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14
 sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_usb.cti.2.14 $NEPI_BAUMER_PATH/libbgapi2_usb.cti
 sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14.1 $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14
