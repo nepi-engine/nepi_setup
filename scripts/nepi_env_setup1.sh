@@ -209,7 +209,7 @@ else
     sudo apt update
     sudo apt install yq -y
     sudo apt install trash-cli -y
-
+    sudo apt install dialog -y
 
     echo ""
     echo "########################"

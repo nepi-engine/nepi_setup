@@ -127,7 +127,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG $SUDO_USER ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG root ${CONFIG_USER} >/dev/null 2>&1
 
 	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
 	#sudo chsh -s /bin/bash ${CONFIG_USER} # Fix no login user
