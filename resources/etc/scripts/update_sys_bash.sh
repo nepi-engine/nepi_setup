@@ -23,11 +23,9 @@ sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
+    CONFIG_USER=$SUDO_USER
 fi
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
-    CONFIG_USER=nepihost
-fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -70,10 +68,6 @@ else
     echo "Updating nepi system bash file"
     echo "Using Device ID: ${NEPI_DEVICE_ID}"
     update_text_value ${SYS_BASH_FILE} "export DEVICE_ID" "export DEVICE_ID=${NEPI_DEVICE_ID}"
-    echo "Using Device Model Name: ${NEPI_DEVICE_MD}"
-    update_text_value ${SYS_BASH_FILE} "export DEVICE_TYPE" "export DEVICE_TYPE=${NEPI_DEVICE_MD}"
-    echo "Using Device Serial Number: ${NEPI_DEVICE_SN}"
-    update_text_value ${SYS_BASH_FILE} "export DEVICE_SN" "export DEVICE_SN=${NEPI_DEVICE_SN}"
 
 
 

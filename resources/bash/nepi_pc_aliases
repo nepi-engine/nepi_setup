@@ -106,12 +106,38 @@ fi
 
 
 # Setup Connection Shortcuts
+# Setup Connection Shortcuts
 alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 
+
+function sshnhc(){
+  echo "Checking NEPI Device Clock"
+  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
+  year_str="${date_str%%-*}"
+  if [[ $year_str -lt 2026 ]]; then
+    echo "Upating Clock"
+    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
+  fi
+  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
+  year_str="${date_str%%-*}"
+  if [[ $year_str -lt 2026 ]]; then
+    echo "Failed to Update Clock"
+    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
+    return 1
+  else
+    echo "Remote Clock Updated to ${date_str}"
+    return 0
+  fi  
+}
 # Setup Connection Shortcuts
-alias sshnh="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
+function sshnh(){
+  sshnhc
+  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}
+}
+
+
 alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
 alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
 
@@ -124,6 +150,10 @@ function sftpnl(){
 sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi:../.."$@"
 }
 
+function sftpnhl(){
+sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}:../.."$@"
+}
+
 
 HELPN="${HELPN}
 ################################
@@ -131,6 +161,7 @@ HELPN="${HELPN}
 ################################
 sshn = SSH into NEPI Software System
 sshnh = SSH into NEPI Host System
+sshnhc = Sync NEPI Host System Clock
 scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
 sshnh = SSH into NEPI HOST
@@ -351,21 +382,25 @@ function drive(){
 	sftpnl $DRIVE
 }
 
-
+export DCFG="/mnt/nepi_config/docker_cfg"
 export FCFG="/mnt/nepi_config/factory_cfg"
 export SCFG="/mnt/nepi_config/system_cfg"
 export UCFG="/mnt/nepi_storage/user_cfg"
 
+function dcfg(){
+	sftpnhl $DCFG
+}
+
 function fcfg(){
-	sftpnl $FCFG
+	sftpnhl $FCFG
 }	
 
 function scfg(){
-	sftpnl $SCFG
+	sftpnhl $SCFG
 }	
 
 function ucfg(){
-	sftpnl $UCFG
+	sftpnhl $UCFG
 }	
 
 
@@ -400,6 +435,7 @@ share = /opt/nepi/nepi_engine/share
 src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
 srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src
 tmp = /mnt/nepi_storage/tmp
+dcfg = /mnt/nepi_config/docker_cfg
 fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/system_cfg
 ucfg = /mnt/nepi_storage/user_cfg"

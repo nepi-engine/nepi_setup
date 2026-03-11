@@ -22,6 +22,7 @@ LITE_INSTALL=0
 if [[ "$1" -eq 1 ]] 2>/dev/null; then
     LITE_INSTALL=$1
 fi
+export LITE_INSTALL=$LITE_INSTALL
 # echo "LITE_INSTALL=${LITE_INSTALL}"
 
 sudo -v
@@ -35,16 +36,17 @@ fi
 
 # This file configures a NEPI Docker installation environment
 
-
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
 fi
 export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    return 
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+        return
+    fi
 fi
 
 
@@ -62,4 +64,4 @@ source $NEPI_UTILS_SOURCE
 
 script_file=nepi_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-source $script_path
+source $script_path $LITE_INSTALL

@@ -20,7 +20,11 @@
 # This file imports an image from a tar file to the inactive fs
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -36,14 +40,17 @@ fi
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
+DOCKER_CONFIG_UPDATE_SCRIPT=${DOCKER_FOLDER}/nepi_docker_update.sh
+DOCKER_SWITCH_SCRIPT=${DOCKER_FOLDER}/nepi_docker_switch.sh
+DOCKER_START_SCRIPT=${DOCKER_FOLDER}/nepi_docker_start.sh
+
 
 ########################
 # Update Docker Config
 echo ""
 echo "Updating Docker Config File"
 
-source $DOCKER_CONFIG_UPDATE_FILE
+source $DOCKER_CONFIG_UPDATE_SCRIPT
 if [[ "$?" -eq 1 ]]; then
     echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
 else
@@ -245,7 +252,8 @@ else
             else
                 #IMPORT_ID=debug
                 echo "Importing file ${INSTALL_IMAGE} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
-                echo "Staging import nepi_staging:${NEPI_IMPORT_TAG}"
+                echo "Importing NEPI image to nepi_staging:${NEPI_IMPORT_TAG}"
+                echo "*** The import process can take several minutes to complete ***"
                 res=$(sudo docker import $INSTALL_IMAGE nepi_staging:${NEPI_IMPORT_TAG})
                 wait
                 hash=${res##*sha256:}
@@ -294,6 +302,11 @@ else
                         echo "NEPI Image Import Complete"
                         echo ""
                         dimg
+
+                        source $DOCKER_SWITCH_SCRIPT
+                        source $DOCKER_START_SCRIPT
+
+
 
 
                 else

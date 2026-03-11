@@ -23,7 +23,11 @@
 
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -70,11 +74,13 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
+sync_yaml_files $UPDATE_FILE ${SOURCE_FILE}.bak
+sudo rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -98,10 +104,12 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
+sudo rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
+sync_yaml_files $UPDATE_FILE ${SOURCE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}

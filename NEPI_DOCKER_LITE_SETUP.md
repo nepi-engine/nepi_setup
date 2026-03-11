@@ -20,7 +20,7 @@ For a detailed tutorials and videos on this process see the "NEPI Docker Lite Se
 
 
 ################################################################
-### NEPI Docker Lite User Setup
+## NEPI Docker Lite Setup
 
 This step will setup NEPI Docker required user accounts on your device
 
@@ -42,63 +42,27 @@ Clone the NEPI Setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
+Run the NEPI Docker lite setup script:
 
-    cd /home/${USER}/nepi_setup/scripts
-    sudo su 
+    cd /home/${USER}/nepi_setup/scripts 
 
-then
+then if prompted enter: `y` or 'yes' :
 
-    ./docker_lite_user_setup.sh
+    source ./docker_lite_setup.sh
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
+The docker lite setup script will run through the following steps NEPI Docker Lite Environment Setup, NEPI Docker Lite Config Setup, and NEPI Docker Init Setup.
 
-################################################################
 ### NEPI Docker Lite Environment Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
 
-Log into the `nepihost` user using password  'nepi'
-(sudo password is 'nepi')
-
-Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
-
-Make sure your system has internet access by running the following command:
-
-    ping -c 1 google.com
-
-Clone the NEPI Setup repo:
-
-    cd /home/${USER}
-    git clone https://github.com/nepi-engine/nepi_setup.git
-
-
-Run the NEPI Docker Lite configuration setup script (sudo password is now 'nepi'):
-
-    source /home/nepihost/nepi_setup/scripts/docker_lite_env_setup.sh
-
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
-
-################################################################
 ### NEPI Docker Lite Config Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
-
-Log into the `nepihost` user using password  'nepi'
-(sudo password is 'nepi')
-
-Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
-
-Run the NEPI Docker Lite Configuration setup script (sudo password is now 'nepi'):
-
-If prompted enter: `y` or 'yes' :
-
-    source /home/nepihost/nepi_setup/scripts/docker_lite_config_setup.sh
-
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
@@ -112,31 +76,17 @@ This process will create (if not allready created) and setup the following NEPI 
 
 
 **NOTE:**  After this process, the following changes will be made:
-1) Desktop background and sidebar applications menu updates.
-2) NEPI bash alias and util functions added to 'nepihost user bash profile.
-3) NEPI folder shortcuts added to File Manager folder bookmarks.
-4) Chromium browser updated with useful NEPI browser bookmarks.
+1) NEPI bash alias and util functions added to 'nepihost user bash profile.
+2) NEPI folder shortcuts added to File Manager folder bookmarks.
+3) Chromium browser updated with useful NEPI browser bookmarks.
 
 
-
-################################################################
 ### NEPI Docker Init Setup
 This section will initialize and test your NEPI Docker installation.  
 
-Log back into `nepihost` using password 'nepi' 
-
-Check for internet connection
-
-    ping -c 1 google.com
-
-
-Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
-
 **NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
 
-    source /home/nepihost/nepi_setup/scripts/docker_lite_init_setup.sh
-
-Run the NEPI Docker Import command (sudo password is now 'nepi'):
+Run the NEPI Docker Import command:
 
 **NOTE:** This step imports a large NEPI image file into the system which takes several minutes to complete.
 

@@ -31,10 +31,7 @@ sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
-fi
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
-    CONFIG_USER=nepihost
+    CONFIG_USER=$SUDO_USER
 fi
 
 bfile=/home/${CONFIG_USER}/.bashrc
@@ -114,6 +111,9 @@ NEPI_CONFIG_PATH=/opt/nepi
 NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
 NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
+
+FACTORY_CONFIG_PATH=/mnt/nepi_config/factory_cfg
+FACTORY_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
 
 SYSTEM_CONFIG_PATH=/mnt/nepi_config/system_cfg
 SYSTEM_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
@@ -282,221 +282,276 @@ function udpate_config_file(){
 
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     update_current_config
-    print_current_config
     
     if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
 
-        echo "Select Config to Update:"
 
-        select opt in "APPLY SETTINGS" "VIEW SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
-                "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
-                "Update NEPI_WIRED_INTERFACE" "Update NEPI_IP" "Update NEPI_GATEWAY_IP" \
-                "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
-                "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
-                "FACTORY RESET" "QUIT" \
-                ; do
+    echo ""
+    PS3=$'\n'"Please enter your choice by NUMBER: "
+    options=(   "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
+                        "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
+                        "Update NEPI_WIRED_INTERFACE" "Update NEPI_IP" "Update NEPI_GATEWAY_IP" \
+                        "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
+                        "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
+                        "FACTORY RESET" "APPLY SETTINGS" )
+
+    while true; do
+        #clear # Optional: Clear the screen before displaying the menu
+
+        print_current_config
+        COLUMNS=1
+        select opt in "${options[@]}" ; do
             case $opt in
-                "APPLY SETTINGS")
-                    break
-                    ;;
-                "VIEW SETTINGS")
-                    print_yaml_file $SYSTEM_SYS_CONFIG_FILE
-                    ;;
-                "Update NEPI_USER_PW")
-                    read -p "Enter a new password for 'nepi' user: " USER_INPUT
-                    if is_valid_pw "$USER_INPUT"; then
-                        CURRENT_NEPI_USER_PW=$USER_INPUT
-                    else
-                        echo "Not A Valid Password"
-                    fi           
-                    print_current_config
-                    echo "Select Config to Update:"
-                ;;
-                "Update NEPI_HOST_PW")
-                    read -p "Enter a new password for 'nepihost' user: " USER_INPUT
-                    if is_valid_pw "$USER_INPUT"; then
-                        CURRENT_NEPI_HOST_PW=$USER_INPUT
-                    else
-                        echo "Not A Valid Password"
-                    fi           
-                    print_current_config
-                    echo "Select Config to Update:"
-                ;;
-                "Update NEPI_ADMIN_PW")
-                    read -p "Enter a new password for 'nepiadmin' user: " USER_INPUT
-                    if is_valid_pw "$USER_INPUT"; then
-                        CURRENT_NEPI_HOST_PW=$USER_INPUT
-                    else
-                        echo "Not A Valid Password"
-                    fi           
-                    print_current_config
-                    echo "Select Config to Update:"
-                ;;
-                "Update NEPI_DEVICE_ID")
-                    read -p "Enter a new Device ID Name: " USER_INPUT
-                    if is_valid_did "$USER_INPUT"; then
-                        CURRENT_NEPI_DEVICE_ID=$USER_INPUT
-                    else
-                        echo "Not A Valid Device ID"
-                    fi           
-                    print_current_config
-                    echo "Select Config to Update:"
-                ;;
-                "Update NEPI_DEVICE_MD")
-                    read -p "Enter a new Device Model Name: " USER_INPUT
-                    if is_valid_string "$USER_INPUT"; then
-                        CURRENT_NEPI_DEVICE_MD=$USER_INPUT
-                    else
-                        echo "Not A Valid Device Model Name"
-                    fi           
-                    print_current_config
-                    echo "Select Config to Update:"
-                ;;
-            "Update NEPI_DEVICE_SN")
-                    read -p "Enter a new 6 digit Serial Number: " USER_INPUT
-                    if is_valid_sn "$USER_INPUT"; then
-                        CURRENT_NEPI_DEVICE_SN=$USER_INPUT
-                    else
-                        echo "Not A Valid Serial Number Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_WIRED_INTERFACE")
-                    read -p "Enter a new Wired Interface name: " USER_INPUT
-                    if [[ -n "$USER_INPUT" && "$USER_INPUT" != *" "* ]]; then
-                        CURRENT_NEPI_WIRED_INTERFACE=$USER_INPUT
-                    else
-                        echo "Not A Valid Wired Interface name"
-                    fi
-                    ;;
-                "Update NEPI_IP")
-                    read -p "Enter a new Static IP Address\Netmask: " USER_INPUT
-                    if is_valid_ipv4_netmask "$USER_INPUT"; then
-                        CURRENT_NEPI_IP=$USER_INPUT
-                    else
-                        echo "Not A Valid IP/Netmask Format"
-                    fi
-                    ;;
-                "Update NEPI_GATEWAY_IP")
-                    read -p "Enter a new Gateway IP Address, or Empty Line for None: " USER_INPUT
-                    if [[ "${USER_INPUT}" == "" ]]; then
-                        USER_INPUT=None
-                    fi
-                    if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
-                    else
-                        echo "Not A Valid IP Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_ALIAS_IP_1")
-                    read -p "Enter a new Alias IP Address\Netmask, or Empty Line for None: " USER_INPUT
-                    if [[ "${USER_INPUT}" == "" ]]; then
-                        USER_INPUT=None
-                    fi
-                    if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
-                    else
-                        echo "Not A Valid IP/Netmask Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_ALIAS_IP_2")
-                    read -p "Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
-                    if [[ "${USER_INPUT}" == "" ]]; then
-                        USER_INPUT=None
-                    fi
-                    if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
-                    else
-                        echo "Not A Valid IP/Netmask Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_ALIAS_IP_3")
-                    read -p "Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
-                    if [[ "${USER_INPUT}" == "" ]]; then
-                        USER_INPUT=None
-                    fi
-                    if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_ALIAS_IP_3=$USER_INPUT
-                    else
-                        echo "Not A Valid IP/Netmask Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_NTP_IP")
-                    read -p "Enter a new NTP Source IP Address, or Empty Line to Clear: " USER_INPUT
-                    if [[ "${USER_INPUT}" == "" ]]; then
-                        USER_INPUT=None
-                    fi
-                    if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_NTP_IP=$USER_INPUT
-                    else
-                        echo "Not A Valid IP Format"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
 
-                "Update NEPI_FS_AB")
-                    read -p "Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
-                    if is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_FS_AB=$USER_INPUT
-                    else
-                        echo "Not A Valid Input"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
 
-                "Update NEPI_IMPORT_PATH")
-                    read -p "Enter a Valid NEPI image Import path: " USER_INPUT
-                    if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
-                    else
-                        echo "Not A Valid Input"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "Update NEPI_EXPORT_PATH")
-                    read -p "Enter a Valid NEPI image Export path: " USER_INPUT
-                    if is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
-                        CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
-                    else
-                        echo "Not A Valid Input"
-                    fi
-                    print_current_config
-                    echo "Select Config to Update:"
-                    ;;
-                "FACTORY RESET")
-                    echo "ARE YOU SURE"
-                    choice=$(ask_yes_no)
-                    if [[ "$choice" == 'yes' ]]; then
-                        source ${SYSTEM_ETC_PATH}/load_system_config.sh
-                        update_current_config
-                        udpate_config_file
-                        print_current_config
-                        break
-                    else
-                        print_current_config
-                        echo "Select Config to Update:"
-                    fi
-                    ;;
-                "QUIT")
-                    exit 0
-                    ;;
-                *)
-                    print_current_config
-                    ;;
-            esac
+                        "VIEW ALL SETTINGS")
+                            print_yaml_file $SYSTEM_SYS_CONFIG_FILE
+                            break # Exit the select statement, re-display menu
+                            ;;
+                        "Update NEPI_USER_PW")
+                            read -p $'\n'"Enter a new password for 'nepi' user: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
+                                CURRENT_NEPI_USER_PW=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Password"
+                            fi           
+
+                        ;;
+                        "Update NEPI_HOST_PW")
+                            read -p $'\n'"Enter a new password for 'nepihost' user: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
+                                CURRENT_NEPI_HOST_PW=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Password"
+                            fi           
+                        ;;
+                        "Update NEPI_ADMIN_PW")
+                            read -p $'\n'"Enter a new password for 'nepiadmin' user: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_pw "$USER_INPUT"; then
+                                CURRENT_NEPI_HOST_PW=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Password"
+                            fi           
+                        ;;
+                        "Update NEPI_DEVICE_ID")
+                            read -p $'\n'"Enter a new Device ID Name: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_did "$USER_INPUT"; then
+                                CURRENT_NEPI_DEVICE_ID=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Device ID"
+                            fi           
+                            print_current_config
+                            echo "Select Config to Update:"
+                        ;;
+                        "Update NEPI_DEVICE_MD")
+                            read -p $'\n'"Enter a new Device Model Name: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_string "$USER_INPUT"; then
+                                CURRENT_NEPI_DEVICE_MD=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Device Model Name"
+                            fi           
+
+                        ;;
+                    "Update NEPI_DEVICE_SN")
+                            read -p $'\n'"Enter a new 6 digit Serial Number: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_sn "$USER_INPUT"; then
+                                CURRENT_NEPI_DEVICE_SN=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Serial Number Format"
+                            fi
+                            ;;
+                        "Update NEPI_WIRED_INTERFACE")
+                            read -p $'\n'"Enter a new Wired Interface name: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif [[ -n "$USER_INPUT" && "$USER_INPUT" != *" "* ]]; then
+                                CURRENT_NEPI_WIRED_INTERFACE=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Wired Interface name"
+                            fi
+                            ;;
+                        "Update NEPI_IP")
+                            read -p $'\n'"Enter a new Static IP Address\Netmask: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_ipv4_netmask "$USER_INPUT"; then
+                                CURRENT_NEPI_IP=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP/Netmask Format"
+                            fi
+                            ;;
+                        "Update NEPI_GATEWAY_IP")
+                            read -p $'\n'"Enter a new Gateway IP Address, or Empty Line for None: " USER_INPUT
+                            if [[ "${USER_INPUT}" == "" ]]; then
+                                USER_INPUT=None
+                            fi
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP Format"
+                            fi
+                            ;;
+                        "Update NEPI_ALIAS_IP_1")
+                            read -p $'\n'"Enter a new Alias IP Address\Netmask, or Empty Line for None: " USER_INPUT
+                            if [[ "${USER_INPUT}" == "" ]]; then
+                                USER_INPUT=None
+                            fi
+                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP/Netmask Format"
+                            fi
+                            ;;
+                        "Update NEPI_ALIAS_IP_2")
+                            read -p $'\n'"Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
+                            if [[ "${USER_INPUT}" == "" ]]; then
+                                USER_INPUT=None
+                            fi
+                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP/Netmask Format"
+                            fi
+                            ;;
+                        "Update NEPI_ALIAS_IP_3")
+                            read -p $'\n'"Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
+                            if [[ "${USER_INPUT}" == "" ]]; then
+                                USER_INPUT=None
+                            fi
+                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_ALIAS_IP_3=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP/Netmask Format"
+                            fi
+                            ;;
+                        "Update NEPI_NTP_IP")
+                            read -p $'\n'"Enter a new NTP Source IP Address, or Empty Line to Clear: " USER_INPUT
+                            if [[ "${USER_INPUT}" == "" ]]; then
+                                USER_INPUT=None
+                            fi
+                            if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_NTP_IP=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid IP Format"
+                            fi
+                            ;;
+
+                        "Update NEPI_FS_AB")
+                            read -p $'\n'"Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_FS_AB=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Input"
+                            fi
+                            ;;
+
+                        "Update NEPI_IMPORT_PATH")
+                            read -p $'\n'"Enter a Valid NEPI image Import path: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Input"
+                            fi
+                            ;;
+                        "Update NEPI_EXPORT_PATH")
+                            read -p $'\n'"Enter a Valid NEPI image Export path: " USER_INPUT
+                            if [[ "$USER_INPUT" == '' ]]; then
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                                CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            else
+                                echo "Not A Valid Input"
+                            fi
+
+                            ;;
+                        "FACTORY RESET")
+                            echo "ARE YOU SURE"
+                            choice=$(ask_yes_no)
+                            if [[ "$choice" == 'yes' ]]; then
+                                source_path ${FACTORY_ETC_PATH}
+                                dest_path ${SYSTEM_ETC_PATH}
+                                if [[ ! -d ${dest_path} && -d ${source_path} ]]; then
+                                    sudo rm -r ${dest_path}/*
+                                    sudo cp -r ${source_path}/* ${dest_path}/
+                                update_current_config
+                                break
+                            else
+                                break
+                            fi
+                            ;;
+                        "APPLY SETTINGS")
+                            break 2 # Exit both the select and the while loop
+                            ;;
+                        *)
+                            echo "Invalid option, please try again."
+                            ;;
+                    esac
+                done
         done
+        echo ""
     fi
 
     udpate_config_file

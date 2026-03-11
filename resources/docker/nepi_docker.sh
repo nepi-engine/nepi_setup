@@ -26,7 +26,11 @@ fi
 
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -211,6 +215,18 @@ export function ninet
 ####################################
 # Process Functions
 function NEPI_START_FUNCTION(){
+
+ echo ""
+ echo "Starting NEPI START FUNCTION"
+ echo "********************************"
+
+
+    echo "Updating ${DOCKER_CONFIG_FILE} with fail count ${NEPI_FAIL_COUNT}"
+    update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
+
+    source ${DOCKER_FOLDER}/nepi_docker_update.sh
+    wait
+
     NEPI_STARTING=1
     update_yaml_value "NEPI_STARTING" 1 $DOCKER_CONFIG_FILE
     echo "RUNNING START FUNCTION"
@@ -503,13 +519,11 @@ wait
 CONFIG_MODE=SYSTEM
 update_yaml_value "NEPI_FS_RESTART" 1 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
+
+
+
+
 NEPI_FAIL_COUNT=-1
-echo "Updating ${DOCKER_CONFIG_FILE} with fail count ${NEPI_FAIL_COUNT}"
-update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-
-
-
-
 NEPI_START_FUNCTION
 if [[ ! "$?" -eq 0 ]]; then
     echo " Restart Process Failed. Will Stop Trying"
@@ -518,8 +532,10 @@ fi
 
 #####################################
 # Run Monitoring and Upadate Loop
-
+ echo ""
  echo "Starting NEPI Service Monitoring"
+ echo "********************************"
+
  while [[ 1 ]]; do
 
     DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -597,6 +613,7 @@ fi
             update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
             echo "NEPI RESTARTING"
             CONFIG_MODE=SYSTEM
+            NEPI_FAIL_COUNT=-1
             NEPI_START_FUNCTION
             if [[ ! "$?" -eq 0 ]]; then
                 echo " Container Start Process Failed. Will Stop Trying"

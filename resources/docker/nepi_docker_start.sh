@@ -20,7 +20,11 @@
 # This script launches NEPI Container
 sudo -v
 
-CONFIG_USER=nepihost
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -104,6 +108,7 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=ho
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
+--mount type=bind,source=/etc/udev,target=/etc/udev \
 --cap-add=SYS_TIME --volume=/var/empty:/var/empty -v /etc/ntpd.conf:/etc/ntpd.conf \
 -e DISPLAY=$DISPLAY \
 --net=host \
@@ -127,6 +132,19 @@ DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 -v /tmp/.X11-unix/:/tmp/.X11-unix "
 
 fi 
+
+
+# Set jetson support if needed
+
+if is_valid_jetson; then
+    echo "Enabling Jetson GPU Support TRUE"
+DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v /tmp:/tmp \
+-v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
+fi 
+
+
 
 # Finish Run Command
 
@@ -207,6 +225,11 @@ if [[ -z "$CONTAINER_ID" ]]; then
 
 else
 
+    if is_valid_jetson; then
+        echo ""
+        echo "Restarting nvargus-daemon"
+        sudo systemctl restart nvargus-daemon  >/dev/null 2>&1
+    fi
     echo ""
     dps
     echo ""

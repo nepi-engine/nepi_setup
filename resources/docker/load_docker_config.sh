@@ -20,6 +20,12 @@
 
 # This script loads the nepi_system_config.yaml values
 
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
+
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_docker_config.py
@@ -28,11 +34,13 @@ DOCKER_CONFIG_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml.bak
 
 
-
+#echo "Starting Load Script with config folder: " ${CONFIG_FOLDER}
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
 
+    #echo "Running Load Process"
     success=0
     eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
     eval "$eval_cmd"
@@ -40,8 +48,10 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
     
     for entry in $load_vals; do
         export ${entry}
+        #echo ${entry}
     done
 
+    echo "Finished Load Process"
     if [[ "$success" -ne 1 ]]; then
         #echo "Success = ${success}"
         echo "Docker Config File failed to load"
@@ -59,11 +69,11 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
             done
             if [[ "$success" -ne 1 ]]; then
                 echo "Failed to Load Config File from Backup"
-                return 1
+                exit
             fi
         else
             echo "Backup File does not Exist"
-            return 1
+            exit
         fi
     fi
 
@@ -74,8 +84,9 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
     fi
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"
-    return 1
+    exit
 fi

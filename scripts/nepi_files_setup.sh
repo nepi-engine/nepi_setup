@@ -35,11 +35,6 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepi' && "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi' or 'nepihost'"
-    return 
-fi
-
 sudo -v
 
 

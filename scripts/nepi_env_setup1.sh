@@ -37,11 +37,8 @@ CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
 fi
+export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepi' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    return 
-fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -208,8 +205,18 @@ else
     sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install yq -y
+
+    
     sudo apt install trash-cli -y
+<<<<<<< HEAD
     sudo apt install dialog -y
+=======
+    sudo apt install ncdu -y
+
+
+    
+
+>>>>>>> f68063e887f6ab9d885719c4231537fe3328c088
 
     echo ""
     echo "########################"
@@ -257,6 +264,9 @@ else
     sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev 
     sudo apt -y install libopenblas-dev
     sudo apt install -y libxml2-dev libxslt1-dev
+
+    sudo apt install libgpiod2 -y
+
     sudo apt update
     sudo apt-get install --fix-broken -y 
 

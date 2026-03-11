@@ -20,6 +20,12 @@
 
 # This script loads the nepi_system_config.yaml values
 
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
+fi
+export CONFIG_USER=$CONFIG_USER
+
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
@@ -32,6 +38,7 @@ BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
 
     success=0
     eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
@@ -71,9 +78,10 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
     if [[ "$success" -eq 1 ]]; then
         echo "Backing Up NEPI Config File..."
         sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE 2>/dev/null
     fi
 
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"

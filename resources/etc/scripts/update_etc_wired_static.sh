@@ -23,11 +23,9 @@ sudo -v
 
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER="$(id -un 1000)"
+    CONFIG_USER=$SUDO_USER
 fi
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
-    CONFIG_USER=nepihost
-fi
+export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
@@ -130,26 +128,6 @@ if [[ "$?" -eq 0 ]]; then
             fi
 
 
-        #     ###########################
-        #     if ! nnet; then
-        #         echo "Running networking ifup flush and ifdown processes"
-        #         sudo ifdown ${NEPI_WIRED_INTERFACE} 2>/dev/null
-        #         sudo ip addr flush ${NEPI_WIRED_INTERFACE}
-
-
-        #         # # Tune ethernet interfaces for fast sensor throughput (especially important for genicam)
-        #         # echo "Running pre-launch ethernet interface tuning"
-        #         # sudo python3 /opt/nepi/nepi_engine/etc/nepi_env/tune_ethernet_interfaces.py
-
-
-        #         sudo ifup ${NEPI_WIRED_INTERFACE}
-
-        #         #sudo systemctl restart networking
-
-
-        #     fi
-
-        #     source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
         fi  
     fi
 fi

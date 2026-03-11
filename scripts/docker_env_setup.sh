@@ -37,17 +37,18 @@ fi
 # This file installs NEPI Docker required software packages
 
 
-
-
 CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
 fi
 export CONFIG_USER=$CONFIG_USER
 
-if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-    return 
+
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
+        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
+        return
+    fi
 fi
 
 sudo -v
@@ -75,7 +76,7 @@ echo "########################"
 
 script_file=nepi_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path; then
+if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
@@ -160,7 +161,8 @@ sudo apt install python3-venv python3-pip -y
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
-
+sudo -H python3 -m pip install --no-input cryptography
+sudo -H python3 -m pip install --no-input python-dotenv
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "######################################"
@@ -392,12 +394,14 @@ if [[ -n "$DISPLAY" ]]; then
     echo "Installing mdview"
     sudo snap install mdview
 
-    echo ""
-    echo "Installing Chromium Browser"
-    #sudo snap remove --purge chromium
-    sudo snap install chromium
-    #sudo apt install chromium-browser -y
-    #chromium-browser --disable-features=DnsOverHttps
+    if [[ $LITE_INSTALL -eq 0 ]]; then
+        echo ""
+        echo "Installing Chromium Browser"
+        #sudo snap remove --purge chromium
+        sudo snap install chromium
+        #sudo apt install chromium-browser -y
+        #chromium-browser --disable-features=DnsOverHttps
+    fi
 
     if command -v code &> /dev/null; then
         echo "Visual Studio Code is installed and accessible."

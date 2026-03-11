@@ -31,15 +31,11 @@ fi
 # This file sets up the OS software requirements for a NEPI File System installation
 
 
-export CONFIG_USER=$(id -un)
+CONFIG_USER=$(id -un)
 if [[ ${CONFIG_USER} == 'root' ]]; then
-    export CONFIG_USER=$SUDO_USER
+    CONFIG_USER=$SUDO_USER
 fi
-
-if [[ "$CONFIG_USER" != 'nepi' ]]; then
-    echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepi'"
-    return 
-fi
+export CONFIG_USER=$CONFIG_USER
 
 
 
@@ -186,9 +182,12 @@ else
 
     # Create USER python folder
     mkdir -p $(python -m site --user-site)
-    fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages"
-    fix_path  /home/${CONFIG_USER}/.local/bin
-    fix_folder /home/${CONFIG_USER}/.local
+    NEPI_PYTHON=3.8
+    fix_path "/home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages" 755
+    fix_path /home/${CONFIG_USER}/.local/bin 755
+    fix_folder /home/${CONFIG_USER}/.local 755
+    sudo chown -R nepi:nepi /home/nepi/.local
+    sudo chmod -R u+rwX /home/nepi/.local
     sudo ln -sf /usr/bin/pip3 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages/pip
 
 
@@ -243,7 +242,8 @@ else
     sudo -H python${NEPI_PYTHON} -m pip install --no-input scikit-build 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input ninja 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input cmake
-
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input cryptography
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-dotenv
     sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy
 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input cffi
