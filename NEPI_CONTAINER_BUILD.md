@@ -369,7 +369,11 @@ YOU ARE NOW IN THE NEPI CONTAINER
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 Start the NEPI Build from Source process (password is 'nepi'):
 
-    codebld
+    nepibld
+
+Update permissions
+
+    sudo chown -R nepi:nepi /opt/nepi/
 
 Test Run the NEPI
 

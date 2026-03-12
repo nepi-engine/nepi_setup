@@ -208,15 +208,9 @@ else
 
     
     sudo apt install trash-cli -y
-<<<<<<< HEAD
+
     sudo apt install dialog -y
-=======
-    sudo apt install ncdu -y
 
-
-    
-
->>>>>>> f68063e887f6ab9d885719c4231537fe3328c088
 
     echo ""
     echo "########################"

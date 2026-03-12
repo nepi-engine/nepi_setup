@@ -121,67 +121,6 @@ else
     sudo adduser --gecos "$CONFIG_USER" --disabled-password "$CONFIG_USER"
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 fi    
-if id -u "$CONFIG_USER" >/dev/null 2>&1; then
-    echo "Configuring NEPI Base User account $CONFIG_USER"
-    # sudo rm -r /home/${CONFIG_USER}
-    # sudo mkdir -p /home/${CONFIG_USER}
-    # sudo cp -r /etc/skel/. /home/${CONFIG_USER}/
-    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /
-
-    if [[ $CONFIG_USER == "nepihost" ]]; then
-        echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
-    fi
-    #sudo usermod -aG $CONFIG_USER $CONFIG_USER
-    sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
-    sudo adduser ${CONFIG_USER} dialout
-    sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
-    sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
-    echo $SUDO_USER
-    echo $CONFIG_USER
-    sudo usermod -aG ${SUDO_USER} ${CONFIG_USER} #>/dev/null 2>&1
-
-
-	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
-	#sudo chsh -s /bin/bash ${CONFIG_USER} # Fix no login user
-
-
-        
-    # if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
-    #     if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
-    #         sudo cp -R /home/${SUDO_USER}/nepi_setup /home/${CONFIG_USER}/nepi_setup
-    #     fi
-    # fi
-    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
-
-    if [[ $CONFIG_USER == "nepihost" ]]; then
-        # Updated the Desktop
-        dfolder=/home/${CONFIG_USER}/Desktop
-        if [[ -d "$dfolder" ]]; then
-            if find "$dfolder" -maxdepth 0 -empty | read; then
-                echo "Desktop folder cleaned"
-            else
-                sudo rm ${dfolder}/*
-                echo "Desktop folder cleaned"
-            fi
-        fi
-    fi
-   
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-    sudo chmod 0755 /home/${CONFIG_USER}
-
-
-
-else
-    echo "Failed to create user account $CONFIG_USER"
-    echo "Manual create an Adminstrator user account name ${CONFIG_USER}"
-    echo "Then rerun this script"
-    return 
-fi
 
 
 ###################################
@@ -237,6 +176,67 @@ function new_system_user(){
 
 new_system_user ${SYS_USER_1} ${SYS_USER_1_PW}
 new_system_user ${SYS_USER_2} ${SYS_USER_2_PW}
+
+
+if id -u "$CONFIG_USER" >/dev/null 2>&1; then
+    echo "Configuring NEPI Base User account $CONFIG_USER"
+    # sudo rm -r /home/${CONFIG_USER}
+    # sudo mkdir -p /home/${CONFIG_USER}
+    # sudo cp -r /etc/skel/. /home/${CONFIG_USER}/
+    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /
+
+    if [[ $CONFIG_USER == "nepihost" ]]; then
+        echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+    fi
+    #sudo usermod -aG $CONFIG_USER $CONFIG_USER
+    sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
+    sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
+    sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
+    sudo adduser ${CONFIG_USER} dialout
+    sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG ${SUDO_USER} ${CONFIG_USER} #>/dev/null 2>&1
+
+
+	#sudo usermod -s /bin/bash ${CONFIG_USER} # Fix no login user
+	#sudo chsh -s /bin/bash ${CONFIG_USER} # Fix no login user
+
+
+        
+    # if [[ "$SUDO_USER" != "$CONFIG_USER" ]]; then
+    #     if [[ -d "/home/${SUDO_USER}/nepi_setup" ]]; then
+    #         sudo cp -R /home/${SUDO_USER}/nepi_setup /home/${CONFIG_USER}/nepi_setup
+    #     fi
+    # fi
+    # sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_setup
+
+    if [[ $CONFIG_USER == "nepihost" ]]; then
+        # Updated the Desktop
+        dfolder=/home/${CONFIG_USER}/Desktop
+        if [[ -d "$dfolder" ]]; then
+            if find "$dfolder" -maxdepth 0 -empty | read; then
+                echo "Desktop folder cleaned"
+            else
+                sudo rm ${dfolder}/*
+                echo "Desktop folder cleaned"
+            fi
+        fi
+    fi
+   
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+    sudo chmod 0755 /home/${CONFIG_USER}
+
+
+
+else
+    echo "Failed to create user account $CONFIG_USER"
+    echo "Manual create an Adminstrator user account name ${CONFIG_USER}"
+    echo "Then rerun this script"
+    return 
+fi
 
 
 
