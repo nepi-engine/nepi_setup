@@ -41,14 +41,8 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
 fi
 export CONFIG_USER=$CONFIG_USER
+NEPI_USER_ID=1000
 
-
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
-    fi
-fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -218,7 +212,7 @@ else
             if [[ -f "$staging_image_path" ]]; then
                 sudo rm $staging_image_path
             fi
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${NEPI_IMPORT_PATH}
+            sudo chown -R ${NEPI_USER_ID}:${NEPI_USER_ID} ${NEPI_IMPORT_PATH}
             sudo chmod -R +x ${NEPI_IMPORT_PATH}/*
             cd $CURRENT_FOLDER
 

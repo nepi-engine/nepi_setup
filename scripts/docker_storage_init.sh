@@ -41,14 +41,7 @@ if [[ ${CONFIG_USER} == 'root' ]]; then
     CONFIG_USER=$SUDO_USER
 fi
 export CONFIG_USER=$CONFIG_USER
-
-
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
-    fi
-fi
+NEPI_USER_ID=1000
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -143,7 +136,6 @@ else
                 sudo unzip -o -q $storage_latest_zip
                 if [ $? -eq 0 ]; then
                     #sudo rm ${storage_latest_zip} > /dev/null 2>&1
-                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $(pwd)/*
                     success_storage=1
                 else
                     echo ""
@@ -165,8 +157,8 @@ else
                 sudo rm ${storage_latest_zip} > /dev/null 2>&1
             fi
 
-            sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
-
+            #sudo find $NEPI_STORAGE -type d -exec chown ${NEPI_USER_ID}:${NEPI_USER_ID} {} +
+            sudo chown -R ${NEPI_USER_ID}:${NEPI_USER_ID} ${NEPI_USER_ID}
             cd $CURRENT_FOLDER
 
 
