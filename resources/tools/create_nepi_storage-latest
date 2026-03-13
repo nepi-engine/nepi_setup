@@ -1,0 +1,2 @@
+cd /mnt/nepi_storage
+zip -r nepi_storage-latest.zip ai_models ai_training databases sample_data user_cfg
