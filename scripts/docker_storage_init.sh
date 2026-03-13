@@ -140,7 +140,7 @@ else
                 echo ""
                 echo "Unzipping storage folders from ${storage_latest_zip}"
                 echo ""
-                sudo unzip -o -q $storage_latest_zip
+                sudo su unzip -o -q $storage_latest_zip ${CONFIG_USER}
                 if [ $? -eq 0 ]; then
                     #sudo rm ${storage_latest_zip} > /dev/null 2>&1
                     success_storage=1
