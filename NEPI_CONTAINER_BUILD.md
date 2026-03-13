@@ -341,45 +341,18 @@ Log Into the NEPI container as nepi (password is 'nepi'):
 
 YOU ARE NOW IN THE NEPI CONTAINER
 
-Configure user id's:
-
-    sudo su
-
-then
-
-    cd /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
-    source ./nepi_user_setup.sh
-
-then
-
-    exit # exit sudo uer
-
-Log out of the container:
-
-    exit
-
-YOU ARE NOW IN THE NEPI HOST
-
-Log Into the NEPI container as nepi (password is 'nepi'):
-
-    nepilogin
-
-YOU ARE NOW IN THE NEPI CONTAINER
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 Start the NEPI Build from Source process (password is 'nepi'):
 
+    export DEPLOY_3RD_PARTY=1
     nepibld
-
-Update permissions
-
     sudo chown -R nepi:nepi /opt/nepi/
 
-Test Run the NEPI
 
-    scripts
-    sudo su
-    source ./nepi_engine_start
+Test Run NEPI. Look for error messages
+
+    nepistart
 
 **Ctrl-C** to stop the process
 
