@@ -300,7 +300,7 @@ else
 
     ########################
     ## Remove issue packackes
-    sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing
+    sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing -y
 
 
     echo ""

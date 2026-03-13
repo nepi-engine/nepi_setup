@@ -131,8 +131,7 @@ YOU ARE NOW IN THE NEPI HOST
 
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "user_setup" $RESTART
+    nepicommit "user_setup"
 
 
 
@@ -177,8 +176,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "env_setup1" $RESTART
+    nepicommit "env_setup1"
 
 
 ################################################################
@@ -223,8 +221,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "env_setup2" $RESTART
+    nepicommit "env_setup2"
 
 
 ################################################################
@@ -265,8 +262,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "ros_setup" $RESTART
+    nepicommit "ros_setup"
 
     
 
@@ -320,9 +316,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "config_setup" $RESTART
-
+    nepicommit "config_setup"
 
 
 
@@ -341,16 +335,18 @@ Log Into the NEPI container as nepi (password is 'nepi'):
 
 YOU ARE NOW IN THE NEPI CONTAINER
 
+
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 Start the NEPI Build from Source process (password is 'nepi'):
 
-    codebld
+    export DEPLOY_3RD_PARTY=1
+    nepibld
+    sudo chown -R nepi:nepi /opt/nepi/
 
-Test Run the NEPI
 
-    scripts
-    sudo su
-    source ./nepi_engine_start
+Test Run NEPI. Look for error messages
+
+    nepistart
 
 **Ctrl-C** to stop the process
 
@@ -366,8 +362,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "engine_setup" $RESTART
+    nepicommit "engine_setup"
 
 
 
@@ -412,8 +407,7 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    RESTART=0
-    nepicommit "rui_setup" $RESTART
+    nepicommit "rui_setup"
 
 
 
@@ -428,8 +422,7 @@ Restart the NEPI container running in production mode now using the latest commi
 
 Export and Import the new NEPI Docker Image from the running NEPI Container (password is 'nepi'):
 
-**NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
-the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
+    nepiexport
+    nepiimport
 
-    nepicreate # OR 'nepiexport' to just export the new image without importing
 

@@ -135,7 +135,7 @@ else
                 if [[ "$export_clean" == 1 ]]; then
                     NEW_DESC=''
                 else
-                    NEW_DESC=${TAG_ARRAY[5]}
+                    NEW_DESC=${TAG_ARRAY[6]}
                     if [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
                         NEW_DESC=${NEW_DESC%?????}
                         NEW_DESC="${NEW_DESC}_$(date +%H%M)"
@@ -153,8 +153,9 @@ else
 
         
         
-                NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
-
+                NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}-${NEW_DESC}"
+                # update_yaml_value "NEPI_EXPORT_TAG" "${NEPI_EXPORT_TAG}" "${DOCKER_CONFIG_FILE}"
+ 
             
                 NEPI_EXPORT_TAG=${NEPI_EXPORT_TAG,,}
             fi
