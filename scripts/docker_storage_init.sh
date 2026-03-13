@@ -143,6 +143,7 @@ else
                 sudo unzip -o -q $storage_latest_zip
                 if [ $? -eq 0 ]; then
                     #sudo rm ${storage_latest_zip} > /dev/null 2>&1
+                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $(pwd)/*
                     success_storage=1
                 else
                     echo ""
