@@ -209,6 +209,8 @@ new_system_user ${SYS_USER_2} ${SYS_USER_2_PW}
 
 
 
+
+
 echo ""
 echo "###################################"
 echo "Changing Non-NEPI user IDs and Groups"
@@ -393,6 +395,10 @@ if [[ -f "$source_file" ]]; then
 fi
 sudo chown root:root $dest_file
 sudo chmod 0440 $dest_file
+
+
+
+
 
 
 
