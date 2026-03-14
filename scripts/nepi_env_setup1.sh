@@ -181,7 +181,6 @@ else
     sudo apt install ubuntu-advantage-tools -y
 
     sudo apt install scons -y # Required for num_gpsd
-    sudo apt install zstd -y # Required for Zed SDK installer
     sudo apt install dos2unix -y # Required for robust automation_mgr
     sudo apt install libffi-dev -y # Required for python cryptography library
     sudo apt install libv4l-dev v4l-utils -y # V4L Cameras (USB, etc.)
@@ -231,8 +230,14 @@ else
 
     ### Install Driver Support Libs
 
-    #https://www.stereolabs.com/developers/release/4.1
-    wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons
+    if [[ ${NEPI_ARCH} == 'jetson' ]]; then
+        #https://www.stereolabs.com/developers/release/4.1
+        wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+    else if  [[ ${NEPI_ARCH} == 'arm64' ]]; then
+        : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+    else if  [[ ${NEPI_ARCH} == 'amd64' ]]; then
+        : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+    fi
     sudo sudo apt install zstd -y
 
 
