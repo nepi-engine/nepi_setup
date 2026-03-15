@@ -26,6 +26,8 @@ fi
 
 sudo -v
 
+source /root/.bashrc
+
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
     if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -33,9 +35,11 @@ if [[ ! -n $CONFIG_USER ]]; then
     fi
 fi
 if [[ ! -n $CONFIG_USER ]]; then
-    id -nu 1000
+    CONFIG_USER=$(id -nu 1000)
 fi
 export CONFIG_USER=$CONFIG_USER
+
+echo "NEPI_DOCKER Service starting with CONFIG_USER= " + ${CONFIG_USER}
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils

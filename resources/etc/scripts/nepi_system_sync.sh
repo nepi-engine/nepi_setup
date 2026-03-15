@@ -29,7 +29,7 @@ if [[ ! -n $CONFIG_USER ]]; then
     fi
 fi
 if [[ ! -n $CONFIG_USER ]]; then
-    id -nu 1000
+    CONFIG_USER=$(id -nu 1000)
 fi
 export CONFIG_USER=$CONFIG_USER
 
