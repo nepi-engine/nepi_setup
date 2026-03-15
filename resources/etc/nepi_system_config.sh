@@ -29,9 +29,27 @@ fi
 
 sudo -v
 
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
+fi
+if [[ ! -n $CONFIG_USER ]]; then
+    id -nu 1000
+fi
+export CONFIG_USER=$CONFIG_USER
+
+ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
+
+
+# Load System Config File
+source ${ETC_FOLDER}/load_system_config.sh
+if [ $? -eq 1 ]; then
+    echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
+    
 fi
 
 bfile=/home/${CONFIG_USER}/.bashrc
@@ -43,12 +61,6 @@ else
     echo "NEPI Utils bash file not found at: ${ufile}"
     exit 1
 fi
-
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
-
-
-
 
 echo "########################"
 echo "NEPI SYSTEM CONFIG SETUP"
@@ -146,7 +158,10 @@ else
 fi
 update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
 
-
+if [[ ${CONFIG_USER} != 'nepi' ]]; then
+    export NEPI_HOST_USER=$CONFIG_USER
+    update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
+fi
 
 # # This is updated by NEPI Container process
 # if is_valid_cuda; then

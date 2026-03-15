@@ -205,6 +205,7 @@ else
     export NEPI_IN_CONTAINER=1
 fi
 
+
 # Add NEPI SETTINGS
 if grep -qnw $BASHRC -e "##### NEPI SETTINGS #####" ; then
     : #echo "Already Done"
