@@ -301,7 +301,7 @@ if [[ "$?" -eq 0 ]]; then
 
 
         
-        if [[ "$CONFIG_USER" == "nepihost" ]]; then
+        if [[ "$CONFIG_USER" != "nepi" ]]; then
             source_file=${SOURCE_ETC_PATH}/docker/ssh/sshd_config 
         else
             source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
@@ -323,7 +323,8 @@ if [[ "$?" -eq 0 ]]; then
     fi
 
 
-    if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" == "nepihost" ]]; then
+    if [[ "$CONFIG_USER" != "nepi" ]]; then
+
         echo ""
         echo "########"
         echo "Updating Docker Service Config"
@@ -334,13 +335,20 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl stop docker
         sudo systemctl stop docker.socket       
 
+
+
         if [[ ! -f "/etc/docker/daemon.json.org" ]]; then
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
         fi
+
         
-        sudo nvidia-ctk runtime configure --runtime=docker
+        if is_valid_cuda; then
+            sudo nvidia-ctk runtime configure --runtime=docker
+        fi
 
+    fi
 
+    if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" != "nepi" ]]; then
         # Set docker service root location
         #https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
         # https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
@@ -377,7 +385,10 @@ if [[ "$?" -eq 0 ]]; then
         UPDATE="ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=${NEPI_DOCKER}"
         echo $UPDATE
         sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    
+    fi
 
+    if [[ "$CONFIG_USER" != "nepi" ]]; then
 
         echo ""
         echo "Enabling Docker Service"

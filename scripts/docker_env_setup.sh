@@ -371,6 +371,12 @@ if is_valid_cuda; then
 
 fi
 
+echo ""
+echo "Enabling Docker Service"
+sudo systemctl daemon-reload
+sudo systemctl start docker.socket
+sudo systemctl start docker
+
 sudo apt-get update
 sudo apt-get install --fix-broken -y
 
