@@ -233,9 +233,9 @@ else
     if [[ ${NEPI_ARCH} == 'jetson' ]]; then
         #https://www.stereolabs.com/developers/release/4.1
         wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
-    else if  [[ ${NEPI_ARCH} == 'arm64' ]]; then
+    elif [[ ${NEPI_ARCH} == 'arm64' ]]; then
         : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
-    else if  [[ ${NEPI_ARCH} == 'amd64' ]]; then
+    elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
         : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
     fi
     sudo sudo apt install zstd -y
