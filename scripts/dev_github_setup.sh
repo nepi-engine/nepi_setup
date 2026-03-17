@@ -72,7 +72,6 @@ while [[ "$install_key" == 'yes' ]]; do
         if [[ "$?" -lt 2 ]]; then
             key_file=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
             key_name=$(basename "${key_file}")
-            echo "GitHub SSH key authenticated with key file ${key_file}"
             install_key='no'
         else
             key_file=''
@@ -120,8 +119,48 @@ while [[ "$install_key" == 'yes' ]]; do
     fi
 done
 
+if [[ -n $key_file ]]; then
+    check_key='yes'
+    while [[ "$check_key" == 'yes' ]]; do
 
 
+        ssh -T git@github.com >/dev/null 2>&1
+        if [[ "$?" -gt 1 ]]; then
+
+            echo "*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
+            echo ""
+            echo "1) Log Into Your GitHub Account at www.github.com"
+            echo "2) Click on your User Icon, and select 'Settings"
+            echo "3) Select 'SSH and GPG keys' from the left sidebar menu"
+            echo "4) Click the 'New SSH key' button in the top right"
+            echo "5) Enter the following information in the boxes provided,"
+            echo "   Then click the 'Add SSH key' button"
+            echo ""
+            echo "<< TITLE >>"
+            echo ${key_name}
+            echo ""
+            echo "<< KEY_TYPE >>"
+            echo "Authentication Key"
+            echo ""
+            echo "<< KEY >>"
+            echo $(cat ${key_file}.pub)
+            echo ""
+            echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
+
+            echo ""
+            check_key=$(ask_yes_no "Do you want to setup your key in your GitHub account and test it again?")
+        else
+            check_key='no'
+        fi
+    done
+fi
+
+ssh -T git@github.com >/dev/null 2>&1
+if [[ "$?" -lt 2 ]]; then
+    echo "GitHub SSH key authenticated with key file ${key_file}"
+else
+    echo "GitHub SSH key not authenticated"
+fi
 
 
 echo " "
@@ -129,39 +168,3 @@ echo "################################# "
 echo "NEPI DEV GITHUB SETUP COMPLETE"
 echo "################################# "
 echo " "
-
-
-check_key='yes'
-
-while [[ "$check_key" == 'yes' ]]; do
-
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -gt 1 && -n $key_file ]]; then
-
-        echo "*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
-        echo ""
-        echo "1) Log Into Your GitHub Account at www.github.com"
-        echo "2) Click on your User Icon, and select 'Settings"
-        echo "3) Select 'SSH and GPG keys' from the left sidebar menu"
-        echo "4) Click the 'New SSH key' button in the top right"
-        echo "5) Enter the following information in the boxes provided,"
-        echo "   Then click the 'Add SSH key' button"
-        echo ""
-        echo "<< TITLE >>"
-        echo ${key_name}
-        echo ""
-        echo "<< KEY_TYPE >>"
-        echo "Authentication Key"
-        echo ""
-        echo "<< KEY >>"
-        echo $(cat ${key_file}.pub)
-        echo ""
-        echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
-
-        echo ""
-        check_key=$(ask_yes_no "Do you want to setup your key in your GitHub account and test it again?")
-    else
-        check_key='no'
-    fi
-done
-
