@@ -161,6 +161,9 @@ update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
 if [[ ${CONFIG_USER} != 'nepi' ]]; then
     export NEPI_HOST_USER=$CONFIG_USER
     update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
+    if [[ ${NEPI_HOST_USER} == "nepihost" ]]; then
+        update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+    fi
 fi
 
 # # This is updated by NEPI Container process

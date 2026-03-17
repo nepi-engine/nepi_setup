@@ -71,13 +71,20 @@ fi
 echo ""
 echo "UPDATING ETC USERS"
 
-pw_changed=0
+nepi_user_pw_changed=0
+nepi_host_user_pw_changed=0
+nepi_admin_user_pw_changed=0
 
 
 
 function update_password() {
         username=$1
         password=$2
+
+        if [[ ${password} == "encrypted" ]]; then
+            echo "Password for ${username} already encrypted" 
+            return 1
+        fi
 
         if is_valid_pw $password; then
 
@@ -101,21 +108,30 @@ function update_password() {
 }
 
 
-
-if update_password $NEPI_USER $NEPI_USER_PW; then 
-    pw_changed=1 
+if [[ ${NEPI_USER} == 'nepi' ]]; then
+    if update_password $NEPI_USER $NEPI_USER_PW; then 
+        nepi_user_pw_changed=1 
+        update_yaml_value "NEPI_USER_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+    fi
 fi
 sudo chown ${username}:${username} /home/${username}
 sudo chmod 0755 /home/${username}
 
-if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
-    pw_changed=1 
+if [[ ${NEPI_HOST_USER} != 'nepi' ]]; then
+    if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
+        nepi_host_user_pw_changed=1 
+        update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+    fi
 fi
 sudo chown ${username}:${username} /home/${username}
 sudo chmod 0755 /home/${username}
 
-if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
-    pw_changed=1 
+
+if [[ ${NEPI_HOST_USER} != 'nepi' ]]; then
+    if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
+        nepi_admin_user_pw_changed=1 
+        update_yaml_value "NEPI_ADMIN_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+    fi
 fi
 sudo chown ${username}:${username} /home/${username}
 sudo chmod 0755 /home/${username}
@@ -177,19 +193,32 @@ fi
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
-        if [[ "$pw_changed" -eq 1 ]]; then
+        if [[ "$nepi_user_pw_changed" -eq 1 ]]; then
                 echo ""
                 echo "########"
                 echo "Configuring nepi Samba passwords"
                 echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
                 sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+                echo "Restarting sshd service"
+                sudo systemctl restart sshd
+        fi
 
+        if [[ "$nepi_host_user_pw_changed" -eq 1 ]]; then  
+                echo ""
+                echo "########"
+                echo "Configuring nepihost Samba passwords"
                 echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
                 sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+                echo "Restarting sshd service"
+                sudo systemctl restart sshd
+        fi
 
+        if [[ "$nepi_admin_user_pw_changed" -eq 1 ]]; then
+                echo ""
+                echo "########"
+                echo "Configuring nepiadmin Samba passwords"
                 echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
-                sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null 2>&1
-
+                sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null
                 echo "Restarting sshd service"
                 sudo systemctl restart sshd
         fi

@@ -70,6 +70,12 @@ function is_valid_pw() {
         echo "Passwords can not be blank string."
         return 1
     fi
+
+    if [[ "$input" == "encrypted" ]]; then
+        echo "Password already encrypted"
+        return 1
+    fi
+
   case "$input" in
       *[[:space:]]*|*/*|*\\*)
           echo "Passwords can not contain spaces or slashes."
