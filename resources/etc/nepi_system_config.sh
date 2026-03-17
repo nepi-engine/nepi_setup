@@ -42,7 +42,7 @@ fi
 export CONFIG_USER=$CONFIG_USER
 
 ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
+ETC_FOLDER=$ETC_SCRIPTS_FOLDER #$(dirname ${ETC_SCRIPTS_FOLDER})
 
 
 # Load System Config File
