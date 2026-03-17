@@ -668,6 +668,15 @@ if ! source_script $script_path $LITE_INSTALL; then
     return 
 fi
 
+#####################################
+
+if is_valid_internet >/dev/null 2>&1; then
+    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+    GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
+    source $GITHUB_SETUP_SCRIPT
+fi
+
+
 echo ""
 echo "########################"
 echo "NEPI Lite Init SETUP Complete"

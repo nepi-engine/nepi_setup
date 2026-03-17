@@ -671,6 +671,7 @@ function fix_ipv4_netmask() {
 }
 export -f fix_ipv4_netmask
 
+
 function nepiclone {
   if is_valid_internet ; then
     cd ~/
@@ -696,14 +697,14 @@ function nepiclonedev {
 export -f nepiclonedev
 
 
-function nepipullupdates {
+function nepipull {
   if is_valid_internet ; then
     cd ~/nepi_engine_ws
     git pull --recurse-submodules
   fi
 }
 
-export -f nepipullupdates
+export -f nepipull
 
 
 function nls(){
@@ -730,7 +731,7 @@ fix_chromium = Fix any Chromium config issues
 fix_ipv4_netmask = Check valid IP and add 24 netmask if not provided
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
-nepipullupdates = Update to the latest NEPI source-code repo
+nepipull = Update to the latest NEPI source-code repo
 sbrc = Source the current user's bashrc files" 
 
 ###################################

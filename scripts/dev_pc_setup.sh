@@ -327,6 +327,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 fi
 
+
+
 #####################################
 echo " "
 echo "################################# "
@@ -346,6 +348,17 @@ else
 fi
 sudo service ntp start
 ntpq -p
+
+
+
+#####################################
+
+if is_valid_internet >/dev/null 2>&1; then
+    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+    GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
+    source $GITHUB_SETUP_SCRIPT
+fi
+
 
 
 echo " "
