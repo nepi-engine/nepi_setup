@@ -41,8 +41,8 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$ETC_SCRIPTS_FOLDER #$(dirname ${ETC_SCRIPTS_FOLDER})
+ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
 
 
 # Load System Config File
@@ -551,6 +551,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ ! -d ${dest_path} && -d ${source_path} ]]; then
                                     sudo rm -r ${dest_path}/*
                                     sudo cp -r ${source_path}/* ${dest_path}/
+                                fi
                                 update_current_config
                                 break
                             else
