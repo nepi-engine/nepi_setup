@@ -501,19 +501,108 @@ nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 
 
 ###################################
+# NEPI SSH Agent Config
+###################################
+
+CURRENT_DIR=$(pwd)
+
+if [[ -z "$NEPI_SSH_KEY_FILE" ]]; then
+  export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+fi
+
+export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+
+
+export NEPI_REMOTE_SETUP=1
+export NEPI_TARGET_IP=$NEPI_IP
+export NEPI_RECOVERY_IP=$NEPI_RECOVERY_IP
+export NEPI_TARGET_USERNAME=nepi
+export NEPI_SSH_KEY=~/ssh_keys/nepi_engine_default_private_ssh_key
+export NEPI_TARGET_SRC_DIR=/mnt/nepi_storage/nepi_src # This is the default if unset
+
+
+# Clear Known Host Keys
+function ckeys(){
+  kh_file=/home/${CONFIG_USER}/.ssh/known_hosts
+  if [[ -f "$kh_file" ]]; then
+    rm $kh_file
+  fi
+}
+export -f ckeys
+
+
+
+nepi_port=2222
+
+
+# Setup Connection Shortcuts
+# Setup Connection Shortcuts
+alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
+alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
+alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
+
+
+
+
+
+alias sshnr="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@nepirecovery"
+
+
+
+
+
+HELPN="${HELPN}
+################################
+### NEPI SSH UTIL FUNCTIONS
+################################
+sshn = SSH into NEPI Software System
+scpn = SCPN into NEPI
+sftpn = SFTP into NEPI
+ckeys = Clear known host keys"
+
+
+
+
+SSH_ENV="$HOME/.ssh/environment"
+
+function run_ssh_env {
+  . "${SSH_ENV}" > /dev/null
+}
+
+function start_ssh_agent {
+  echo "Initializing new SSH agent..."
+  ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+  echo "succeeded"
+  chmod 600 "${SSH_ENV}"
+
+  run_ssh_env;
+
+  ssh-add ~/.ssh/id_rsa;
+}
+
+if [ -f "${SSH_ENV}" ]; then
+  run_ssh_env;
+  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+    start_ssh_agent;
+  }
+else
+  : # Do Nothing
+fi
+
+
+###################################
 #NEPI folder shortcuts
-#echo "Setting up NEPI Folder Shortcuts"
+###################################
 export AI="/mnt/nepi_storage/ai_models"
 export AIF="/opt/nepi/nepi_engine/share/nepi_ai_ifs"
 export API="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_api"
 export APPS="/opt/nepi/nepi_engine/share/nepi_apps"
 export AUTO="/mnt/nepi_storage/automation_scripts"
-export BUILD="/mnt/nepi_storage/nepi_src/nepi_engine_ws"
-
-export AUTO="/mnt/nepi_storage/automation_scripts"
 export DATA="/mnt/nepi_storage/data"
 export DIST="/opt/nepi/nepi_engine/lib/python3/dist-packages"
+export DRIVE="/mnt/nepi_storage"
 export DRIVERS="/opt/nepi/nepi_engine/lib/nepi_drivers"
+export ENGINE="/opt/nepi/nepi_engine"
 export ETC="/opt/nepi/nepi_engine/etc"
 export INSTALL="/mnt/nepi_storage/intstall"
 export LAUNCH="/opt/nepi/nepi_engine/share/nepi_env/launch"
@@ -521,21 +610,142 @@ export LIB="/opt/nepi/nepi_engine/lib"
 export LIBSDK="/opt/nepi/nepi_engine/lib/nepi_sdk"
 export MANAGERS="/opt/nepi/nepi_engine/lib/nepi_managers"
 export NEPI="/opt/nepi"
+export NIMG="/mnt/nepi_storage/nepi_images"
 export NFI="/mnt/nepi_storage/nepi_full_img"
 export NFIA="/mnt/nepi_storage/nepi_full_img_archive"
-export NIMG="/mnt/nepi_storage/nepi_images"
-export ENGINE="/opt/nepi/nepi_engine"
 export RUI="/opt/nepi/nepi_rui/src/rui_webserver/rui-app/src"
 export RUI_ENV="/opt/nepi/nepi_rui"
-export SCRIPTS="/opt/nepi/scripts"
-export SETUPN="/mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts"
 export SDK="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk"
 export SHARE="/opt/nepi/nepi_engine/share"
 export SRC="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src"
-export SRCRUI="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src"
+export SRCRUI="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src"
 export TMP="/mnt/nepi_storage/tmp"
-export TRAIN="/mnt/nepi_storage/ai_training"
 export DRIVE="/mnt/nepi_storage"
+
+
+
+
+#NEPI sftp folder shortcuts
+# Function to open sftp to location on nepi device
+# Example call: sftpnl '/mnt/nepi_storage'
+
+function ai(){
+	sftpnl $AI
+}	
+function aifs(){
+	sftpnl $AIFS
+}	
+function api(){
+	sftpnl $API
+}	
+function apps(){
+	sftpnl $APPS
+}
+function auto(){
+	sftpnl $AUTO
+}
+function data(){
+	sftpnl $DATA
+}	
+function dist(){
+	sftpnl $DIST
+}	
+function drive(){
+	sftpnl $DRIVE
+}
+function drivers(){
+	sftpnl $DRIVERS
+}	
+function engine(){
+	sftpnl $ENGINE
+}
+function etc(){
+	sftpnl $ETC
+}	
+function intstall(){
+	sftpnl $INSTALL
+}	
+function lib(){
+	sftpnl $LIB
+}	
+function libsdk(){
+	sftpnl $LIBSDK
+}	
+function managers(){
+	sftpnl $MANAGERS
+}	
+function nepi(){
+	sftpnl $NEPI
+}	
+function nfi(){
+	sftpnl $NFI
+}	
+function nfia(){
+	sftpnl $NFIA
+}	
+function rui(){
+	sftpnl $RUI
+}
+function rui_env(){
+	sftpnl $RUI_ENV
+}	
+function sdk(){
+	sftpnl $SDK
+}	
+function share(){
+	sftpnl $SHARE
+}	
+function src(){
+	sftpnl $SRC
+}	
+function srcrui(){
+	sftpnl $SRCRUI
+}
+function tmp(){
+	sftpnl $TMP
+}	
+
+
+
+HELPN="${HELPN}
+################################
+## NEPI sftp folder shortcuts ##
+################################
+ai = /mnt/nepi_storage/ai_models
+aifs = /opt/nepi/nepi_engine/share/nepi_aifs
+api = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_api
+apps = /opt/nepi/nepi_engine/share/nepi_apps
+auto = /mnt/nepi_storage/automation_scripts
+data = /mnt/nepi_storage/data
+dist = /opt/nepi/nepi_engine/lib/python3/dist-packages/
+drive = /mnt/nepi_storage
+drivers = /opt/nepi/nepi_engine/lib/nepi_drivers
+engine = /opt/nepi/nepi_engine
+etc = /opt/nepi/nepi_engine/etc
+intstall = /mnt/nepi_storage/intstall
+lib = /opt/nepi/nepi_engine/lib
+libsdk = /opt/nepi/nepi_engine/lib/sdk
+managers = /opt/nepi/nepi_engine/lib/nepi_managers
+nepi = /opt/nepi
+nfi = /mnt/nepi_storage/nepi_full_img
+nfia = /mnt/nepi_storage/nepi_full_img_archive
+nimg = /mnt/nepi_storage/nepi_images
+rui = /opt/nepi/rui/src/rui_webserver/rui-app/src
+rui_env = /opt/nepi/rui
+sdk = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk
+share = /opt/nepi/nepi_engine/share
+src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
+srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src
+tmp = /mnt/nepi_storage/tmp"
+
+
+
+###################################
+#NEPIHOST folder shortcuts
+#echo "Setting up NEPI Folder Shortcuts"
+export NIMG="/mnt/nepi_storage/nepi_images"
+
+export NDRIVE="/mnt/nepi_storage"
 
 export DCFG="/mnt/nepi_config/docker_cfg"
 export FCFG="/mnt/nepi_config/factory_cfg"
@@ -545,36 +755,9 @@ export UCFG="/mnt/nepi_storage/user_cfg"
 
 # NEPI navigation shortcuts
 
-alias ai="cd $AI"
-alias aif="cd $AIF"
-alias api="cd $API"
-alias apps="cd $APPS"
-alias auto="cd $AUTO"
-alias data="cd $DATA"
-alias dist="cd $DIST"
-alias drivers="cd $DRIVERS"
-alias etc="cd $ETC"
-alias intstall="cd $INSTALL"
-alias launch="cd $LAUNCH"
-alias lib="cd $LIB"
-alias libsdk="cd $LIBSDK"
-alias managers="cd $MANAGERS"
-alias nepi="cd $NEPI"
-alias nfi="cd $NFI"
-alias nfia="cd $NFIA"
 alias nimg="cd $NIMG"
-alias engine="cd $ENGINE"
-alias rui="cd $RUI"
-alias rui_env="cd $RUI_ENV"
-alias scripts="cd $SCRIPTS"
-alias setupn="cd $SETUPN"
-alias sdk="cd $SDK"
-alias share="cd $SHARE"
-alias src="cd $SRC"
-alias srcrui="cd $SRCRUI"
-alias tmp="cd $TMP"
-alias train="cd $TRAIN"
-alias drive="cd $DRIVE"
+
+alias ndrive="cd $NDRIVE"
 
 alias dcfg="cd $DCFG"
 alias fcfg="cd $FCFG"
@@ -592,20 +775,11 @@ alias nfw="cat /opt/nepi/nepi_engine/etc/fw_version.txt"
 
 HELPN="${HELPN}
 ################################
-## NEPI folder shortcuts ##
+## NEPIHOST folder shortcuts ##
 ################################
-ai = /mnt/nepi_storage/ai_models
-auto = /mnt/nepi_storage/automation_scripts
-data = /mnt/nepi_storage/data
-intstall = /mnt/nepi_storage/intstall
-nfi = /mnt/nepi_storage/nepi_full_img
-nfia = /mnt/nepi_storage/nepi_full_img_archive
+
 nimg = /mnt/nepi_storage/nepi_images
-src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
-srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src
-tmp = /mnt/nepi_storage/tmp
-train = /mnt/nepi_storage/ai_training
-drive = /mnt/nepi_storage
+ndrive = /mnt/nepi_storage
 
 dcfg = /mnt/nepi_config/docker_cfg
 fcfg = /mnt/nepi_config/factory_cfg
