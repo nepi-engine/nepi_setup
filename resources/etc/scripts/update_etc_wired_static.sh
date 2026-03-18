@@ -116,17 +116,19 @@ if [[ "$?" -eq 0 ]]; then
                     sudo echo 'auto '${NEPI_WIRED_INTERFACE} | sudo tee -a $file
                     sudo echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
                     sudo echo '    address '${nepi_ip} | sudo tee -a $file
-                    if is_valid_ipv4 $NEPI_GATEWAY_IP; then
+                    if is_valid_ipv4 $NEPI_GATEWAY_IP  2>/dev/null; then
                         sudo route add default gw $NEPI_GATEWAY_IP $NEPI_WIRED_INTERFACE
                         echo "Adding IP Gateway ${NEPI_GATEWAY_IP}"
                         sudo echo '    gateway '${NEPI_GATEWAY_IP} | sudo tee -a $file
+                    else
+                        echo "Not Updating provided Gateway IP. Not A Valid IP Format ${NEPI_GATEWAY_IP} "
                     fi
                     echo "Updated Static IP file"
                     sudo bash -c "cat $file"
 
                     echo "NEPI Static IP address updated to ${nepi_ip}"
                 else
-                    echo "Not A Valid IP Format ${nepi_ip} "
+                    echo "Folder /etc/network/interfaces.d not found"
                 fi
             else
                 echo "Not Updating provided IP. Not A Valid IP Format ${nepi_ip} "
