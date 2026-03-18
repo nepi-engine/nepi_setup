@@ -32,11 +32,17 @@
 
 BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 #echo "BASH_FOLDER = ${BASH_FOLDER}"
-CONFIG_USER=$(id -un)
-if [[ "$CONFIG_USER" == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
+fi
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -nu 1000)
 fi
 export CONFIG_USER=$CONFIG_USER
+
 
 export NEPI_HOME=/home/$CONFIG_USER
 
@@ -542,10 +548,6 @@ alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH 
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
 
 
-
-
-
-alias sshnr="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@nepirecovery"
 
 
 
