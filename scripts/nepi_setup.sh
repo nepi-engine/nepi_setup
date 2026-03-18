@@ -529,7 +529,18 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl enable nepi_check_license
 
         echo "***** nepi_check_license license manager is installed... you must still provide a valid license file in /mnt/nepi_storage/license *****"
+
+        
+
+
+
+
     fi
+
+
+
+
+
 
 elif [[ "$CONFIG_USER" == 'nepi' ]]; then
 

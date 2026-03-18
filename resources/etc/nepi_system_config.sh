@@ -606,6 +606,45 @@ if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
     update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $SYSTEM_SYS_CONFIG_FILE
 fi
 
+echo " "
+echo "################################# "
+echo "Updating ETC Hosts File"
+echo ""
+
+if [[ -n "${NEPI_IP%%/*}" ]]; then
+    nepi_ip="${NEPI_IP%%/*}"
+else
+    nepi_ip=192.168.170.103/24
+fi
+if ! is_valid_ipv4 "${nepi_ip%%/*}"; then
+    nepi_ip=192.168.170.103/24
+fi
+
+CUT_IP=$(echo "$nepi_ip" | cut -d '.' -f 4-)
+
+
+nepi_ip=127.0.0.${CUT_IP}
+
+
+file=/etc/hosts
+bfile=${file}.org
+
+if [[ ! -f "$bfile" ]]; then
+    path_backup $file $bfile
+fi
+
+sudo cp -a $bfile $file
+
+echo "Updating NEPI IP in ${file}"
+
+echo "${nepi_ip} nepi" | sudo tee -a $file
+echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $file
+echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} nepiadmin" | sudo tee -a $file
+echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} nepiuser" | sudo tee -a $file
+echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 
 

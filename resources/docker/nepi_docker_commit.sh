@@ -106,7 +106,9 @@ else
 
             COMMIT_DESC=$1
             if [[ -z "$COMMIT_DESC" ]]; then
-                COMMIT_DESC="-${TAG_ARRAY[5]}"
+                if [[ -n $TAG_ARRAY[5] ]]; then
+                    COMMIT_DESC="-${TAG_ARRAY[5]}"
+                fi
             fi
 
             COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}${COMMIT_DESC}"

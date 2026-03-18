@@ -130,6 +130,8 @@ if ! is_valid_ipv4 "${nepi_ip%%/*}"; then
     nepi_ip=192.168.179.103
 fi
 
+
+
 if [[ -z "$NEPI_DEVICE_ID" ]]; then
     NEPI_DEVICE_ID=device1
 fi
@@ -688,6 +690,7 @@ if is_valid_internet >/dev/null 2>&1; then
     GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
     source $GITHUB_SETUP_SCRIPT
 fi
+
 
 
 echo ""
