@@ -213,6 +213,7 @@ else
     echo ' ' | sudo tee -a $BASHRC
     echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
     echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export NEPI_HOST_USER='${CONFIG_USER} | sudo tee -a $BASHRC
     echo 'export NEPI_PYTHON='${NEPI_PYTHON} | sudo tee -a $BASHRC
     echo '' | sudo tee -a $BASHRC
     echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC

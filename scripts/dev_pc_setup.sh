@@ -52,6 +52,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     NEPI_IN_CONTAINER=1
     NEPI_DEVICE_ID=device1
     NEPI_IP=192.168.179.103
+    NEPI_HOST_USER=nepihost
 
     USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
     if [[ -f "$USER_CONFIG_FILE" ]]; then
@@ -70,6 +71,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     NEPI_DEVICE_ID \
     NEPI_IP \
     NEPI_IN_CONAINTER \
+    NEPI_HOST_USER \
     )
 
     function print_current_config(){
@@ -78,6 +80,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo "---------------------"
         echo "NEPI_IP: ${NEPI_IP}"
         echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
+        echo "NEPI_HOST_USER: ${NEPI_HOST_USER}"
         echo ""
     }
 
@@ -85,6 +88,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         config_file=$1
         update_yaml_value "NEPI_IP" $NEPI_IP $config_file
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
+        update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
         
 
     }
@@ -95,7 +99,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo ""
     PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(  "Update Static IP Address" "Update Device ID Name" "CONTINUE" )
+    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -127,6 +131,18 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
                         echo "Not A Valid Password"
                     fi          
                 ;;
+                "Update NEPI Host User")
+                    read -p $'\n'"Enter the NEPI Host User Name (Current = ${NEPI_HOST_USER}): " USER_INPUT
+                    echo ""
+                    if is_valid_uid "$USER_INPUT"; then
+                        export NEPI_HOST_USER=$NEPI_HOST_USER
+                        echo ""
+                        break # Exit the select statement, re-display menu
+                    else
+                        echo "Not A Valid User Name"
+                    fi          
+                ;;
+
 
                 "CONTINUE")
                     break 2 # Exit both the select and the while loop
@@ -226,8 +242,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo "${NEPI_IP} nepi" | sudo tee -a $file
     echo "${NEPI_IP} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${NEPI_IP} nepihost" | sudo tee -a $file
-    echo "${NEPI_IP} nepihost-${NEPI_DEVICE_ID}" | sudo tee -a $file
+    echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
+    echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
     echo "${NEPI_IP} nepiadmin" | sudo tee -a $file
     echo "${NEPI_IP} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
     echo "${NEPI_IP} nepiuser" | sudo tee -a $file
@@ -277,7 +293,9 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ### Backup CONFIG_USER BASHRC file if needed
     file=$BASHRC
     bfile=${BASHRC}.org
-    path_backup $file $bfile
+    if [[ ! -f $bfile ]]; then
+        path_backup $file $bfile
+    fi
 
     sudo cp $bfile $BASHRC
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
@@ -285,6 +303,10 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     # Add additional user bashrc statements
     # Add NEPI SETTINGS
+    echo ' ' | sudo tee -a $BASHRC
+    echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
     echo ' ' | sudo tee -a $BASHRC
     echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
     echo 'export NEPI_IP='${NEPI_IP} | sudo tee -a $BASHRC
