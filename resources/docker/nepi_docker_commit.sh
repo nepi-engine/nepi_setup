@@ -106,10 +106,10 @@ else
 
             COMMIT_DESC=$1
             if [[ -z "$COMMIT_DESC" ]]; then
-                COMMIT_DESC=${TAG_ARRAY[5]}
+                COMMIT_DESC="-${TAG_ARRAY[5]}"
             fi
 
-            COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}-${COMMIT_DESC}"
+            COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}${COMMIT_DESC}"
             COMMIT_NAME_TAG="${COMMIT_NAME}:${COMMIT_TAG}"
 
             if [[ -n "$COMMIT_NAME" && -n "$COMMIT_TAG" && -n "$COMMIT_NAME_TAG" ]]; then

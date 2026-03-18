@@ -161,6 +161,9 @@ update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
 if [[ ${CONFIG_USER} != 'nepi' ]]; then
     export NEPI_HOST_USER=$CONFIG_USER
     update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
+    if [[ ${NEPI_HOST_USER} == "nepihost" ]]; then
+        update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+    fi
 fi
 
 # # This is updated by NEPI Container process
@@ -440,7 +443,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
-                            elif is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            elif is_valid_ipv4 "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -453,7 +456,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
-                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -466,7 +469,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
-                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -479,7 +482,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
-                            if is_valid_ipv4_netmask "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_ALIAS_IP_3=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -492,7 +495,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
-                            if is_valid_ipv4 "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            if is_valid_ipv4 "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_NTP_IP=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -506,7 +509,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
-                            elif is_valid_bool "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            elif is_valid_bool "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_FS_AB=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -520,7 +523,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
-                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            elif is_valid_folder "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_IMPORT_PATH=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -533,7 +536,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
-                            elif is_valid_folder "$USER_INPUT" || "${USER_INPUT}" == "None"; then
+                            elif is_valid_folder "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                 CURRENT_NEPI_EXPORT_PATH=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
