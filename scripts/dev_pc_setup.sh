@@ -232,6 +232,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     file=/etc/hosts
     bfile=${file}.org
+
     if [[ ! -f "$bfile" ]]; then
         path_backup $file $bfile
     fi
@@ -293,6 +294,11 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ### Backup CONFIG_USER BASHRC file if needed
     file=$BASHRC
     bfile=${BASHRC}.org
+
+    if [[ ! -f "$file"  ]]; then
+        cp /etc/skel/.bashrc $BASHRC
+    fi
+
     if [[ ! -f $bfile ]]; then
         path_backup $file $bfile
     fi

@@ -128,6 +128,8 @@ if ! is_valid_did $NEPI_DEVICE_ID; then
     NEPI_DEVICE_ID=device1
 fi
 
+
+
 if grep -qnw $BASHRC -e "##### System Config #####" ; then
     : #echo "Already Done"
 else

@@ -129,7 +129,12 @@ if ! is_valid_did $NEPI_DEVICE_ID; then
     NEPI_DEVICE_ID=device1
 fi
 
-
+if [[ -z "$NEPI_HOST_USER" ]]; then
+    NEPI_HOST_USER=nepihost
+fi
+if ! is_valid_uid $NEPI_HOST_USER; then
+    NEPI_HOST_USER=nepihost
+fi
 
 
 if grep -qnw $BASHRC -e "##### System Config #####" ; then
@@ -224,6 +229,7 @@ else
     echo ' ' | sudo tee -a $BASHRC
     echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
     echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
     echo 'export NEPI_PYTHON='${NEPI_PYTHON} | sudo tee -a $BASHRC
     echo '' | sudo tee -a $BASHRC
     echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
