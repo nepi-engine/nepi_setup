@@ -76,7 +76,7 @@ nepi_admin_user_pw_changed=0
 function check_password() {
     username=$1
     pcheck=$2
-    echo "$pcheck" | su -c true "$username" 2>/dev/null
+    echo "$pcheck" | su -c true "$username" >/dev/null 2>&1
     error=$?
     if [[ $error -eq 0 ]]; then
         return 0
@@ -129,8 +129,8 @@ function change_password() {
     #echo "Checking password for ${NEPI_USER} ${NEPI_USER_PW}"
     if change_password $NEPI_USER $NEPI_USER_PW ; then 
         nepi_user_pw_changed=$?
-        #update_yaml_value "NEPI_USER_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
+    update_yaml_value "NEPI_USER_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
 
 sudo chown ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER}
 sudo chmod 0755 /home/${NEPI_USER}
@@ -139,8 +139,8 @@ sudo chmod 0755 /home/${NEPI_USER}
 #echo "Checking password for ${NEPI_HOST_USER} ${NEPI_HOST_PW}"
     if change_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
         nepi_host_user_pw_changed=$? 
-        #update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
+    update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
 
 sudo chown ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER}
 sudo chmod 0755 /home/${NEPI_HOST_USER}
@@ -149,8 +149,8 @@ sudo chmod 0755 /home/${NEPI_HOST_USER}
     #echo "Checking password for ${NEPI_ADMIN_USER} ${NEPI_ADMIN_PW}"
     if change_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
         nepi_admin_user_pw_changed=$? 
-        #update_yaml_value "NEPI_ADMIN_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
+    update_yaml_value "NEPI_ADMIN_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
 
 sudo chown ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}
 sudo chmod 0755 /home/${NEPI_ADMIN_USER}

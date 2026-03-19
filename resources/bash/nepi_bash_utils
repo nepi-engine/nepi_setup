@@ -640,7 +640,7 @@ export function ninet
 function check_password() {
     local username=$1
     local pcheck=$2
-    echo "$pcheck" | su -c true "$username" 2>/dev/null
+    echo "$pcheck" | su -c true "$username" >/dev/null 2>&1
     local error=$?
     if [[ $error -eq 0 ]]; then
         return 0

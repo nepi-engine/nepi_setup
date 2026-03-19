@@ -151,7 +151,6 @@ sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.14 $NEPI_BAUMER_PATH/libbgapi
 NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
 
-
 NEPI_SYS_CONFIG_LOAD=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
 if ! source_script $NEPI_SYS_CONFIG_LOAD; then
     script_error=$?
@@ -481,6 +480,7 @@ echo "Updating NEPI SyStem Config"
 echo "########################"
 echo ""
 sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/docker_cfg/
+sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/system_cfg/
 
 config_update_file=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
 SHOW_CONFIG_MENU=0
