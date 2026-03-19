@@ -637,7 +637,61 @@ function ninet(){
 }
 export function ninet
 
+function check_password() {
+    local username=$1
+    local pcheck=$2
+    echo "$pcheck" | su -c true "$username" 2>/dev/null
+    local error=$?
+    if [[ $error -eq 0 ]]; then
+        return 0
+    else
+        ret=$(echo "$pcheck" | su -c true "$username" 2>/dev/null)
+        if [[ ${ret} == 'This account is currently not available.' ]]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
 
+export check_password
+
+
+function change_password() {
+        username=$1
+        password=$2
+
+        if [[ ${password} == "encrypted" ]]; then
+            echo "Password for ${username} encrypted" 
+            return 1
+        fi
+        if check_password ${username} ${password} ; then
+            echo "Password unchanged" 
+            return 1
+        fi        
+
+        if is_valid_pw $password; then
+
+            OLD_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+
+            echo "${username}:${password}" | sudo chpasswd
+
+            # After chpasswd
+            NEW_HASH=$(sudo grep "^${username}:" /etc/shadow | cut -d: -f2)
+
+            if [ "$OLD_HASH" != "$NEW_HASH" ]; then
+                echo "Updated password for user ${username}"
+                return 0
+            else
+                return 1
+            fi
+        else
+            echo "Password update for user ${username} failed. Not valid password" 
+            return 1
+        fi
+}
+
+export change_password
 
 function fix_chromium(){
   sudo -v
@@ -733,6 +787,7 @@ ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
+check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues
 fix_ipv4_netmask = Check valid IP and add 24 netmask if not provided
 nepiclone = Clone the latest NEPI source-code repo
