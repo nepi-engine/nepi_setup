@@ -80,7 +80,7 @@ function update_password() {
         password=$2
 
         if [[ ${password} == "encrypted" ]]; then
-            echo "Password for ${username} already encrypted" 
+            echo "Password for ${username} encrypted" 
             return 1
         fi
 
@@ -106,84 +106,83 @@ function update_password() {
 }
 
 
-if [[ ${NEPI_USER} == 'nepi' ]]; then
+
     if update_password $NEPI_USER $NEPI_USER_PW; then 
-        nepi_user_pw_changed=1 
-        update_yaml_value "NEPI_USER_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+        nepi_user_pw_changed=$?
+        # update_yaml_value "NEPI_USER_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
-fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
 
-if [[ ${NEPI_HOST_USER} != 'nepi' ]]; then
+sudo chown ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER}
+sudo chmod 0755 /home/${NEPI_USER}
+
     if update_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
-        nepi_host_user_pw_changed=1 
-        update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+        nepi_host_user_pw_changed=$? 
+        # update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
-fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
+
+sudo chown ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER}
+sudo chmod 0755 /home/${NEPI_HOST_USER}
 
 
-if [[ ${NEPI_HOST_USER} != 'nepi' ]]; then
+
     if update_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
-        nepi_admin_user_pw_changed=1 
-        update_yaml_value "NEPI_ADMIN_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
-    fi
-fi
-sudo chown ${username}:${username} /home/${username}
-sudo chmod 0755 /home/${username}
-
-
-if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
-
-    echo ""
-    echo "########"
-    echo "Removing Non-NEPI user IDs and Groups"
-
-    cur_users=$(awk -F':' '1000 <= $3 && $3 <= 2000 {print $1, $3}' /etc/passwd)
-    echo "Current Users:"
-    echo $cur_users
-
-    OLD_UID_START=1000
-    OLD_UID_END=2999
-
-    # Function to update user and group IDs
-    remove_user() {
-        local username=$1
-        echo "Removiong non-NEPI user '$username'"
-        sudo deluser $username
-        echo "Removing ${username} home folder."
-        sudo rm -r /home/${username}
-        echo "User '$username' removed successfully."
-    }
-
-    allow_users=1
-    if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
-        allow_users=0
+        nepi_admin_user_pw_changed=$? 
+        # update_yaml_value "NEPI_ADMIN_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
     fi
 
-    # Read /etc/passwd and process users
-    while IFS=':' read -r username _ uid gid _ _ _; do
+sudo chown ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER}
+sudo chmod 0755 /home/${NEPI_ADMIN_USER}
 
-        # Check if the UID is within the 1000-1999 range and is not a system user
-        if [[ $uid -ge $OLD_UID_START && $uid -le $OLD_UID_END ]]; then
-            echo "Checking user ${username} against nepi users"
-            if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
-                is_nepi_user=1
-            else
-                is_nepi_user=0
-            fi
-            if [[  "$allow_users" -eq 0 && "$is_nepi_user" -eq 0 ]]; then
-                remove_user "$username"
-            fi
-        fi
-    done < /etc/passwd
 
-    echo "Updated Users:"
-    echo $cur_users
+# if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
 
-fi
+#     echo ""
+#     echo "########"
+#     echo "Removing Non-NEPI user IDs and Groups"
+
+#     cur_users=$(awk -F':' '1000 <= $3 && $3 <= 2000 {print $1, $3}' /etc/passwd)
+#     echo "Current Users:"
+#     echo $cur_users
+
+#     OLD_UID_START=1000
+#     OLD_UID_END=2999
+
+#     # Function to update user and group IDs
+#     remove_user() {
+#         local username=$1
+#         echo "Removiong non-NEPI user '$username'"
+#         sudo deluser $username
+#         echo "Removing ${username} home folder."
+#         sudo rm -r /home/${username}
+#         echo "User '$username' removed successfully."
+#     }
+
+#     allow_users=1
+#     if [[ "$NEPI_ALLOWS_USERS" -eq 0 ]]; then
+#         allow_users=0
+#     fi
+
+#     # Read /etc/passwd and process users
+#     while IFS=':' read -r username _ uid gid _ _ _; do
+
+#         # Check if the UID is within the 1000-1999 range and is not a system user
+#         if [[ $uid -ge $OLD_UID_START && $uid -le $OLD_UID_END ]]; then
+#             echo "Checking user ${username} against nepi users"
+#             if [[  "$username" == 'nepihost' || "$username" == 'nepi'  || "$username" == 'nepiadmin' ]]; then
+#                 is_nepi_user=1
+#             else
+#                 is_nepi_user=0
+#             fi
+#             if [[  "$allow_users" -eq 0 && "$is_nepi_user" -eq 0 ]]; then
+#                 remove_user "$username"
+#             fi
+#         fi
+#     done < /etc/passwd
+
+#     echo "Updated Users:"
+#     echo $cur_users
+
+# fi
 
 
 
@@ -191,7 +190,7 @@ fi
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
-        if [[ "$nepi_user_pw_changed" -eq 1 ]]; then
+        if [[ "$nepi_user_pw_changed" -eq 1 && ${NEPI_USER_PW} != 'encrypted' ]]; then
                 echo ""
                 echo "########"
                 echo "Configuring nepi Samba passwords"
@@ -201,7 +200,7 @@ if [[ "$?" -eq 0 ]]; then
                 sudo systemctl restart sshd
         fi
 
-        if [[ "$nepi_host_user_pw_changed" -eq 1 ]]; then  
+        if [[ "$nepi_host_user_pw_changed" -eq 1 && ${NEPI_HOST_PW} != 'encrypted' ]]; then
                 echo ""
                 echo "########"
                 echo "Configuring nepihost Samba passwords"
@@ -211,7 +210,7 @@ if [[ "$?" -eq 0 ]]; then
                 sudo systemctl restart sshd
         fi
 
-        if [[ "$nepi_admin_user_pw_changed" -eq 1 ]]; then
+        if [[ "$nepi_admin_user_pw_changed" -eq 1 && ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
                 echo ""
                 echo "########"
                 echo "Configuring nepiadmin Samba passwords"

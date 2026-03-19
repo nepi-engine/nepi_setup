@@ -460,10 +460,11 @@ fi
 
 echo ""
 echo "########################"
-echo "Updating NEPI OS Config"
+echo "Updating NEPI SyStem Config"
 echo "########################"
 echo ""
 sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/docker_cfg/
+
 config_update_file=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
 SHOW_CONFIG_MENU=0
 echo "Running System Config Update Script: ${config_update_file}"

@@ -110,6 +110,9 @@ else
                     COMMIT_DESC="-${TAG_ARRAY[5]}"
                 fi
             fi
+            if [[ ${COMMIT_DESC} == '-' ]];
+                COMMIT_DESC=''
+            fi
 
             COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}${COMMIT_DESC}"
             COMMIT_NAME_TAG="${COMMIT_NAME}:${COMMIT_TAG}"
