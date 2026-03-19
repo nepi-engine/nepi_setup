@@ -607,9 +607,6 @@ if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
     update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $SYSTEM_SYS_CONFIG_FILE
 fi
 
-
-
-
 echo ""
 echo "########################"
 echo "Updating OS Configuration"
@@ -688,11 +685,7 @@ echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
 source ${SYSTEM_ETC_PATH}/scripts/nepi_system_sync.sh
 
 
-echo ""
-echo "##################################"
-echo 'NEPI System Config Setup Complete'
-echo "##################################"
-echo ""
+
 
 ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
@@ -704,6 +697,65 @@ if [ $? -eq 1 ]; then
     echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
     
 fi
+
+
+echo " "
+echo "################################# "
+echo "Updating ETC Hosts File"
+echo ""
+
+
+file=/etc/hosts
+bfile=${file}.org
+
+# file=${ETC_FOLDER}/hosts
+# if [[ -f "${file}.blank" ]]; then
+#     echo "Updating hosts file: ${file}"
+
+# if [ -f "$file" ]; then
+#     sudo cp -a ${file}.blank $file
+# fi
+                
+if [[ ! -f $bfile ]]; then
+    path_backup $file $bfile
+fi
+
+if [[ -f $bfile ]]; then
+   cp $bfile $file 
+fi
+
+if [[ -n "${NEPI_STATIC_IP%%/*}" ]]; then
+    nepi_ip="${NEPI_STATIC_IP%%/*}"
+else
+    nepi_ip=192.168.170.103
+fi
+if ! is_valid_ipv4 "${nepi_ip}"; then
+    nepi_ip=192.168.170.103
+fi
+
+CUT_IP=$(echo "$nepi_ip" | cut -d '.' -f 4-)
+nepi_ip=127.0.0.${CUT_IP}
+
+
+
+echo "Updating NEPI IP in ${file}"
+
+echo "${nepi_ip} nepi" | sudo tee -a $file
+echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $file
+echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} nepiadmin" | sudo tee -a $file
+echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
+echo "${nepi_ip} nepiuser" | sudo tee -a $file
+echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
+
+echo ""
+echo "##################################"
+echo 'NEPI System Config Setup Complete'
+echo "##################################"
+echo ""
+
+
 
 NEPI_STATIC_IP_END=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_END=$NEPI_DEVICE_ID

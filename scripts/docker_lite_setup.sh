@@ -131,14 +131,19 @@ sudo chmod 775 $NEPI_ALIASES_DEST
 echo "Updating user bashrc files"
 BASHRC=/home/${CONFIG_USER}/.bashrc
 
+file=$BASHRC
 bfile=${BASHRC}.org
 
-if [[ ! -f "$BASHRC"  ]]; then
-    cp /etc/skel/.bashrc $BASHRC
+if [[ ! -f "$file"  ]]; then
+    cp /etc/skel/.bashrc $file
 fi
 
 if [[ ! -f $bfile ]]; then
-    path_backup $BASHRC $bfile
+    path_backup $file $bfile
+fi
+
+if [[ -f $bfile ]]; then
+   cp $bfile $file 
 fi
 
 if [[ -n $NEPI_STATIC_IP ]]; then
@@ -705,6 +710,7 @@ if is_valid_internet >/dev/null 2>&1; then
     GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
     source $GITHUB_SETUP_SCRIPT
 fi
+
 
 
 echo ""

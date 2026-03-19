@@ -107,42 +107,42 @@ if [[ "$?" -eq 0 ]]; then
             fi
 
 
-            ###########
-            # Update Hosts File
-            file=${ETC_FOLDER}/hosts
-            if [[ -f "${file}.blank" ]]; then
-                echo "Updating hosts file: ${file}"
+            # ###########
+            # # Update Hosts File
+            # file=${ETC_FOLDER}/hosts
+            # if [[ -f "${file}.blank" ]]; then
+            #     echo "Updating hosts file: ${file}"
 
-                if [ -f "$file" ]; then
-                    sudo rm $file
-                fi
-                sudo cp -a ${file}.blank $file
+            #     if [ -f "$file" ]; then
+            #         sudo rm $file
+            #     fi
+            #     sudo cp -a ${file}.blank $file
 
-                echo "Updating NEPI IP in ${file}"
-                nepi_ip=${NEPI_STATIC_IP%%/*}
-                echo "Using NEPI_IP:HOSTNAME ${nepi_ip}:${NEPI_DEVICE_ID}"
-                if is_valid_ipv4 $nepi_ip; then
-                    entry="${nepi_ip} ${NEPI_USER}"
-                    echo "Adding NEPI IP in ${file}"
-                    echo "${nepi_ip} ${NEPI_DEVICE_ID}" | sudo tee -a $file
-                    echo $entry | sudo tee -a $file
-                    echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+            #     echo "Updating NEPI IP in ${file}"
+            #     nepi_ip=${NEPI_STATIC_IP%%/*}
+            #     echo "Using NEPI_IP:HOSTNAME ${nepi_ip}:${NEPI_DEVICE_ID}"
+            #     if is_valid_ipv4 $nepi_ip; then
+            #         entry="${nepi_ip} ${NEPI_USER}"
+            #         echo "Adding NEPI IP in ${file}"
+            #         echo "${nepi_ip} ${NEPI_DEVICE_ID}" | sudo tee -a $file
+            #         echo $entry | sudo tee -a $file
+            #         echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
-                    entry="${nepi_ip} ${NEPI_ADMIN_USER}"
-                    echo $entry | sudo tee -a $file
-                    echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+            #         entry="${nepi_ip} ${NEPI_ADMIN_USER}"
+            #         echo $entry | sudo tee -a $file
+            #         echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
-                    entry="${nepi_ip} ${NEPI_HOST_USER}"
-                    echo $entry | sudo tee -a $file
-                    echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+            #         entry="${nepi_ip} ${NEPI_HOST_USER}"
+            #         echo $entry | sudo tee -a $file
+            #         echo "${entry}-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
-                    echo "Replacing ETC file /etc/hosts"
-                    sudo rm -r /etc/hosts
-                    sudo cp -R -a $file /etc/hosts
-                fi
-            else
-                echo "FAILED TO FIND SOURCE ${file}.blank"
-            fi
+            #         echo "Replacing ETC file /etc/hosts"
+            #         sudo rm -r /etc/hosts
+            #         sudo cp -R -a $file /etc/hosts
+            #     fi
+            # else
+            #     echo "FAILED TO FIND SOURCE ${file}.blank"
+            # fi
             
             ###################
             # Restart Service
