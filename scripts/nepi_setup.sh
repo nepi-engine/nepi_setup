@@ -282,13 +282,13 @@ if [[ "$?" -eq 0 ]]; then
         wait
         sleep 2
 
-        echo "Updating Wired Static IP Addresses"
-        source /opt/nepi/etc/scripts/update_etc_wired_static.sh
+        # echo "Updating Wired Static IP Addresses"
+        # source /opt/nepi/etc/scripts/update_etc_wired_static.sh
 
-        echo "Updating Wired Alias IP Addresses"
-        source /opt/nepi/etc/scripts/update_etc_wired_aliases.sh
+        # echo "Updating Wired Alias IP Addresses"
+        # source /opt/nepi/etc/scripts/update_etc_wired_aliases.sh
 
-
+        echo "Restarting networking service"
         sudo systemctl restart networking
 
     fi

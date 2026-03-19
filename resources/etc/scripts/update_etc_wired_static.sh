@@ -46,14 +46,16 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ -v "$1" ]]; then
-    if [[ "$1" -eq 0 ]]; then
+if [[ -v $1 ]]; then
+    if [[ $1 -eq 0 ]]; then
         LOAD_NEPI_CONFIG=0
+        #echo "Skipping NEPI System Config load"
     fi
 fi
 
-if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
+if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
     # Load System Config File
+    #echo "Loading NEPI SYSTEM CONFIG"
     source ${ETC_FOLDER}/load_system_config.sh
     if [ $? -eq 1 ]; then
         echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
@@ -93,19 +95,19 @@ if [[ "$?" -eq 0 ]]; then
             fi
 
             file=/etc/network/interfaces.d/nepi_static_ip
-            echo "Fixing static ip ${NEPI_IP}"
+            echo "Fixing static ip ${NEPI_STATIC_IP}"
             needs_update=0
-            nepi_ip=$(fix_ipv4_netmask "$NEPI_IP")
+            nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
             if [[ "$?" -eq 2 ]]; then
                 needs_update=1
             fi
             
-            echo "Got fixed static ip ${nepi_ip}"
-            if is_valid_ipv4_netmask "$nepi_ip" ]]; then
+            echo "Got fixed static ip ${nepi_static_ip}"
+            if is_valid_ipv4_netmask "$nepi_static_ip" ]]; then
                 if [[ "$needs_update" -eq 1 ]]; then
                     update_file=${ETC_FOLDER}/nepi_system_config.yaml
-                    echo "Updating NEPI System Config file ${file} with NEPI_IP: ${nepi_ip}"
-                    update_yaml_value "NEPI_IP" ${nepi_ip} $update_file
+                    echo "Updating NEPI System Config file ${file} with NEPI_STATIC_IP: ${nepi_static_ip}"
+                    update_yaml_value "NEPI_STATIC_IP" ${nepi_static_ip} $update_file
                 fi
 
 
@@ -115,7 +117,7 @@ if [[ "$?" -eq 0 ]]; then
                     sudo bash -c "cat /dev/null > $file"
                     sudo echo 'auto '${NEPI_WIRED_INTERFACE} | sudo tee -a $file
                     sudo echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
-                    sudo echo '    address '${nepi_ip} | sudo tee -a $file
+                    sudo echo '    address '${nepi_static_ip} | sudo tee -a $file
                     if is_valid_ipv4 $NEPI_GATEWAY_IP  2>/dev/null; then
                         sudo route add default gw $NEPI_GATEWAY_IP $NEPI_WIRED_INTERFACE
                         echo "Adding IP Gateway ${NEPI_GATEWAY_IP}"
@@ -126,12 +128,12 @@ if [[ "$?" -eq 0 ]]; then
                     echo "Updated Static IP file"
                     sudo bash -c "cat $file"
 
-                    echo "NEPI Static IP address updated to ${nepi_ip}"
+                    echo "NEPI Static IP address updated to ${nepi_static_ip}"
                 else
                     echo "Folder /etc/network/interfaces.d not found"
                 fi
             else
-                echo "Not Updating provided IP. Not A Valid IP Format ${nepi_ip} "
+                echo "Not Updating provided IP. Not A Valid IP Format ${nepi_static_ip} "
             fi
 
 

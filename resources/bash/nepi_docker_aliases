@@ -286,13 +286,6 @@ function nepiimport(){
 export -f nepiimport
 
 
-function nepipull(){
-  sudo -v
-  pull_ref=$1
-  echo "Pulling NEPI Image from ${pull_ref}"
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $pull_ref
-}
-export -f nepipull
 
 function nepiretag(){
   sudo -v
@@ -300,7 +293,7 @@ function nepiretag(){
   echo "Retagging NEPI Active Image with ${sw_desc}"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_retag.sh $sw_desc
 }
-export -f nepipull
+export -f nepiretag
 
 
 function nepiexport(){
@@ -354,6 +347,7 @@ function nepiconfig(){
   sudo -v
   SHOW_CONFIG_MENU=1
   bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+  sbrc
 }
 export -f nepiconfig
 
@@ -463,6 +457,7 @@ export -f nepicreate
 alias nepibld="
 sudo -v
 source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh
+sbrc
 nnet"
 
 
@@ -483,7 +478,6 @@ nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full 
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
-nepipull = Import a NEPI image from a remote repository given the PULL_URL.
 nepitag = Update the Software Description field in the active NEPI container.
 nepiconfig = Configure NEPI System settings.
 nepienable = Enable NEPI Docker service on next boot.

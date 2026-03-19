@@ -101,6 +101,19 @@ sudo chmod 775 $NEPI_ALIASES_DEST
 
 
 
+SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
+
+ echo $NEPI_STATIC_IP
+if [[ -f $SYSTEM_CONFIG_FILE ]]; then
+    # Load System Config File
+    echo "Loading NEPI SYSTEM CONFIG"
+    source $SYSTEM_CONFIG_FILE
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
+    fi
+fi
+echo $NEPI_STATIC_IP
+
 
 #############
 echo "Updating user bashrc files"
@@ -119,14 +132,22 @@ else
         path_backup $BASHRC $bfile
     fi
 
+    if [[ -f $bfile ]]; then
+        path_backup $bfile $BASHRC
+    fi
+
 fi
 
-if [[ -n "${NEPI_IP%%/*}" ]]; then
-    nepi_ip="${NEPI_IP%%/*}"
+if [[ -n $NEPI_STATIC_IP ]]; then
+    echo "Got NEPI_STATIC_IP ${NEPI_STATIC_IP}"
+    nepi_ip="${NEPI_STATIC_IP%%/*}"
 else
     nepi_ip=192.168.179.103
+    echo "NEPI_STATIC_IP not defined, falling back to ${nepi_ip}"
 fi
-if ! is_valid_ipv4 "${nepi_ip%%/*}"; then
+
+if ! is_valid_ipv4 $nepi_ip; then
+    echo "NEPI_IP invalid, falling back to 192.168.179.103"
     nepi_ip=192.168.179.103
 fi
 

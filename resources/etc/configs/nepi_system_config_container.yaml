@@ -36,15 +36,15 @@ NEPI_SW_DESC: unknown
 # Set the NEPI device's wired network interface name
 NEPI_WIRED_INTERFACE: eth0
 # Set the NEPI device's primary IP address
-NEPI_IP: 192.168.179.103
+NEPI_STATIC_IP: 192.168.179.103
 # Set the NEPI device's primary IP Gatway address, or set to NONE
-NEPI_IP_GATEWAY: NONE
-# Add an IP address Alias on top of NEPI's Primary IP address (NEPI_IP), or set to NONE.
+NEPI_STATIC_IP_GATEWAY: NONE
+# Add an IP address Alias on top of NEPI's Primary IP address (NEPI_STATIC_IP), or set to NONE.
 # NOTE: NEPI IP aliases are useful if you need to connect to other devices on the Network
-#  like IP cameras configured with a different IP subnet then the NEPI_IP value. 
+#  like IP cameras configured with a different IP subnet then the NEPI_STATIC_IP value. 
 NEPI_ALIAS_IPS: NONE
 # Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
-# NOTE: If the subnet of your desired NTP source IP address is different then NEPI_IP's subnet,
+# NOTE: If the subnet of your desired NTP source IP address is different then NEPI_STATIC_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
 NEPI_NTP_IPS: 192.168.179.5
@@ -102,7 +102,7 @@ NEPI_HW_MODEL: unknown
 NEPI_IN_CONTAINER: 1
 NEPI_GB_CONTAINER: 20
 # If NEPI_IN_CONTAINER=1, set whether NEPI supports a recovery mode
-# Note: If NEPI_RECOVERY_ENABLED enabled and NEPI_IP is not 192.168.179.103,
+# Note: If NEPI_RECOVERY_ENABLED enabled and NEPI_STATIC_IP is not 192.168.179.103,
 #   the NEPI Host system will run with 
 #   NEPI factory config ip address 192.168.179.103 before switching to
 #   NEPI system config configured ip address for 10 seconds
@@ -135,7 +135,7 @@ NEPI_BOOT_TIME: 30
 #   -DOCKER-If enabled, the Hoset OS's docker config will be update to use the NEPI_DOCKER path set below.
 #   -HOSTNAME-Configure the HOST OS etc/hostname file with desired network hostname -> NEPI_DEVICE_ID.
 #   -HOSTNAME-Configure the HOST OS etc/hosts file with nepi ip alias -> NEPI_DEVICE_ID.
-#   -NETWORK-Ensure on the Host OS that the NEPI_IP address enabled as a static ip address -> NEPI_IP nepi.
+#   -NETWORK-Ensure on the Host OS that the NEPI_STATIC_IP address enabled as a static ip address -> NEPI_STATIC_IP nepi.
 #   -NETWORK-Setup and Enable DHCP Client for internet connections if needed.
 #   -TIME-Setup and configure Chrony time management service.
 #   -TIME-Configure Chrony's NTP service to listen for -> NEPI_NTP_IP address.

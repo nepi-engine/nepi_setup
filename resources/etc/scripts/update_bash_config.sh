@@ -47,14 +47,16 @@ ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
 LOAD_NEPI_CONFIG=1
-if [[ -v "$1" ]]; then
-    if [[ "$1" -eq 0 ]]; then
+if [[ -v $1 ]]; then
+    if [[ $1 -eq 0 ]]; then
         LOAD_NEPI_CONFIG=0
+        #echo "Skipping NEPI System Config load"
     fi
 fi
 
-if [[ "$LOAD_NEPI_CONFIG" -eq 1 || ! -v NEPI_USER ]]; then
+if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
     # Load System Config File
+    #echo "Loading NEPI SYSTEM CONFIG"
     source ${ETC_FOLDER}/load_system_config.sh
     if [ $? -eq 1 ]; then
         echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
@@ -77,11 +79,15 @@ fi
 
 if [[ -f "$bfile" ]]; then
     echo ""
-    echo "Updating Bash Variables"
+    echo "Updating Bash Variables in ${bfile}"
+    echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
     if is_valid_did $NEPI_DEVICE_ID; then
         update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
     fi
-    nepi_ip="${NEPI_IP%%/*}"
+
+    echo "NEPI_STATIC_IP: ${NEPI_STATIC_IP}"
+    nepi_ip=${NEPI_STATIC_IP%%/*}
+    echo "NEPI_IP: ${nepi_ip}"
     if is_valid_ipv4 $nepi_ip; then
         update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${nepi_ip}"
     fi

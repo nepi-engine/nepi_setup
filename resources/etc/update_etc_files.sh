@@ -44,9 +44,9 @@ else
     exit 1
 fi
 
-ETC_SCRIPTS_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_FOLDER=$(dirname ${ETC_SCRIPTS_FOLDER})
 
+ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
 
 echo ""
 echo "########################"
@@ -110,11 +110,16 @@ source ${ETC_FOLDER}/scripts/update_etc_users.sh $LOAD_NEPI_CONFIG
 ###########################################
 # HOSTNAME AND HOSTS UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_hostname.sh $LOAD_NEPI_CONFIG
-
+# Update System Config from Current
+# export NEPI_DEVICE_ID=$(hostname)
+# update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID ${ETC_FOLDER}/nepi_system_config.yaml
 ###########################################
 # CHRONY TIME UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_time_ntps.sh $LOAD_NEPI_CONFIG
 
+###########################################
+# WIRED DHCP UPDATES
+source ${ETC_FOLDER}/scripts/update_etc_wired_dhcp.sh $LOAD_NEPI_CONFIG
 
 #############################
 # WIRED NETWORK STATIC IP UPDATES
@@ -123,10 +128,6 @@ source ${ETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
 #############################
 # WIRED NETWORK ALIAS IP UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_wired_aliases.sh $LOAD_NEPI_CONFIG
-
-###########################################
-# WIRED DHCP UPDATES
-source ${ETC_FOLDER}/scripts/update_etc_wired_dhcp.sh $LOAD_NEPI_CONFIG
 
 ###########################################
 # WIFI CLIENT UPDATES
@@ -149,19 +150,9 @@ source ${ETC_FOLDER}/scripts/update_etc_wifi_access_point.sh $LOAD_NEPI_CONFIG
 source ${ETC_FOLDER}/scripts/update_etc_ssh_keys.sh $LOAD_NEPI_CONFIG
 
 ###########################################
-# Update System Config from Current
-export NEPI_DEVICE_ID=$(hostname)
-update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID ${ETC_FOLDER}/nepi_system_config.yaml
-
-# cur_ips=($(ip -4 addr show dev ${NEPI_WIRED_INTERFACE} | grep "inet " | awk '{print $2}' | cut -d/ -f1))
-# cur_ip=${cur_ips[0]}
-# export NEPI_IP=$cur_ip
-# update_yaml_value "NEPI_IP" $NEPI_IP ${ETC_FOLDER}/nepi_system_config.yaml
-
-
-###########################################
 # BASH UPDATES
-source ${ETC_FOLDER}/scripts/update_bash_config.sh $LOAD_NEPI_CONFIG
+# Allow Load NEPI Config
+source ${ETC_FOLDER}/scripts/update_bash_config.sh
 
 
 

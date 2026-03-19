@@ -116,6 +116,21 @@ if ! source_script $script_path $LITE_INSTALL; then
     return 
 fi
 
+
+# ####################################
+# # Re-Run NEPI Bash Setup Script
+
+# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+# script_file=docker_bash_setup.sh
+# script_path=${SCRIPT_FOLDER}/${script_file}
+# if ! source_script $script_path $LITE_INSTALL; then
+#     script_error=$?
+#     echo "Script ${script_path} failed with error ${script_error}"
+#     return 
+# fi
+
+# source /home/${CONFIG_USER}/.bashrc
+
 #####################################
 
 if is_valid_internet >/dev/null 2>&1; then

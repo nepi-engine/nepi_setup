@@ -157,7 +157,13 @@ fi
 
 ssh -T git@github.com >/dev/null 2>&1
 if [[ "$?" -lt 2 ]]; then
+    echo ''
+    echo '#######################'
     echo "GitHub SSH key authenticated with key file ${key_file}"
+    echo '#######################'
+    echo ''
+    fi
+
 else
     echo "GitHub SSH key not authenticated"
 fi

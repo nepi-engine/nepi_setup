@@ -42,26 +42,50 @@ See the NEPI PC command line shortcuts menu:
 
     nepihelp
 
+
 ################################################################
-### NEPI GitHub SSH Key Setup
+### NEPI Remote PC Connections Tutorials
 
-**OPTIONAL** If you need to clone the NEPI source-code GitHub repo for your development efforts,
-  this section will walk you through the github account and ssh key setup process.
+**NOTE:** The following section only applies to PC connected Dev Systems.  
+If you are running your NEPI Dev environment on a NEPI Device, you can skip this section.
+
+Setup and test your network or WiFi connected PC connection to your NEPI device following these instructions.
+
+Test that you can connect to your running conatiner from a network connected PC.
+See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
+
+Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
+See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+
+SSH into either your NEPI Host device or NEPI running container following this tutorial.
+See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 
-**NOTE** If you don't allready have a github user account, create a user account at www.github.com.
+################################################################
+### NEPI Engine Repo Setup and Build
 
-**NOTE** If you don't allready have a github ssh private key setup on your dev PC, log into your account. 
-You will be adding an passkey to the account later in this process.
+**OPTIONAL** If you want to get, update, and build NEPI from source-code
+this section will walk you through the process.
 
+**NOTE** This section assumes you have a valid GitHub SSH key configured for your GitHub account.
+If you did not successfully setup your GitHub SSH key in the 'NEPI Dev PC Setup'
+section, you can rerun the setup script by typing: nepisetup
 
-Run the NEPI GitHub PC Setup script which will check for a valid github ssh key and create one if none available:
+    nepiclone
 
-    bash /home/${USER}/nepi_setup/scripts/dev_github_setup.sh
+Aditional command line NEPI Github commands are available
 
-**NOTE:** If the script fails to authenticate a GitHub SSH connection, 
-    follow the printed instructions to configure your GitHub account with
-    the provided SSH Key information.
+nepiclone = Clone the latest NEPI source-code repo
+nepiclonedev = Clone the latest NEPI Development branch source-code repo
+nepipull = Update to the latest NEPI source-code repo
+
+Other useful NEPI development command line shortcuts.
+
+sshn = SSH into NEPI Software System
+sshnh = SSH into NEPI Software Host System
+nepidpl = Deploy nepi source-code to nepi device
+
+To deploy and build NEPI from the cloned repo, see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 ################################################################
 ### NEPI AI Training Software Setup
@@ -84,43 +108,5 @@ Test that label-studio opens:
 
     label-studio
 
-
-################################################################
-### NEPI Remote PC Connections Tutorials
-
-**NOTE:** The following section only applies to PC connected Dev Systems.  
-If you are running your NEPI Dev environment on a NEPI Device, you can skip this section.
-
-Setup and test your network or WiFi connected PC connection to your NEPI device following these instructions.
-
-Test that you can connect to your running conatiner from a network connected PC.
-See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
-
-Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
-See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
-
-SSH into either your NEPI Host device or NEPI running container following this tutorial.
-See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
-
-
-
-################################################################
-### NEPI Dev PC Software Developent Tools
-
-The NEPI Dev PC setup process includes a number of command line
-shortcuts to accelerate NEPI software development.
-
-sshn = SSH into NEPI Software System
-sshnh = SSH into NEPI Software Host System
-nepidpl = Deploy nepi source-code to nepi device
-
-See complete NEPI PC command line shortcuts menu:
-
-    nepihelp
-
-################################################################
-### NEPI Dev PC Software Developent Tools
-
-See the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 

@@ -20,6 +20,8 @@
 
 
 # NEPI Docker Lite Installation script
+sudo -v
+CONFIG_USER=$(id -un)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -29,11 +31,26 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-CONFIG_USER=$(id -un)
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    source ${NEPI_SYSTEM_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE ]];
+    source ${NEPI_SETUP_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
+fi
 
 echo ""
 echo "########################"
@@ -60,11 +77,6 @@ echo "NEPI User Account Setup Complete"
 echo "########################"
 echo ""
 
-echo ""
-echo "########################"
-echo "NEPI Docker Lite Enviorment Setup"
-echo "########################"
-echo ""
 
 echo ""
 echo "########################"
@@ -107,7 +119,15 @@ sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
 sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
 sudo chmod 775 $NEPI_ALIASES_DEST
 
+
 #############
+
+
+
+
+
+
+
 echo "Updating user bashrc files"
 BASHRC=/home/${CONFIG_USER}/.bashrc
 
@@ -121,16 +141,16 @@ if [[ ! -f $bfile ]]; then
     path_backup $BASHRC $bfile
 fi
 
-if [[ -n "${NEPI_IP%%/*}" ]]; then
-    nepi_ip="${NEPI_IP%%/*}"
+if [[ -n $NEPI_STATIC_IP ]]; then
+    nepi_ip="${NEPI_STATIC_IP%%/*}"
 else
     nepi_ip=192.168.179.103
 fi
-if ! is_valid_ipv4 "${nepi_ip%%/*}"; then
+if ! is_valid_ipv4 $nepi_ip; then
     nepi_ip=192.168.179.103
 fi
 
-if [[ -z "$NEPI_DEVICE_ID" ]]; then
+if [[ -n "$NEPI_DEVICE_ID" ]]; then
     NEPI_DEVICE_ID=device1
 fi
 
@@ -500,10 +520,7 @@ sudo systemctl start docker
 sudo apt-get update
 sudo apt-get install --fix-broken -y
 
-echo ""
-echo "######################################"
-echo "Installing NEPI required python packages"
-echo "######################################"
+
 
 if [[ -n "$DISPLAY" ]]; then
     echo ""

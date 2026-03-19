@@ -142,7 +142,8 @@ if [ $? -eq 1 ]; then
     exit 1
 fi
 
-
+NEPI_STATIC_IP_START=$NEPI_STATIC_IP
+NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
 ###################
 #  Upated NEPI Config Settings
@@ -190,11 +191,11 @@ NEPI_USER_CONFIGS=(
 NEPI_USER_PW \
 NEPI_HOST_PW \
 NEPI_ADMIN_PW \
-NEPI_IP_INTERFACE \
+NEPI_STATIC_IP_INTERFACE \
 NEPI_DEVICE_ID \
 NEPI_DEVICE_MD \
 NEPI_DEVICE_SN \
-NEPI_IP \
+NEPI_STATIC_IP \
 NEPI_GATEWAY_IP \
 NEPI_ALIAS_IP_1 \
 NEPI_ALIAS_IP_2 \
@@ -213,7 +214,7 @@ function update_current_config() {
     CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
     CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
     CURRENT_NEPI_WIRED_INTERFACE="$NEPI_WIRED_INTERFACE"
-    CURRENT_NEPI_IP=$(fix_ipv4_netmask $NEPI_IP)
+    CURRENT_NEPI_STATIC_IP=$(fix_ipv4_netmask $NEPI_STATIC_IP)
     CURRENT_NEPI_GATEWAY_IP="$NEPI_GATEWAY_IP"
     CURRENT_NEPI_ALIAS_IP_1=$(fix_ipv4_netmask $NEPI_ALIAS_IP_1)
     CURRENT_NEPI_ALIAS_IP_2=$(fix_ipv4_netmask $NEPI_ALIAS_IP_2)
@@ -260,7 +261,7 @@ function print_current_config(){
     echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
     echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
     echo "NEPI_WIRED_INTERFACE: ${CURRENT_NEPI_WIRED_INTERFACE}"
-    echo "NEPI_IP: ${CURRENT_NEPI_IP}"
+    echo "NEPI_STATIC_IP: ${CURRENT_NEPI_STATIC_IP}"
     echo "NEPI_GATEWAY_IP: ${CURRENT_NEPI_GATEWAY_IP}"
     echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
     echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
@@ -282,7 +283,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_SN $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_WIRED_INTERFACE" $CURRENT_NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
-    update_yaml_value "NEPI_IP" $CURRENT_NEPI_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_STATIC_IP" $CURRENT_NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_GATEWAY_IP" $CURRENT_NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
@@ -308,7 +309,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     PS3=$'\n'"Please enter your choice by NUMBER: "
     options=(   "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                         "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
-                        "Update NEPI_WIRED_INTERFACE" "Update NEPI_IP" "Update NEPI_GATEWAY_IP" \
+                        "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                         "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                         "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
                         "FACTORY RESET" "APPLY SETTINGS" )
@@ -422,13 +423,13 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 echo "Not A Valid Wired Interface name"
                             fi
                             ;;
-                        "Update NEPI_IP")
+                        "Update NEPI_STATIC_IP")
                             read -p $'\n'"Enter a new Static IP Address\Netmask: " USER_INPUT
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
                             elif is_valid_ipv4_netmask "$USER_INPUT"; then
-                                CURRENT_NEPI_IP=$USER_INPUT
+                                CURRENT_NEPI_STATIC_IP=$USER_INPUT
                                 echo ""
                                 break # Exit the select statement, re-display menu
                             else
@@ -682,21 +683,6 @@ source ${SYSTEM_ETC_PATH}/update_etc_files.sh
 # fi
 
 
-
-#################
-echo ""
-echo "UPDATING BASH VARIABLES"
-
-bfile=/home/${USER}/.bashrc
-if is_valid_did $NEPI_DEVICE_ID; then
-    update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
-fi
-ip="${NEPI_IP%%/*}"
-if is_valid_ipv4 $ip; then
-    update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${ip}"
-fi
-
-
 ####################
 echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
 source ${SYSTEM_ETC_PATH}/scripts/nepi_system_sync.sh
@@ -707,4 +693,71 @@ echo "##################################"
 echo 'NEPI System Config Setup Complete'
 echo "##################################"
 echo ""
+
+ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
+
+
+# Load System Config File
+source ${ETC_FOLDER}/load_system_config.sh
+if [ $? -eq 1 ]; then
+    echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
+    
+fi
+
+NEPI_STATIC_IP_END=$NEPI_STATIC_IP
+NEPI_DEVICE_ID_END=$NEPI_DEVICE_ID
+
+if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+        if [[ ${NEPI_DEVICE_ID_END} != ${NEPI_DEVICE_ID_START} ]]; then
+            echo ""
+            echo "Your NEPI DEVICE ID has changed to: ${NEPI_DEVICE_ID}"
+            echo ""
+            echo ""
+            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+            echo ""
+            echo "Rerun the 'nepisetup' to update the NEPI_DEVICE_ID env variable to: ${NEPI_DEVICE_ID}"
+            echo ""
+        fi
+
+        if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
+            remote_ip=${SSH_CLIENT%% *}
+            remote_submask=${remote_ip%.*}
+            remote_addr=${remote_ip##*.}
+            new_ip=${NEPI_STATIC_IP_END%%/*}
+            new_submask=${new_ip%.*}
+            new_addr=${new_ip##*.}
+            new_netmask=${NEPI_STATIC_IP_END#*/}
+            pc_ip_netmask=${new_submask}'.'${remote_addr}'/'${new_netmask}
+            echo ""
+            echo "Your NEPI STATIC IP address has changed to: ${NEPI_STATIC_IP_END}"
+            echo ""
+
+            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+            echo ""
+            if [[ ${remote_submask} != ${new_submask} ]]; then
+                echo "Updating the IP address on your remote PC's network adapter to: ${pc_ip_netmask}"
+                echo ""
+            fi
+            echo "Rerun the 'nepisetup' to update the NEPI_IP env variable to: ${NEPI_STATIC_IP_END%%/*}"
+            echo ""
+
+            echo "Do you want to restart networking now?"
+            choice=$(ask_yes_no)
+            if [[ "$choice" == 'yes' ]]; then
+                nnet
+            else
+                echo "IP address will be appled on next reboot?"
+            fi    
+
+        fi
+    else
+        nnet
+    fi
+else
+    nnet
+fi
+
+
 

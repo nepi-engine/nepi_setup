@@ -52,7 +52,14 @@ else
     exit 1
 fi
 
+NEPI_CONFIG=/mnt/nepi_config
+SETC_FOLDER=${NEPI_CONFIG}/system_cfg/etc
+FETC_FOLDER=${NEPI_CONFIG}/factory_cfg/etc
+RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 ########################
 # Redefine any nepi_bash_util functions that require without sudo
 ######################
@@ -237,7 +244,6 @@ function NEPI_START_FUNCTION(){
     #echo "CONFIG MODE: ${CONFIG_MODE}"
     while [[ ! "$NEPI_FAIL_COUNT" -eq 0 && "$CONFIG_MODE" != "STOP" ]]; do
         # Update docker config variables
-        DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
         source ${DOCKER_FOLDER}/load_docker_config.sh
 
         echo "FAIL COUNT: ${NEPI_FAIL_COUNT}"
@@ -425,7 +431,7 @@ fi
 echo ""
 echo "---------------------------------"
 echo "Reseting Network Config"
-echo "Got NEPI_IP = ${NEPI_IP}"
+echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
 echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
 
 
@@ -452,29 +458,40 @@ fi
 ####################################
 # Run in Recovery Mode if Needed
 
-nepi_ip=192.168.179.103
-if [[ -n "$NEPI_IP" ]]; then
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$NEPI_IP" != "$nepi_ip" ]]; then
-        echo "##########################"
-        echo "Starting Recovery Mode"
-        echo "##########################"
-        echo "Got NEPI_IP = ${NEPI_IP}"
-        echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - 192.168.179.103"
+if [[ ! -n "$NEPI_STATIC_IP" ]]; then
+    NEPI_STATIC_IP=192.168.179.103/24
+fi
 
-        # Load NEPI FACTORY CONFIG
-        echo "Setting Static IP to 192.168.179.103"
-        # Load NEPI FACTORY CONFIG
-        export NEPI_IP=192.168.179.103
+nepi_static_ip=$NEPI_STATIC_IP
+nepi_recovery_ip=192.168.179.103/24
+
+if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi_static_ip" != "$nepi_recovery_ip" ]]; then
+
+    echo "##########################"
+    echo "Starting Recovery Mode"
+    echo "##########################"
+    echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+    echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - ${nepi_recovery_ip}"
+
+    # Load NEPI FACTORY CONFIG
+    echo "Setting Static IP to ${nepi_recovery_ip}"
+    # Load NEPI FACTORY CONFIG
+    export NEPI_STATIC_IP=nepi_recovery_ip
+    LOAD_NEPI_CONFIG=0
+    source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
+    nnet
+    if [[ "$?" -eq 0 ]]; then
+        echo "Sleeping for 10 seconds"
+        sleep 10
+        export NEPI_STATIC_IP=nepi_static_ip
         LOAD_NEPI_CONFIG=0
         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-        if [[ "$?" -eq 0 ]]; then
-            echo "Sleeping for 10 seconds"
-            sleep 10
-        else
-            echo "Failed to run recovery mode setup"
-        fi
+        nnet
+    else
+        echo "Failed to run recovery mode setup"
     fi
 fi
+
 
 
 
@@ -488,14 +505,7 @@ echo "-----------------------------"
 echo "LAUNCING NEPI CONTAINER"
 
 # Define CONFIG FOLDERS
-NEPI_CONFIG=/mnt/nepi_config
-SETC_FOLDER=${NEPI_CONFIG}/system_cfg/etc
-FETC_FOLDER=${NEPI_CONFIG}/factory_cfg/etc
-RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 
 
 
