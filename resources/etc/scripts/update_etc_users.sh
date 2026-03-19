@@ -189,15 +189,14 @@ sudo chmod 0755 /home/${NEPI_ADMIN_USER}
 # Update ETC files if systemd is running (Not in Container)
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
-
+        needs_restart=0
         if [[ "$nepi_user_pw_changed" -eq 1 && ${NEPI_USER_PW} != 'encrypted' ]]; then
                 echo ""
                 echo "########"
                 echo "Configuring nepi Samba passwords"
                 echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" >/dev/null 2>&1
                 sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
-                echo "Restarting sshd service"
-                sudo systemctl restart sshd
+                needs_restart=1
         fi
 
         if [[ "$nepi_host_user_pw_changed" -eq 1 && ${NEPI_HOST_PW} != 'encrypted' ]]; then
@@ -206,8 +205,7 @@ if [[ "$?" -eq 0 ]]; then
                 echo "Configuring nepihost Samba passwords"
                 echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" >/dev/null 2>&1
                 sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
-                echo "Restarting sshd service"
-                sudo systemctl restart sshd
+                needs_restart=1
         fi
 
         if [[ "$nepi_admin_user_pw_changed" -eq 1 && ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
@@ -216,8 +214,14 @@ if [[ "$?" -eq 0 ]]; then
                 echo "Configuring nepiadmin Samba passwords"
                 echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" >/dev/null 2>&1
                 sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER >/dev/null
-                echo "Restarting sshd service"
-                sudo systemctl restart sshd
+                needs_restart=1
+        fi
+
+        if [[ $needs_restart -eq 1 ]]; then
+            echo "Restarting sshd service"
+            sudo systemctl restart sshd
+            echo "Restarting smbd service"
+            sudo systemctl restart smbd
         fi
 
 fi
