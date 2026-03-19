@@ -239,14 +239,31 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl restart smbd
         
 
-        # echo "Updating Samba Users"
-        # echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+        echo "Updating Samba Users"
+        if [[ ${NEPI_USER_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+        else
+            sudo smbpasswd -a "$NEPI_USER"
+        fi
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
 
-        # echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
-        # sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
 
-        # echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
-        # sudo usermod -a
+        if [[ ${NEPI_HOST_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
+        else
+            sudo smbpasswd -a "$NEPI_HOST_USER"
+        fi
+        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+
+        if [[ ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
+        else
+            sudo smbpasswd -a "$NEPI_ADMIN_USER"
+        fi        
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
+
+        sudo systemctl restart sshd
     fi
 
 
