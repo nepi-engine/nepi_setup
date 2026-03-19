@@ -110,7 +110,7 @@ else
                     COMMIT_DESC="-${TAG_ARRAY[5]}"
                 fi
             fi
-            if [[ ${COMMIT_DESC} == '-' ]];
+            if [[ ${COMMIT_DESC} == '-' ]]; then
                 COMMIT_DESC=''
             fi
 
