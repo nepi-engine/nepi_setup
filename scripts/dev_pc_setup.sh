@@ -258,8 +258,44 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Updating Bash Files"
     echo ""
 
-    echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
+
     BASHRC=/home/${CONFIG_USER}/.bashrc
+
+
+    ### Backup CONFIG_USER BASHRC file if needed
+    file=$BASHRC
+    bfile=${BASHRC}.org
+
+    if [[ ! -f "$file"  ]]; then
+        cp /etc/skel/.bashrc $BASHRC
+    fi
+
+    if [[ ! -f $bfile ]]; then
+        path_backup $file $bfile
+    fi
+
+    sudo cp $bfile $BASHRC
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
+    sudo chmod 775 $BASHRC
+
+
+
+    echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
+    # Add additional user bashrc statements
+    # Add NEPI SETTINGS
+    echo ' ' | sudo tee -a $BASHRC
+    echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
+    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
+    echo ' ' | sudo tee -a $BASHRC
+    echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
+    echo 'export NEPI_IP='${NEPI_IP} | sudo tee -a $BASHRC
+    echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
+    echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
+    echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
+    echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
+    echo 'export NEPI_SSH_KEY_FILE='${NEPI_SSH_KEY_FILE} | sudo tee -a $BASHRC
+
 
 
     ##############
@@ -283,53 +319,26 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
     NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
+
     if [ -f "$NEPI_ALIASES_DEST" ]; then
         sudo rm $NEPI_ALIASES_DEST
     fi
     sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
-
-    #############
-    echo "Updating user bashrc files"
-    ### Backup CONFIG_USER BASHRC file if needed
-    file=$BASHRC
-    bfile=${BASHRC}.org
-
-    if [[ ! -f "$file"  ]]; then
-        cp /etc/skel/.bashrc $BASHRC
-    fi
-
-    if [[ ! -f $bfile ]]; then
-        path_backup $file $bfile
-    fi
-
-    sudo cp $bfile $BASHRC
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
-    sudo chmod 775 $BASHRC
-
-    # Add additional user bashrc statements
-    # Add NEPI SETTINGS
-    echo ' ' | sudo tee -a $BASHRC
-    echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
-    echo ' ' | sudo tee -a $BASHRC
-    echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
-    echo 'export NEPI_IP='${NEPI_IP} | sudo tee -a $BASHRC
-    echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
-    echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
-    echo 'export NEPI_SSH_KEY_FILE='${NEPI_SSH_KEY_FILE} | sudo tee -a $BASHRC
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
+    sudo chmod 775 $NEPI_ALIASES_DEST
 
 
+    # Add NEPI Aliases
     if grep -qnw $BASHRC -e "##### Source NEPI Aliases #####" ; then
-        : #echo "Already Done"
+        if grep -qnw $BASHRC -e "NEPI_ALIASES_FILE=" ; then
+            update_text_value $BASHRC "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST}"
+        fi
     else
         echo ' ' | sudo tee -a $BASHRC
         echo '##### Source NEPI Aliases #####' | sudo tee -a $BASHRC
-        echo 'if [ -f '${NEPI_ALIASES_DEST}' ]; then' | sudo tee -a $BASHRC
-        echo '    . '${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
+        echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
+        echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $BASHRC
+        echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $BASHRC
         echo 'fi' | sudo tee -a $BASHRC
     fi
 
@@ -380,19 +389,10 @@ ntpq -p
 
 
 #####################################
-
-if is_valid_internet >/dev/null 2>&1; then
-    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-    GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
-    source $GITHUB_SETUP_SCRIPT
-fi
-
-
-
 echo " "
 echo "################################# "
 echo "NEPI DEV PC SETUP COMPLETE"
 echo "################################# "
 echo " "
-echo " "
 echo "To see a list of NEPI command line shortcuts run: nepihelp"
+echo " "

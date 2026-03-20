@@ -32,40 +32,50 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-
-
-# This file installs the NEPI Engine File System installation
-
-bfile=/home/${CONFIG_USER}/.bashrc
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-
-if [[ -f "$ufile" ]]; then
-    source $ufile
-else
-    echo "NEPI Utils bash file not found at: ${ufile}"
-    return 
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
 fi
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -nu 1000)
+fi
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${RESOURCES_FOLDER}")/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    source ${NEPI_SYSTEM_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
+    source ${NEPI_SETUP_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
 fi
-export CONFIG_USER=$CONFIG_USER
 
+
+
+
+
+
+#######################################################################################
 
 
 echo "########################"
 echo "NEPI CONFIG SETUP"
 echo "########################"
-
-
-#######################################################################################
-
 # #####################################
 # NEPI Config Setup
 # #####################################

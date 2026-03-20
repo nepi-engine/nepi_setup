@@ -18,12 +18,9 @@
 ## - mailto:nepi@numurus.com
 ##
 
-LITE_INSTALL=0
-if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    LITE_INSTALL=$1
-fi
-
 sudo -v 
+
+sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -32,87 +29,43 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-
-# This file sets up nepi bash aliases and util functions
-
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
-fi
-export CONFIG_USER=$CONFIG_USER
-
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
     fi
 fi
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -nu 1000)
+fi
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${RESOURCES_FOLDER}")/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
-
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    source ${NEPI_SYSTEM_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
+    source ${NEPI_SETUP_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
+fi
 
 echo "########################"
 echo "NEPI BASH SETUP"
 echo "########################"
 
-##############
-
-echo "Installing NEPI Utils files"
-
-NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
-
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
-sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
-sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
-
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
-NEPI_UTILS_DEST=/home/${CONFIG_USER}
-
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
-sudo chmod 775 $NEPI_UTILS_SOURCE
-sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
-
-
-
-##############
-echo "Installing NEPI aliases file ${NEPI_ALIASES_DEST} "
-
-if [[ "$CONFIG_USER" != 'nepi' ]]; then
-    NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_docker_aliases
-    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_docker_aliases
-else
-    NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_system_aliases
-    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_system_aliases
-fi 
-
-
-if [ -f "$NEPI_ALIASES_DEST" ]; then
-    sudo rm $NEPI_ALIASES_DEST
-fi
-sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
-sudo chmod 775 $NEPI_ALIASES_DEST
-
-
-
-SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-
- echo $NEPI_STATIC_IP
-if [[ -f $SYSTEM_CONFIG_FILE ]]; then
-    # Load System Config File
-    echo "Loading NEPI SYSTEM CONFIG"
-    source $SYSTEM_CONFIG_FILE
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
-    fi
-fi
-echo $NEPI_STATIC_IP
 
 
 #############
@@ -120,23 +73,9 @@ echo "Updating user bashrc files"
 BASHRC=/home/${CONFIG_USER}/.bashrc
 bfile=${BASHRC}.org
 
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    rm $BASHRC
-    cp /etc/skel/.bashrc $BASHRC
-else
-    if [[ ! -f "$BASHRC"  ]]; then
-        cp /etc/skel/.bashrc $BASHRC
-    fi
+rm $BASHRC
+cp /etc/skel/.bashrc $BASHRC
 
-    if [[ ! -f $bfile ]]; then
-        path_backup $BASHRC $bfile
-    fi
-
-    if [[ -f $bfile ]]; then
-        path_backup $bfile $BASHRC
-    fi
-
-fi
 
 if [[ -n $NEPI_STATIC_IP ]]; then
     echo "Got NEPI_STATIC_IP ${NEPI_STATIC_IP}"
@@ -272,16 +211,61 @@ else
 fi
 
 
+
+##############
+
+echo "Installing NEPI Utils files"
+
+NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
+sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
+sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+
+NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
+NEPI_UTILS_DEST=/home/${CONFIG_USER}
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
+sudo chmod 775 $NEPI_UTILS_SOURCE
+sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
+
+
+
+##############
+echo "Installing NEPI aliases file ${NEPI_ALIASES_DEST} "
+
+
+NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_system_aliases
+NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_system_aliases
+echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
+
+if [ -f "$NEPI_ALIASES_DEST" ]; then
+    sudo rm $NEPI_ALIASES_DEST
+fi
+sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
+sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
+sudo chmod 775 $NEPI_ALIASES_DEST
+
+
 # Add NEPI Aliases
 if grep -qnw $BASHRC -e "##### Source NEPI Aliases #####" ; then
-    : #echo "Already Done"
+    if grep -qnw $BASHRC -e "NEPI_ALIASES_FILE=" ; then
+        update_text_value $BASHRC "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST}"
+    fi
 else
     echo ' ' | sudo tee -a $BASHRC
     echo '##### Source NEPI Aliases #####' | sudo tee -a $BASHRC
-    echo 'if [ -f '${NEPI_ALIASES_DEST}' ]; then' | sudo tee -a $BASHRC
-    echo '    . '${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
+    echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
+    echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $BASHRC
+    echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $BASHRC
     echo 'fi' | sudo tee -a $BASHRC
 fi
+
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
+sudo chmod 0644 ~/.bashrc
+
+
 
 
 sudo rm /root/.bashrc

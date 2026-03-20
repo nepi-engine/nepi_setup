@@ -29,41 +29,54 @@ export LITE_INSTALL=$LITE_INSTALL
 # echo "LITE_INSTALL=${LITE_INSTALL}"
 
 
-
-sudo -v
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $LICENSE_CHECK_FILE
 source $INSTALL_CHECK_FILE $1
 if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
 
-# This file configures a NEPI Docker installation environment
+sudo -v
 
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-export CONFIG_USER=$CONFIG_USER
 
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
     fi
+fi
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -nu 1000)
 fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=$(dirname "${RESOURCES_FOLDER}")/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    source ${NEPI_SYSTEM_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
+    source ${NEPI_SETUP_CONFIG_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
+fi
 
 
 ####################################
@@ -116,28 +129,6 @@ if ! source_script $script_path $LITE_INSTALL; then
     return 
 fi
 
-
-# ####################################
-# # Re-Run NEPI Bash Setup Script
-
-# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-# script_file=docker_bash_setup.sh
-# script_path=${SCRIPT_FOLDER}/${script_file}
-# if ! source_script $script_path $LITE_INSTALL; then
-#     script_error=$?
-#     echo "Script ${script_path} failed with error ${script_error}"
-#     return 
-# fi
-
-# source /home/${CONFIG_USER}/.bashrc
-
-#####################################
-
-if is_valid_internet >/dev/null 2>&1; then
-    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-    GITHUB_SETUP_SCRIPT=${SCRIPT_FOLDER}/dev_github_setup.sh
-    source $GITHUB_SETUP_SCRIPT
-fi
 
 ####################################
 echo ""

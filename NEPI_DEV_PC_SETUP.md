@@ -62,30 +62,12 @@ See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-a
 
 
 ################################################################
-### NEPI Engine Repo Setup and Build
+### NEPI Software Building
 
-**OPTIONAL** If you want to get, update, and build NEPI from source-code
+**OPTIONAL** If you want to get, update, and build NEPI Software from source-code
 this section will walk you through the process.
 
-**NOTE** This section assumes you have a valid GitHub SSH key configured for your GitHub account.
-If you did not successfully setup your GitHub SSH key in the 'NEPI Dev PC Setup'
-section, you can rerun the setup script by typing: nepisetup
-
-    nepiclone
-
-Aditional command line NEPI Github commands are available
-
-nepiclone = Clone the latest NEPI source-code repo
-nepiclonedev = Clone the latest NEPI Development branch source-code repo
-nepipull = Update to the latest NEPI source-code repo
-
-Other useful NEPI development command line shortcuts.
-
-sshn = SSH into NEPI Software System
-sshnh = SSH into NEPI Software Host System
-nepidpl = Deploy nepi source-code to nepi device
-
-To deploy and build NEPI from the cloned repo, see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
+see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 ################################################################
 ### NEPI AI Training Software Setup
