@@ -68,43 +68,85 @@ echo "########################"
 
 
 
-#############
-echo "Updating user bashrc files"
-BASHRC=/home/${CONFIG_USER}/.bashrc
-bfile=${BASHRC}.org
-
-rm $BASHRC
-cp /etc/skel/.bashrc $BASHRC
+    #####################################
+    echo " "
+    echo "################################# "
+    echo "Updating Bash Files"
+    echo ""
 
 
-if [[ -n $NEPI_STATIC_IP ]]; then
-    echo "Got NEPI_STATIC_IP ${NEPI_STATIC_IP}"
-    nepi_ip="${NEPI_STATIC_IP%%/*}"
-else
-    nepi_ip=192.168.179.103
-    echo "NEPI_STATIC_IP not defined, falling back to ${nepi_ip}"
-fi
-
-if ! is_valid_ipv4 $nepi_ip; then
-    echo "NEPI_IP invalid, falling back to 192.168.179.103"
-    nepi_ip=192.168.179.103
-fi
+    ##############
+    echo "Setting up NEPI Bash Utils file"
 
 
+    NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
+    NEPI_UTILS_DEST=/home/${CONFIG_USER}
 
-if [[ -z "$NEPI_DEVICE_ID" ]]; then
-    NEPI_DEVICE_ID=device1
-fi
-if ! is_valid_did $NEPI_DEVICE_ID; then
-    NEPI_DEVICE_ID=device1
-fi
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
+    sudo chmod 775 $NEPI_UTILS_SOURCE
+    sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
 
-if [[ -z "$NEPI_HOST_USER" ]]; then
-    NEPI_HOST_USER=nepihost
-fi
-if ! is_valid_uid $NEPI_HOST_USER; then
-    NEPI_HOST_USER=nepihost
-fi
+    NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+    NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
+    sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
+    sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
+
+
+    systemctl&> /dev/null
+    res=$?
+    if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepihost' ]]; then
+        export NEPI_IN_CONTAINER=1
+    elif [[ "$?" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
+        export NEPI_IN_CONTAINER=0
+    else
+        export NEPI_IN_CONTAINER=1
+    fi
+
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER}"
+
+
+    # export NEPI_USER=nepi
+    # export NEPI_HOST_USER=nepihost
+
+    # export NEPI_IP=192.168.179.103
+    # export NEPI_DEVICE_ID=device1
+    # export NEPI_RECOVERY_DEVICE_ID=device1
+    # export NEPI_RECOVERY_IP=192.168.179.103
+    # export NEPI_IN_CONTAINER=1
+
+
+    # export NEPI_HOME=/home/$CONFIG_USER
+    # export NEPI_BASE=/opt/nepi
+    # export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
+    # export NEPI_STORAGE='/mnt/nepi_storage'
+    # export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
+    # export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
+
+
+    # export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+    # export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+    # export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
+
+    # export NEPI_TARGET_IP=$NEPI_IP
+    # export NEPI_TARGET_USERNAME=$NEPI_USER
+    # export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
+
+    # export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
+
+
+
 
 
 if grep -qnw $BASHRC -e "##### System Config #####" ; then
@@ -138,11 +180,20 @@ else
 fi
 NEPI_PYTHON=$pyver
 
+if [[ ! -d /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages ]]; then
+    sudo mkdir -p /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+fi
+#echo "Udating user python permissions"
+sudo chmod 755 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
+
+
+
 if grep -qnw $BASHRC -e "##### Python Config #####" ; then
     : #echo "Already Done"
 else
     echo ' ' | sudo tee -a $BASHRC
     echo '##### Python Config #####' | sudo tee -a $BASHRC
+    echo 'export NEPI_PYTHON='${NEPI_PYTHON} | sudo tee -a $BASHRC
     echo 'export PYTHONPATH='${NEPI_ENGINE}'/etc:${PYTHONPATH}' | sudo tee -a $BASHRC
     echo 'export PYTHONPATH='${NEPI_ENGINE}'/lib/nepi_drivers:${PYTHONPATH}' | sudo tee -a $BASHRC
     echo 'export PYTHONPATH=/usr/local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $BASHRC
@@ -182,33 +233,82 @@ if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
 fi
 
 
-systemctl&> /dev/null
-res=$?
-if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepihost' ]]; then
-    export NEPI_IN_CONTAINER=1
-elif [[ "$?" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
-    export NEPI_IN_CONTAINER=0
-else
-    export NEPI_IN_CONTAINER=1
-fi
 
-# Add NEPI SETTINGS
-if grep -qnw $BASHRC -e "##### NEPI SETTINGS #####" ; then
-    : #echo "Already Done"
-else
-    echo ' ' | sudo tee -a $BASHRC
-    echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
-    echo 'export NEPI_PYTHON='${NEPI_PYTHON} | sudo tee -a $BASHRC
-    echo '' | sudo tee -a $BASHRC
-    echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
-    echo 'export NEPI_IP='${nepi_ip} | sudo tee -a $BASHRC
-    echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
-    echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
-fi
+
+
+
+    ##############
+    echo "Installing NEPI PC Aliases file"
+
+    NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_docker_aliases
+    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_docker_aliases
+    echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
+
+    if [ -f "$NEPI_ALIASES_DEST" ]; then
+        sudo rm $NEPI_ALIASES_DEST
+    fi
+    sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
+    sudo chmod 775 $NEPI_ALIASES_DEST
+
+
+
+
+    ##############
+    echo "Updating ${CONFIG_USER} user .bashrc file"
+
+    BASHRC=/home/${CONFIG_USER}/.bashrc
+    file=$BASHRC
+    bfile=${BASHRC}.bak
+
+    if [[ ! -f "$file"  ]]; then
+        cp /etc/skel/.bashrc $file
+    fi
+
+    if [[ ! -f $bfile ]]; then
+        path_backup $file $bfile
+    fi
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
+    sudo chmod 775 $file
+
+
+    # Add NEPI Aliases
+    if grep -qnw $file -e "##### Source NEPI Aliases #####" ; then
+        if grep -qnw $file -e "NEPI_ALIASES_FILE=" ; then
+            update_text_value $file "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE=${NEPI_ALIASES_DEST}"
+        fi
+    else
+        echo ' ' | sudo tee -a $file
+        echo '##### Source NEPI Aliases #####' | sudo tee -a $file
+        echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $file
+        echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $file
+        echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $file
+        echo 'fi' | sudo tee -a $file
+    fi
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
+    sudo chmod 0644 ~/.bashrc
+
+    echo ""
+    echo "Sourcing updated bash files"
+    source $file
+    wait
+
+
+
+
+################
+echo "Fixing other user files"
+cp /etc/skel/.profile /home/${CONFIG_USER}/
+sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.profile
+sudo chmod 0644 /home/${CONFIG_USER}/.profile
+
+
+
+
+
+
 
 
 

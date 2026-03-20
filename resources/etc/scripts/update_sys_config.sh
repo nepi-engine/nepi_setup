@@ -24,7 +24,7 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-bfile=/home/${CONFIG_USER}/.bashrc
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then

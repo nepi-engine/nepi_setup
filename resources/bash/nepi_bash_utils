@@ -25,7 +25,7 @@
 #echo "########################"
 
 
-BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
 
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
@@ -36,12 +36,50 @@ fi
 if [[ ! -n $CONFIG_USER ]]; then
     id -nu 1000
 fi
-export CONFIG_USER=$CONFIG_USER
 
+
+##############################
+##### NEPI SETTINGS #####
+
+CURRENT_DIR=$(pwd)
+BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+export CONFIG_USER=$CONFIG_USER
+export USER=$CONFIG_USER
+
+export NEPI_USER=nepi
+export NEPI_HOST_USER=nepihost
+
+export NEPI_IP=192.168.179.103
+export NEPI_DEVICE_ID=device1
+export NEPI_RECOVERY_DEVICE_ID=device1
+export NEPI_RECOVERY_IP=192.168.179.103
+export NEPI_IN_CONTAINER=1
+
+
+export NEPI_HOME=/home/$CONFIG_USER
+export NEPI_BASE=/opt/nepi
+export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
+export NEPI_STORAGE='/mnt/nepi_storage'
+export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
+export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
+
+
+export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
+
+export NEPI_TARGET_IP=$NEPI_IP
+export NEPI_TARGET_USERNAME=$NEPI_USER
+export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
+
+export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
+
+
+
+###############################
 
 utilsn=""
-
-
 
 ###################################
 # System Check Functions
@@ -1683,6 +1721,9 @@ export SOURCE_FOLDER=/home/${CONFIG_USER}/nepi_engine_ws
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
+alias nepihome="
+cd ${NEPI_HOME}"
+
 
 function nepigithub {
     if is_valid_internet >/dev/null 2>&1; then
@@ -1908,11 +1949,11 @@ function pushn(){
 }
 
 
-
 utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
 ################################
+nepihome = Change to users home folder
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo

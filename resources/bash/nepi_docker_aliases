@@ -23,15 +23,7 @@
 #echo "NEPI Docker Aliases"
 #echo "########################"
 
-
-
-
-
-
 ##########################################
-
-BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-#echo "BASH_FOLDER = ${BASH_FOLDER}"
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
     if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -39,27 +31,18 @@ if [[ ! -n $CONFIG_USER ]]; then
     fi
 fi
 if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+    id -nu 1000
 fi
-export CONFIG_USER=$CONFIG_USER
 
-
-export NEPI_HOME=/home/$CONFIG_USER
-
-export NEPI_BASE=/opt/nepi
-
-export NEPI_STORAGE=/mnt/nepi_storage
-
-export NEPI_DOCKER_CONFIG=/mnt/nepi_config/docker_cfg
-export NEPI_STORAGE=/mnt/nepi_storage
 
 NEPI_UTILS_FILE=/home/${CONFIG_USER}/.nepi_bash_utils
-
 source $NEPI_UTILS_FILE
 
-########################
-# Help Msg Initialization
-#########################
+
+################################
+export NEPI_REMOTE_SETUP=0
+################################
+
 HELPN="${UTILSN}"
 
 
@@ -71,12 +54,6 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 
 
-## NEPI deploy complete
-alias nepihome="
-cd ${NEPI_HOME}"
-
-alias nhome="
-cd ${NEPI_HOME}"
 
 ## NEPI deploy complete
 alias nepidpl="
@@ -130,7 +107,7 @@ HELPN="${HELPN}
 ################################
 ### NEPI DEV UTIL FUNCTIONS
 ################################
-nhome = Switch to Home folder
+nepihome = Switch to Home folder
 nepidpl = Deploy nepi complete to nepi device
 repodpl = Deploy repos to nepi device
 pushn = Add,commit,push repo changes with provided comment"
@@ -140,11 +117,7 @@ pushn = Add,commit,push repo changes with provided comment"
 # NEPI SHORTCUT FUNCTIONS
 #############################
 
-export NEPI_USER=nepi
-export NEPI_HOME=/home/nepi
 
-export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
-export NEPI_STORAGE=/mnt/nepi_storage
 
 # NEPI stop and start shortcuts
 function nepistop(){
@@ -504,21 +477,7 @@ nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 # NEPI SSH Agent Config
 ###################################
 
-CURRENT_DIR=$(pwd)
 
-if [[ -z "$NEPI_SSH_KEY_FILE" ]]; then
-  export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-fi
-
-export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
-
-
-export NEPI_REMOTE_SETUP=1
-export NEPI_TARGET_IP=$NEPI_IP
-export NEPI_RECOVERY_IP=$NEPI_RECOVERY_IP
-export NEPI_TARGET_USERNAME=nepi
-export NEPI_SSH_KEY=~/ssh_keys/nepi_engine_default_private_ssh_key
-export NEPI_TARGET_SRC_DIR=/mnt/nepi_storage/nepi_src # This is the default if unset
 
 
 # Clear Known Host Keys
@@ -792,8 +751,7 @@ function nepihelp(){
     echo "$HELPN"
 }
 
-export NEPI_REMOTE_SETUP=0
-export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
+
 
 
 

@@ -52,7 +52,6 @@ if [ $? -eq 1 ]; then
     
 fi
 
-bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
@@ -706,7 +705,7 @@ echo ""
 
 
 file=/etc/hosts
-bfile=${file}.org
+bfile=${file}.bak
 
 # file=${ETC_FOLDER}/hosts
 # if [[ -f "${file}.blank" ]]; then

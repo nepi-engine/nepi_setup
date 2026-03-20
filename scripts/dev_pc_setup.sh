@@ -19,7 +19,6 @@
 
 sudo -v
 
-
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -27,24 +26,19 @@ if [[ "$?" -ne 0 ]]; then
     return
 fi
 
-# This file sets up nepi bash aliases and util functions
-
-
-
-echo "########################"
-echo "NEPI DEV PC SETUP"
-echo "########################"
-
-echo "Running Intitialization Scripts"
-
-
 CONFIG_USER=$(id -un)
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-ETC_SOURCE_FOLDER=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+
+# This file sets up nepi bash aliases and util functions
+echo "########################"
+echo "NEPI DEV PC SETUP"
+echo "########################"
 
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
@@ -59,13 +53,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo "Updating NEPI CONFIG from File: ${USER_CONFIG_FILE} "
         load_yaml_file $USER_CONFIG_FILE 2>/dev/null
     fi
-
-
-    #####################################
-    # Script Functions
-
-
-
 
     NEPI_USER_CONFIGS=(
     NEPI_DEVICE_ID \
@@ -89,8 +76,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         update_yaml_value "NEPI_IP" $NEPI_IP $config_file
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
-        
-
     }
 
 
@@ -181,7 +166,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ###################
     # Check for default key
 
-    NEPI_SSH_PKEY_SOURCE=${ETC_SOURCE_FOLDER}/ssh/ssh_keys/private_keys
+    NEPI_SSH_PKEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys/private_keys
     NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
     if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
@@ -231,7 +216,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo ""
 
     file=/etc/hosts
-    bfile=${file}.org
+    bfile=${file}.bak
 
     if [[ ! -f "$bfile" ]]; then
         path_backup $file $bfile
@@ -259,54 +244,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo ""
 
 
-    BASHRC=/home/${CONFIG_USER}/.bashrc
-
-
-    ### Backup CONFIG_USER BASHRC file if needed
-    file=$BASHRC
-    bfile=${BASHRC}.org
-
-    if [[ ! -f "$file"  ]]; then
-        cp /etc/skel/.bashrc $BASHRC
-    fi
-
-    if [[ ! -f $bfile ]]; then
-        path_backup $file $bfile
-    fi
-
-    sudo cp $bfile $BASHRC
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BASHRC
-    sudo chmod 775 $BASHRC
-
-
-
-    echo "Updating NEPI aliases files with NEPI_IP: ${NEPI_IP}"
-    # Add additional user bashrc statements
-    # Add NEPI SETTINGS
-    echo ' ' | sudo tee -a $BASHRC
-    echo 'export USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export CONFIG_USER='${CONFIG_USER} | sudo tee -a $BASHRC
-    echo 'export NEPI_HOST_USER='${NEPI_HOST_USER} | sudo tee -a $BASHRC
-    echo ' ' | sudo tee -a $BASHRC
-    echo '##### NEPI SETTINGS #####' | sudo tee -a $BASHRC
-    echo 'export NEPI_IP='${NEPI_IP} | sudo tee -a $BASHRC
-    echo 'export NEPI_DEVICE_ID='${NEPI_DEVICE_ID} | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_DEVICE_ID=device1' | sudo tee -a $BASHRC
-    echo 'export NEPI_RECOVERY_IP=192.168.179.103' | sudo tee -a $BASHRC
-    echo 'export NEPI_IN_CONTAINER='${NEPI_IN_CONTAINER} | sudo tee -a $BASHRC
-    echo 'export NEPI_SSH_KEY_FILE='${NEPI_SSH_KEY_FILE} | sudo tee -a $BASHRC
-
-
-
     ##############
-    echo "Installing NEPI Utils files"
-
-    NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
-    NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
-    sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
-    sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+    echo "Setting up NEPI Bash Utils file"
 
     NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
     NEPI_UTILS_DEST=/home/${CONFIG_USER}
@@ -315,7 +254,56 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     sudo chmod 775 $NEPI_UTILS_SOURCE
     sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
 
+    NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+    NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
+    sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
+    sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
+
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
+
+    # export NEPI_USER=nepi
+    # export NEPI_HOST_USER=nepihost
+
+    # export NEPI_IP=192.168.179.103
+    # export NEPI_DEVICE_ID=device1
+    # export NEPI_RECOVERY_DEVICE_ID=device1
+    # export NEPI_RECOVERY_IP=192.168.179.103
+    # export NEPI_IN_CONTAINER=1
+
+
+    # export NEPI_HOME=/home/$CONFIG_USER
+    # export NEPI_BASE=/opt/nepi
+    # export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
+    # export NEPI_STORAGE='/mnt/nepi_storage'
+    # export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
+    # export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
+
+
+    # export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+    # export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
+    # export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
+
+    # export NEPI_TARGET_IP=$NEPI_IP
+    # export NEPI_TARGET_USERNAME=$NEPI_USER
+    # export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
+
+    # export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
+
+
+
     ##############
+    echo "Installing NEPI PC Aliases file"
+
     NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
     NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
@@ -328,18 +316,39 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     sudo chmod 775 $NEPI_ALIASES_DEST
 
 
+
+
+    ##############
+    echo "Updating ${CONFIG_USER} user .bashrc file"
+
+    BASHRC=/home/${CONFIG_USER}/.bashrc
+    file=$BASHRC
+    bfile=${BASHRC}.bak
+
+    if [[ ! -f "$file"  ]]; then
+        cp /etc/skel/.bashrc $file
+    fi
+
+    if [[ ! -f $bfile ]]; then
+        path_backup $file $bfile
+    fi
+
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
+    sudo chmod 775 $file
+
+
     # Add NEPI Aliases
-    if grep -qnw $BASHRC -e "##### Source NEPI Aliases #####" ; then
-        if grep -qnw $BASHRC -e "NEPI_ALIASES_FILE=" ; then
-            update_text_value $BASHRC "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST}"
+    if grep -qnw $file -e "##### Source NEPI Aliases #####" ; then
+        if grep -qnw $file -e "NEPI_ALIASES_FILE=" ; then
+            update_text_value $file "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE=${NEPI_ALIASES_DEST}"
         fi
     else
-        echo ' ' | sudo tee -a $BASHRC
-        echo '##### Source NEPI Aliases #####' | sudo tee -a $BASHRC
-        echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $BASHRC
-        echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $BASHRC
-        echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $BASHRC
-        echo 'fi' | sudo tee -a $BASHRC
+        echo ' ' | sudo tee -a $file
+        echo '##### Source NEPI Aliases #####' | sudo tee -a $file
+        echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $file
+        echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $file
+        echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $file
+        echo 'fi' | sudo tee -a $file
     fi
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
@@ -347,7 +356,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo ""
     echo "Sourcing updated bash files"
-    source $BASHRC
+    source $file
     wait
 
 
@@ -362,37 +371,41 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
 
-fi
+    #####################################
+    echo " "
+    echo "################################# "
+    echo "Configuring NTP Server"
+    echo ""
 
-
-
-#####################################
-echo " "
-echo "################################# "
-echo "Configuring NTP Server"
-echo ""
-
-if dpkg -l | grep ntp >/dev/null 2>&1; then
-    echo "NTP application installed"
-else
-    
-    if ! dpkg -l | grep chrony >/dev/null 2>&1; then
+    if dpkg -l | grep ntp >/dev/null 2>&1; then
+        echo "NTP application installed"
+    else
+        
+        if ! dpkg -l | grep chrony >/dev/null 2>&1; then
+            echo "Installing NTP application"
+            sudo apt-get install chrony
+        fi
         echo "Installing NTP application"
-        sudo apt-get install chrony
+        sudo apt-get install ntp
     fi
-    echo "Installing NTP application"
-    sudo apt-get install ntp
+    sudo service ntp start
+    ntpq -p
+
+
+
+    #####################################
+    echo " "
+    echo "################################# "
+    echo "NEPI DEV PC SETUP COMPLETE"
+    echo "################################# "
+    echo " "
+    echo "To see a list of NEPI command line shortcuts run: nepihelp"
+    echo " "
+
+else
+
+    echo "THIS SCRIPT CANNOT BE RUN BY USER nepi OR nepihost"
+
 fi
-sudo service ntp start
-ntpq -p
 
 
-
-#####################################
-echo " "
-echo "################################# "
-echo "NEPI DEV PC SETUP COMPLETE"
-echo "################################# "
-echo " "
-echo "To see a list of NEPI command line shortcuts run: nepihelp"
-echo " "

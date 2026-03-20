@@ -22,19 +22,23 @@
 #echo "########################"
 #echo "NEPI System Aliases"
 #echo "########################"
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
+fi
+if [[ ! -n $CONFIG_USER ]]; then
+    id -nu 1000
+fi
 
-export NEPI_HOME=/home/nepi
-
-export NEPI_BASE=/opt/nepi
-export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
-export NEPI_SYSTEM_CONFIG=${NEPI_SYSTEM_CONFIG}/etc
-export NEPI_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/.nepi_system_config.yaml
-
-export NEPI_STORAGE=/mnt/nepi_storage
-
-NEPI_UTILS_FILE=/home/nepi/.nepi_bash_utils
-
+NEPI_UTILS_FILE=/home/${CONFIG_USER}/.nepi_bash_utils
 source $NEPI_UTILS_FILE
+
+
+################################
+export NEPI_REMOTE_SETUP=0
+################################
 
 HELPN="${UTILSN}"
 
@@ -52,73 +56,69 @@ alias nhome="
 cd ${NEPI_HOME}"
 
 
-
-
-  
-
-  # NEPI stop and start shortcuts
-  function nepistop(){
-    sudo -v
-
-    service_name="nepi_engine"
-    if systemctl status > /dev/null 2>&1; then
-      if systemctl is-active --quiet "$service_name.service" ; then
-        sudo systemctl stop "$service_name"
-      fi
-    elif supervisorctl status > /dev/null 2>&1; then
-      #echo "Supervisor and its managed processes appear to be running."
-      status = supervisorctl status "$service_name" 2>/dev/null
-      if echo "$status" | grep -q "RUNNING"; then
-        sudo supervisorctl stop nepi_engine
-      fi
-    fi
-
-    sudo ${NEPI_BASE}/scripts/nepi_engine_stop
-
-  }
-
-  export -f nepistop
-  
-
-  function nepistart(){
-      sudo -v
-      nepistop
-      source ${NEPI_BASE}/scripts/nepi_engine_start
-  }
-
-  export -f nepistart
-
-
-  function nepiconfig(){
-  echo "Running nepi_system_config.sh"
+# NEPI stop and start shortcuts
+function nepistop(){
   sudo -v
-  SHOW_CONFIG_MENU=1
-  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-  }
-  export -f nepiconfig
+
+  service_name="nepi_engine"
+  if systemctl status > /dev/null 2>&1; then
+    if systemctl is-active --quiet "$service_name.service" ; then
+      sudo systemctl stop "$service_name"
+    fi
+  elif supervisorctl status > /dev/null 2>&1; then
+    #echo "Supervisor and its managed processes appear to be running."
+    status = supervisorctl status "$service_name" 2>/dev/null
+    if echo "$status" | grep -q "RUNNING"; then
+      sudo supervisorctl stop nepi_engine
+    fi
+  fi
+
+  sudo ${NEPI_BASE}/scripts/nepi_engine_stop
+
+}
+
+export -f nepistop
 
 
-  BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws
-  ## NEPI build shortcuts
- function nepibld(){
+function nepistart(){
     sudo -v
-    cd $BUILD
-    source ./build_nepi_complete.sh
-  }
+    nepistop
+    source ${NEPI_BASE}/scripts/nepi_engine_start
+}
 
-  # NEPI build shortcuts
-  function codebld(){
+export -f nepistart
+
+
+function nepiconfig(){
+echo "Running nepi_system_config.sh"
+sudo -v
+SHOW_CONFIG_MENU=1
+bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+}
+export -f nepiconfig
+
+
+BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws
+## NEPI build shortcuts
+function nepibld(){
   sudo -v
   cd $BUILD
-  source ./build_nepi_code.sh
-  }
+  source ./build_nepi_complete.sh
+}
 
-  # NEPI build shortcuts
-  function ruibld(){
-    sudo -v
-    cd $BUILD
-    source ./build_nepi_rui.sh
-  }
+# NEPI build shortcuts
+function codebld(){
+sudo -v
+cd $BUILD
+source ./build_nepi_code.sh
+}
+
+# NEPI build shortcuts
+function ruibld(){
+  sudo -v
+  cd $BUILD
+  source ./build_nepi_rui.sh
+}
 
 
 function snvm(){

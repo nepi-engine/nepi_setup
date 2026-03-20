@@ -20,35 +20,30 @@
 
 # This file contains nepi pc dev aliases and sources nepi bash utils
 
-CONFIG_USER=$(id -un)
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
+fi
+if [[ ! -n $CONFIG_USER ]]; then
+    id -nu 1000
+fi
 
-### SOURCE NEPI UTIL FUNCTIONS
 NEPI_UTILS_FILE=/home/${CONFIG_USER}/.nepi_bash_utils
 source $NEPI_UTILS_FILE
 
-HELPN="${UTILSN}"
 
+################################
+export NEPI_REMOTE_SETUP=1
+################################
+
+HELPN="${UTILSN}"
 
 
 ###################################
 # NEPI SSH Agent Config
 ###################################
-
-CURRENT_DIR=$(pwd)
-
-if [[ -z "$NEPI_SSH_KEY_FILE" ]]; then
-  export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-fi
-
-export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
-
-
-export NEPI_REMOTE_SETUP=1
-export NEPI_TARGET_IP=$NEPI_IP
-export NEPI_RECOVERY_IP=$NEPI_RECOVERY_IP
-export NEPI_TARGET_USERNAME=nepi
-export NEPI_SSH_KEY=~/ssh_keys/nepi_engine_default_private_ssh_key
-export NEPI_TARGET_SRC_DIR=/mnt/nepi_storage/nepi_src # This is the default if unset
 
 
 # Clear Known Host Keys
