@@ -37,7 +37,9 @@ LOAD_SCRIPT=${CONFIG_FOLDER}/load_docker_config.py
 
 DOCKER_CONFIG_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml.bak
-
+if [[ ! -f $BACKUP_FILE ]]; then
+    cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+fi
 
 #echo "Starting Load Script with config folder: " ${CONFIG_FOLDER}
 
