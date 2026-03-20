@@ -207,8 +207,9 @@ else
 
     
     sudo apt install trash-cli -y
-
     sudo apt install dialog -y
+    sudo apt install ncdu -y
+
 
 
     echo ""

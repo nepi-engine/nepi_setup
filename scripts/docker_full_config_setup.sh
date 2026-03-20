@@ -39,6 +39,11 @@ if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -nu 1000)
 fi
 
+if [[ ${CONFIG_USER} != 'nepihost' ]]; then
+    echo "NEPI DOCKER FULL installation scripts must be run by user 'nepihost'"
+    return 1
+fi
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
