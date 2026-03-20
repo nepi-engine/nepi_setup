@@ -38,8 +38,9 @@ LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
 
 NEPI_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
-
-
+if [[ ! -f $BACKUP_FILE ]]; then
+    cp $NEPI_CONFIG_FILE $BACKUP_FILE
+fi
 
 
 if [[ -f "$LOAD_SCRIPT" ]]; then

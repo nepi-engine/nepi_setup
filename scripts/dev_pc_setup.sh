@@ -247,14 +247,15 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ##############
     echo "Setting up NEPI Bash Utils file"
 
-    NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_utils
+
+    NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_utils
     NEPI_UTILS_DEST=/home/${CONFIG_USER}
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
     sudo chmod 775 $NEPI_UTILS_SOURCE
     sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
 
-    NEPI_UTILS_FILE_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+    NEPI_UTILS_FILE_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
     NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
@@ -304,7 +305,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ##############
     echo "Installing NEPI PC Aliases file"
 
-    NEPI_ALIASES_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_pc_aliases
+    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_pc_aliases
     NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
 
