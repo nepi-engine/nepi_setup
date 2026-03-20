@@ -20,8 +20,6 @@
 
 sudo -v 
 
-sudo -v
-
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -41,9 +39,9 @@ fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-RESOURCES_FOLDER==$(dirname ${SCRIPT_FOLDER})/resources
+RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${RESOURCES_FOLDER}")/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 # Load System Config File
@@ -51,11 +49,13 @@ source $NEPI_UTILS_SOURCE
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
 NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
 if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SYSTEM_CONFIG_FILE}
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
     fi
 elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SETUP_CONFIG_FILE}"
     source ${NEPI_SETUP_CONFIG_FILE}
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"

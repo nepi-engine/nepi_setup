@@ -131,6 +131,7 @@ SYSTEM_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
 
 SYSTEM_SYS_CONFIG_FILE=${SYSTEM_ETC_PATH}/nepi_system_config.yaml
 SYSTEM_SYS_CONFIG_UPDATE_FILE=${SYSTEM_ETC_PATH}/nepi_system_config.sh
+SYSTEM_USER_CONFIG_FILE=${SYSTEM_ETC_PATH}/user/user_config.yaml
 
 
 
@@ -276,8 +277,11 @@ function print_current_config(){
 function udpate_config_file(){
     echo "Updating nepi system config values in file ${SYSTEM_SYS_CONFIG_FILE}"
     update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_USER_CONFIG_FILE
     update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_USER_CONFIG_FILE
     update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_USER_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_SN $SYSTEM_SYS_CONFIG_FILE

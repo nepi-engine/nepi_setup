@@ -1,0 +1,6 @@
+NEPI_USER: nepi
+NEPI_ADMIN_USER: nepiadmin
+NEPI_HOST_USER: nepihost
+NEPI_USER_PW: encrypted
+NEPI_ADMIN_PW: encrypted
+NEPI_HOST_PW: encrypted
