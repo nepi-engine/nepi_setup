@@ -158,7 +158,7 @@ else
 
         
         
-                NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}-${NEW_DESC}"
+                NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
                 # update_yaml_value "NEPI_EXPORT_TAG" "${NEPI_EXPORT_TAG}" "${DOCKER_CONFIG_FILE}"
  
             
