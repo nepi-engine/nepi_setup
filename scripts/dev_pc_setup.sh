@@ -35,6 +35,45 @@ NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+#echo "Loading NEPI SYSTEM CONFIG"
+NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
+if [[ ! -f $NEPI_USER_CONFIG_SCRIPT ]]; then
+    cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
+fi
+
+NEPI_SETUP_CONFIG_PYTHON=${RESOURCES_FOLDER}/etc/load_system_config.py
+NEPI_USER_CONFIG_PYTHON=/home/${CONFIG_USER}/load_system_config.py
+if [[ ! -f $NEPI_USER_CONFIG_PYTHON ]]; then
+    cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
+fi
+
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
+NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
+if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
+    cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
+fi
+
+if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
+    source ${NEPI_USER_CONFIG_SCRIPT}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
+    fi
+fi
+
+if [[ -n $NEPI_STATIC_IP ]]; then
+    nepi_ip=${NEPI_STATIC_IP%%/*}
+    NEPI_IP=$nepi_ip
+else
+    NEPI_DEVICE_ID=device1
+    NEPI_IP=192.168.179.103
+    NEPI_HOST_USER=nepihost
+    NEPI_IN_CONTAINER=1
+fi
+
 # This file sets up nepi bash aliases and util functions
 echo "########################"
 echo "NEPI DEV PC SETUP"
@@ -43,16 +82,6 @@ echo "########################"
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
-    NEPI_IN_CONTAINER=1
-    NEPI_DEVICE_ID=device1
-    NEPI_IP=192.168.179.103
-    NEPI_HOST_USER=nepihost
-
-    USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
-    if [[ -f "$USER_CONFIG_FILE" ]]; then
-        echo "Updating NEPI CONFIG from File: ${USER_CONFIG_FILE} "
-        load_yaml_file $USER_CONFIG_FILE 2>/dev/null
-    fi
 
     NEPI_USER_CONFIGS=(
     NEPI_DEVICE_ID \
@@ -73,7 +102,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     function udpate_config_file(){
         config_file=$1
-        update_yaml_value "NEPI_IP" $NEPI_IP $config_file
+        update_yaml_value "NEPI_STATIC_IP" "${NEPI_IP}/24" $config_file
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
     }

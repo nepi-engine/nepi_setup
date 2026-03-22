@@ -33,7 +33,6 @@ fi
 export CONFIG_USER=$CONFIG_USER
 
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -127,6 +126,8 @@ if [[ "$?" -eq 0 ]]; then
                     fi
                     echo "Updated Static IP file"
                     sudo bash -c "cat $file"
+                    echo "Updating Bash files"
+                    source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
 
                     echo "NEPI Static IP address updated to ${nepi_static_ip}"
                 else

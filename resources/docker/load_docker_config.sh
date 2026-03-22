@@ -44,8 +44,15 @@ fi
 #echo "Starting Load Script with config folder: " ${CONFIG_FOLDER}
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+    SETUP_FOLDER='nepi_setup'
+    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+        clean_yaml_file $DOCKER_CONFIG_FILE
+        if [[ ! -f $BACKUP_FILE ]]; then
+            cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+        fi
+        clean_yaml_file $BACKUP_FILE
+    if
 
     #echo "Running Load Process"
     success=0
@@ -84,14 +91,15 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         fi
     fi
 
+    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
+        if [[ "$success" -eq 1 ]]; then
+            echo "Backing Up Docker Config File..."
+            sudo cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
+        fi
 
-    if [[ "$success" -eq 1 ]]; then
-        echo "Backing Up Docker Config File..."
-        sudo cp $DOCKER_CONFIG_FILE $BACKUP_FILE
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
     fi
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"

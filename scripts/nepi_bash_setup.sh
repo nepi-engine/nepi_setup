@@ -47,7 +47,7 @@ source $NEPI_UTILS_SOURCE
 # Load System Config File
 #echo "Loading NEPI SYSTEM CONFIG"
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
-NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/home/${CONFIG_USER}/load_system_config.sh
 if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SYSTEM_CONFIG_FILE}
@@ -97,7 +97,8 @@ echo "########################"
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
 
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
+    nepi_ip=${NEPI_STATIC_IP%%/*}
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${nepi_ip}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
 
@@ -122,7 +123,7 @@ echo "########################"
 
     # export NEPI_IP=192.168.179.103
     # export NEPI_DEVICE_ID=device1
-    # export NEPI_RECOVERY_DEVICE_ID=device1
+    # export NEPI_RECOVERY_ID=device1
     # export NEPI_RECOVERY_IP=192.168.179.103
     # export NEPI_IN_CONTAINER=1
 

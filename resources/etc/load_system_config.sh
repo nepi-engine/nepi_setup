@@ -38,14 +38,19 @@ LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
 
 NEPI_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
-if [[ ! -f $BACKUP_FILE ]]; then
-    cp $NEPI_CONFIG_FILE $BACKUP_FILE
-fi
 
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
+    SETUP_FOLDER='nepi_setup'
+    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
+        clean_yaml_file $NEPI_CONFIG_FILE
+        if [[ ! -f $BACKUP_FILE ]]; then
+            cp $NEPI_CONFIG_FILE $BACKUP_FILE
+        fi
+        clean_yaml_file $BACKUP_FILE
+    fi
 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
 
     success=0
     eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
@@ -81,14 +86,15 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         fi
     fi
 
+    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
+        if [[ "$success" -eq 1 ]]; then
+            echo "Backing Up NEPI Config File..."
+            sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE 2>/dev/null
+        fi
 
-    if [[ "$success" -eq 1 ]]; then
-        echo "Backing Up NEPI Config File..."
-        sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE 2>/dev/null
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
     fi
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"

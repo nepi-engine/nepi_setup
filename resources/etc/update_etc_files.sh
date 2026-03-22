@@ -148,10 +148,7 @@ source ${ETC_FOLDER}/scripts/update_etc_wifi_access_point.sh $LOAD_NEPI_CONFIG
 # SSH KEY UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_ssh_keys.sh $LOAD_NEPI_CONFIG
 
-###########################################
-# BASH UPDATES
-# Allow Load NEPI Config
-source ${ETC_FOLDER}/scripts/update_bash_config.sh
+
 
 
 

@@ -33,7 +33,6 @@ fi
 export CONFIG_USER=$CONFIG_USER
 
 
-bfile=/home/${CONFIG_USER}/.nepi_bash_utils
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
@@ -77,19 +76,20 @@ else
 fi
 
 
-if [[ -f "$bfile" ]]; then
+if [[ -f "$ufile" ]]; then
+    needs_update=0
     echo ""
-    echo "Updating Bash Variables in ${bfile}"
+    echo "Updating Bash Variables in ${ufile}"
     echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
     if is_valid_did $NEPI_DEVICE_ID; then
-        update_text_value $bfile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
+        update_text_value $ufile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
     fi
 
     echo "NEPI_STATIC_IP: ${NEPI_STATIC_IP}"
     nepi_ip=${NEPI_STATIC_IP%%/*}
     echo "NEPI_IP: ${nepi_ip}"
     if is_valid_ipv4 $nepi_ip; then
-        update_text_value $bfile "export NEPI_IP" "export NEPI_IP=${nepi_ip}"
+        update_text_value $ufile "export NEPI_IP" "export NEPI_IP=${nepi_ip}"
     fi
 
     sudo rm /root/.bashrc
@@ -106,8 +106,10 @@ if [[ -f "$bfile" ]]; then
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
     sudo chmod 0755 /home/${CONFIG_USER}
 
+    source /home/${CONFIG_USER}/.bashrc
+
 else
-    echo "NEPI Bashrc file not found at: ${bfile}"
+    echo "NEPI Bashrc file not found at: ${ufile}"
     exit 1
 fi
 

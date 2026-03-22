@@ -32,7 +32,7 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
@@ -150,7 +150,7 @@ if [[ "$?" -eq 0 ]]; then
             sudo hostnamectl set-hostname ${NEPI_DEVICE_ID}
             sudo systemctl restart systemd-hostnamed
 
-
+            echo "Updating Bash files"
             source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
             
 

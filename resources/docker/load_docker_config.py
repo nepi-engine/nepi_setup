@@ -47,26 +47,18 @@ def read_yaml_2_dict(file_path):
     return dict_from_file
 
 if os.path.exists(config_file) == True:
-    if os.path.exists(backup_file) == True:
-        config_dict = read_yaml_2_dict(config_file)
-        backup_dict = read_yaml_2_dict(backup_file)
-        if config_dict is not None:
-            if len(config_dict.keys()) == len(backup_dict.keys()):
-                for key in config_dict.keys():
-                    print_string=(str(key) + "=" + str(config_dict[key]))
-                    print_list.append(print_string)
-                print_list.append("success=1")
-            else:
-                print_list.append("success=-3")
-        else:
-            print_list.append("success=0")
-    else:
         config_dict = read_yaml_2_dict(config_file)
         if config_dict is not None:
-                for key in config_dict.keys():
-                    print_string=(str(key) + "=" + str(config_dict[key]))
-                    print_list.append(print_string)
-                print_list.append("success=1")
+            if os.path.exists(backup_file) == True:
+                backup_dict = read_yaml_2_dict(backup_file)
+                if backup_dict is not None:
+                    for key in backup_dict.keys():
+                        if key not in config_dict.keys():
+                            config_dict[key] = backup_dict[key]
+            for key in config_dict.keys():
+                print_string=(str(key) + "=" + str(config_dict[key]))
+                print_list.append(print_string)
+            print_list.append("success=1")
         else:
             print_list.append("success=0")
 else:

@@ -1018,13 +1018,30 @@ function sync_yaml_files(){
 export -f sync_yaml_files
 
 
+
+function clean_yaml_file(){
+    yaml_file=$1
+    #echo $yaml_file
+    if [ -f "$yaml_file" ]; then
+
+      success=0
+      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/clean_yaml_file.py $tmp_file)"  #2>/dev/null"
+      eval "$eval_cmd"
+      
+    else
+        echo "Yaml file not found ${yaml_file}"
+        return 1
+    fi
+}
+export -f clean_yaml_file
+
 function load_yaml_file(){
-    config_file=$1
-    #echo $config_file
-    if [ -f "$config_file" ]; then
+    yaml_file=$1
+    #echo $yaml_file
+    if [ -f "$yaml_file" ]; then
     
       success=0
-      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $config_file)"  #2>/dev/null"
+      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $yaml_file)"  #2>/dev/null"
       eval "$eval_cmd"
       
       for entry in $load_vals; do
@@ -1037,7 +1054,7 @@ function load_yaml_file(){
       fi
 
     else
-        echo "Config file not found ${config_file}"
+        echo "Yaml file not found ${yaml_file}"
         return 1
     fi
 }
@@ -1045,11 +1062,11 @@ export -f load_yaml_file
 
 function print_yaml_file(){
     #echo $1
-    config_file=$1
-    if [ -f "$config_file" ]; then
+    yaml_file=$1
+    if [ -f "$yaml_file" ]; then
 
       success=0
-      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $config_file)"  #2>/dev/null"
+      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $yaml_file)"  #2>/dev/null"
       eval "$eval_cmd"
 
       for entry in $load_vals; do
@@ -1065,7 +1082,7 @@ function print_yaml_file(){
     fi
 
     else
-        echo "Config file not found ${config_file}"
+        echo "Yaml file not found ${yaml_file}"
         return 1
     fi
 }

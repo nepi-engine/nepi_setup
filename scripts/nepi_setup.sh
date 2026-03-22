@@ -205,24 +205,6 @@ export NEPI_MANAGES_DOCKER=$SERVICES_MANAGED
 update_yaml_value "NEPI_MANAGES_DOCKER" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
 
 
-if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
-    echo ""
-    echo "########"
-    echo "Configuring Samba Service"
-
-
-    echo "Updating Samba ETC config file"
-    if [[ "$CONFIG_USER" == "nepi" ]]; then
-        source_file=${SOURCE_ETC_PATH}/samba/smb.conf
-    else
-        source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-    fi
-
-    dest_file=/etc/samba/smb.conf
-    if [[ -f "$source_file" ]]; then
-        sudo cp -d $source_file $dest_file
-    fi
-fi
 
 
 echo ""
@@ -238,6 +220,24 @@ if [[ "$?" -eq 0 ]]; then
 
 
     if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
+
+        echo ""
+        echo "########"
+        echo "Configuring Samba Service"
+
+
+        echo "Updating Samba ETC config file"
+        if [[ "$CONFIG_USER" == "nepi" ]]; then
+            source_file=${SOURCE_ETC_PATH}/samba/smb.conf
+        else
+            source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+        fi
+
+        dest_file=/etc/samba/smb.conf
+        if [[ -f "$source_file" ]]; then
+            sudo cp -d $source_file $dest_file
+        fi
+
 
         SYSTEMD_SERVICE_PATH=/etc/systemd/system
 

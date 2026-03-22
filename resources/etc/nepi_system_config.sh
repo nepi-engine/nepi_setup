@@ -148,11 +148,10 @@ NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 ###################
 #  Upated NEPI Config Settings
 
+
 systemctl&> /dev/null
 res=$?
-if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepihost' ]]; then
-    export NEPI_IN_CONTAINER=1
-elif [[ "$?" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
+if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
     export NEPI_IN_CONTAINER=0
 else
     export NEPI_IN_CONTAINER=1
@@ -162,8 +161,9 @@ update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepiadmin' && ${CONFIG_USER} != 'nepihost' ]]; then
     export NEPI_HOST_USER=$CONFIG_USER
     update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
+    NEPI_HOST_PW="encrypted"
     if [[ ${NEPI_HOST_USER} == "nepihost" ]]; then
-        update_yaml_value "NEPI_HOST_PW" "encrypted" $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_HOST_PW" $NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
     fi
 fi
 
@@ -220,6 +220,7 @@ function update_current_config() {
     CURRENT_NEPI_ALIAS_IP_2=$(fix_ipv4_netmask $NEPI_ALIAS_IP_2)
     CURRENT_NEPI_ALIAS_IP_3=$(fix_ipv4_netmask $NEPI_ALIAS_IP_3)
     CURRENT_NEPI_NTP_IP="$NEPI_NTP_IP"
+    CURRENT_NEPI_ROS_IP="$NEPI_ROS_IP"
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
@@ -267,6 +268,7 @@ function print_current_config(){
     echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
     echo "NEPI_ALIAS_IP_3: ${CURRENT_NEPI_ALIAS_IP_3}"
     echo "NEPI_NTP_IP: ${CURRENT_NEPI_NTP_IP}"
+    echo "NEPI_ROS_IP: ${CURRENT_NEPI_ROS_IP}"
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
@@ -292,6 +294,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_3" $CURRENT_NEPI_ALIAS_IP_3 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ROS_IP" $CURRENT_NEPI_ROS_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
@@ -433,6 +436,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 break # Exit the select statement, re-display menu
                             elif is_valid_ipv4_netmask "$USER_INPUT"; then
                                 CURRENT_NEPI_STATIC_IP=$USER_INPUT
+                                CURRENT_NEPI_ROS_IP=${CURRENT_NEPI_STATIC_IP%%/*}
                                 echo ""
                                 break # Exit the select statement, re-display menu
                             else
