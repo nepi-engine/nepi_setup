@@ -46,29 +46,6 @@ export NEPI_REMOTE_SETUP=0
 HELPN="${UTILSN}"
 
 
-###################################
-# NEPI DEV Util Functions
-###################################
-export SOURCE_FOLDER=/home/${CONFIG_USER}/nepi_engine_ws
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-
-
-
-## NEPI deploy complete
-alias nepidpl="
-cd $SOURCE_FOLDER
-./deploy_nepi_complete.sh"
-
-# NEPI deploy repos
-alias repodpl="
-cd $SOURCE_FOLDER
-./deploy_nepi_repos.sh"
-
-utilsn="${utilsn}
-### NEPI DEV UTIL FUNCTIONS
-nepidpl = deploy nepi complete
-repodpl = deploy specific repos"
 
 function pushn(){
   git add --all

@@ -44,6 +44,9 @@ fi
 CURRENT_DIR=$(pwd)
 BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
+
+export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
+
 export CONFIG_USER=$CONFIG_USER
 export USER=$CONFIG_USER
 
@@ -73,8 +76,13 @@ export NEPI_TARGET_IP=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
 export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
 
-export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
+export NEPI_REPO_ADDRESS_DEFAULT='git@github.com:nepi-engine/nepi_engine_ws.git'
+export NEPI_REPO_ADDRESS='git@github.com:nepi-engine/nepi_engine_ws.git'
+export NEPI_REPO_NAME=$(basename "${NEPI_REPO_ADDRESS%.*}")
+export NEPI_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
 
+export NEPI_SETUP_REPO_NAME='nepi_setup'
+export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
 
 ###############################
@@ -449,8 +457,8 @@ is_valid_jetson = Check if device is an NVIDIA Jetson system
 is_valid_arm64 = Check if device is arm64 arch
 is_valid_amd64 = Check if device is amd64 arch
 is_valid_cuda = Check if system has CUDA
-is_space_avail_mb = Check SOURCE_FOLDER for REQ_SPACE in MB
-is_space_avail_gb = Check SOURCE_FOLDER for REQ_SPACE in GB
+is_space_avail_mb = Check folder for REQ_SPACE in MB
+is_space_avail_gb = Check folder for REQ_SPACE in GB
 is_nepi_path = Check if path in either a nepi managed folder
 is_valid_email = Check if email is valid format"
 
@@ -770,41 +778,6 @@ function fix_ipv4_netmask() {
 export -f fix_ipv4_netmask
 
 
-function nepiclone {
-  if is_valid_internet ; then
-    cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout main
-    git submodule update --init --recursive
-  fi
-}
-
-export -f nepiclone
-
-function nepiclonedev {
-  if is_valid_internet ; then
-    cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout develop
-    git submodule update --init --recursive
-  fi
-}
-
-export -f nepiclonedev
-
-
-function nepipull {
-  if is_valid_internet ; then
-    cd ~/nepi_engine_ws
-    git pull --recurse-submodules
-  fi
-}
-
-export -f nepipull
-
-
 function nls(){
   ls -l -a $1
 }
@@ -828,9 +801,6 @@ nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues
 fix_ipv4_netmask = Check valid IP and add 24 netmask if not provided
-nepiclone = Clone the latest NEPI source-code repo
-nepiclonedev = Clone the latest NEPI Development branch source-code repo
-nepipull = Update to the latest NEPI source-code repo
 sbrc = Source the current user's bashrc files" 
 
 ###################################
@@ -1734,7 +1704,7 @@ fi
 ###################################
 # NEPI Dev Functions
 ###################################
-export SOURCE_FOLDER=/home/${CONFIG_USER}/nepi_engine_ws
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 
@@ -1742,7 +1712,167 @@ alias nepihome="
 cd ${NEPI_HOME}"
 
 
+
+function select_ssh_key {
+        key_folder=$1
+        if [[ -z $key_folder ]]; then
+          key_folder="/home/${CONFIG_USER}/.ssh"
+        fi
+        sel_ssh_file=''
+        echo "Checking for available key options in folder: ${key_folder}"
+
+        if [[ -d $key_folder ]]; then
+                ###############
+                #echo "Checking for available key options"
+                # Change to the specified directory
+                sudo chmod 0700 $key_folder
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+                pushd "$key_folder" > /dev/null || return 1
+
+                declare -a files
+                for file in "$key_folder"/*; do
+                    pub_file="${file}.pub"
+                    #echo "Checking file: ${file}"
+                    #echo "Looking for public key file: ${pub_file}"
+                    filename=$(basename "$file")
+                    if [[ -f "$file" ]]; then # Check if the item is a regular file
+                        if [[ -f $pub_file ]]; then
+                          files+=( "$filename" ) # Add it to the array
+                          echo $filename
+                        fi
+                    fi
+                done
+                sudo chmod 0700 $key_folder
+                
+
+                # Check if there are any files
+                if [[ ${#files[@]} -eq 0 ]]; then
+                    echo "No SSH Key files found in folder: ${key_folder}"
+                    popd > /dev/null
+                    return 1
+                fi
+
+                # # Check if one file
+                # if [[ ${#files[@]} -eq 1 ]]; then
+                #     echo "${files[0]}"
+                #     popd > /dev/null
+                #     return 0
+                # fi
+                echo ""
+                echo "Select a file from "${folder_path}":"
+                echo "--------------------"
+                echo ""
+                select filename in "${files[@]}"; do
+                    if [[ -n "$filename" ]]; then
+                        sel_ssh_file="$filename"
+                        break
+                    else
+                        echo "Invalid selection. Please try again."
+                    fi
+                done
+                
+                # Return to the original directory
+                popd > /dev/null
+
+                # Output the full path of the selected file
+                if [[ -n "$sel_ssh_file" ]]; then
+                    sel_ssh_path=${key_folder}/$sel_ssh_file
+                    sudo chmod 0700 $sel_ssh_path
+                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                    echo ${sel_ssh_path}
+                    return 0
+                else
+                  return 2
+                fi
+
+        else
+          echo "SSH Key folder not found ${key_folder}"
+          return 1
+        fi
+
+}
+
+export -f select_ssh_key
+
+
+function create_ssh_key {
+        key_folder=$1
+        if [[ ! -d $key_folder ]]; then
+          sudo mkdir -p $key_folder
+        fi
+
+        user_email=$2
+        if [[ -z "$user_email" ]]; then
+            echo "No Email Provided"
+            return 1
+        fi 
+
+        key_name=$3
+        if [[ -z "$key_name" ]]; then
+            key_name="$(hostname)_${CONFIG_USER}_nepi"
+        fi 
+        
+
+
+
+        if [[ -d $key_folder ]]; then          
+
+              key_file="id_ed25519_"${key_name}
+              key_path=${key_folder}/${key_file}
+
+              sudo chmod 0700 $key_folder
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+              if [[ -f $key_path ]]; then
+                  echo "${key_path}"
+                  return -2
+              fi
+
+              ssh-keygen -t ed25519 -f ${key_path} -q -N "" -C "${ghub_email}"
+              eval "$(ssh-agent -s)"
+              ssh-add ${key_path}
+
+              config_file=${key_folder}/config
+              touch ${config_file}
+
+              sudo chmod 0700 $key_folder
+              sudo chmod 0600 $key_path
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+
+
+              if [[ -f $key_path ]]; then
+                  echo "Created ssh_key ${key_file}"
+                  echo "${key_path}"
+                  return 0
+
+              else
+                echo "NEPI Failed to create ssh_key ${key_file}"
+                return 1
+              fi
+
+
+        else
+          echo "SSH Key folder not found ${key_folder}"
+          return 2
+        fi
+
+}
+
+export -f create_ssh_key
+
+
+
+
+
 function nepigithub {
+    key_folder="/home/${CONFIG_USER}/.ssh"
+
+    if [[ ! -d $key_folder ]]; then
+      sudo mkdir -p $key_folder
+    fi    
+
     if is_valid_internet >/dev/null 2>&1; then
 
         echo " "
@@ -1751,70 +1881,153 @@ function nepigithub {
         echo ""
 
 
-        install_key='yes'
+        needs_key='yes'
+        exist_key='no'
+        add_key='no'
+        ghub_email=''
 
-        while [[ "$install_key" == 'yes' ]]; do
+        while [[ "$needs_key" == 'yes' ]]; do
 
 
             if ! is_valid_internet >/dev/null 2>&1; then
                 echo "NO INTERNET CONNECTION DETECTED.  "
                 echo ""
-                install_key=$(ask_yes_no "Do you want to connect to internet and try again?")
+                needs_key=$(ask_yes_no "Do you want to connect to internet and try again?")
             else
                 ssh -T git@github.com >/dev/null 2>&1
                 if [[ "$?" -lt 2 ]]; then
-                    key_file=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
-                    key_name=$(basename "${key_file}")
-                    install_key='no'
+                    key_path=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
+                    key_name=$(basename "$key_path")
+                    needs_key='no'
                 else
-                    key_file=''
+                    key_path=''
+                    echo ""
                     echo "NO VALID GITHUB SSH KEY FOUND"
                     echo ""
-                    install_key=$(ask_yes_no "Do you want to create a new GitHub SSH Key?")
 
-                    if [ "$install_key" == "yes" ]; then
+                    PS3=$'\n'"Please enter your choice by NUMBER: "
+                    options=(  "Select SSH Key" "Create SSH Key")
 
-                        key_name=id_ed25519_nepi
-                        key_file=/home/${CONFIG_USER}/.ssh/${key_name}
-                        if [[ ! -f $key_file ]]; then
-                            echo "Creating NEPI GitHub ssh_key ${key_name}"
-                            echo ""
-                            while [[ -z "$ghub_email" ]]; do
-                                read -p "Enter your GitHub email address: " USER_INPUT
-                                if is_valid_email "$USER_INPUT"; then
-                                    echo "Using email ${USER_INPUT}"
-                                    ghub_email=$USER_INPUT
-                                else
-                                    echo "Not A Valid Email"
-                                fi  
-                            done   
-                            ssh-keygen -t ed25519 -f ${key_file} -q -N "" -C "${ghub_email}"
+                    while true; do
+                        #clear # Optional: Clear the screen before displaying the menu
 
-                        fi
+                        COLUMNS=1
+                        select opt in "${options[@]}" ; do
+                            case $opt in
+
+                                "Select SSH Key")
+                                    ret=$(select_ssh_key $key_folder)
+                                    sel_error=$?
+                                    sel_file=$(echo $ret | awk '{print $NF}')
+                                    #echo "Got select SSH Key file error: ${sel_error}"
+                                    if [[ $sel_error -eq 0 && -n sel_file ]]; then
+                                      echo ''
+                                      echo "Got selected SSH Key file: ${sel_file}"
+                                      key_path=$sel_file
+                                      exist_key='yes'
+                                      break 2 # Exit both the select and the while loop
+                                    else
+                                      echo ''
+                                      echo "No SSH Key files found in folder: ${key_folder}"
+                                      echo ''
+                                    fi     
+                                    break # Exit the select statement
+                                    ;;
+                                "Create SSH Key")
+                                    key_name="$(hostname)_${CONFIG_USER}_github"
+
+                                    if [[ ! -f $key_path ]]; then
+                                        echo "Creating NEPI GitHub ssh_key ${key_file}"
+                                        echo ""
+
+                                        while [[ -z "$ghub_email" ]]; do
+                                            read -p "Enter your GitHub email address: " USER_INPUT
+                                            if is_valid_email "$USER_INPUT"; then
+                                                echo "Using email ${USER_INPUT}"
+                                                ghub_email=$USER_INPUT
+                                            else
+                                                echo "Not A Valid Email"
+                                                return 1
+                                            fi  
+                                        done   
+                                        
+
+                                    fi
+
+
+                                    ret=$(create_ssh_key $key_folder $key_name)
+                                    sel_error=$?
+                                    sel_file=$(echo $ret | awk '{print $NF}')
+                                    #echo "Got select SSH Key file error: ${sel_error}"
+                                    
+                                    if [[ $? -eq 0 && -n sel_file ]]; then
+                                      echo ''
+                                      echo "Got selected SSH Key file: ${sel_file}"
+                                      key_path=$sel_file
+                                      break 2 # Exit both the select and the while loop
+                                    elif [[ $? -eq 1 ]]; then
+                                      echo ''
+                                      echo "SSH Github Key for this user allready exists: ${key_name}"
+                                      check_key=$(ask_yes_no "Do you want to use this key?")
+                                      if [[ ${check_key} == 'yes' ]]; then
+                                        key_path=$sel_file
+                                        break 2 # Exit both the select and the while loop
+                                      fi
+                                    fi     
+                                    break # Exit the select statement
+                                    ;;
+                                *)
+                                    echo "Invalid option, please try again."
+                                    ;;
+                            esac
+                        done
+                    done
+                    echo ""
+
+
+
+
+
+
+
+                    if [[ -n $key_path ]]; then
+
+                        sudo chmod 0700 $key_folder
+                        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
                         config_file=/home/${CONFIG_USER}/.ssh/config
                         touch ${config_file}
                         if grep -qnw $config_file -e ${key_name}; then
                             : #echo "Already Done"
                         else
+                            
+                            NAME=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
+
                             echo 'Host github.com' | sudo tee -a $config_file
                             echo '   AddKeysToAgent yes' | sudo tee -a $config_file
-                            echo '   IdentityFile '${key_file} | sudo tee -a $config_file
+                            echo '   IdentityFile '${key_path} | sudo tee -a $config_file
+                            echo ''
+
+
                         fi
+
+                        sudo chmod 0700 $key_folder
+                        sudo chmod 0600 $key_path
+                        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                        needs_key='no'
+                        add_key='yes'
+
+                        break 2 # Exit both the select and the while loop
                         
-                        eval "$(ssh-agent -s)"
-                        ssh-add ${key_file}
-                    else
-                        echo "You can rerun this script if you want to setup at a later time"
-                        echo ""
                     fi
+
                 fi
 
             fi
         done
 
-        if [[ -n $key_file ]]; then
-            check_key='yes'
-            while [[ "$check_key" == 'yes' ]]; do
+        if [[ -n $key_path && ${add_key} == 'yes' ]]; then
+            key_name=$(basename "${key_path}")
 
 
                 ssh -T git@github.com >/dev/null 2>&1
@@ -1836,35 +2049,123 @@ function nepigithub {
                     echo "Authentication Key"
                     echo ""
                     echo "<< KEY >>"
-                    echo $(cat ${key_file}.pub)
+                    echo $(sudo cat ${key_path}.pub)
                     echo ""
                     echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
 
                     echo ""
-                    check_key=$(ask_yes_no "Do you want to setup your key in your GitHub account and test it again?")
-                else
-                    check_key='no'
-                fi
-            done
+                    read -p "Press enter after configuring your GitHub account with new ssh key"
+
+              fi
+
         fi
+
+        g_email=$(git config user.email)
+        g_name=$(git config user.name)
+
+        if [[ -z $g_email || -z $g_name ]]; then
+          if [[ -z $ghub_email ]]; then
+                              while [[ -z "$ghub_email" ]]; do
+                                  read -p "Enter your GitHub email address: " USER_INPUT
+                                  if is_valid_email "$USER_INPUT"; then
+                                      echo "Using email ${USER_INPUT}"
+                                      ghub_email=$USER_INPUT
+                                  else
+                                      echo "Not A Valid Email"
+                                      return 1
+                                  fi  
+                              done   
+          fi
+
+          if [[ -n $ghub_email ]]; then
+                  ghub_name=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
+                  git config --global user.email "$ghub_email"
+                  git config --global user.name "$ghub_name"
+          
+          fi
+        fi
+
+
 
         ssh -T git@github.com >/dev/null 2>&1
         if [[ "$?" -lt 2 ]]; then
             echo ''
             echo '#######################'
-            echo "GitHub SSH key authenticated with key file ${key_file}"
+            echo "GitHub SSH Key authenticated with key file ${key_path}"
             echo '#######################'
             echo ''
+
+
+
+            # nepi_repo_address=$NEPI_REPO_ADDRESS_DEFAULT
+            # echo ""
+            # PS3=$'\n'"Please enter your choice by NUMBER: "
+            # options=(  "Use Default NEPI Repo" "Fork Default NEPI Repo" "Set Custom NEPI Repo")
+
+            # while true; do
+            #     #clear # Optional: Clear the screen before displaying the menu
+
+            #     COLUMNS=1
+            #     select opt in "${options[@]}" ; do
+            #         case $opt in
+
+            #             "Use Default NEPI Repo")
+            #                 NEPI_REPO_ADDRESS=$nepi_repo_address
+            #                 break 2 # Exit both the select and the while loop
+
+            #                 ;;
+            #             "Fork Default NEPI Repo")
+            #                  NEPI_REPO_ADDRESS=$nepi_repo_address
+            #                 break 2 # Exit both the select and the while loop
+
+            #                 ;;
+            #             "Set Custom NEPI Repo")
+            #                 NEPI_REPO_ADDRESS=$nepi_repo_address
+            #                 break 2 # Exit both the select and the while loop
+
+            #                 ;;
+            #             *)
+            #                 echo "Invalid option, please try again."
+            #                 ;;
+            #         esac
+            #     done
+            # done
+            # echo ""
+
+            nepi_repo_name=$(basename "${NEPI_REPO_ADDRESS%.*}")
+            if [[ -n $NEPI_REPO_ADDRESS && -n $nepi_repo_name ]]; then
+              export NEPI_REPO_ADDRESS=$NEPI_REPO_ADDRESS
+              export NEPI_REPO_NAME=$nepi_repo_name
+
+              update_text_value $NEPI_BASH_UTILS "export NEPI_REPO_ADDRESS=" "export NEPI_REPO_ADDRESS=${NEPI_REPO_ADDRESS}"
+
+
+              echo "Using NEPI Repo ${nepi_repo_name}"
+              echo ""
+   
+              nepi_repo_folder="/home/${CONFIG_USER}/${nepi_repo_name}"
+              if [[ ! -d $nepi_repo_folder ]]; then
+                echo "Cloning NEPI Repo to ${nepi_repo_folder}"
+                echo "" 
+                nepiclone
+              fi
+
+            fi
+
+
+
+            echo " "
+            echo "################################# "
+            echo "NEPI DEV GITHUB SETUP COMPLETE"
+            echo "################################# "
+            echo " "
+
+
         else
-            echo "GitHub SSH key not authenticated"
+            echo "GitHub SSH Key NOT AUTHENTICATED"
+            echo "Fix errors and try again"
         fi
 
-
-        echo " "
-        echo "################################# "
-        echo "NEPI DEV GITHUB SETUP COMPLETE"
-        echo "################################# "
-        echo " "
     fi
 
 }
@@ -1875,10 +2176,14 @@ export -f nepigithub
 function nepiclone {
   if is_valid_internet ; then
     cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout main
-    git submodule update --init --recursive
+    git clone ${NEPI_REPO_ADDRESS} 
+    if [[ $? -eq 0 ]]; then
+      cd ${NEPI_REPO_NAME}
+      git checkout main
+      git submodule update --init --recursive
+    else
+      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
+    fi
   fi
 }
 
@@ -1887,10 +2192,14 @@ export -f nepiclone
 function nepiclonedev {
   if is_valid_internet ; then
     cd ~/
-    git clone git@github.com:nepi-engine/nepi_engine_ws.git 
-    cd nepi_engine_ws
-    git checkout develop
-    git submodule update --init --recursive
+    git clone ${NEPI_REPO_ADDRESS} 
+    if [[ $? -eq 0 ]]; then
+      cd ${NEPI_REPO_NAME}
+      git checkout develop
+      git submodule update --init --recursive
+    else
+      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
+    fi
   fi
 }
 
@@ -1899,22 +2208,33 @@ export -f nepiclonedev
 
 function nepipull {
   if is_valid_internet ; then
-    cd ~/nepi_engine_ws
-    git pull --recurse-submodules
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git pull --recurse-submodules
+    fi
   fi
 }
 
 export -f nepipull
 
 function nepimain {
-    cd ~/nepi_engine_ws
-    git checkout main
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git checkout main
+      nepipull
+    fi
 }
 export -f nepimain
 
 function nepidev {
-    cd ~/nepi_engine_ws
-    git checkout develop
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git checkout develop
+      nepipull
+    fi
 }
 export -f nepidev
 
@@ -1922,16 +2242,16 @@ export -f nepidev
 
 ## NEPI deploy complete
 alias nepisetup="
-source ${SOURCE_FOLDER}/nepi_setup/scripts/dev_pc_setup.sh"
+source ${NEPI_REPO_FOLDER}/nepi_setup/scripts/dev_pc_setup.sh"
 
 ## NEPI deploy complete
 alias nepidpl="
-cd $SOURCE_FOLDER
+cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_complete.sh"
 
 # NEPI deploy repos
 alias repodpl="
-cd $SOURCE_FOLDER
+cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_repos.sh"
 
 
@@ -1946,7 +2266,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == 'nepi_engine_ws' || "$(pwd)" == "/home/${CONFIG_USER}/nepi_engine_ws/src" ]]; then
+    if [[ "$cur_folder" == '${NEPI_REPO_NAME}' || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src" ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 

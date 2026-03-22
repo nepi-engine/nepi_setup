@@ -64,6 +64,7 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
+
 if [[ -n $NEPI_STATIC_IP ]]; then
     nepi_ip=${NEPI_STATIC_IP%%/*}
     NEPI_IP=$nepi_ip
@@ -184,86 +185,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
 
-    ####################################################
-
-    echo " "
-    echo "################################# "
-    echo "Updating SSH Keys"
-    echo ""
-
-
-    ###################
-    # Check for default key
-
-    NEPI_SSH_PKEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys/private_keys
-    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
-    if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
-        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
-    else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
-            mkdir -p $NEPI_SSH_PKEY_DEST
-        fi
-        sudo chmod 0600 $NEPI_SSH_PKEY_SOURCE/*
-        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* /home/${CONFIG_USER}/ssh_keys/
-    fi
-    if [ -d "/home/${CONFIG_USER}/ssh_keys" ]; then
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/ssh_keys/*
-    fi
-
-    ###############
-    echo "Checking for available key options"
-    sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
-
-    echo $sel_ssh_file
-    if [[ -n "$sel_ssh_file"  ]]; then
-        sel_ssh_path=${NEPI_SSH_PKEY_DEST}/${sel_ssh_file}
-        if [[ -f "$sel_ssh_path" ]]; then
-            NEPI_SSH_FILE=$sel_ssh_file
-            NEPI_SSH_SOURCE=$sel_ssh_path
-            echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
-            export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
-        fi
-    else
-        echo "No SSH Key Found"
-        export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-    fi
-
-
-
-
-    #################
-    # Update Key Path
-    sudo chmod 0700 $NEPI_SSH_PKEY_DEST
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
-
-
-
-    echo " "
-    echo "################################# "
-    echo "Updating ETC Hosts File"
-    echo ""
-
-    file=/etc/hosts
-    bfile=${file}.bak
-
-    if [[ ! -f "$bfile" ]]; then
-        path_backup $file $bfile
-    fi
-
-    sudo cp -a $bfile $file
-
-    echo "Updating NEPI IP in ${file}"
-
-    echo "${NEPI_IP} nepi" | sudo tee -a $file
-    echo "${NEPI_IP} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
-    echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${NEPI_IP} nepiadmin" | sudo tee -a $file
-    echo "${NEPI_IP} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${NEPI_IP} nepiuser" | sudo tee -a $file
-    echo "${NEPI_IP} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
-
 
 
     #####################################
@@ -300,34 +221,6 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
-
-    # export NEPI_USER=nepi
-    # export NEPI_HOST_USER=nepihost
-
-    # export NEPI_IP=192.168.179.103
-    # export NEPI_DEVICE_ID=device1
-    # export NEPI_RECOVERY_DEVICE_ID=device1
-    # export NEPI_RECOVERY_IP=192.168.179.103
-    # export NEPI_IN_CONTAINER=1
-
-
-    # export NEPI_HOME=/home/$CONFIG_USER
-    # export NEPI_BASE=/opt/nepi
-    # export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
-    # export NEPI_STORAGE='/mnt/nepi_storage'
-    # export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
-    # export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
-
-
-    # export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-    # export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
-    # export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
-
-    # export NEPI_TARGET_IP=$NEPI_IP
-    # export NEPI_TARGET_USERNAME=$NEPI_USER
-    # export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
-
-    # export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
 
 
 
@@ -388,6 +281,86 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Sourcing updated bash files"
     source $file
     wait
+
+
+
+    ####################################################
+
+    echo " "
+    echo "################################# "
+    echo "Updating SSH Keys"
+    echo ""
+
+
+    ###################
+    # Check for default key
+
+    NEPI_SSH_PKEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys/private_keys
+    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
+    if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
+        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
+    else
+        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
+        if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
+            mkdir -p $NEPI_SSH_PKEY_DEST
+        fi
+        sudo chmod 0600 $NEPI_SSH_PKEY_SOURCE/*
+        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* /home/${CONFIG_USER}/ssh_keys/
+    fi
+    if [ -d "/home/${CONFIG_USER}/ssh_keys" ]; then
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/ssh_keys/*
+    fi
+
+    ###############
+    echo "Checking for available key options"
+    sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
+
+    echo $sel_ssh_file
+    if [[ -n "$sel_ssh_file"  ]]; then
+        sel_ssh_path=${NEPI_SSH_PKEY_DEST}/${sel_ssh_file}
+        if [[ -f "$sel_ssh_path" ]]; then
+            NEPI_SSH_FILE=$sel_ssh_file
+            NEPI_SSH_SOURCE=$sel_ssh_path
+            echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
+            export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
+        fi
+    else
+        echo "No SSH Key Found"
+        export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
+    fi
+
+
+    #################
+    # Update Key Path
+    sudo chmod 0700 $NEPI_SSH_PKEY_DEST
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
+
+
+
+    echo " "
+    echo "################################# "
+    echo "Updating ETC Hosts File"
+    echo ""
+
+    file=/etc/hosts
+    bfile=${file}.bak
+
+    if [[ ! -f "$bfile" ]]; then
+        path_backup $file $bfile
+    fi
+
+    sudo cp -a $bfile $file
+
+    echo "Updating NEPI IP in ${file}"
+
+    echo "${NEPI_IP} nepi" | sudo tee -a $file
+    echo "${NEPI_IP} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
+    echo "${NEPI_IP} ${NEPI_HOST_USER}" | sudo tee -a $file
+    echo "${NEPI_IP} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
+    echo "${NEPI_IP} nepiadmin" | sudo tee -a $file
+    echo "${NEPI_IP} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
+    echo "${NEPI_IP} nepiuser" | sudo tee -a $file
+    echo "${NEPI_IP} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 
 
