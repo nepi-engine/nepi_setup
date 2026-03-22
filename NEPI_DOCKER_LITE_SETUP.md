@@ -184,6 +184,37 @@ Check that your NEPI Container is running after reboot:
 
 
 ################################################################
+### NEPI GitHub Setup
+
+**OPTIONAL** If you want to get, update, and build NEPI Software from source-code
+this section will walk you through the process.
+
+Check or Setup an SSH Key for your GitHub Account by typing the following
+
+    nepigithub
+
+**NOTE:**  If successful, the nepi_engine_ws repo will be cloned to your home folder at ~/nepi_engine_ws.
+
+Aditional command line NEPI Github commands are available
+
+nepiclone = Clone the latest NEPI source-code repo
+nepiclonedev = Clone the latest NEPI Development branch source-code repo
+nepipull = Update to the latest NEPI source-code repo
+nepimain = Switch to the NEPI source-code main repo branch
+nepidev = Switch to the NEPI source-code develop repo branch
+nepidpl = Deploy nepi source-code to nepi device
+nepipush = Push current repo (or submodule repo) if you have push permisions
+
+Other useful NEPI development command line shortcuts.
+
+sshn = SSH into the running NEPI Software Container
+sshnh = SSH into the NEPI Software Host System
+
+**NOTE** For instructions on deploying and building NEPI Software from source-code,
+see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
+
+
+################################################################
 ### (OPTIONAL) NEPI Docker Remote PC Connections
 If you want to connect to your NEPI device from a remote network connected PC, setup and test a remote connection following these instructions.
 

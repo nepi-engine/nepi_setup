@@ -15,14 +15,9 @@ directly on a NEPI Host device, or on a network connected Linux Ubuntu Remote PC
 For the Remote PC  build option, you will first need to configure your PC for NEPI development. 
 See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md).
 
-
 Check or Setup an SSH Key for your GitHub Account by typing the following
 
     nepigithub
-
-Clone the nepi_engine_ws repo to your system.
-
-    nepiclone
 
 **NOTE:**  If successful, the nepi_engine_ws repo will be cloned to your home folder at ~/nepi_engine_ws.
 
@@ -34,6 +29,7 @@ nepipull = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI source-code main repo branch
 nepidev = Switch to the NEPI source-code develop repo branch
 nepidpl = Deploy nepi source-code to nepi device
+nepipush = Push current repo (or submodule repo) if you have push permisions
 
 Other useful NEPI development command line shortcuts.
 

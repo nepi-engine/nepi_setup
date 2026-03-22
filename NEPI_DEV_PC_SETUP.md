@@ -62,11 +62,33 @@ See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-a
 
 
 ################################################################
-### NEPI Software Building
+### NEPI GitHub Setup
 
 **OPTIONAL** If you want to get, update, and build NEPI Software from source-code
 this section will walk you through the process.
 
+Check or Setup an SSH Key for your GitHub Account by typing the following
+
+    nepigithub
+
+**NOTE:**  If successful, the nepi_engine_ws repo will be cloned to your home folder at ~/nepi_engine_ws.
+
+Aditional command line NEPI Github commands are available
+
+nepiclone = Clone the latest NEPI source-code repo
+nepiclonedev = Clone the latest NEPI Development branch source-code repo
+nepipull = Update to the latest NEPI source-code repo
+nepimain = Switch to the NEPI source-code main repo branch
+nepidev = Switch to the NEPI source-code develop repo branch
+nepidpl = Deploy nepi source-code to nepi device
+nepipush = Push current repo (or submodule repo) if you have push permisions
+
+Other useful NEPI development command line shortcuts.
+
+sshn = SSH into the running NEPI Software Container
+sshnh = SSH into the NEPI Software Host System
+
+**NOTE** For instructions on deploying and building NEPI Software from source-code,
 see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 ################################################################
@@ -91,4 +113,16 @@ Test that label-studio opens:
     label-studio
 
 
+################################################################
+### NEPI Software Tutorials
 
+Learn more about using and configuring the NEPI software, as well as building and deploying 
+custom AI Models at nepi.com.
+
+See the documentation, tuturials, videos, and community forum available at NEPI.com:
+[NEPI Website](https://www.nepi.com)
+
+
+################################################################
+### NEPI DEV PC SETUP COMPLETE
+################################################################
