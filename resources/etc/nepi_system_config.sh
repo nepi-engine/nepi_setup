@@ -224,7 +224,7 @@ function update_current_config() {
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-}
+    CURRENT_NEPI_SSH_KEY_FILE="$NEPI_SSH_KEY_FILE"        
 
 function print_user_config(){
     config_file=${SYSTEM_SYS_CONFIG_FILE}
@@ -272,6 +272,8 @@ function print_current_config(){
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
+    echo "NEPI_SSH_KEY_FILE: ${$CURRENT_NEPI_SSH_KEY_FILE}"
+}
     echo ""
 }
 
@@ -298,6 +300,14 @@ function udpate_config_file(){
     update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
+    if [[ "$NEPI_SSH_KEY_FILE" !="$CURRENT_NEPI_SSH_KEY_FILE" ]]; then
+        remove_ssh_key_file=$NEPI_SSH_KEY_FILE
+        if nepisetkey $CURRENT_NEPI_SSH_KEY_FILE; then
+            nepiauthkey $remove_ssh_key_file
+        fi
+    fi
+
+}
 
 }
 
@@ -317,7 +327,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                         "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
                         "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                         "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
-                        "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" \
+                        "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY_FILE"\
                         "FACTORY RESET" "APPLY SETTINGS" )
 
     while true; do
@@ -553,6 +563,21 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             fi
 
                             ;;
+                        "Update NEPI_SSH_KEY_PATH")
+                            ret=$(nepisshkey)
+                            sel_error=$?
+                            sel_file=$(echo $ret | awk '{print $NF}')
+                            #echo "Got select SSH Key file error: ${sel_error}"
+                            
+                            if [[ $? -eq 0 && -n sel_file ]]; then
+                                echo ''
+                                echo "Got Selected SSH Key file: ${sel_file}"
+                                CURRENT_NEPI_SSH_KEY_FILE=$sel_file
+                            fi     
+                            break # Exit the select statement
+
+                            ;;
+
                         "FACTORY RESET")
                             echo "ARE YOU SURE"
                             choice=$(ask_yes_no)
