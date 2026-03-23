@@ -1780,7 +1780,7 @@ function select_ssh_key {
                 # Output the full path of the selected file
                 if [[ -n "$sel_ssh_file" ]]; then
                     sel_ssh_path=${key_folder}/$sel_ssh_file
-                    ssh-add ${sel_ssh_path}
+                    ssh-add ${sel_ssh_path} 
                     sudo chmod 0700 $sel_ssh_path
                     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
                     echo ${sel_ssh_path}
@@ -2061,7 +2061,8 @@ function nepiauthkey {
           remove_key_path=$key_path
         fi
         if [[ -n $remove_key_path ]]; then
-          ssh-add -d "$remove_key_path"
+          ssh-add -d "$remove_key_path" > /dev/null 2>&1
+
           remove_key_pub=$(cat $remove_key_path)
           remove_key_email="${remove_key_pub##* }"
           if [[ -n $remove_key_email ]]; then        
@@ -2069,7 +2070,9 @@ function nepiauthkey {
           fi
         fi
 
-        cat ${key_path}.pub >> ~/.ssh/authorized_keys
+        ssh-add ${key_path}
+        cat ${key_path}.pub >> ~/.ssh/authorized_keys > /dev/null 2>&1
+
         sudo chmod 0700 $key_folder
         sudo chmod 0600 $authorized_keys
         sudo chmod 0600 $key_path
