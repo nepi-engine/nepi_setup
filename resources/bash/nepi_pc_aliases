@@ -74,10 +74,10 @@ function switchnd(){
   export NEPI_IN_CONTAINER=$NEPI_IN_CONTAINER
   if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
     nepi_port=2222
-    nepihost=nepihost
+    nepihost=$NEPI_HOST_USER
   else
     nepi_port=22
-    nepihost=nepi
+    nepihost=$NEPI_USER
     
   fi
 
@@ -90,21 +90,24 @@ function switchnd(){
 
 if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
   nepi_port=2222
-  nepihost=nepihost
+  nepihost=$NEPI_HOST_USER
 else
   nepi_port=22
-  nepihost=nepi
+  nepihost=$NEPI_USER
+fi
+
+NEPI_SSH_KEY=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
+if [[ ! -v NEPI_SSH_KEY_PATH ]]; then
+  NEPI_SSH_KEY_PATH=$NEPI_SSH_KEY
 fi
 
 
 
-
-
 # Setup Connection Shortcuts
 # Setup Connection Shortcuts
-alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
-alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
-alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
+alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
+alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
+alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
 
 
 function sshnhc(){

@@ -471,11 +471,16 @@ export -f ckeys
 nepi_port=2222
 
 
+NEPI_SSH_KEY=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
+if [[ ! -v NEPI_SSH_KEY_PATH ]]; then
+  NEPI_SSH_KEY_PATH=$NEPI_SSH_KEY
+fi
+
 # Setup Connection Shortcuts
 # Setup Connection Shortcuts
-alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
-alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
-alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi"
+alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
+alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
+alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
 
 
 

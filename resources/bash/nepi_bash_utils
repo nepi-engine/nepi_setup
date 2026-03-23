@@ -68,9 +68,10 @@ export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
 
-export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
-export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
+export NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+export NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
+export NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
 
 export NEPI_TARGET_IP=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
@@ -1714,6 +1715,7 @@ cd ${NEPI_HOME}"
 
 
 function select_ssh_key {
+        sudo -v
         key_folder=$1
         if [[ -z $key_folder ]]; then
           key_folder="/home/${CONFIG_USER}/.ssh"
@@ -1778,6 +1780,7 @@ function select_ssh_key {
                 # Output the full path of the selected file
                 if [[ -n "$sel_ssh_file" ]]; then
                     sel_ssh_path=${key_folder}/$sel_ssh_file
+                    ssh-add ${sel_ssh_path}
                     sudo chmod 0700 $sel_ssh_path
                     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
                     echo ${sel_ssh_path}
@@ -1797,28 +1800,38 @@ export -f select_ssh_key
 
 
 function create_ssh_key {
+        sudo -v
+
+        key_type=ed25519
+
         key_folder=$1
         if [[ ! -d $key_folder ]]; then
           sudo mkdir -p $key_folder
         fi
 
-        user_email=$2
-        if [[ -z "$user_email" ]]; then
-            echo "No Email Provided"
-            return 1
-        fi 
-
-        key_name=$3
+        key_name=$2
         if [[ -z "$key_name" ]]; then
-            key_name="$(hostname)_${CONFIG_USER}_nepi"
+            key_name="id_${key_type}_$(hostname)_${CONFIG_USER}"
         fi 
-        
 
+        user_email=$3
+        if [[ -z "$user_email" ]]; then
+            while [[ -z "$ghub_email" ]]; do
+                read -p "Enter your GitHub email address: " USER_INPUT
+                if is_valid_email "$USER_INPUT"; then
+                    echo "Using email ${USER_INPUT}"
+                    user_email=$USER_INPUT
+                else
+                    echo "Not A Valid Email"
+                    return 1
+                fi  
+            done   
+        fi     
 
 
         if [[ -d $key_folder ]]; then          
 
-              key_file="id_ed25519_"${key_name}
+              key_file=${key_name}
               key_path=${key_folder}/${key_file}
 
               sudo chmod 0700 $key_folder
@@ -1829,7 +1842,7 @@ function create_ssh_key {
                   return -2
               fi
 
-              ssh-keygen -t ed25519 -f ${key_path} -q -N "" -C "${ghub_email}"
+              ssh-keygen -t ${key_type} -f ${key_path} -q -N "" -C "${user_email}"
               eval "$(ssh-agent -s)"
               ssh-add ${key_path}
 
@@ -1863,10 +1876,193 @@ function create_ssh_key {
 export -f create_ssh_key
 
 
+function nepisetkey {
+    sudo -v
+
+    key_path=$1
+    if [[ -z $key_path ]]; then
+      key_path=$NEPI_SSH_KEY_PATH
+    fi
+    if [[ ! -f $key_path ]]; then
+      echo "Private Key not found at ${key_path}"
+      return 1
+    fi
+
+    pub_path="${key_path}.pub"
+    if [[ ! -f $pub_path ]]; then
+      echo "Public Key not found at ${pub_path}"
+      return 2
+    fi
+
+    if [[ -f $key_path ]]; then
+
+        sudo chmod 0700 $key_folder
+        sudo chmod 0600 $authorized_keys
+        sudo chmod 0600 $key_path
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+        
+        export NEPI_SSH_KEY_FILE=$(basename "$key_path")
+        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
+        export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_PATH=" "export NEPI_SSH_KEY_PATH=${NEPI_SSH_KEY_PATH}"
+        export NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
+        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_PUB=" "export NEPI_SSH_KEY_PUB=${NEPI_SSH_KEY_PUB}"
+        export NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
+        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_EMAIL=" "export NEPI_SSH_KEY_EMAIL=${NEPI_SSH_KEY_EMAIL}"
+
+        echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
+
+        return 0
+
+
+    else
+        echo "NEPI SSH Key NOT CHANGED"
+        return 1
+    fi
+
+
+
+}
+
+export -f nepisetkey
+
+
+function nepisshkey {
+    sudo -v
+
+    key_folder="/home/${CONFIG_USER}/.ssh"
+
+    if [[ ! -d $key_folder ]]; then
+      sudo mkdir -p $key_folder
+    fi    
+
+    PS3=$'\n'"Please enter your choice by NUMBER: "
+    options=(  "Select SSH Key" "Create SSH Key")
+
+    while true; do
+        #clear # Optional: Clear the screen before displaying the menu
+
+        COLUMNS=1
+        select opt in "${options[@]}" ; do
+            case $opt in
+
+                "Select SSH Key")
+                    ret=$(select_ssh_key $key_folder)
+                    sel_error=$?
+                    sel_file=$(echo $ret | awk '{print $NF}')
+                    #echo "Got select SSH Key file error: ${sel_error}"
+                    if [[ $sel_error -eq 0 && -n sel_file ]]; then
+                      echo ''
+                      echo "Got selected SSH Key file: ${sel_file}"
+                      key_path=$sel_file
+                      exist_key='yes'
+                      break 2 # Exit both the select and the while loop
+                    else
+                      echo ''
+                      echo "No SSH Key files found in folder: ${key_folder}"
+                      echo ''
+                    fi     
+                    break # Exit the select statement
+                    ;;
+                "Create SSH Key")
+                    key_email='nepi@numurus'
+                    key_name="$(hostname)_${CONFIG_USER}_nepi"
+                    key_path="${key_folder}/key_name"
+                    if [[ -f $key_path ]]; then
+                      echo "NEPI SSH Key with name allready exists: ${key_name}"
+                      check_key=$(ask_yes_no "Do you want to replace this key?")
+                      if [[ ${check_key} == 'yes' ]]; then
+                        sudo rm -r ${key_path}*
+                      else
+                        key_path=''
+                        break
+                      fi
+
+                    fi
+
+                    ret=$(create_ssh_key $key_folder $key_name $key_email)
+                    sel_error=$?
+                    sel_file=$(echo $ret | awk '{print $NF}')
+                    #echo "Got select SSH Key file error: ${sel_error}"
+                    
+                    if [[ $? -eq 0 && -n sel_file ]]; then
+                      echo ''
+                      echo "Got New SSH Key file: ${sel_file}"
+                      key_path=$sel_file
+                      break 2 # Exit both the select and the while loop
+                    fi     
+                    break # Exit the select statement
+                    ;;
+                *)
+                    echo "Invalid option, please try again."
+                    ;;
+            esac
+        done
+    done
+    echo ""
+
+    if [[ -n $key_path ]]; then
+
+        nepisetkey $key_path
+
+    else
+        echo "NEPI SSH Key NOT CHANGED"
+    fi
+
+
+
+}
+
+export -f nepisshkey
+
+
+function nepiauthkey {
+    sudo -v
+    
+    remove_key_path=$1
+
+
+    key_folder="/home/${CONFIG_USER}/.ssh"
+
+    if [[ ! -d $key_folder ]]; then
+      sudo mkdir -p $key_folder
+    fi    
+
+    if [[ -n $key_path ]]; then
+
+        sudo chmod 0700 $key_folder
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+        authorized_keys=/home/${CONFIG_USER}/.ssh/authorized_keys
+        touch ${authorized_keys}
+
+        if [[ -n $remove_key_path ]]; then
+          ssh-add -d "$remove_key_path"
+          remove_key_pub=$(cat $remove_key_path)
+          remove_key_email="${remove_key_pub##* }"
+          if [[ -n $remove_key_email ]]; then        
+            sed -i "/$remove_key_email/d" "$authorized_keys"
+          fi
+        fi
+
+        ssh-add ${key_path}
+        cat ${key_path}.pub >> ~/.ssh/authorized_keys
+        sudo chmod 0700 $key_folder
+        sudo chmod 0600 $authorized_keys
+        sudo chmod 0600 $key_path
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+    else
+        echo "NEPI AUTHORIZED SSH Key NOT CHANGED"
+    fi
+}
+
+export -f nepiauthkey
 
 
 
 function nepigithub {
+    sudo -v
     key_folder="/home/${CONFIG_USER}/.ssh"
 
     if [[ ! -d $key_folder ]]; then
@@ -1934,28 +2130,26 @@ function nepigithub {
                                     break # Exit the select statement
                                     ;;
                                 "Create SSH Key")
-                                    key_name="$(hostname)_${CONFIG_USER}_github"
+                                    key_path=''
+                                    echo "Creating NEPI GitHub ssh_key ${key_file}"
+                                    echo ""
 
-                                    if [[ ! -f $key_path ]]; then
-                                        echo "Creating NEPI GitHub ssh_key ${key_file}"
-                                        echo ""
-
-                                        while [[ -z "$ghub_email" ]]; do
-                                            read -p "Enter your GitHub email address: " USER_INPUT
-                                            if is_valid_email "$USER_INPUT"; then
-                                                echo "Using email ${USER_INPUT}"
-                                                ghub_email=$USER_INPUT
-                                            else
-                                                echo "Not A Valid Email"
-                                                return 1
-                                            fi  
-                                        done   
+                                    while [[ -z "$ghub_email" ]]; do
+                                        read -p "Enter your GitHub email address: " USER_INPUT
+                                        if is_valid_email "$USER_INPUT"; then
+                                            echo "Using email ${USER_INPUT}"
+                                            ghub_email=$USER_INPUT
+                                        else
+                                            echo "Not A Valid Email"
+                                            return 1
+                                        fi  
+                                    done   
                                         
 
-                                    fi
+                                    
 
-
-                                    ret=$(create_ssh_key $key_folder $key_name)
+                                    key_name="$(hostname)_${CONFIG_USER}_github"
+                                    ret=$(create_ssh_key $key_folder $key_name $ghub_email)
                                     sel_error=$?
                                     sel_file=$(echo $ret | awk '{print $NF}')
                                     #echo "Got select SSH Key file error: ${sel_error}"

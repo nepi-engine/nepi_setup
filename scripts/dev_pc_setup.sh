@@ -81,6 +81,25 @@ echo "NEPI DEV PC SETUP"
 echo "########################"
 
 
+###################
+# Check for default key
+
+NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
+if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
+    echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
+else
+    echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
+    if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
+        mkdir -p $NEPI_SSH_KEY_DEST
+    fi
+    sudo chmod 0700 $NEPI_SSH_KEY_DEST
+    sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
+    sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
+fi
+
+
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
@@ -89,6 +108,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     NEPI_IP \
     NEPI_IN_CONAINTER \
     NEPI_HOST_USER \
+    NEPI_SSH_KEY_FILE \
     )
 
     function print_current_config(){
@@ -98,6 +118,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         echo "NEPI_IP: ${NEPI_IP}"
         echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo "NEPI_HOST_USER: ${NEPI_HOST_USER}"
+        echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY_FILE}"
         echo ""
     }
 
@@ -106,6 +127,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         update_yaml_value "NEPI_STATIC_IP" "${NEPI_IP}/24" $config_file
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
+        update_yaml_value "NEPI_SSH_KEY_FILE" $NEPI_SSH_KEY_FILE $config_file
     }
 
 
@@ -114,7 +136,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo ""
     PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "CONTINUE" )
+    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "Update NEPI SSH KEY FILE" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -156,6 +178,9 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
                     else
                         echo "Not A Valid User Name"
                     fi          
+                ;;
+                "Update NEPI Host User")
+                    nepisshkey
                 ;;
 
 
@@ -292,48 +317,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo ""
 
 
-    ###################
-    # Check for default key
 
-    NEPI_SSH_PKEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys/private_keys
-    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
-    if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
-        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_PKEY_SOURCE} "
-    else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
-            mkdir -p $NEPI_SSH_PKEY_DEST
-        fi
-        sudo chmod 0600 $NEPI_SSH_PKEY_SOURCE/*
-        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* /home/${CONFIG_USER}/ssh_keys/
-    fi
-    if [ -d "/home/${CONFIG_USER}/ssh_keys" ]; then
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/ssh_keys/*
-    fi
-
-    ###############
-    echo "Checking for available key options"
-    sel_ssh_file=$(select_file_from_folder $NEPI_SSH_PKEY_DEST | tail -n 1)
-
-    echo $sel_ssh_file
-    if [[ -n "$sel_ssh_file"  ]]; then
-        sel_ssh_path=${NEPI_SSH_PKEY_DEST}/${sel_ssh_file}
-        if [[ -f "$sel_ssh_path" ]]; then
-            NEPI_SSH_FILE=$sel_ssh_file
-            NEPI_SSH_SOURCE=$sel_ssh_path
-            echo "Using SSH Key file: ${NEPI_SSH_SOURCE}"
-            export NEPI_SSH_KEY_FILE=$NEPI_SSH_FILE
-        fi
-    else
-        echo "No SSH Key Found"
-        export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-    fi
-
-
-    #################
-    # Update Key Path
-    sudo chmod 0700 $NEPI_SSH_PKEY_DEST
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
 
 
 
