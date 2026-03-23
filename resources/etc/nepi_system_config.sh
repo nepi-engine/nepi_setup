@@ -590,29 +590,6 @@ fi
 
 
 
-if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-    ###############
-    # Check for available key options
-    SYSTEM_SSH_AKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/
-    SYSTEM_SSH_AKEY_DEST=${SYSTEM_ETC_PATH}/ssh/authorized_keys
-    sel_ssh_path="${SYSTEM_SSH_AKEY_SOURCE}/nepi_engine_default_authorized_keys"
-
-
-    file_count=$(find "$SYSTEM_SSH_AKEY_SOURCE" -maxdepth 1 -type f | wc -l)
-    if [[ "$file_count" -gt 1 ]]; then
-        sel_ssh_file=$(select_file_from_folder $SYSTEM_SSH_AKEY_SOURCE | tail -n 1)
-        if [[ -n "$sel_ssh_file"  ]]; then
-            sel_ssh_path=${SYSTEM_SSH_AKEY_SOURCE}/${sel_ssh_file}
-        fi
-    fi
-
-    if [[ -f "$sel_ssh_path" ]]; then
-        NEPI_SSH_AKEY=$sel_ssh_path
-    fi
-    echo "Using SSH Key file: ${NEPI_SSH_AKEY}"
-    export NEPI_SSH_AKEY=$NEPI_SSH_AKEY
-    update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $SYSTEM_SYS_CONFIG_FILE
-fi
 
 echo ""
 echo "########################"
@@ -631,49 +608,7 @@ fi
 
 
 if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-    ########################################
-    # Update SSH Public Keys
-    SYSTEM_SSH_AKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/${NEPI_SSH_AKEY}
-    SYSTEM_SSH_AKEY_DEST=${SYSTEM_ETC_PATH}/ssh/authorized_keys
-
-
-    if [[ -f "$SYSTEM_SSH_AKEY_SOURCE" ]]; then
-        echo "Updating NEPI SSH PUBLIC KEY FILE from: ${SYSTEM_SSH_AKEY_SOURCE}"
-        sudo cp $SYSTEM_SSH_AKEY_SOURCE $SYSTEM_SSH_AKEY_DEST
-        sudo chmod 0600 $SYSTEM_SSH_AKEY_DEST
-    else
-        echo "Can't find specified NEPI SSH Public Key file: ${SYSTEM_SSH_AKEY_SOURCE}"
-        NEPI_SSH_AKEY=nepi_engine_default_authorized_keys
-        SYSTEM_SSH_AKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/${NEPI_SSH_AKEY}
-        if [[ ! -f "$SYSTEM_SSH_AKEY_DEST" ]]; then
-            echo "Installing NEPI Default SSH Public Key file: ${SYSTEM_SSH_AKEY_SOURCE}"
-            sudo cp $SYSTEM_SSH_AKEY_SOURCE $SYSTEM_SSH_AKEY_DEST
-            sudo chmod 0600 $SYSTEM_SSH_AKEY_DEST
-            update_yaml_value "NEPI_SSH_AKEY" $NEPI_SSH_AKEY $SYSTEM_SYS_CONFIG_FILE
-        else
-            echo "Using existing NEPI SSH Public Key File: ${SYSTEM_SSH_AKEY_DEST}"
-        fi
-    fi
-
-
-    echo "Updating NEPI SSH PRIVATE KEY FILES"
-
-    NEPI_SSH_PKEY_SOURCE=${SYSTEM_ETC_PATH}/ssh/ssh_keys/private_keys
-    NEPI_SSH_PKEY_DEST=/home/${CONFIG_USER}/ssh_keys
-
-    if [[ ! -d "$NEPI_SSH_PKEY_DEST" ]]; then
-        mkdir -p $NEPI_SSH_PKEY_DEST
-    fi
-
-    if [ ! -d $NEPI_SSH_PKEY_SOURCE ]; then
-        echo "Failed to Find SSH Private Keys source folder: ${NEPI_SSH_PKEY_SOURCE} "
-    else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_PKEY_SOURCE} "
-        sudo cp -p $NEPI_SSH_PKEY_SOURCE/* $NEPI_SSH_PKEY_DEST/
-        sudo chmod 600 $NEPI_SSH_PKEY_DEST/*
-    fi
-
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_PKEY_DEST
+    nepiauthkey
 fi
 
 

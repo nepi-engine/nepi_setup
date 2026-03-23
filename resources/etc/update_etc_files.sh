@@ -144,14 +144,6 @@ source ${ETC_FOLDER}/scripts/update_etc_wifi_client.sh $LOAD_NEPI_CONFIG
 # WIFI ACCESS POINT UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_wifi_access_point.sh $LOAD_NEPI_CONFIG
 
-###########################################
-# SSH KEY UPDATES
-source ${ETC_FOLDER}/scripts/update_etc_ssh_keys.sh $LOAD_NEPI_CONFIG
-
-
-
-
-
 
 
 echo ""

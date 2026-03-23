@@ -338,13 +338,8 @@ if [[ "$?" -eq 0 ]]; then
         fi
 
         echo "Enabling ssh service"
-        sudo systemctl enable sshd >/dev/null 2>&1
-        wait
-        sleep 2
-        echo "Updating ssh keys"
-        source /opt/nepi/etc/scripts/update_etc_ssh_keys.sh
-        
-        sudo systemctl restart sshd
+        sudo systemctl enable sshd >/dev/null 2>&1        
+        sudo systemctl start sshd
 
     fi
 

@@ -62,9 +62,44 @@ elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
     fi
 fi
 
+
+
+
+
 echo "########################"
 echo "NEPI BASH SETUP"
 echo "########################"
+
+
+    echo " "
+    echo "################################# "
+    echo "Updating SSH Keys"
+    echo ""
+
+
+    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
+    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
+        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
+    else
+        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
+        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
+            mkdir -p $NEPI_SSH_KEY_DEST
+        fi
+        sudo chmod 0700 $NEPI_SSH_KEY_DEST
+        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
+        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
+    fi
+
+    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
+        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
+    else
+        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+    fi    
+    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+    NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
+    NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
 
 
 
@@ -73,8 +108,7 @@ echo "########################"
     echo "################################# "
     echo "Updating Bash Files"
     echo ""
-
-
+    
     ##############
     echo "Setting up NEPI Bash Utils file"
 
@@ -116,35 +150,6 @@ echo "########################"
     fi
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
-
-
-    # export NEPI_USER=nepi
-    # export NEPI_HOST_USER=nepihost
-
-    # export NEPI_IP=192.168.179.103
-    # export NEPI_DEVICE_ID=device1
-    # export NEPI_RECOVERY_ID=device1
-    # export NEPI_RECOVERY_IP=192.168.179.103
-    # export NEPI_IN_CONTAINER=1
-
-
-    # export NEPI_HOME=/home/$CONFIG_USER
-    # export NEPI_BASE=/opt/nepi
-    # export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
-    # export NEPI_STORAGE='/mnt/nepi_storage'
-    # export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
-    # export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
-
-
-    # export NEPI_SSH_KEY_FILE=nepi_engine_default_private_ssh_key
-    # export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/ssh_keys/${NEPI_SSH_KEY_FILE}
-    # export NEPI_SSH_KEY=$NEPI_SSH_KEY_PATH
-
-    # export NEPI_TARGET_IP=$NEPI_IP
-    # export NEPI_TARGET_USERNAME=$NEPI_USER
-    # export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
-
-    # export NEPI_GITHUB_REPO=git@github.com:nepi-engine/nepi_engine_ws.git
 
 
 

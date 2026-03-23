@@ -81,23 +81,35 @@ echo "NEPI DEV PC SETUP"
 echo "########################"
 
 
-###################
-# Check for default key
+    echo " "
+    echo "################################# "
+    echo "Updating SSH Keys"
+    echo ""
 
-NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
-NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
-if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
-    echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
-else
-    echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
-    if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
-        mkdir -p $NEPI_SSH_KEY_DEST
+
+    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
+    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
+        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
+    else
+        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
+        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
+            mkdir -p $NEPI_SSH_KEY_DEST
+        fi
+        sudo chmod 0700 $NEPI_SSH_KEY_DEST
+        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
+        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
     fi
-    sudo chmod 0700 $NEPI_SSH_KEY_DEST
-    sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
-    sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
-fi
+
+    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
+        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
+    else
+        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+    fi    
+    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+    NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
+    NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
 
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
