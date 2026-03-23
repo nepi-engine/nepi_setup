@@ -52,7 +52,7 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
             cp $DOCKER_CONFIG_FILE $BACKUP_FILE
         fi
         clean_yaml_file $BACKUP_FILE
-    if
+    fi
 
     #echo "Running Load Process"
     success=0

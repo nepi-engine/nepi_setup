@@ -1897,7 +1897,6 @@ function nepisetkey {
     if [[ -f $key_path ]]; then
 
         sudo chmod 0700 $key_folder
-        sudo chmod 0600 $authorized_keys
         sudo chmod 0600 $key_path
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
         
