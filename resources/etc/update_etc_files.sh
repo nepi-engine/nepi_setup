@@ -57,8 +57,8 @@ echo ""
 
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 etc_folder=$CONFIG_FOLDER
-if [[ ! -z "$1" ]]; then
-    test_folder=$1
+test_folder=$1
+if [[ -n $test_folder ]]; then
     if [ ! -f "${test_folder}/load_system_config.sh" ]; then
         echo "Could not find config file in requested config folder ${test_folder}/load_system_config.sh"
     else

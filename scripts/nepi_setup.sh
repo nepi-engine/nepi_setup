@@ -46,7 +46,7 @@ fi
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${RESOURCES_FOLDER}")/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 # Load System Config File

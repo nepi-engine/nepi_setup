@@ -42,7 +42,7 @@ fi
 ##### NEPI SETTINGS #####
 
 CURRENT_DIR=$(pwd)
-BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
@@ -2069,7 +2069,6 @@ function nepiauthkey {
           fi
         fi
 
-        ssh-add ${key_path}
         cat ${key_path}.pub >> ~/.ssh/authorized_keys
         sudo chmod 0700 $key_folder
         sudo chmod 0600 $authorized_keys
