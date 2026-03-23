@@ -1930,6 +1930,8 @@ export -f nepisetkey
 function nepisshkey {
     sudo -v
 
+    setkey=$1
+
     key_folder="/home/${CONFIG_USER}/.ssh"
 
     if [[ ! -d $key_folder ]]; then
@@ -2002,11 +2004,27 @@ function nepisshkey {
     echo ""
 
     if [[ -n $key_path ]]; then
+      ret_val=0
+      if [[ $setkey -eq 1 ]]; then
 
         nepisetkey $key_path
+        ret_val=$?
+      fi
+
+      if [[ $ret_val -eq 0 ]]; then
+        key_name=$(basename "$key_path")
+         echo $key_name
+         return 0
+      else
+          echo "NEPI SSH Key FAILED TO SET"
+         echo ''
+         return 2
+      fi
 
     else
         echo "NEPI SSH Key NOT CHANGED"
+         echo ''
+         return 1
     fi
 
 
@@ -2018,16 +2036,19 @@ export -f nepisshkey
 
 function nepiauthkey {
     sudo -v
-    
+    key_folder="/home/${CONFIG_USER}/.ssh"
+    key_path=$NEPI_SSH_KEY_PATH
     remove_key_path=$1
 
 
-    key_folder="/home/${CONFIG_USER}/.ssh"
+
+
 
     if [[ ! -d $key_folder ]]; then
       sudo mkdir -p $key_folder
     fi    
 
+    
     if [[ -n $key_path ]]; then
 
         sudo chmod 0700 $key_folder
@@ -2036,6 +2057,9 @@ function nepiauthkey {
         authorized_keys=/home/${CONFIG_USER}/.ssh/authorized_keys
         touch ${authorized_keys}
 
+        if [[ -z $remove_key_path ]]; then
+          remove_key_path=$key_path
+        fi
         if [[ -n $remove_key_path ]]; then
           ssh-add -d "$remove_key_path"
           remove_key_pub=$(cat $remove_key_path)
@@ -2051,6 +2075,8 @@ function nepiauthkey {
         sudo chmod 0600 $authorized_keys
         sudo chmod 0600 $key_path
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+        sudo systemctl restart sshd
 
     else
         echo "NEPI AUTHORIZED SSH Key NOT CHANGED"
