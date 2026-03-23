@@ -203,7 +203,7 @@ NEPI_NTP_IP \
 NEPI_FS_AB \
 NEPI_IMPORT_PATH \
 NEPI_EXPORT_PATH \
-NEPI_SSH_KEY_PATH
+NEPI_SSH_KEY
 )
 
 function update_current_config() {
@@ -225,7 +225,7 @@ function update_current_config() {
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-    CURRENT_NEPI_SSH_KEY_FILE="$NEPI_SSH_KEY_FILE"        
+    CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"        
 
 function print_user_config(){
     config_file=${SYSTEM_SYS_CONFIG_FILE}
@@ -273,7 +273,7 @@ function print_current_config(){
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
-    echo "NEPI_SSH_KEY_FILE: ${$CURRENT_NEPI_SSH_KEY_FILE}"
+    echo "NEPI_SSH_KEY: ${$CURRENT_NEPI_SSH_KEY}"
 }
     echo ""
 }
@@ -301,13 +301,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
-    if [[ "$NEPI_SSH_KEY_FILE" != "$CURRENT_NEPI_SSH_KEY_FILE" ]]; then
-        remove_ssh_key_file=$NEPI_SSH_KEY_FILE
-        if nepisetkey $CURRENT_NEPI_SSH_KEY_FILE; then
-            nepiauthkey $remove_ssh_key_file
-        fi
-    fi
-
+    update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
 }
 
 #####################################
@@ -571,7 +565,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             if [[ $? -eq 0 && -n sel_file ]]; then
                                 echo ''
                                 echo "Got Selected SSH Key file: ${sel_file}"
-                                CURRENT_NEPI_SSH_KEY_FILE=$sel_file
+                                CURRENT_NEPI_SSH_KEY=$sel_file
                             fi     
                             break # Exit the select statement
 
@@ -628,13 +622,6 @@ source ${SYSTEM_ETC_PATH}/load_system_config.sh
 if [ $? -eq 1 ]; then
     echo "Failed to load ${SYSTEM_ETC_PATH}/load_system_config.sh"
     exit 1
-fi
-
-
-if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-    echo "Updating NEPI SSH files}"
-    echo "Calling nepiauthkey"
-    nepiauthkey
 fi
 
 

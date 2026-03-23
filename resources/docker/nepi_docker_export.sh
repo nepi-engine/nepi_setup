@@ -197,7 +197,7 @@ else
                     fi
                     TAR_EXPORT_PATH=${TAR_EXPORT_PATH,,}
                     echo "Staging Image Export to: ${EXPORT_STAGING_PATH}"
-                    *** The export process can take several minutes to complete ***
+                    echo "*** The export process can take several minutes to complete ***"
 
                     update_yaml_value "NEPI_FS_EXPORT" 0 "$DOCKER_CONFIG_FILE"
                     update_yaml_value "NEPI_EXPORTING" 1 "$DOCKER_CONFIG_FILE"

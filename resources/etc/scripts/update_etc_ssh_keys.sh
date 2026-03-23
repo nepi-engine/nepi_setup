@@ -17,7 +17,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# This script updates bash stored system values
+# This script updates etc user settings
 
 sudo -v
 
@@ -32,7 +32,7 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
@@ -63,62 +63,24 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
     fi
 fi
 
-#############################
+################################
 echo ""
-echo "UPDATING BASH CONFIG"
+echo "UPDATING ETC SSH KEYS"
 
 
-if [[ -f "$ufile" ]]; then
-    source $ufile
+cur_key=$NEPI_SSH_KEY_FILE
+if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
+    echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
+    if nepisetkey $NEPI_SSH_KEY; then
+        echo "NEPI SSH key set to ${NEPI_SSH_KEY}"
+        echo "Authorizing NEPI SSH key ${NEPI_SSH_KEY}"
+        nepiauthadd $cur_key
+    fi
 else
-    echo "NEPI Utils bash file not found at: ${ufile}"
-    exit 1
+    nepiauthrm $cur_key
 fi
 
-
-if [[ -f "$ufile" ]]; then
-    needs_update=0
-    echo ""
-    echo "Updating Bash Variables in ${ufile}"
-    echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
-    if is_valid_did $NEPI_DEVICE_ID; then
-        update_text_value $ufile "export NEPI_DEVICE_ID" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
-    fi
-
-    echo "NEPI_STATIC_IP: ${NEPI_STATIC_IP}"
-    nepi_ip=${NEPI_STATIC_IP%%/*}
-    echo "NEPI_IP: ${nepi_ip}"
-    if is_valid_ipv4 $nepi_ip; then
-        update_text_value $ufile "export NEPI_IP" "export NEPI_IP=${nepi_ip}"
-    fi
-
-    echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY}"
-    update_text_value $ufile "export NEPI_SSH_KEY_FILE" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY}"
-
-
-    sudo rm /root/.bashrc
-
-    sudo cp /home/${CONFIG_USER}/.bashrc /root/.bashrc
-    sudo chmod 0644 /root/.bashrc
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.bashrc
-    sudo chmod 0644 /home/${CONFIG_USER}/.bashrc
-
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/nepi_utils
-    sudo chmod -R 0755 /home/${CONFIG_USER}/nepi_utils
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-    sudo chmod 0755 /home/${CONFIG_USER}
-
-    source /home/${CONFIG_USER}/.bashrc
-
-else
-    echo "NEPI Bashrc file not found at: ${ufile}"
-    exit 1
-fi
+source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
 
 
 
-
-
-    

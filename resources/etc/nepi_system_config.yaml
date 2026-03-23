@@ -58,8 +58,7 @@ NEPI_NTP_IP: 192.168.179.5
 NEPI_WIRED_DHCP_ENABLED: 0
 # Set the SSH Port that NEPI listens to, on top of the standard NEPI Host port (22).
 NEPI_SSH_PORT: 2222
-NEPI_SSH_AKEY: nepi_engine_default_authorized_keys
-NEPI_SSH_PKEY: nepi_engine_default_private_ssh_key
+NEPI_SSH_KEY: nepi_default_ssh_key
 ## WIFI NETWORK SETTINGS
 # Set the NEPI device's WiFi hardware interface name
 # NOTE: If set to "unknown", the first detected WiFi harware will be used

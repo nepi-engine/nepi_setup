@@ -67,11 +67,9 @@ export NEPI_STORAGE='/mnt/nepi_storage'
 export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
-
+export NEPI_SSH_FOLDER="/home/${CONFIG_USER}/.ssh"
 export NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
-export NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
-export NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
+export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"
 
 export NEPI_TARGET_IP=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
@@ -1879,10 +1877,14 @@ export -f create_ssh_key
 function nepisetkey {
     sudo -v
 
-    key_path=$1
-    if [[ -z $key_path ]]; then
-      key_path=$NEPI_SSH_KEY_PATH
+    key_file=$1
+
+    if [[ -z $key_file ]]; then
+      key_file=$NEPI_SSH_KEY_FILE
     fi
+    key_folder="/home/${CONFIG_USER}/.ssh"
+    key_path="${key_folder}/${key_file}"
+
     if [[ ! -f $key_path ]]; then
       echo "Private Key not found at ${key_path}"
       return 1
@@ -1900,14 +1902,15 @@ function nepisetkey {
         sudo chmod 0600 $key_path
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
         
-        export NEPI_SSH_KEY_FILE=$(basename "$key_path")
-        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
-        export NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
-        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_PATH=" "export NEPI_SSH_KEY_PATH=${NEPI_SSH_KEY_PATH}"
-        export NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
-        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_PUB=" "export NEPI_SSH_KEY_PUB=${NEPI_SSH_KEY_PUB}"
-        export NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
-        update_text_value $NEPI_BASH_UTILS "export NEPI_SSH_KEY_EMAIL=" "export NEPI_SSH_KEY_EMAIL=${NEPI_SSH_KEY_EMAIL}"
+
+        SYSTEM_KEYS_FOLDER="${NEPI_SYSTEM_CONFIG}/etc/ssh/ssh_keys"
+        if [[ -d $SYSTEM_KEYS_FOLDER ]]; then
+          sudo cp $key_path "${SYSTEM_KEYS_FOLDER}/${key_file}"
+          sudo cp $pub_path "${SYSTEM_KEYS_FOLDER}/${key_file}.pub"
+          config_file="${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.yaml"
+          export NEPI_SSH_KEY=$key_file
+          update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
+        fi
 
         echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
 
@@ -2003,15 +2006,16 @@ function nepisshkey {
     echo ""
 
     if [[ -n $key_path ]]; then
+      key_name=$(basename "$key_path")
       ret_val=0
       if [[ $setkey -eq 1 ]]; then
 
-        nepisetkey $key_path
+        nepisetkey $key_name
         ret_val=$?
       fi
 
       if [[ $ret_val -eq 0 ]]; then
-        key_name=$(basename "$key_path")
+
          echo $key_name
          return 0
       else
@@ -2033,58 +2037,118 @@ function nepisshkey {
 export -f nepisshkey
 
 
-function nepiauthkey {
+function nepiauthrm {
     sudo -v
-    key_folder="/home/${CONFIG_USER}/.ssh"
-    key_path=$NEPI_SSH_KEY_PATH
-    remove_key_path=$1
-
-
-
-
-
-    if [[ ! -d $key_folder ]]; then
-      sudo mkdir -p $key_folder
-    fi    
+    key_file=$1
 
     
-    if [[ -n $key_path ]]; then
+    if [[ -n $key_file ]]; then
 
-        sudo chmod 0700 $key_folder
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+        key_folder=$NEPI_SSH_FOLDER
+        key_path=${key_folder}/${key_file}
 
-        authorized_keys=/home/${CONFIG_USER}/.ssh/authorized_keys
-        touch ${authorized_keys}
+        if [[ -f $key_path ]]; then
 
-        if [[ -z $remove_key_path ]]; then
-          remove_key_path=$key_path
-        fi
-        if [[ -n $remove_key_path ]]; then
-          ssh-add -d "$remove_key_path" > /dev/null 2>&1
+          sudo chmod 0700 $key_folder
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
-          remove_key_pub=$(cat $remove_key_path)
-          remove_key_email="${remove_key_pub##* }"
-          if [[ -n $remove_key_email ]]; then        
-            sed -i "/$remove_key_email/d" "$authorized_keys"
+          authorized_keys_path="${key_folder}/authorized_keys"
+          touch ${authorized_keys_path}
+
+          key_pub=$(cat $key_path.pub)
+          key_email="${key_pub##* }"
+          echo "Removing existing key for id ${key_email}"
+          if [[ -n $key_email ]]; then        
+            sed -i "/$key_email/d" "$authorized_keys_path"
           fi
+
+          # systemctl&> /dev/null
+          # res=$?
+          # if [[ "$res" -eq 0 ]];  then
+          #   sudo systemctl restart sshd
+          # fi
+
+          # supervisorctl&> /dev/null
+          # res=$?
+          # if [[ "$res" -eq 0 ]];  then
+          #   sudo supervisorctl restart sshd
+          # fi
+
+          return 0
+          
+        else
+          echo "Remove Key File Not Found: ${key_path}"
+          return 1
         fi
-
-        ssh-add ${key_path}
-        cat ${key_path}.pub >> ~/.ssh/authorized_keys > /dev/null 2>&1
-
-        sudo chmod 0700 $key_folder
-        sudo chmod 0600 $authorized_keys
-        sudo chmod 0600 $key_path
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-        sudo systemctl restart sshd
 
     else
-        echo "NEPI AUTHORIZED SSH Key NOT CHANGED"
+        echo "Remove Key File Not Provided"
+        return 1
     fi
 }
 
-export -f nepiauthkey
+export -f nepiauthrm
+
+
+function nepiauthadd {
+    sudo -v
+    key_file=$1
+
+    
+    if [[ -n $key_file ]]; then
+
+        key_folder=$NEPI_SSH_FOLDER
+        key_path=${key_folder}/${key_file}
+
+        if [[ -f $key_path ]]; then
+
+          sudo chmod 0700 $key_folder
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+          authorized_keys_path="${key_folder}/authorized_keys"
+          touch ${authorized_keys_path}
+
+          key_pub=$(cat $key_path.pub)
+          key_email="${key_pub##* }"
+          echo "Removing existing key for id ${key_email}"
+          if [[ -n $key_email ]]; then        
+            sed -i "/$key_email/d" "$authorized_keys_path"
+          fi
+
+          #ssh-add ${key_path}
+          cat ${key_path}.pub >> $authorized_keys_path
+
+          sudo chmod 0700 $key_folder
+          sudo chmod 0600 $authorized_keys_path
+          sudo chmod 0600 $key_path
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+          # systemctl&> /dev/null
+          # res=$?
+          # if [[ "$res" -eq 0 ]];  then
+          #   sudo systemctl restart sshd
+          # fi
+
+          # supervisorctl&> /dev/null
+          # res=$?
+          # if [[ "$res" -eq 0 ]];  then
+          #   sudo supervisorctl restart sshd
+          # fi
+
+          return 0
+          
+        else
+          echo "Add Key File Not Found: ${key_path}"
+          return 1
+        fi
+
+    else
+        echo "Add Key File Not Provided"
+        return 1
+    fi
+}
+
+export -f nepiauthadd
 
 
 
