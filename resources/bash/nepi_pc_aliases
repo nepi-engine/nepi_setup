@@ -378,20 +378,22 @@ ucfg = /mnt/nepi_storage/user_cfg"
 ###################################
 
 
-## NEPI deploy complete
-alias nepisetup="
-source ${NEPI_SETUP_REPO_FOLDER}/scripts/dev_pc_setup.sh"
 
+if [[ -d "${NEPI_REPO_FOLDER}/nepi_setup/scripts" ]]; then
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts""
+else
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts""
+fi
 
-# if [[ -d "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts" ]]; then
-#   setup_folder="/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
-# else
-#   setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
-# fi
-setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
 export NSETUP=$setup_folder
 
 alias nsetup="cd ${NSETUP}"
+
+## NEPI deploy complete
+alias nepisetup="
+source ${NSETUP}/scripts/dev_pc_setup.sh"
+
+
 
 HELPN="${HELPN}
 ################################
