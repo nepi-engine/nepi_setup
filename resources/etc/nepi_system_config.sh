@@ -41,9 +41,12 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
+
+
 ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
-
+echo "ETC_FOLDER ${ETC_FOLDER}"
+echo "NEPI_SSH_KEY ${NEPI_SSH_KEY}"
 
 # Load System Config File
 source ${ETC_FOLDER}/load_system_config.sh
@@ -225,7 +228,8 @@ function update_current_config() {
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-    CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"        
+    CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"   
+}     
 
 function print_user_config(){
     config_file=${SYSTEM_SYS_CONFIG_FILE}
@@ -273,8 +277,7 @@ function print_current_config(){
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
-    echo "NEPI_SSH_KEY: ${$CURRENT_NEPI_SSH_KEY}"
-}
+    echo "NEPI_SSH_KEY: ${CURRENT_NEPI_SSH_KEY}"
     echo ""
 }
 
@@ -654,55 +657,7 @@ if [ $? -eq 1 ]; then
 fi
 
 
-echo " "
-echo "################################# "
-echo "Updating ETC Hosts File"
-echo ""
 
-
-file=/etc/hosts
-bfile=${file}.bak
-
-# file=${ETC_FOLDER}/hosts
-# if [[ -f "${file}.blank" ]]; then
-#     echo "Updating hosts file: ${file}"
-
-# if [ -f "$file" ]; then
-#     sudo cp -a ${file}.blank $file
-# fi
-                
-if [[ ! -f $bfile ]]; then
-    path_backup $file $bfile
-fi
-
-if [[ -f $bfile ]]; then
-   cp $bfile $file 
-fi
-
-if [[ -n "${NEPI_STATIC_IP%%/*}" ]]; then
-    nepi_ip="${NEPI_STATIC_IP%%/*}"
-else
-    nepi_ip=192.168.170.103
-fi
-if ! is_valid_ipv4 "${nepi_ip}"; then
-    nepi_ip=192.168.170.103
-fi
-
-CUT_IP=$(echo "$nepi_ip" | cut -d '.' -f 4-)
-nepi_ip=127.0.0.${CUT_IP}
-
-
-
-echo "Updating NEPI IP in ${file}"
-
-echo "${nepi_ip} nepi" | sudo tee -a $file
-echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $file
-echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} nepiadmin" | sudo tee -a $file
-echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} nepiuser" | sudo tee -a $file
-echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 echo ""
 echo "##################################"

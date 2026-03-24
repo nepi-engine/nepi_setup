@@ -96,9 +96,9 @@ else
   nepihost=$NEPI_USER
 fi
 
-NEPI_SSH_KEY=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
-if [[ ! -v NEPI_SSH_KEY_PATH ]]; then
-  NEPI_SSH_KEY_PATH=$NEPI_SSH_KEY
+ssh_key_path=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
+if [[ -z NEPI_SSH_KEY_PATH ]]; then
+  NEPI_SSH_KEY_PATH=$ssh_key_path
 fi
 
 
@@ -383,12 +383,12 @@ alias nepisetup="
 source ${NEPI_SETUP_REPO_FOLDER}/scripts/dev_pc_setup.sh"
 
 
-if [[ -d "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts" ]]; then
-  setup_folder="/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
-else
-  setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
-fi
-
+# if [[ -d "/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts" ]]; then
+#   setup_folder="/home/${CONFIG_USER}/nepi_engine_ws/nepi_setup/scripts"
+# else
+#   setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
+# fi
+setup_folder="/home/${CONFIG_USER}/nepi_setup/scripts"
 export NSETUP=$setup_folder
 
 alias nsetup="cd ${NSETUP}"
