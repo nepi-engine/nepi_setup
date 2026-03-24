@@ -176,6 +176,7 @@ sudo apt install git -y
 sudo apt install gitk -y
 sudo apt install htop -y
 sudo apt install ncdu -y
+
 sudo apt install snap -y  2>/dev/null 
 if is_valid_jetson; then
     snap download snapd --revision=24724
@@ -187,6 +188,7 @@ fi
 sudo apt install curl -y
 sudo apt install gparted -y
 
+sudo apt install python-is-python3 -y
 sudo apt install python3-venv python3-pip -y
 
 echo "######################################"
@@ -214,18 +216,6 @@ echo "Installing Docker Required Software"
 echo "######################################"
 echo ""
 
-echo "Stopping Docker Service"
-SERVICE_NAME=docker
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Stopping ${SERVICE_NAME} Service"
-    sudo systemctl stop $SERVICE_NAME
-fi
-
-SERVICE_NAME=docker.socket
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Stopping ${SERVICE_NAME} Service"
-    sudo systemctl stop $SERVICE_NAME
-fi
 
 echo ""
 echo "######################################"
@@ -233,55 +223,60 @@ echo "NEPI ARCHITECTURE: ${NEPI_ARCH}"
 echo "######################################"
 echo ""
 
-if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-    echo "Checking for Docker software"
-    if command -v docker &>/dev/null; then
-        echo "Removing Docker existing docker installation."
-        sudo apt remove docker -y
-    fi
-    # https://docs.docker.com/engine/install/ubuntu/
-    echo ""
-    echo "######################################"
-    echo "Installing Docker"
-    echo "######################################"
-    echo ""
 
-    # Update Package Lists and Install Prerequisites.
-    sudo apt update
-    sudo 
-    echo 1
-    sudo apt install -y apt-transport-https ca-certificates curl software-properties-common 
-    echo 2
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    echo 3
-    sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
-    sudo apt update
-    echo 4
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo docker info
-    docker compose version
-elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-    echo ""
-    echo "######################################"
-    echo "Installing Docker"
-    echo "######################################"
-    echo ""
+echo "Checking for Docker software"
+if command -v docker &>/dev/null; then
+    # echo "Removing Docker existing docker installation."
+    # sudo apt remove docker -y
+    echo "Docker Installed"
+else
 
-    sudo apt-get remove docker docker-engine docker.io containerd runc
-    sudo apt-get update
-    sudo apt-get install ca-certificates curl gnupg
-    sudo install -m 0775 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    echo \
-    "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    \"$(. /etc/os-release && echo \"$VERSION_CODENAME\")\" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-else 
-    arch_val=$(uname -m)
-    echo "Arch ${arch_val} not supported yet"
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+
+            # https://docs.docker.com/engine/install/ubuntu/
+            echo ""
+            echo "######################################"
+            echo "Installing Docker"
+            echo "######################################"
+            echo ""
+
+            # Update Package Lists and Install Prerequisites.
+            sudo apt update
+            sudo 
+            echo 1
+            sudo apt install -y apt-transport-https ca-certificates curl software-properties-common 
+            echo 2
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            echo 3
+            sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
+            sudo apt update
+            echo 4
+            sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo docker info
+            docker compose version
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            echo ""
+            echo "######################################"
+            echo "Installing Docker"
+            echo "######################################"
+            echo ""
+
+            sudo apt-get remove docker docker-engine docker.io containerd runc
+            sudo apt-get update
+            sudo apt-get install ca-certificates curl gnupg
+            sudo install -m 0775 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            echo \
+            "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            \"$(. /etc/os-release && echo \"$VERSION_CODENAME\")\" stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        else 
+            arch_val=$(uname -m)
+            echo "Arch ${arch_val} not supported yet"
+        fi
 fi
 
 sudo apt-get update
@@ -295,6 +290,21 @@ if is_valid_cuda; then
     echo "Installing NVIDIA Toolkit "
     echo "######################################"
     echo ""
+
+
+    echo "Stopping Docker Service"
+    SERVICE_NAME=docker
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        echo "Stopping ${SERVICE_NAME} Service"
+        sudo systemctl stop $SERVICE_NAME
+    fi
+
+    SERVICE_NAME=docker.socket
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        echo "Stopping ${SERVICE_NAME} Service"
+        sudo systemctl stop $SERVICE_NAME
+    fi
+
 
     if dpkg --get-selections | grep nvidia-container-toolkit; then
         # Install nvidia toolkit
