@@ -702,9 +702,6 @@ alias scfg="cd $SCFG"
 alias ucfg="cd $UCFG"
 
 
-export NSETUP="/home/${CONFIG_USER}/nepi_setup/scripts"
-alias nsetup="cd ${NSETUP}"
-
 export NDSETUP="/mnt/nepi_config/docker_cfg"
 alias ndsetup="cd ${NDSETUP}"
 
@@ -723,7 +720,6 @@ fcfg = /mnt/nepi_config/factory_cfg
 scfg = /mnt/nepi_config/factory_cfg
 ucfg = /mnt/nepi_storage/user_cfg
 
-nsetup = /home/${CONFIG_USER}/nepi_setup/scripts
 ndsetup = /mnt/nepi_config/docker_config
 
 nfw = Show Installed NEPI FW Version"

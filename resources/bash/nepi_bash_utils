@@ -43,6 +43,7 @@ fi
 
 CURRENT_DIR=$(pwd)
 export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+#echo "BASH_FOLDER ${BASH_FOLDER}"
 
 
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
@@ -485,6 +486,7 @@ function netlist() {
         split($4, a, "/"); # Split the IP/CIDR to get just the IP address
         printf "%-9s  %s |\n", $2, a[1] ;
     }'
+
 }
 export -f netlist
 
@@ -592,6 +594,8 @@ function netsetstatic() {
             ipv4.addresses ${new_ip_netmask} \
             ipv4.dns 8.8.8.8,8.8.4.4 \
             ipv4.method manual       
+
+        sudo systemctl restart NetworkManager
     fi   
 }
 export -f netsetstatic
@@ -908,6 +912,9 @@ utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
+netlist = list network adapters and IP addresses
+netliststatic = list network adapters and static IP addresses
+netsetstatic = set static_ip for ethernet adapter with provided IP/Netmask like '192.168.179.103/24'
 pingi = Check connection to NEPI IP
 pingnc = ping NEPI IP address continously
 pingi = Check connection to internet
@@ -1832,6 +1839,15 @@ RED='\033[0;31m'
 alias nepihome="
 cd ${NEPI_HOME}"
 
+if [[ -d "${NEPI_REPO_FOLDER}/nepi_setup/scripts" ]]; then
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
+else
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
+fi
+
+export NSETUP=$setup_folder
+
+alias nsetup="cd ${NSETUP}"
 
 
 function select_ssh_key {
@@ -2681,7 +2697,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == '${NEPI_REPO_NAME}' || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src" ]]; then
+    if [[ ("$cur_folder" == "${NEPI_REPO_NAME}" || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
@@ -2706,6 +2722,7 @@ utilsn="${utilsn}
 ### NEPI Dev FUNCTIONS
 ################################
 nepihome = Change to users home folder
+nsetup = Change Dir to the NEPI setup scripts folder
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo

@@ -417,6 +417,23 @@ fi
 
 echo ""
 echo "########################"
+echo "NEPI LITE Folders SETUP"
+echo "########################"
+echo ""
+
+####################################
+# Run NEPI Files Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path $LITE_INSTALL; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
+
+echo ""
+echo "########################"
 echo "NEPI LITE FILES SETUP"
 echo "########################"
 echo ""
@@ -432,11 +449,18 @@ if ! source_script $script_path $LITE_INSTALL; then
     return 
 fi
 
-echo ""
-echo "########################"
-echo "NEPI LITE FILES SETUP"
-echo "########################"
-echo ""
+
+
+####################################
+# Run NEPI Image Init Setup Script
+if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepiadmin' && ${CONFIG_USER} != 'nepihost' ]]; then
+    export NEPI_HOST_USER=$CONFIG_USER
+    update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
+    NEPI_HOST_PW="encrypted"
+    if [[ ${NEPI_HOST_USER} == "nepihost" ]]; then
+        update_yaml_value "NEPI_HOST_PW" $NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
+    fi
+fi
 
 echo ""
 echo "########################"

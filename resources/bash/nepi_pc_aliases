@@ -340,29 +340,16 @@ ucfg = /mnt/nepi_storage/user_cfg"
 ###################################
 
 
-
-if [[ -d "${NEPI_REPO_FOLDER}/nepi_setup/scripts" ]]; then
-  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
-else
-  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
-fi
-
-export NSETUP=$setup_folder
-
-alias nsetup="cd ${NSETUP}"
-
 ## NEPI deploy complete
 alias nepisetup="
 source ${NSETUP}/dev_pc_setup.sh"
-
 
 
 HELPN="${HELPN}
 ################################
 ## NEPI PC Setup Shortcuts ##
 ################################
-nepisetup = Rerun the pc_dev_setup script
-nsetup = Change Dir to the NEPI setup scripts folder"
+nepisetup = Rerun the pc_dev_setup script"
 
 
 export NTEST='NEPI'
