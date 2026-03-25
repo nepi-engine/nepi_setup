@@ -275,66 +275,68 @@ function NEPI_START_FUNCTION(){
             echo "NEPI Start attempts have exceeded max tries of ${NEPI_MAX_FAIL_COUNT}"
             echo "##########################"
 
+
             # Try Backup Mode if System CONFIG Fails
             if [[ "$CONFIG_MODE" == "SYSTEM" ]]; then
                 if [[ "$NEPI_AB_FS" -eq 1 ]]; then
                     echo "##########################"
-                    echo "Switching to Backup NEPI File System Container"
+                    echo "Switching to Backup NEPI File System"
                     echo "##########################"
                     #source ${DOCKER_FOLDER}/nepi_docker_stop.sh
                     source ${DOCKER_FOLDER}/nepi_docker_switch.sh
                     CONFIG_MODE=BACKUP
                     NEPI_FAIL_COUNT=-1
                     update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-
-                else
-                    CONFIG_MODE=BACKUP # FORCE Recovery Mode For Next Pass if Backup not supported
-                fi
-
-            # Try Recovery Mode if Backup CONFIG Fails
-            elif [[ "$CONFIG_MODE" == "BACKUP" ]]; then
-                # Load NEPI Recovery CONFIG
-                echo "##########################"
-                echo "Loading NEPI Recovery Config"
-                echo "##########################"
-                CONFIG_MODE=RECOVERY
-                ETC_FOLDER=$RCFG_FOLDER
-                source  ${RETC_FOLDER}/update_etc_files.sh $RETC_FOLDER
-                if [[ "$?" -eq 0 ]]; then
-                    echo "Recovery config loaded successfully"
-                    NEPI_FAIL_COUNT=-1
-                    update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-                else
-                    echo "Failed to run Recovery Config setup"
-                fi
-
-            # Try Factory Mode if Recovery CONFIG Fails
-            elif [[ "$CONFIG_MODE" == "RECOVERY" ]]; then
-                # Load NEPI Factory CONFIG
-                echo "##########################"
-                echo "Loading NEPI Factory Config"
-                echo "##########################"
-                CONFIG_MODE=FACTORY
-                ETC_FOLDER=$FCFG_FOLDER
-                source  ${FETC_FOLDER}/update_etc_files.sh $FETC_FOLDER
-                if [[ "$?" -eq 0 ]]; then
-                    echo "Factory config loaded successfully"
-                    NEPI_FAIL_COUNT=-1
-                    update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-                else
-                    echo "##########################"
-                    echo "Failed to run Factoery Config Setup"
-                    echo "##########################"
-                fi
-
-            # Stop Trying if Factory CONFIG Fails
-            elif [[ "$CONFIG_MODE" == "FACTORY" ]]; then
-                echo "No Options Left to Try.  Will not attempt to start NEPI Docker processes again"
-                CONFIG_MODE=STOP
             else
-                echo "Not sure how we got here.  Will not attempt to start NEPI Docker processes again"
+                echo "NEPI Failed to Start. Will Not Retry"
                 CONFIG_MODE=STOP
             fi
+        
+
+            # # Try Recovery Mode if Backup CONFIG Fails
+            # elif [[ "$CONFIG_MODE" == "BACKUP" ]]; then
+            #     # Load NEPI Recovery CONFIG
+            #     echo "##########################"
+            #     echo "Loading NEPI Recovery Config"
+            #     echo "##########################"
+            #     CONFIG_MODE=RECOVERY
+            #     ETC_FOLDER=$RCFG_FOLDER
+            #     source  ${RETC_FOLDER}/update_etc_files.sh $RETC_FOLDER
+            #     if [[ "$?" -eq 0 ]]; then
+            #         echo "Recovery config loaded successfully"
+            #         NEPI_FAIL_COUNT=-1
+            #         update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
+            #     else
+            #         echo "Failed to run Recovery Config setup"
+            #     fi
+
+            # # Try Factory Mode if Recovery CONFIG Fails
+            # elif [[ "$CONFIG_MODE" == "RECOVERY" ]]; then
+            #     # Load NEPI Factory CONFIG
+            #     echo "##########################"
+            #     echo "Loading NEPI Factory Config"
+            #     echo "##########################"
+            #     CONFIG_MODE=FACTORY
+            #     ETC_FOLDER=$FCFG_FOLDER
+            #     source  ${FETC_FOLDER}/update_etc_files.sh $FETC_FOLDER
+            #     if [[ "$?" -eq 0 ]]; then
+            #         echo "Factory config loaded successfully"
+            #         NEPI_FAIL_COUNT=-1
+            #         update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
+            #     else
+            #         echo "##########################"
+            #         echo "Failed to run Factoery Config Setup"
+            #         echo "##########################"
+            #     fi
+
+            # # Stop Trying if Factory CONFIG Fails
+            # elif [[ "$CONFIG_MODE" == "FACTORY" ]]; then
+            #     echo "No Options Left to Try.  Will not attempt to start NEPI Docker processes again"
+            #     CONFIG_MODE=STOP
+            # else
+            #     echo "Not sure how we got here.  Will not attempt to start NEPI Docker processes again"
+            #     CONFIG_MODE=STOP
+            # fi
         
         # RESTART IN SET CONFIG MODE WHILE FAIL COUNT != 0
         elif [[ ! "$NEPI_FAIL_COUNT" -eq 0 ]]; then # Try Again

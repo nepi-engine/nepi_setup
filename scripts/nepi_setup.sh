@@ -654,13 +654,7 @@ if [[ "$?" -eq 0  ]]; then
         'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
         'gnome-control-center.desktop']"
 
-    fi
 
-    ###################
-
-    if command -v chromium >/dev/null 2>&1; then
-        echo "Chromium is Already Installed"
-    else
         echo "########"
         echo "Updating Chrome settings for user ${CONFIG_USER}"
         echo "Killing any running Chromium processes"
@@ -679,6 +673,8 @@ if [[ "$?" -eq 0  ]]; then
 
         echo "Cleaning Chromium Files"
         fix_chromium
+
+
     fi
 
     if [[ $LITE_INSTALL -eq 1 ]]; then

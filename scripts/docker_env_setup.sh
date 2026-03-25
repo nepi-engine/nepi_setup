@@ -154,6 +154,7 @@ fi
 sudo apt install curl -y
 sudo apt install gparted -y
 
+sudo apt install python-is-python3 -y
 sudo apt install python3-venv python3-pip -y
 
 
@@ -462,7 +463,7 @@ sudo apt update
 sudo apt-get install --fix-broken -y
 sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
 sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
-sudo rm -r /tmp/* 2>/dev/null
+#sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 
 

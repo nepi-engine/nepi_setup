@@ -122,34 +122,6 @@ echo ""
 
 
 
-    echo " "
-    echo "################################# "
-    echo "Updating ETC Hosts File"
-    echo ""
-
-    file=/etc/hosts
-    bfile=${file}.bak
-
-    if [[ ! -f "$bfile" ]]; then
-        path_backup $file $bfile
-    fi
-
-    sudo cp -a $bfile $file
-
-    echo "Updating NEPI IP in ${file}"
-    nepi_ip=${NEPI_STATIC_IP%%/*}
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${nepi_ip}"
-
-    echo "${nepi_ip} nepi" | sudo tee -a $file
-    echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $file
-    echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${nepi_ip} nepiadmin" | sudo tee -a $file
-    echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
-    echo "${nepi_ip} nepiuser" | sudo tee -a $file
-    echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
-
-
 
     #####################################
     echo " "
@@ -271,13 +243,14 @@ echo ""
     wait
 
 
+
     echo " "
     echo "################################# "
     echo "Clearing Known Hosts"
     echo ""
-
-    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
-    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
+    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts*
+    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
+    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
 
 ################

@@ -41,8 +41,11 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
+
+
 ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
+echo "ETC_FOLDER ${ETC_FOLDER}"
 
 
 # Load System Config File
@@ -149,24 +152,6 @@ NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 #  Upated NEPI Config Settings
 
 
-systemctl&> /dev/null
-res=$?
-if [[ "$res" -eq 0  && "$CONFIG_USER" == 'nepi' ]]; then
-    export NEPI_IN_CONTAINER=0
-else
-    export NEPI_IN_CONTAINER=1
-fi
-update_yaml_value "NEPI_IN_CONTAINER" $NEPI_IN_CONTAINER $SYSTEM_SYS_CONFIG_FILE
-
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepiadmin' && ${CONFIG_USER} != 'nepihost' ]]; then
-    export NEPI_HOST_USER=$CONFIG_USER
-    update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $SYSTEM_SYS_CONFIG_FILE
-    NEPI_HOST_PW="encrypted"
-    if [[ ${NEPI_HOST_USER} == "nepihost" ]]; then
-        update_yaml_value "NEPI_HOST_PW" $NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
-    fi
-fi
-
 # # This is updated by NEPI Container process
 # if is_valid_cuda; then
 #     export NEPI_HAS_CUDA=1
@@ -225,7 +210,8 @@ function update_current_config() {
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
-    CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"        
+    CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"   
+}     
 
 function print_user_config(){
     config_file=${SYSTEM_SYS_CONFIG_FILE}
@@ -273,8 +259,7 @@ function print_current_config(){
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
-    echo "NEPI_SSH_KEY: ${$CURRENT_NEPI_SSH_KEY}"
-}
+    echo "NEPI_SSH_KEY: ${CURRENT_NEPI_SSH_KEY}"
     echo ""
 }
 
@@ -302,6 +287,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+
 }
 
 #####################################
@@ -654,55 +640,7 @@ if [ $? -eq 1 ]; then
 fi
 
 
-echo " "
-echo "################################# "
-echo "Updating ETC Hosts File"
-echo ""
 
-
-file=/etc/hosts
-bfile=${file}.bak
-
-# file=${ETC_FOLDER}/hosts
-# if [[ -f "${file}.blank" ]]; then
-#     echo "Updating hosts file: ${file}"
-
-# if [ -f "$file" ]; then
-#     sudo cp -a ${file}.blank $file
-# fi
-                
-if [[ ! -f $bfile ]]; then
-    path_backup $file $bfile
-fi
-
-if [[ -f $bfile ]]; then
-   cp $bfile $file 
-fi
-
-if [[ -n "${NEPI_STATIC_IP%%/*}" ]]; then
-    nepi_ip="${NEPI_STATIC_IP%%/*}"
-else
-    nepi_ip=192.168.170.103
-fi
-if ! is_valid_ipv4 "${nepi_ip}"; then
-    nepi_ip=192.168.170.103
-fi
-
-CUT_IP=$(echo "$nepi_ip" | cut -d '.' -f 4-)
-nepi_ip=127.0.0.${CUT_IP}
-
-
-
-echo "Updating NEPI IP in ${file}"
-
-echo "${nepi_ip} nepi" | sudo tee -a $file
-echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $file
-echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} nepiadmin" | sudo tee -a $file
-echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $file
-echo "${nepi_ip} nepiuser" | sudo tee -a $file
-echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $file
 
 echo ""
 echo "##################################"
@@ -715,56 +653,58 @@ echo ""
 NEPI_STATIC_IP_END=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_END=$NEPI_DEVICE_ID
 
-if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
-    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-        if [[ ${NEPI_DEVICE_ID_END} != ${NEPI_DEVICE_ID_START} ]]; then
-            echo ""
-            echo "Your NEPI DEVICE ID has changed to: ${NEPI_DEVICE_ID}"
-            echo ""
-            echo ""
-            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
-            echo ""
-            echo "Rerun the 'nepisetup' to update the NEPI_DEVICE_ID env variable to: ${NEPI_DEVICE_ID}"
-            echo ""
-        fi
 
-        if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
-            remote_ip=${SSH_CLIENT%% *}
-            remote_submask=${remote_ip%.*}
-            remote_addr=${remote_ip##*.}
-            new_ip=${NEPI_STATIC_IP_END%%/*}
-            new_submask=${new_ip%.*}
-            new_addr=${new_ip##*.}
-            new_netmask=${NEPI_STATIC_IP_END#*/}
-            pc_ip_netmask=${new_submask}'.'${remote_addr}'/'${new_netmask}
-            echo ""
-            echo "Your NEPI STATIC IP address has changed to: ${NEPI_STATIC_IP_END}"
-            echo ""
+if [[ ${NEPI_DEVICE_ID_END} != ${NEPI_DEVICE_ID_START} ]]; then
+    echo ""
+    echo "Your NEPI DEVICE ID has changed to: ${NEPI_DEVICE_ID}"
+    echo ""
+    echo ""
+    echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+    echo ""
+    echo "Rerun the 'nepisetup' to update the NEPI_DEVICE_ID env variable to: ${NEPI_DEVICE_ID}"
+    echo ""
+fi
 
-            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
-            echo ""
-            if [[ ${remote_submask} != ${new_submask} ]]; then
-                echo "Updating the IP address on your remote PC's network adapter to: ${pc_ip_netmask}"
-                echo ""
-            fi
-            echo "Rerun the 'nepisetup' to update the NEPI_IP env variable to: ${NEPI_STATIC_IP_END%%/*}"
-            echo ""
+if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
+    remote_ip=${SSH_CLIENT%% *}
+    remote_submask=${remote_ip%.*}
+    remote_addr=${remote_ip##*.}
+    new_ip=${NEPI_STATIC_IP_END%%/*}
+    new_submask=${new_ip%.*}
+    new_addr=${new_ip##*.}
+    new_netmask=${NEPI_STATIC_IP_END#*/}
+    pc_ip_netmask=${new_submask}'.'${remote_addr}'/'${new_netmask}
+    echo ""
+    echo "Your NEPI STATIC IP address has changed to: ${NEPI_STATIC_IP_END}"
+    echo ""
 
+    echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+    echo ""
+    if [[ ${remote_submask} != ${new_submask} ]]; then
+        echo "Updating the IP address on your remote PC's network adapter to: ${pc_ip_netmask}"
+        echo ""
+    fi
+    echo "Rerun the 'nepisetup' to update the NEPI_IP env variable to: ${NEPI_STATIC_IP_END%%/*}"
+    echo ""
+
+
+    # if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
+        if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
             echo "Do you want to restart networking now?"
             choice=$(ask_yes_no)
             if [[ "$choice" == 'yes' ]]; then
-                nnet
+                sudo systemctl restart networking
             else
                 echo "IP address will be appled on next reboot?"
             fi    
 
+        else
+            sudo systemctl restart networking
         fi
-    else
-        nnet
-    fi
-else
-    nnet
+    # else
+    #     sudo systemctl restart networking
 fi
+
 
 
 

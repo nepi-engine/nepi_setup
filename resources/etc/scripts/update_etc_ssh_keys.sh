@@ -68,8 +68,8 @@ echo ""
 echo "UPDATING ETC SSH KEYS"
 
 
-cur_key=$NEPI_SSH_KEY_FILE
-if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
+if [[ "$NEPI_MANAGES_SSH" -eq 1 || ${CONFIG_USER} == ${NEPI_USER} ]]; then
+    if [[ ${NEPI_SSH_KEY_FILE} != ${NEPI_SSH_KEY} ]]; then
     echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
     if nepisetkey $NEPI_SSH_KEY; then
         echo "NEPI SSH key set to ${NEPI_SSH_KEY}"

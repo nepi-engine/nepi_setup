@@ -43,6 +43,7 @@ fi
 
 CURRENT_DIR=$(pwd)
 export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+#echo "BASH_FOLDER ${BASH_FOLDER}"
 
 
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
@@ -474,6 +475,131 @@ function echovar(){
 }
 export -f echovar
 
+
+function netlist() {
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    echo "Interface IP Address"
+    echo "-----------------------"
+    ip -4 -o addr show | awk '{
+        # $netlist2 is the interface name, $4 is the IP address in CIDR format
+        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
+        printf "%-9s  %s |\n", $2, a[1] ;
+    }'
+
+}
+export -f netlist
+
+function netliststatic() {
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    echo "Interface | STATIC IP Address"
+    echo "-----------------------"
+    nlist=netlist
+
+    nslist=$(
+    counter=0
+    new_n=1
+    last_n='lo'
+    skip=0
+    for word in $nlist; do
+      if [[ ${word} == ${last_n} || "$word" == *"$l4tbr"* || "$word" == *"$rndis"* || "$word" == *"$wlan"* || "$word" == *"$docker"* ]]; then
+        skip=1
+      fi
+      if [[ $skip -eq 0 ]]; then
+        printf "%s " "$word"
+      fi
+      if [[ $new_n -eq 1 ]]; then
+        last_n=$word
+        new_n=0
+      fi
+      ((counter++))
+      if [[ $((counter % 3)) == 0 ]]; then
+        new_n=1
+        skip=0
+        printf "\\n"
+      fi
+    done
+    # Add a final newline if the total count isn't a multiple of 3,
+    # ensuring the last line is processed.
+    if [[ $((counter % 3)) != 0 ]]; then
+      printf "\\n"
+    fi
+
+
+  )
+
+}
+export -f netliststatic
+
+
+function netsetstatic() {
+    new_ip_netmask=$1
+    if ! systemctl is-active --quiet NetworkManager; then
+      echo "Network Manager Not Running"
+      return 1
+    fi
+
+    if ! is_valid_ipv4_netmask $new_ip_netmask; then
+      echo "Invalid Address/Netmask Combination ${net_ip}"
+      return 1
+    fi
+
+
+
+    selected_adapter=''
+
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    nslist=netliststatic 
+
+    # Set IFS to | and read into an array
+    IFS='|' read -r -a adapters <<< "$nslist"
+
+ 
+    # Check if there are any files
+    if [[ ${#adapters[@]} -eq 0 ]]; then
+        echo "No Network Adapters Found"
+        return 1
+    fi
+
+    # Check if there are any files
+    if [[ ${#adapters[@]} -eq 1 ]]; then
+        set -- ${adapters[0]}
+        selected_adapter=${1}
+    fi
+
+    if [[ -z $selected_adapter ]]; then
+      echo ""
+      echo "Select a Network Adapter to Update"
+      echo "--------------------"
+      echo ""
+      select adapter in "${adapters[@]}"; do
+          if [[ -n "$adapter" ]]; then
+              set -- $adapter
+              selected_adapter=${1}
+              break
+          else
+              echo "Invalid selection. Please try again."
+          fi
+      done
+    fi
+      
+    
+    # Output the full path of the selected file
+    if [[ -n "$selected_adapter" ]]; then
+        echo "Updating Network Adapter ${selected_adapter} with IP Address ${new_ip_netmask}"
+
+        sudo nmcli connection modify ${selected_adpater} \
+            ipv4.addresses ${new_ip_netmask} \
+            ipv4.dns 8.8.8.8,8.8.4.4 \
+            ipv4.method manual       
+
+        sudo systemctl restart NetworkManager
+    fi   
+}
+export -f netsetstatic
+
 # ping internet
 function pingi(){
     if ! ping -c 1 google.com > /dev/null 2>&1; then
@@ -740,9 +866,9 @@ export change_password
 
 function fix_chromium(){
   sudo -v
-  sudo rm -rf ~/.config/chromium/Singleton* > /dev/null 2>&1
-  sudo rm -rf ~/.config/chromium/chommon/Singleton* > /dev/null 2>&1
-  sudo rm -rf ~/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/chommon/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
 
   sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
   sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium > /dev/null 2>&1
@@ -786,6 +912,9 @@ utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
+netlist = list network adapters and IP addresses
+netliststatic = list network adapters and static IP addresses
+netsetstatic = set static_ip for ethernet adapter with provided IP/Netmask like '192.168.179.103/24'
 pingi = Check connection to NEPI IP
 pingnc = ping NEPI IP address continously
 pingi = Check connection to internet
@@ -1710,6 +1839,15 @@ RED='\033[0;31m'
 alias nepihome="
 cd ${NEPI_HOME}"
 
+if [[ -d "${NEPI_REPO_FOLDER}/nepi_setup/scripts" ]]; then
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
+else
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
+fi
+
+export NSETUP=$setup_folder
+
+alias nsetup="cd ${NSETUP}"
 
 
 function select_ssh_key {
@@ -1907,11 +2045,19 @@ function nepisetkey {
         if [[ -d $SYSTEM_KEYS_FOLDER ]]; then
           sudo cp $key_path "${SYSTEM_KEYS_FOLDER}/${key_file}"
           sudo cp $pub_path "${SYSTEM_KEYS_FOLDER}/${key_file}.pub"
+          config_file="/home/${CONFIG_USER}/nepi_system_config.yaml"
+          if [[ -f $config_file ]]; then
+            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
+          fi
           config_file="${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.yaml"
+          if [[ -f $config_file ]]; then
+            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
+          fi
           export NEPI_SSH_KEY=$key_file
-          update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
-        fi
+          
 
+        fi
+        ssh-add ${key_path}
         echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
 
         return 0
@@ -2062,17 +2208,17 @@ function nepiauthrm {
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          # systemctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo systemctl restart sshd
-          # fi
+          systemctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo systemctl restart sshd
+          fi
 
-          # supervisorctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo supervisorctl restart sshd
-          # fi
+          supervisorctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo supervisorctl restart sshd
+          fi
 
           return 0
           
@@ -2115,7 +2261,7 @@ function nepiauthadd {
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          #ssh-add ${key_path}
+          
           cat ${key_path}.pub >> $authorized_keys_path
 
           sudo chmod 0700 $key_folder
@@ -2123,17 +2269,17 @@ function nepiauthadd {
           sudo chmod 0600 $key_path
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
-          # systemctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo systemctl restart sshd
-          # fi
+          systemctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo systemctl restart sshd
+          fi
 
-          # supervisorctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo supervisorctl restart sshd
-          # fi
+          supervisorctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo supervisorctl restart sshd
+          fi
 
           return 0
           
@@ -2551,7 +2697,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == '${NEPI_REPO_NAME}' || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src" ]]; then
+    if [[ ("$cur_folder" == "${NEPI_REPO_NAME}" || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
@@ -2576,6 +2722,7 @@ utilsn="${utilsn}
 ### NEPI Dev FUNCTIONS
 ################################
 nepihome = Change to users home folder
+nsetup = Change Dir to the NEPI setup scripts folder
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
