@@ -277,8 +277,7 @@ function NEPI_START_FUNCTION(){
 
 
             # Try Backup Mode if System CONFIG Fails
-            if [[ "$CONFIG_MODE" == "SYSTEM" ]]; then
-                if [[ "$NEPI_AB_FS" -eq 1 ]]; then
+            if [[ "$CONFIG_MODE" == "SYSTEM" && "$NEPI_AB_FS" -eq 1 ]]; then
                     echo "##########################"
                     echo "Switching to Backup NEPI File System"
                     echo "##########################"
