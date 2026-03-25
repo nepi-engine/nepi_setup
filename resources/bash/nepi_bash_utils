@@ -474,6 +474,128 @@ function echovar(){
 }
 export -f echovar
 
+
+function netlist() {
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    echo "Interface IP Address"
+    echo "-----------------------"
+    ip -4 -o addr show | awk '{
+        # $netlist2 is the interface name, $4 is the IP address in CIDR format
+        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
+        printf "%-9s  %s |\n", $2, a[1] ;
+    }'
+}
+export -f netlist
+
+function netliststatic() {
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    echo "Interface | STATIC IP Address"
+    echo "-----------------------"
+    nlist=netlist
+
+    nslist=$(
+    counter=0
+    new_n=1
+    last_n='lo'
+    skip=0
+    for word in $nlist; do
+      if [[ ${word} == ${last_n} || "$word" == *"$l4tbr"* || "$word" == *"$rndis"* || "$word" == *"$wlan"* || "$word" == *"$docker"* ]]; then
+        skip=1
+      fi
+      if [[ $skip -eq 0 ]]; then
+        printf "%s " "$word"
+      fi
+      if [[ $new_n -eq 1 ]]; then
+        last_n=$word
+        new_n=0
+      fi
+      ((counter++))
+      if [[ $((counter % 3)) == 0 ]]; then
+        new_n=1
+        skip=0
+        printf "\\n"
+      fi
+    done
+    # Add a final newline if the total count isn't a multiple of 3,
+    # ensuring the last line is processed.
+    if [[ $((counter % 3)) != 0 ]]; then
+      printf "\\n"
+    fi
+
+
+  )
+
+}
+export -f netliststatic
+
+
+function netsetstatic() {
+    new_ip_netmask=$1
+    if ! systemctl is-active --quiet NetworkManager; then
+      echo "Network Manager Not Running"
+      return 1
+    fi
+
+    if ! is_valid_ipv4_netmask $new_ip_netmask; then
+      echo "Invalid Address/Netmask Combination ${net_ip}"
+      return 1
+    fi
+
+
+
+    selected_adapter=''
+
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    nslist=netliststatic 
+
+    # Set IFS to | and read into an array
+    IFS='|' read -r -a adapters <<< "$nslist"
+
+ 
+    # Check if there are any files
+    if [[ ${#adapters[@]} -eq 0 ]]; then
+        echo "No Network Adapters Found"
+        return 1
+    fi
+
+    # Check if there are any files
+    if [[ ${#adapters[@]} -eq 1 ]]; then
+        set -- ${adapters[0]}
+        selected_adapter=${1}
+    fi
+
+    if [[ -z $selected_adapter ]]; then
+      echo ""
+      echo "Select a Network Adapter to Update"
+      echo "--------------------"
+      echo ""
+      select adapter in "${adapters[@]}"; do
+          if [[ -n "$adapter" ]]; then
+              set -- $adapter
+              selected_adapter=${1}
+              break
+          else
+              echo "Invalid selection. Please try again."
+          fi
+      done
+    fi
+      
+    
+    # Output the full path of the selected file
+    if [[ -n "$selected_adapter" ]]; then
+        echo "Updating Network Adapter ${selected_adapter} with IP Address ${new_ip_netmask}"
+
+        sudo nmcli connection modify ${selected_adpater} \
+            ipv4.addresses ${new_ip_netmask} \
+            ipv4.dns 8.8.8.8,8.8.4.4 \
+            ipv4.method manual       
+    fi   
+}
+export -f netsetstatic
+
 # ping internet
 function pingi(){
     if ! ping -c 1 google.com > /dev/null 2>&1; then
