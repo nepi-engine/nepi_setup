@@ -46,7 +46,7 @@ export CONFIG_USER=$CONFIG_USER
 ETC_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 ETC_SCRIPTS_FOLDER=${ETC_FOLDER}/scripts
 echo "ETC_FOLDER ${ETC_FOLDER}"
-echo "NEPI_SSH_KEY ${NEPI_SSH_KEY}"
+
 
 # Load System Config File
 source ${ETC_FOLDER}/load_system_config.sh
@@ -305,6 +305,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+
 }
 
 #####################################
@@ -670,56 +671,58 @@ echo ""
 NEPI_STATIC_IP_END=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_END=$NEPI_DEVICE_ID
 
-if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
-    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-        if [[ ${NEPI_DEVICE_ID_END} != ${NEPI_DEVICE_ID_START} ]]; then
-            echo ""
-            echo "Your NEPI DEVICE ID has changed to: ${NEPI_DEVICE_ID}"
-            echo ""
-            echo ""
-            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
-            echo ""
-            echo "Rerun the 'nepisetup' to update the NEPI_DEVICE_ID env variable to: ${NEPI_DEVICE_ID}"
-            echo ""
-        fi
 
-        if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
-            remote_ip=${SSH_CLIENT%% *}
-            remote_submask=${remote_ip%.*}
-            remote_addr=${remote_ip##*.}
-            new_ip=${NEPI_STATIC_IP_END%%/*}
-            new_submask=${new_ip%.*}
-            new_addr=${new_ip##*.}
-            new_netmask=${NEPI_STATIC_IP_END#*/}
-            pc_ip_netmask=${new_submask}'.'${remote_addr}'/'${new_netmask}
-            echo ""
-            echo "Your NEPI STATIC IP address has changed to: ${NEPI_STATIC_IP_END}"
-            echo ""
+if [[ ${NEPI_DEVICE_ID_END} != ${NEPI_DEVICE_ID_START} ]]; then
+    echo ""
+    echo "Your NEPI DEVICE ID has changed to: ${NEPI_DEVICE_ID}"
+    echo ""
+    echo ""
+    echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+    echo ""
+    echo "Rerun the 'nepisetup' to update the NEPI_DEVICE_ID env variable to: ${NEPI_DEVICE_ID}"
+    echo ""
+fi
 
-            echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
-            echo ""
-            if [[ ${remote_submask} != ${new_submask} ]]; then
-                echo "Updating the IP address on your remote PC's network adapter to: ${pc_ip_netmask}"
-                echo ""
-            fi
-            echo "Rerun the 'nepisetup' to update the NEPI_IP env variable to: ${NEPI_STATIC_IP_END%%/*}"
-            echo ""
+if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
+    remote_ip=${SSH_CLIENT%% *}
+    remote_submask=${remote_ip%.*}
+    remote_addr=${remote_ip##*.}
+    new_ip=${NEPI_STATIC_IP_END%%/*}
+    new_submask=${new_ip%.*}
+    new_addr=${new_ip##*.}
+    new_netmask=${NEPI_STATIC_IP_END#*/}
+    pc_ip_netmask=${new_submask}'.'${remote_addr}'/'${new_netmask}
+    echo ""
+    echo "Your NEPI STATIC IP address has changed to: ${NEPI_STATIC_IP_END}"
+    echo ""
 
+    echo "UPDATE IP SETTINGS ON YOUR REMOTE PC IF REQUIRED BY:"
+    echo ""
+    if [[ ${remote_submask} != ${new_submask} ]]; then
+        echo "Updating the IP address on your remote PC's network adapter to: ${pc_ip_netmask}"
+        echo ""
+    fi
+    echo "Rerun the 'nepisetup' to update the NEPI_IP env variable to: ${NEPI_STATIC_IP_END%%/*}"
+    echo ""
+
+
+    # if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
+        if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
             echo "Do you want to restart networking now?"
             choice=$(ask_yes_no)
             if [[ "$choice" == 'yes' ]]; then
-                nnet
+                sudo systemctl restart networking
             else
                 echo "IP address will be appled on next reboot?"
             fi    
 
+        else
+            sudo systemctl restart networking
         fi
-    else
-        nnet
-    fi
-else
-    nnet
+    # else
+    #     sudo systemctl restart networking
 fi
+
 
 
 

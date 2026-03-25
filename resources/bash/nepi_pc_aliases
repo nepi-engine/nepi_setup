@@ -56,100 +56,62 @@ function ckeys(){
 export -f ckeys
 
 
-function switchnd(){
-  if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
-    echo "Switching to Device Deployment"
-    UPDATE='export NEPI_IN_CONTAINER=0'
-  else
-    echo "Switching to Container Deployment"
-    UPDATE='export NEPI_IN_CONTAINER=1'
-  fi
 
-  ## Update NEPI_IN_CONTAINER
-  FILE=/home/${CONFIG_USER}/.bashrc
-  KEY='export NEPI_IN_CONTAINER'
-  sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-
-  # Do Export Updates
-  export NEPI_IN_CONTAINER=$NEPI_IN_CONTAINER
-  if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
-    nepi_port=2222
-    nepihost=$NEPI_HOST_USER
-  else
-    nepi_port=22
-    nepihost=$NEPI_USER
-    
-  fi
-
-  # Clear known keys
-  ckeys
   
-  sbrc
 
-}
-
-if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
-  nepi_port=2222
-  nepihost=$NEPI_HOST_USER
-else
-  nepi_port=22
-  nepihost=$NEPI_USER
-fi
 
 ssh_key_path=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
 if [[ -z NEPI_SSH_KEY_PATH ]]; then
   NEPI_SSH_KEY_PATH=$ssh_key_path
 fi
 
-
+nepi_port=2222
 
 # Setup Connection Shortcuts
 # Setup Connection Shortcuts
-alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
-alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
-alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_USER}"
+alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
+alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
+alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
+
+function sftpnl(){
+sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi:../.."$@"
+}
+
+
 
 
 function sshnhc(){
   echo "Checking NEPI Device Clock"
-  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
+  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost "date -I")
   year_str="${date_str%%-*}"
   if [[ $year_str -lt 2026 ]]; then
     echo "Upating Clock"
-    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
+    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s)"
   fi
-  date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "date -I")
-  year_str="${date_str%%-*}"
-  if [[ $year_str -lt 2026 ]]; then
-    echo "Failed to Update Clock"
-    ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost} "sudo -S date --set=@$(date +%s)"
-    return 1
-  else
-    echo "Remote Clock Updated to ${date_str}"
-    return 0
-  fi  
+  # date_str=$(ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost "date -I")
+  # year_str="${date_str%%-*}"
+  # if [[ $year_str -lt 2026 ]]; then
+  #   echo "Failed to Update Clock"
+  #   ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s)"
+  #   return 1
+  # else
+  #   echo "Remote Clock Updated to ${date_str}"
+  #   return 0
+  # fi  
 }
+
 # Setup Connection Shortcuts
 function sshnh(){
-  sshnhc
-  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}
+  ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH -t ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s); exec bash -l"
 }
 
 
-alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
-alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}"
+alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost"
+alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost"
 
-alias sshnr="ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@nepirecovery"
-
-
-
-
-function sftpnl(){
-sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH nepi@nepi:../.."$@"
-}
 
 function sftpnhl(){
-sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${nepihost}@${nepihost}:../.."$@"
+sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost:../.."$@"
 }
 
 
@@ -380,9 +342,9 @@ ucfg = /mnt/nepi_storage/user_cfg"
 
 
 if [[ -d "${NEPI_REPO_FOLDER}/nepi_setup/scripts" ]]; then
-  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts""
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
 else
-  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts""
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
 fi
 
 export NSETUP=$setup_folder
@@ -391,7 +353,7 @@ alias nsetup="cd ${NSETUP}"
 
 ## NEPI deploy complete
 alias nepisetup="
-source ${NSETUP}/scripts/dev_pc_setup.sh"
+source ${NSETUP}/dev_pc_setup.sh"
 
 
 

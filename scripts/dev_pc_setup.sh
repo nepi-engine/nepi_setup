@@ -108,8 +108,6 @@ echo "########################"
         NEPI_SSH_KEY_FILE=nepi_default_ssh_key
     fi    
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
-    NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
-    NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
 
 
 if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
@@ -139,7 +137,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
         update_yaml_value "NEPI_STATIC_IP" "${NEPI_IP}/24" $config_file
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
-        update_yaml_value "NEPI_SSH_KEY_FILE" $NEPI_SSH_KEY_FILE $config_file
+        update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $config_file
     }
 
 
@@ -322,7 +320,13 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
     ####################################################
+    echo " "
+    echo "################################# "
+    echo "Setting up SSH Key ${NEPI_SSH_KEY_FILE}"
+    echo ""
 
+    nepisetkey $NEPI_SSH_KEY_FILE
+    ssh-add -l
 
 
     echo " "
@@ -355,14 +359,14 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     sudo sed -i "/${NEPI_DEVICE_ID}/d" "$tfile"
     sudo sed -i "/nepi/d" "$tfile"
     sudo sed -i "/nepiadmin/d" "$tfile"
-    sudo sed -i "/${NEPI_HOST_USER}/d" "$tfile"
+    sudo sed -i "/nepihost/d" "$tfile"
 
 
     echo "${nepi_ip} ${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepi" | sudo tee -a $tfile
     echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $tfile
-    echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
+    echo "${nepi_ip} nepihost" | sudo tee -a $tfile
+    echo "${nepi_ip} nepihost-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepiadmin" | sudo tee -a $tfile
     echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepiuser" | sudo tee -a $tfile
@@ -381,8 +385,9 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Clearing Known Hosts"
     echo ""
 
-    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
-    ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
+    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts*
+    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
+    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
 
 

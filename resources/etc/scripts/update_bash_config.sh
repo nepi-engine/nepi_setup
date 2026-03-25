@@ -146,14 +146,14 @@ if [[ -f "$ufile" ]]; then
     sudo sed -i "/${NEPI_DEVICE_ID}/d" "$tfile"
     sudo sed -i "/nepi/d" "$tfile"
     sudo sed -i "/nepiadmin/d" "$tfile"
-    sudo sed -i "/${NEPI_HOST_USER}/d" "$tfile"
+    sudo sed -i "/nepihost/d" "$tfile"
 
 
     echo "${nepi_ip} ${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepi" | sudo tee -a $tfile
     echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} ${NEPI_HOST_USER}" | sudo tee -a $tfile
-    echo "${nepi_ip} ${NEPI_HOST_USER}-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
+    echo "${nepi_ip} nepihost" | sudo tee -a $tfile
+    echo "${nepi_ip} nepihost-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepiadmin" | sudo tee -a $tfile
     echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
     echo "${nepi_ip} nepiuser" | sudo tee -a $tfile

@@ -1907,11 +1907,19 @@ function nepisetkey {
         if [[ -d $SYSTEM_KEYS_FOLDER ]]; then
           sudo cp $key_path "${SYSTEM_KEYS_FOLDER}/${key_file}"
           sudo cp $pub_path "${SYSTEM_KEYS_FOLDER}/${key_file}.pub"
+          config_file="/home/${CONFIG_USER}/nepi_system_config.yaml"
+          if [[ -f $config_file ]]; then
+            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
+          fi
           config_file="${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.yaml"
+          if [[ -f $config_file ]]; then
+            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
+          fi
           export NEPI_SSH_KEY=$key_file
-          update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
-        fi
+          
 
+        fi
+        ssh-add ${key_path}
         echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
 
         return 0
@@ -2062,17 +2070,17 @@ function nepiauthrm {
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          # systemctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo systemctl restart sshd
-          # fi
+          systemctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo systemctl restart sshd
+          fi
 
-          # supervisorctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo supervisorctl restart sshd
-          # fi
+          supervisorctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo supervisorctl restart sshd
+          fi
 
           return 0
           
@@ -2115,7 +2123,7 @@ function nepiauthadd {
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          #ssh-add ${key_path}
+          
           cat ${key_path}.pub >> $authorized_keys_path
 
           sudo chmod 0700 $key_folder
@@ -2123,17 +2131,17 @@ function nepiauthadd {
           sudo chmod 0600 $key_path
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
-          # systemctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo systemctl restart sshd
-          # fi
+          systemctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo systemctl restart sshd
+          fi
 
-          # supervisorctl&> /dev/null
-          # res=$?
-          # if [[ "$res" -eq 0 ]];  then
-          #   sudo supervisorctl restart sshd
-          # fi
+          supervisorctl&> /dev/null
+          res=$?
+          if [[ "$res" -eq 0 ]];  then
+            sudo supervisorctl restart sshd
+          fi
 
           return 0
           
