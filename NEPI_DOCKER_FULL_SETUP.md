@@ -179,12 +179,15 @@ Check for internet connection
 
     ping -c 1 google.com
 
+Run the NEPI Docker Storage Initialization script (sudo password is now 'nepi'):
 
-Run the NEPI Docker Initialization script (sudo password is now 'nepi'):
+    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
+
+Run the NEPI Docker Image Initialization script (sudo password is now 'nepi'):
 
 **NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
 
-    source /home/nepihost/nepi_setup/scripts/docker_full_init_setup.sh
+    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
 
 Run the NEPI Docker Import command (sudo password is now 'nepi'):
 

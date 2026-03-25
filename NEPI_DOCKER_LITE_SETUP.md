@@ -81,18 +81,34 @@ This process will create (if not allready created) and setup the following NEPI 
 3) Chromium browser updated with useful NEPI browser bookmarks.
 
 
+################################################################
 ### NEPI Docker Init Setup
 This section will initialize and test your NEPI Docker installation.  
 
+Log back into `nepihost` using password 'nepi' 
+
+Check for internet connection
+
+    ping -c 1 google.com
+
+Run the NEPI Docker Storage Initialization script (sudo password is now 'nepi'):
+
+    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
+
+Run the NEPI Docker Image Initialization script (sudo password is now 'nepi'):
+
 **NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
 
-Run the NEPI Docker Import command:
+    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
+
+Run the NEPI Docker Import command (sudo password is now 'nepi'):
 
 **NOTE:** This step imports a large NEPI image file into the system which takes several minutes to complete.
 
     nepiimport
 
 After the import completes, you can print the current installed NEPI Docker Image by typing:
+
 
     dimg
 
@@ -128,11 +144,6 @@ After the import completes, you can print the current installed NEPI Docker Imag
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
 
-**NOTE:** This process downloads the Lite AI models, AI training scripts, 
-sample data files, and user_configurations to folders in /mnt/nepi_storage.
-
-**NOTE:** This process downolads the latest NEPI Docker Image for your system's
-architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
 
 ################################################################
 ### NEPI Docker Image Testing
