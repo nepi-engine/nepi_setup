@@ -305,14 +305,6 @@ ucfg = /mnt/nepi_storage/user_cfg
 nfws = Show Installed NEPI Firmware Version
 nfwu = Update NEPI Firmware Version with provided value"
 
-export NSETUP="/mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts"
-alias nsetup="cd ${NSETUP}"
-
-HELPN="${HELPN}
-################################
-## NEPI folder shortcuts ##
-################################
-nsetup = /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts"
 
 
 # Print out the NEPI shortcuts
