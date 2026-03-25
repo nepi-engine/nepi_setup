@@ -866,9 +866,9 @@ export change_password
 
 function fix_chromium(){
   sudo -v
-  sudo rm -rf ~/.config/chromium/Singleton* > /dev/null 2>&1
-  sudo rm -rf ~/.config/chromium/chommon/Singleton* > /dev/null 2>&1
-  sudo rm -rf ~/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/chommon/Singleton* > /dev/null 2>&1
+  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/chommon/chromium/Singleton* > /dev/null 2>&1
 
   sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
   sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium > /dev/null 2>&1
