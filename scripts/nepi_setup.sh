@@ -681,6 +681,58 @@ if [[ "$?" -eq 0  ]]; then
         fix_chromium
     fi
 
+    if [[ $LITE_INSTALL -eq 1 ]]; then
+
+        echo "Configuring default code editor"
+        CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
+        if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+            echo "VS Code is already the default code editor"
+        else
+            read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+                echo "VS Code set as default code editor"
+            else
+                echo "Skipping VS Code default setup"
+            fi
+        fi
+
+        echo "Adding config and storage folders to files sidebar"
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+
+        CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+        if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+            echo "Adding Chromium to favourites"
+            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+            gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+        else
+            echo "Chromium already in favourites"
+        fi
+
+        echo "Locating Chromium profile"
+        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium/Default"
+        elif [[ -d "/home/${CONFIG_USER}/.config/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium/Default"
+        else
+            echo "Chromium profile directory not found"
+            CHROMIUM_PROFILE=""
+        fi
+
+        if [[ -n "$CHROMIUM_PROFILE" ]]; then
+            echo "Updating Chromium Defualt Files"
+            sudo mkdir -p "$CHROMIUM_PROFILE"
+            
+            sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  $CHROMIUM_PROFILE
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} $CHROMIUM_PROFILE/*
+
+            echo "Cleaning Chromium Files"
+            fix_chromium
+        fi
+
+    fi
+
     #sudo rm -rf ~/.config/chromium/Singleton* 
 
 
