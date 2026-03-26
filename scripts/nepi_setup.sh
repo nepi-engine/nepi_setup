@@ -724,22 +724,8 @@ if [[ "$?" -eq 0  ]]; then
 
             # Enable the Home button in Preferences without overwriting the whole file
             PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
-            sudo python3 - "$PREFS_FILE" <<'PYEOF'
-import json, sys, os
-path = sys.argv[1]
-data = {}
-if os.path.isfile(path):
-    with open(path, 'r') as f:
-        try:
-            data = json.load(f)
-        except Exception:
-            data = {}
-data.setdefault('browser', {})['show_home_button'] = True
-data['bookmark_bar'] = data.get('bookmark_bar', {})
-data['bookmark_bar']['show_on_all_tabs'] = True
-with open(path, 'w') as f:
-    json.dump(data, f, indent=3)
-PYEOF
+            update_json_value "$PREFS_FILE" browser.show_home_button true
+            update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
 
             # echo "Cleaning Chromium Files"
