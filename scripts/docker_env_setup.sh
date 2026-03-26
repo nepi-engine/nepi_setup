@@ -156,6 +156,12 @@ sudo apt install python-is-python3 -y
 sudo apt install python3-venv python3-pip -y
 
 
+if command -v mount.cifs &>/dev/null; then
+    echo "cifs-utils is installed."
+else
+    echo "Installing cifs-utils"
+    sudo apt install cifs-utils
+fi
 
 echo "######################################"
 echo "Installing NEPI python packages"
@@ -396,16 +402,26 @@ if [[ -n "$DISPLAY" ]]; then
 
     #######
     echo ""
-    echo "Installing mdview"
-    sudo snap install mdview
+    if command -v mdview &>/dev/null; then
+        echo "mdview is installed."
+    else
+        echo "Installing mdview"
+        sudo snap install mdview
+    fi
 
-    if [[ $LITE_INSTALL -eq 0 ]]; then
-        echo ""
-        echo "Installing Chromium Browser"
-        #sudo snap remove --purge chromium
-        sudo snap install chromium
-        #sudo apt install chromium-browser -y
-        #chromium-browser --disable-features=DnsOverHttps
+    if command -v chromium-browser &>/dev/null; then
+        echo "Chromium is installed."
+    else
+        # Check for an alternative common name if the first one fails
+        if command -v chromium &>/dev/null; then
+            echo "Chromium is installed."
+        else
+            echo "Installing Chromium Browser"
+            #sudo snap remove --purge chromium
+            sudo snap install chromium
+            #sudo apt install chromium-browser -y
+            #chromium-browser --disable-features=DnsOverHttps
+        fi
     fi
 
     if command -v code &> /dev/null; then
@@ -423,6 +439,13 @@ if [[ -n "$DISPLAY" ]]; then
             sudo snap install code --channel=edge --classic
         fi
 
+    fi
+
+    if command -v mount.cifs &>/dev/null; then
+        echo "cifs-utils is installed."
+    else
+        echo "Installing cifs-utils"
+        sudo apt install cifs-utils
     fi
 fi
 

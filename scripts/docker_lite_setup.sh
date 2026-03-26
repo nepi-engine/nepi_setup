@@ -188,6 +188,13 @@ sudo apt install gparted -y
 sudo apt install python-is-python3 -y
 sudo apt install python3-venv python3-pip -y
 
+if command -v mount.cifs &>/dev/null; then
+    echo "cifs-utils is installed."
+else
+    echo "Installing cifs-utils"
+    sudo apt install cifs-utils
+fi
+
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
@@ -334,16 +341,36 @@ sudo apt-get install --fix-broken -y
 
 
 
+
 if [[ -n "$DISPLAY" ]]; then
-    echo ""
     echo "########################"
     echo "Installing Desktop Utility Apps"
     echo "########################"
-
     sudo apt update
+
+    #######
     echo ""
-    echo "Installing mdview"
-    sudo snap install mdview
+    if command -v mdview &>/dev/null; then
+        echo "mdview is installed."
+    else
+        echo "Installing mdview"
+        sudo snap install mdview
+    fi
+
+    if command -v chromium-browser &>/dev/null; then
+        echo "Chromium is installed."
+    else
+        # Check for an alternative common name if the first one fails
+        if command -v chromium &>/dev/null; then
+            echo "Chromium is installed."
+        else
+            echo "Installing Chromium Browser"
+            #sudo snap remove --purge chromium
+            sudo snap install chromium
+            #sudo apt install chromium-browser -y
+            #chromium-browser --disable-features=DnsOverHttps
+        fi
+    fi
 
     if command -v code &> /dev/null; then
         echo "Visual Studio Code is installed and accessible."
@@ -361,22 +388,10 @@ if [[ -n "$DISPLAY" ]]; then
         fi
 
     fi
+
 fi
 
-if command -v code &> /dev/null; then
-    echo "Visual Studio Code is installed and accessible."
-else
-    echo ""
-    echo "Installing visual code editor"  
-    if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-        curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-        sudo apt install ./code_arm64.deb
-        wait
-        sudo rm code_arm64.deb
-    elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-        sudo snap install code --channel=edge --classic
-    fi
-fi
+
 
 echo ""
 echo "########################"
