@@ -492,6 +492,78 @@ if [[ -n "$DISPLAY" ]]; then
         fi
     fi
 
+
+       echo "Configuring default code editor"
+        CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
+        if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+            echo "VS Code is already the default code editor"
+        else
+            read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+                echo "VS Code set as default code editor"
+            else
+                echo "Skipping VS Code default setup"
+            fi
+        fi
+
+        echo "Adding config and storage folders to files sidebar"
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+
+        CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+        if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+            echo "Adding Chromium to favourites"
+            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+            gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+        else
+            echo "Chromium already in favourites"
+        fi
+
+        echo "Locating Chromium profile"
+        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium/Default"
+        elif [[ -d "/home/${CONFIG_USER}/.config/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium/Default"
+        else
+            echo "Chromium profile directory not found"
+            CHROMIUM_PROFILE=""
+        fi
+
+        if [[ -n "$CHROMIUM_PROFILE" ]]; then
+            echo "Setting Chromium Bookmarks and enabling Home button"
+            sudo mkdir -p "$CHROMIUM_PROFILE"
+
+            # Copy only the Bookmarks file
+            sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
+                "$CHROMIUM_PROFILE/Bookmarks"
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
+
+            # Enable the Home button in Preferences without overwriting the whole file
+            PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
+            sudo python3 - "$PREFS_FILE" <<'PYEOF'
+import json, sys, os
+path = sys.argv[1]
+data = {}
+if os.path.isfile(path):
+    with open(path, 'r') as f:
+        try:
+            data = json.load(f)
+        except Exception:
+            data = {}
+data.setdefault('browser', {})['show_home_button'] = True
+data['bookmark_bar'] = data.get('bookmark_bar', {})
+data['bookmark_bar']['show_on_all_tabs'] = True
+with open(path, 'w') as f:
+    json.dump(data, f, indent=3)
+PYEOF
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
+
+            # echo "Cleaning Chromium Files"
+            # fix_chromium
+        fi
+
+
 fi
     if command -v mount.cifs &>/dev/null; then
         echo "cifs-utils is installed."
