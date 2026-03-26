@@ -238,12 +238,12 @@ else
                 fi
 
 
-                exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
-                if [[ -n "$exist_ids" ]]; then
+                exist_refs=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.Repository}}:{{.Tag}}"))
+                if [[ -n "$exist_refs" ]]; then
                 echo "Removing existing images ${NEPI_IMPORT_FS}"
-                    for id in "${exist_ids[@]}"; do
-                        echo "Removing ${id}"
-                        sudo docker rmi -f $id
+                    for ref in "${exist_refs[@]}"; do
+                        echo "Removing ${ref}"
+                        sudo docker rmi "$ref"
                     done
                 fi
             fi
@@ -283,12 +283,12 @@ else
                         fi
 
                         # Remove existing NEPI image if needed
-                        exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
-                        if [[ -n "$exist_ids" ]]; then
+                        exist_refs=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.Repository}}:{{.Tag}}"))
+                        if [[ -n "$exist_refs" ]]; then
                         echo "Removing existing images ${NEPI_IMPORT_FS}"
-                            for id in "${exist_ids[@]}"; do
-                                echo "Removing ${id}"
-                                sudo docker rmi -f $id
+                            for ref in "${exist_refs[@]}"; do
+                                echo "Removing ${ref}"
+                                sudo docker rmi "$ref"
                             done
                         fi
 
