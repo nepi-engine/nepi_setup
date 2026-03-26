@@ -32,14 +32,11 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -un)
-    if [[ ${CONFIG_USER} == 'root' ]]; then
-        CONFIG_USER=$SUDO_USER
-    fi
-fi
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
 
 
@@ -671,8 +668,8 @@ if [[ "$?" -eq 0  ]]; then
         sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
 
-        echo "Cleaning Chromium Files"
-        fix_chromium
+        # echo "Cleaning Chromium Files"
+        # fix_chromium
 
 
     fi
@@ -723,8 +720,8 @@ if [[ "$?" -eq 0  ]]; then
             sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  $CHROMIUM_PROFILE
             sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} $CHROMIUM_PROFILE/*
 
-            echo "Cleaning Chromium Files"
-            fix_chromium
+            # echo "Cleaning Chromium Files"
+            # fix_chromium
         fi
 
     fi

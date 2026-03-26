@@ -36,25 +36,15 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 
-
-# This file configures a NEPI Docker installation Files and Folders
-
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
-fi
-export CONFIG_USER=$CONFIG_USER
-
-
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
-    fi
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
 
-sudo -v
+
+
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

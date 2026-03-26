@@ -351,7 +351,7 @@ function nepiupdate() {
   ####################################
   # Run NEPI Bash Setup Script
 
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=nepi_bash_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -363,7 +363,7 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Folder Setup Script
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=nepi_folders_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -375,7 +375,7 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Files Setup Script
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=docker_files_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -412,7 +412,7 @@ export -f nepicreate
 ## NEPI build shortcuts
 alias nepibld="
 sudo -v
-source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh
+source ${NSETUP}/docker_config_setup.sh
 sbrc
 nnet"
 

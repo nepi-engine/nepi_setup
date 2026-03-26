@@ -29,13 +29,12 @@ fi
 
 sudo -v
 
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-export CONFIG_USER=$CONFIG_USER
-
-sudo -v
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

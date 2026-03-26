@@ -18,7 +18,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-sudo -v 
+sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -27,16 +27,12 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -un)
-    if [[ ${CONFIG_USER} == 'root' ]]; then
-        CONFIG_USER=$SUDO_USER
-    fi
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
-fi
-
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources

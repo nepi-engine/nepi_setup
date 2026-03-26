@@ -23,10 +23,15 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    return
+    return 
 fi
 
-CONFIG_USER=$(id -un)
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources

@@ -37,19 +37,17 @@ if [[ ! -n $CONFIG_USER ]]; then
     id -nu 1000
 fi
 
+export CONFIG_USER=$CONFIG_USER
+export USER=$CONFIG_USER
 
-##############################
-##### NEPI SETTINGS #####
 
 CURRENT_DIR=$(pwd)
 export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 #echo "BASH_FOLDER ${BASH_FOLDER}"
 
-
+##############################
+##### NEPI SETTINGS #####
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
-
-export CONFIG_USER=$CONFIG_USER
-export USER=$CONFIG_USER
 
 export NEPI_USER=nepi
 export NEPI_HOST_USER=nepihost
@@ -81,9 +79,28 @@ export NEPI_REPO_ADDRESS='git@github.com:nepi-engine/nepi_engine_ws.git'
 export NEPI_REPO_NAME=$(basename "${NEPI_REPO_ADDRESS%.*}")
 export NEPI_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
 
+export NEPI_BUILD_REPO_NAME=${NEPI_REPO_NAME}
+export NEPI_BUILD_REPO_FOLDER="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_NAME}"
+
 export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
+
+if [[ -d $NEPI_REPO_FOLDER ]]; then
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
+  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+  # fi
+elif [[ -d $NEPI_BUILD_REPO_FOLDER ]]; then
+  setup_folder="${NEPI_BUILD_REPO_FOLDER}/nepi_setup/scripts"
+  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+  # fi
+else
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/scripts"
+fi
+
+export NSETUP=$setup_folder
 
 ###############################
 
@@ -1839,13 +1856,6 @@ RED='\033[0;31m'
 alias nepihome="
 cd ${NEPI_HOME}"
 
-if [[ -d $NEPI_REPO_FOLDER ]]; then
-  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
-else
-  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
-fi
-
-export NSETUP=$setup_folder
 
 alias nsetup="cd ${NSETUP}"
 
@@ -2649,6 +2659,8 @@ function nepipull {
 
 export -f nepipull
 
+
+
 function nepimain {
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     if [[ -d ${repo_folder} ]]; then
@@ -2658,6 +2670,11 @@ function nepimain {
     fi
 }
 export -f nepimain
+
+
+
+
+export -f nepipull
 
 function nepidev {
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
@@ -2672,10 +2689,6 @@ export -f nepidev
 
 
 ## NEPI deploy complete
-alias nepisetup="
-source ${NEPI_REPO_FOLDER}/nepi_setup/scripts/dev_pc_setup.sh"
-
-## NEPI deploy complete
 alias nepidpl="
 cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_complete.sh"
@@ -2685,12 +2698,26 @@ alias repodpl="
 cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_repos.sh"
 
+function gitmain {
+  git checkout main
+}
 
 function pushn(){
+  cur_folder=${PWD##*/}
+  IFS='/' read -r -a path_parts <<< "$cur_folder"
+  if [[ ${#path_parts[@]} -lt 3 ]]; then
+      echo "Current folder is not in the NEPI Repo folder: ${cur_folder}"
+      return 1
+  fi
+  third_folder="${path_parts[2]}"
+  if [[ ${third_folder} != ${NEPI_REPO_NAME} ]]; then
+      echo "Current folder is not in the NEPI Repo folder: ${cur_folder}"
+      return 1
+  fi
   git add --all
   git commit -m "*$@*" 
   git push >/dev/null 2>&1
-  cur_folder=${PWD##*/}
+
   par_path=$(dirname "$(pwd)")
   par_folder=$(basename "$par_path")
   #echo $cur_folder
@@ -2717,6 +2744,7 @@ function pushn(){
 }
 
 
+
 utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
@@ -2730,7 +2758,8 @@ nepipull = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI Engine repo's main branch
 nepidev = Switch to the NEPI Engine repo's main branch
 nepidpl = Deploy nepi complete to nepi device
-pushn = Add,commit,push repo changes with optional comment msg"
+gitmain = Change to main branch in current repo or submodule folder
+pushn = Add,commit,push repo changes with optional comment msg in current repo or submodule folder"
 
 
 

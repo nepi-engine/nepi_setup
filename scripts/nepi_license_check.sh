@@ -20,13 +20,12 @@
 
 # This file Checks if the Numurus Software License has been accepted
 
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-export CONFIG_USER=$CONFIG_USER
-
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
@@ -63,13 +62,14 @@ if [[ ! -f "$NEPI_LICENSE_DEST" ]]; then
     if [[ "$license_accepted" == 'no' ]]; then
         echo ""
         echo "License Terms NOT Accepted, Exiting"
-        return 
+        return 1
     else
         echo ""
         echo "License Terms Accepted"
         echo ""
         echo ""
         sudo cp $NEPI_LICENSE_SOURCE $NEPI_LICENSE_DEST
+        return 0
     fi
 fi
     

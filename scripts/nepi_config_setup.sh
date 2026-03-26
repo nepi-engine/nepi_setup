@@ -28,12 +28,19 @@ fi
 
 sudo -v
 
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-export CONFIG_USER=$CONFIG_USER
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
