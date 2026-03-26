@@ -1,3 +1,7 @@
+
+
+
+
 # echo "Loading system config file...."
 SYSTEM_FOLDER=/mnt/nepi_config/system_cfg/etc
 SYSTEM_CONFIG_FILE=${SYSTEM_FOLDER}/nepi_system_config.yaml
@@ -15,14 +19,14 @@ elif [[ -z "$1" ]]; then
         select opt in "${options[@]}"; do
             case $opt in
                 "FULL")
-                    echo "Installing in FULL mode"
+                    # echo "Installing in FULL mode"
                     LITE_INSTALL=0
                     export NEPI_INSTALL="FULL"
                     update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_CONFIG_FILE
                     break
                     ;;
                 "LITE")
-                    echo "Installing in LITE mode"
+                    # echo "Installing in LITE mode"
                     LITE_INSTALL=1
                     export NEPI_INSTALL="LITE"
                     update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_CONFIG_FILE
@@ -34,15 +38,15 @@ elif [[ -z "$1" ]]; then
             esac
         done
     else
-        echo "NEPI installing in ${NEPI_INSTALL} mode from ${SYSTEM_CONFIG_FILE}"
+        #echo "NEPI installing in ${NEPI_INSTALL} mode from ${SYSTEM_CONFIG_FILE}"
         if [[ "$NEPI_INSTALL" == "FULL" ]]; then
-            echo "Installing in FULL mode"
+            # echo "Installing in FULL mode"
             LITE_INSTALL=0
             export NEPI_INSTALL="FULL"
             update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_CONFIG_FILE
 
         elif [[ "$NEPI_INSTALL" == "LITE" ]]; then
-            echo "Installing in LITE mode"
+            # echo "Installing in LITE mode"
             LITE_INSTALL=1
             export NEPI_INSTALL="LITE"
             update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_CONFIG_FILE
@@ -57,11 +61,7 @@ elif [[ "$1" -eq 1 ]]; then
 fi
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
-    echo "#############################"
-    echo "NEPI INSTALL MODE: FULL"
-    echo "#############################"
+    echo "Running in setup mode: FULL"
 elif [[ "$LITE_INSTALL" -eq 1 ]]; then
-    echo "#############################"
-    echo "NEPI INSTALL MODE: LITE"
-    echo "#############################"
+    echo "Running in setup mode: LITE"
 fi

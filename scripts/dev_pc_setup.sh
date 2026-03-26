@@ -23,13 +23,19 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    return
+    return 
 fi
 
-CONFIG_USER=$(id -un)
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
+
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
@@ -64,16 +70,22 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
+NEPI_IP_START=${NEPI_STATIC_IP%%/*}
+echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
 if [[ -n $NEPI_STATIC_IP ]]; then
-    nepi_ip=${NEPI_STATIC_IP%%/*}
-    NEPI_IP=$nepi_ip
+    export NEPI_DEVICE_ID=device1
+    export NEPI_IP=${NEPI_STATIC_IP%%/*}
+    export NEPI_HOST_USER=nepihost
+    export NEPI_IN_CONTAINER=1
 else
-    NEPI_DEVICE_ID=device1
-    NEPI_IP=192.168.179.103
-    NEPI_HOST_USER=nepihost
-    NEPI_IN_CONTAINER=1
+    export NEPI_DEVICE_ID=device1
+    export NEPI_IP=192.168.179.103
+    export NEPI_HOST_USER=nepihost
+    export NEPI_IN_CONTAINER=1
 fi
+
+
 
 # This file sets up nepi bash aliases and util functions
 echo "########################"
@@ -135,9 +147,13 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     function udpate_config_file(){
         config_file=$1
         update_yaml_value "NEPI_STATIC_IP" "${NEPI_IP}/24" $config_file
+        export NEPI_STATIC_IP="${NEPI_IP}/24"
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
+        export NEPI_DEVICE_ID=$NEPI_DEVICE_ID
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
+        export NEPI_HOST_USER=$NEPI_HOST_USER
         update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $config_file
+        export NEPI_SSH_KEY=$NEPI_SSH_KEY
     }
 
 
@@ -314,9 +330,8 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
     echo ""
     echo "Sourcing updated bash files"
-    source $file
+    source /home/${CONFIG_USER}/.bashrc
     wait
-
 
 
     ####################################################
@@ -385,7 +400,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Clearing Known Hosts"
     echo ""
 
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts*
+    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1sb
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
@@ -412,12 +427,212 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     ntpq -p
 
 
+    # echo " "
+    # echo "################################# "
+    # echo "Configuring NEPI Shared Drive Folders"
+    # echo ""
+    # shdrive=/mnt/nepi_share_storage
+    # if [[ ! -e $shdrive ]]; then
+        
+    #     sudo mkdir $shdrive
+    # fi
+    # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+
+    # shdrive=/mnt/nepi_share_config
+    # if [[ ! -e $shdrive ]]; then
+    #     sudo mkdir $shdrive
+    # fi
+    # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+
+if [[ -n "$DISPLAY" ]]; then
+    #####################################
+    echo "########################"
+    echo "Installing Desktop Utility Apps"
+    echo ""
+
+    # sudo apt update
+
+    #######
+    echo ""
+    if command -v mdview &>/dev/null; then
+        echo "mdview is installed."
+    else
+        echo "Installing mdview"
+        sudo snap install mdview
+    fi
+
+    if command -v chromium-browser &>/dev/null; then
+        echo "Chromium is installed."
+    else
+        # Check for an alternative common name if the first one fails
+        if command -v chromium &>/dev/null; then
+            echo "Chromium is installed."
+        else
+            echo "Installing Chromium Browser"
+            #sudo snap remove --purge chromium
+            sudo snap install chromium
+            #sudo apt install chromium-browser -y
+            #chromium-browser --disable-features=DnsOverHttps
+        fi
+    fi
+
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is installed and accessible."
+    else
+        echo ""
+        echo "Installing visual code editor"
+        
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+            sudo apt install ./code_arm64.deb
+            wait
+            sudo rm code_arm64.deb
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            sudo snap install code --channel=edge --classic
+        fi
+    fi
+
+
+       echo "Configuring default code editor"
+        CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
+        if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+            echo "VS Code is already the default code editor"
+        else
+            read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+            if [[ "$response" =~ ^[Yy]$ ]]; then
+                sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+                echo "VS Code set as default code editor"
+            else
+                echo "Skipping VS Code default setup"
+            fi
+        fi
+
+        echo "Adding config and storage folders to files sidebar"
+        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+
+        CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+        if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+            echo "Adding Chromium to favourites"
+            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+            gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+        else
+            echo "Chromium already in favourites"
+        fi
+
+        echo "Locating Chromium profile"
+        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium/Default"
+        elif [[ -d "/home/${CONFIG_USER}/.config/chromium/Default" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium/Default"
+        else
+            echo "Chromium profile directory not found"
+            CHROMIUM_PROFILE=""
+        fi
+
+        if [[ -n "$CHROMIUM_PROFILE" ]]; then
+            echo "Setting Chromium Bookmarks and enabling Home button"
+            sudo mkdir -p "$CHROMIUM_PROFILE"
+
+            # Copy only the Bookmarks file
+            sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
+                "$CHROMIUM_PROFILE/Bookmarks"
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
+
+            # Enable the Home button in Preferences without overwriting the whole file
+            PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
+            sudo python3 - "$PREFS_FILE" <<'PYEOF'
+import json, sys, os
+path = sys.argv[1]
+data = {}
+if os.path.isfile(path):
+    with open(path, 'r') as f:
+        try:
+            data = json.load(f)
+        except Exception:
+            data = {}
+data.setdefault('browser', {})['show_home_button'] = True
+data['bookmark_bar'] = data.get('bookmark_bar', {})
+data['bookmark_bar']['show_on_all_tabs'] = True
+with open(path, 'w') as f:
+    json.dump(data, f, indent=3)
+PYEOF
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
+
+            # echo "Cleaning Chromium Files"
+            # fix_chromium
+        fi
+
+
+fi
+    if command -v mount.cifs &>/dev/null; then
+        echo "cifs-utils is installed."
+    else
+        echo "Installing cifs-utils"
+        sudo apt install cifs-utils
+    fi
+
+
 
     #####################################
     echo " "
     echo "################################# "
     echo "NEPI DEV PC SETUP COMPLETE"
     echo "################################# "
+
+    NEPI_IP_END=$NEPI_IP
+    network_id="$(echo "$NEPI_IP_END" | cut -d'.' -f1-3)"
+    nepi_id=$(echo "$NEPI_IP_END" | cut -d '.' -f 4-)
+    rec_ip=${network_id}.5
+
+    if [[ ${NEPI_IP_END} != ${NEPI_IP_START} ]]; then
+
+            slist=$(netliststatic)
+            if [[ "$slist" != *"$network_id"*  ]]; then
+                echo ""
+                echo "Your NEPI IP address has changed from: ${NEPI_IP_START} to: ${NEPI_IP_END}"
+                if systemctl is-active --quiet NetworkManager; then
+                echo ""
+                echo "Do you want to update now?"
+                choice=$(ask_yes_no)
+                if [[ "$choice" == 'yes' ]]; then
+                    echo ""
+                    netsetstatic "${rec_ip}/24"
+                    echo "###################"
+                    echo "Updated Static IPs"
+                    netliststatic
+                    echo "###################"
+                    echo ""
+                fi  
+                echo ""  
+
+            fi
+        fi
+    fi
+
+    echo "Your NEPI DEVICE IP address is set to:" 
+    echo "${NEPI_IP_END}"
+
+    echo ""
+    echo "Your PC's network adapter should be set to:"
+    echo "${rec_ip}"
+
+    echo " "
+    echo "You can check your NEPI Device connection by typing:"
+    echo "ping ${NEPI_IP}   OR   pingn"
+
+    echo " "
+    echo "You can ssh into your NEPI Devices nepi Docker host OR nepi Docker contatiner by typing:"
+    echo "sshnh  OR   ssh"
+
+    echo " "
+    echo "You can connect to your NEPI Device's shared network drives by typing:"
+    echo "nepistorage  OR   nepiconfig"
+
+    echo " "
+    echo "You can connect to your NEPI Device's RUI in a Chrome browser at:"
+    echo "http://${NEPI_IP}:5003/   OR   typing: nepirui"
+
     echo " "
     echo "To see a list of NEPI command line shortcuts run: nepihelp"
     echo " "

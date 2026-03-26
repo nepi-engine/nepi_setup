@@ -32,14 +32,11 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -un)
-    if [[ ${CONFIG_USER} == 'root' ]]; then
-        CONFIG_USER=$SUDO_USER
-    fi
-fi
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
 
 
@@ -183,26 +180,26 @@ echo "Updating NEPI Config File"
 export NEPI_INSTALL=$NEPI_INSTALL
 update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_HOSTNAME=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_HOSTNAME" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_HOSTNAME=$((NEPI_MANAGES_HOSTNAME * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_NETWORK=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_NETWORK" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_NETWORK=$((NEPI_MANAGES_NETWORK * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_TIME=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_TIME" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_TIME=$((NEPI_MANAGES_TIME * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_SSH=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SSH" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_SSH=$((NEPI_MANAGES_SSH * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_SHARE=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SHARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_SHARE=$((NEPI_MANAGES_SHARE * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_SOFTWARE=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_SOFTWARE" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_SOFTWARE=$((NEPI_MANAGES_SOFTWARE * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
 
-export NEPI_MANAGES_DOCKER=$SERVICES_MANAGED
-update_yaml_value "NEPI_MANAGES_DOCKER" $SERVICES_MANAGED $NEPI_SYS_CONFIG_FILE
+export NEPI_MANAGES_DOCKER=$((NEPI_MANAGES_DOCKER * SERVICES_MANAGED))
+update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
 
 
 
@@ -671,8 +668,8 @@ if [[ "$?" -eq 0  ]]; then
         sudo cp -rf ${SOURCE_ETC_PATH/}/user/snap/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
 
-        echo "Cleaning Chromium Files"
-        fix_chromium
+        # echo "Cleaning Chromium Files"
+        # fix_chromium
 
 
     fi
@@ -745,8 +742,8 @@ with open(path, 'w') as f:
 PYEOF
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
 
-            echo "Cleaning Chromium Files"
-            fix_chromium
+            # echo "Cleaning Chromium Files"
+            # fix_chromium
         fi
 
     fi

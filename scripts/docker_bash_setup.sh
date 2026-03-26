@@ -32,7 +32,6 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-
 sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -42,14 +41,12 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -un)
-    if [[ ${CONFIG_USER} == 'root' ]]; then
-        CONFIG_USER=$SUDO_USER
-    fi
-fi
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
 
 
@@ -228,18 +225,12 @@ echo ""
         echo 'fi' | sudo tee -a $file
     fi
 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
-    sudo chmod 0644 ~/.bashrc
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
+    sudo chmod 0644 $file
 
     echo ""
     echo "Sourcing updated bash files"
     source $file
-    wait
-
-
-    echo ""
-    echo "Sourcing updated bash files"
-    source $BASHRC
     wait
 
 
@@ -248,14 +239,14 @@ echo ""
     echo "################################# "
     echo "Clearing Known Hosts"
     echo ""
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts*
+    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
 
 ################
 echo "Fixing other user files"
-cp /etc/skel/.profile /home/${CONFIG_USER}/
+cp /etc/skel/.profile /home/${CONFIG_USER}/ 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.profile
 sudo chmod 0644 /home/${CONFIG_USER}/.profile
 

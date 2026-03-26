@@ -342,7 +342,8 @@ ucfg = /mnt/nepi_storage/user_cfg"
 
 ## NEPI deploy complete
 alias nepisetup="
-source ${NSETUP}/dev_pc_setup.sh"
+bash ${NSETUP}/dev_pc_setup.sh
+sbrc"
 
 
 HELPN="${HELPN}

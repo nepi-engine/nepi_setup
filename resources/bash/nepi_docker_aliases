@@ -299,13 +299,13 @@ function nepiload(){
 export -f nepiload
 
 
-function nepiconfig(){
+function nepisetup(){
   sudo -v
   SHOW_CONFIG_MENU=1
   bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
   sbrc
 }
-export -f nepiconfig
+export -f nepisetup
 
 
 function nepistatus(){
@@ -351,7 +351,7 @@ function nepiupdate() {
   ####################################
   # Run NEPI Bash Setup Script
 
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=nepi_bash_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -363,7 +363,7 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Folder Setup Script
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=nepi_folders_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -375,7 +375,7 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Files Setup Script
-  SCRIPT_FOLDER=/home/${CONFIG_USER}/nepi_setup/scripts
+  SCRIPT_FOLDER=${NSETUP}
   script_file=docker_files_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -412,7 +412,7 @@ export -f nepicreate
 ## NEPI build shortcuts
 alias nepibld="
 sudo -v
-source /home/${CONFIG_USER}/nepi_setup/scripts/docker_config_setup.sh
+source ${NSETUP}/docker_config_setup.sh
 sbrc
 nnet"
 
@@ -435,7 +435,7 @@ nepiexport = Export the running NEPI container to a .tar file. Enter a file name
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepitag = Update the Software Description field in the active NEPI container.
-nepiconfig = Configure NEPI System settings.
+nepisetup = Configure NEPI System settings.
 nepienable = Enable NEPI Docker service on next boot.
 nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.

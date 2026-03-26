@@ -149,6 +149,9 @@ After the import completes, you can print the current installed NEPI Docker Imag
 ### NEPI Docker Image Testing
 This section will start and test your NEPI Docker solution. 
 
+refresh your .bashrc file:
+
+    source ~/.bashrc
 
 Start your NEPI container running:
 

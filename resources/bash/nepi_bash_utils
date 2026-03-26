@@ -37,19 +37,17 @@ if [[ ! -n $CONFIG_USER ]]; then
     id -nu 1000
 fi
 
+export CONFIG_USER=$CONFIG_USER
+export USER=$CONFIG_USER
 
-##############################
-##### NEPI SETTINGS #####
 
 CURRENT_DIR=$(pwd)
 export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 #echo "BASH_FOLDER ${BASH_FOLDER}"
 
-
+##############################
+##### NEPI SETTINGS #####
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
-
-export CONFIG_USER=$CONFIG_USER
-export USER=$CONFIG_USER
 
 export NEPI_USER=nepi
 export NEPI_HOST_USER=nepihost
@@ -81,9 +79,28 @@ export NEPI_REPO_ADDRESS='git@github.com:nepi-engine/nepi_engine_ws.git'
 export NEPI_REPO_NAME=$(basename "${NEPI_REPO_ADDRESS%.*}")
 export NEPI_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
 
+export NEPI_BUILD_REPO_NAME=${NEPI_REPO_NAME}
+export NEPI_BUILD_REPO_FOLDER="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_NAME}"
+
 export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
+
+if [[ -d $NEPI_REPO_FOLDER ]]; then
+  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
+  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+  # fi
+elif [[ -d $NEPI_BUILD_REPO_FOLDER ]]; then
+  setup_folder="${NEPI_BUILD_REPO_FOLDER}/nepi_setup/scripts"
+  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+  # fi
+else
+  setup_folder="${NEPI_SETUP_REPO_FOLDER}/scripts"
+fi
+
+export NSETUP=$setup_folder
 
 ###############################
 
@@ -93,7 +110,25 @@ utilsn=""
 # System Check Functions
 ###################################
 
+# Function to check if a variable is not blank
+function is_not_blank() {
+  # Strip all whitespace characters using parameter expansion (Bash specific)
+  val=$1
+  if [[ -n $val ]]; then
+    local trimmed_var="${val//[[:space:]]/}"
+    
+    # Check if the length of the trimmed string is non-zero
+    if [[ -n "$trimmed_var" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    return 1
+  fi
+}
 
+export -f is_not_blank
 
 function is_valid_uid() {
     local input=$1
@@ -440,6 +475,7 @@ utilsn="${utilsn}
 ### SYSTEM CHECK FUNCTIONS
 ################################
 *** These checks return 0 error value if true ***
+is_not_blank = Check if variable is blank
 is_valid_uid = Check for valid user id name
 is_valid_pw = Check for valid use password
 is_valid_did = Check for valid device id name
@@ -479,13 +515,47 @@ export -f echovar
 function netlist() {
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
-    echo "Interface IP Address"
-    echo "-----------------------"
-    ip -4 -o addr show | awk '{
+    nlist=$(ip -4 -o addr show | awk '{
         # $netlist2 is the interface name, $4 is the IP address in CIDR format
         split($4, a, "/"); # Split the IP/CIDR to get just the IP address
         printf "%-9s  %s |\n", $2, a[1] ;
-    }'
+    }')
+    if is_not_blank $nlist; then
+        #echo "netlist = ${nlist}"
+        counter=0
+        new_n=1
+        for word in $nlist; do
+          #echo "got ${word}"
+          if [[ $counter -eq 0 ]]; then
+            aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
+            if [[ $? -eq 0 && -n $aname ]]; then
+              printf "%s " "$aname"
+            else
+              printf "%s " "$word"
+            fi
+          elif [[ $counter -eq 1 ]]; then
+              printf "%s " "| ${word}"
+          fi
+          if [[ $new_n -eq 1 ]]; then
+            last_n=$word
+            new_n=0
+          fi
+          ((counter++))
+          if [[ $((counter % 3)) == 0 ]]; then
+            counter=0
+            new_n=1
+            skip=0
+            printf "\\n"
+          fi
+        done
+        # Add a final newline if the total count isn't a multiple of 3,
+        # ensuring the last line is processed.
+        if [[ $((counter % 3)) != 0 ]]; then
+          printf "\\n"
+        fi
+    else
+      echo ''
+    fi
 
 }
 export -f netlist
@@ -493,41 +563,56 @@ export -f netlist
 function netliststatic() {
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
-    echo "Interface | STATIC IP Address"
-    echo "-----------------------"
-    nlist=netlist
-
-    nslist=$(
-    counter=0
-    new_n=1
-    last_n='lo'
-    skip=0
-    for word in $nlist; do
-      if [[ ${word} == ${last_n} || "$word" == *"$l4tbr"* || "$word" == *"$rndis"* || "$word" == *"$wlan"* || "$word" == *"$docker"* ]]; then
-        skip=1
-      fi
-      if [[ $skip -eq 0 ]]; then
-        printf "%s " "$word"
-      fi
-      if [[ $new_n -eq 1 ]]; then
-        last_n=$word
-        new_n=0
-      fi
-      ((counter++))
-      if [[ $((counter % 3)) == 0 ]]; then
-        new_n=1
-        skip=0
+    nlist=$(ip -4 -o addr show | awk '{
+        # $netlist2 is the interface name, $4 is the IP address in CIDR format
+        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
+        printf "%-9s  %s |\n", $2, a[1] ;
+    }')
+    if is_not_blank $nlist; then
+      #echo "netlist = ${nlist}"
+      counter=0
+      new_n=1
+      last_n='lo'
+      skip=0
+      for word in $nlist; do
+        #echo "got ${word}"
+        if [[ ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
+          #echo "skipping ${word}"
+          skip=1
+        fi
+        if [[ $skip -eq 0 ]]; then
+          if [[ $counter -eq 0 ]]; then
+            aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
+            if [[ $? -eq 0 && -n $aname ]]; then
+              printf "%s " "$aname"
+            else
+              skip=1
+            fi
+          elif [[ $counter -eq 1 ]]; then
+              printf "%s " "| ${word}"
+          fi
+        fi
+        if [[ $new_n -eq 1 ]]; then
+          last_n=$word
+          new_n=0
+        fi
+        ((counter++))
+        if [[ $((counter % 3)) == 0 ]]; then
+          counter=0
+          new_n=1
+          skip=0
+          printf "\\n"
+        fi
+      done
+      # Add a final newline if the total count isn't a multiple of 3,
+      # ensuring the last line is processed.
+      if [[ $((counter % 3)) != 0 ]]; then
         printf "\\n"
       fi
-    done
-    # Add a final newline if the total count isn't a multiple of 3,
-    # ensuring the last line is processed.
-    if [[ $((counter % 3)) != 0 ]]; then
-      printf "\\n"
+    else
+      echo ''
     fi
 
-
-  )
 
 }
 export -f netliststatic
@@ -551,11 +636,16 @@ function netsetstatic() {
 
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
-    nslist=netliststatic 
-
+    nslist=$(netliststatic) 
+    
+    if ! is_not_blank $nslist; then
+        echo "No Network Adapters Found"
+        return 1
+    fi
+    echo $nslist
     # Set IFS to | and read into an array
-    IFS='|' read -r -a adapters <<< "$nslist"
-
+    readarray -t adapters <<< "$nslist"
+    adapters=("${adapters[@]:1}")
  
     # Check if there are any files
     if [[ ${#adapters[@]} -eq 0 ]]; then
@@ -563,10 +653,11 @@ function netsetstatic() {
         return 1
     fi
 
-    # Check if there are any files
+    # Check if there are any adapters
     if [[ ${#adapters[@]} -eq 1 ]]; then
-        set -- ${adapters[0]}
-        selected_adapter=${1}
+        line=${adapters[0]}
+        delimiter=" |"
+        selected_adapter=${adapter%%$delimiter*}
     fi
 
     if [[ -z $selected_adapter ]]; then
@@ -576,8 +667,8 @@ function netsetstatic() {
       echo ""
       select adapter in "${adapters[@]}"; do
           if [[ -n "$adapter" ]]; then
-              set -- $adapter
-              selected_adapter=${1}
+              delimiter=" |"
+              selected_adapter=${adapter%%$delimiter*}
               break
           else
               echo "Invalid selection. Please try again."
@@ -590,12 +681,18 @@ function netsetstatic() {
     if [[ -n "$selected_adapter" ]]; then
         echo "Updating Network Adapter ${selected_adapter} with IP Address ${new_ip_netmask}"
 
-        sudo nmcli connection modify ${selected_adpater} \
-            ipv4.addresses ${new_ip_netmask} \
+        cmd='sudo nmcli connection modify "'${selected_adapter}'" \
+            ipv4.addresses '${new_ip_netmask}' \
             ipv4.dns 8.8.8.8,8.8.4.4 \
-            ipv4.method manual       
+            ipv4.method manual '
+        echo $cmd
+        eval "$cmd"     
 
-        sudo systemctl restart NetworkManager
+        cmd='sudo nmcli connection up "'${selected_adapter}'"'
+        #echo $cmd
+        eval "$cmd"     
+        echo ""
+        
     fi   
 }
 export -f netsetstatic
@@ -1839,15 +1936,69 @@ RED='\033[0;31m'
 alias nepihome="
 cd ${NEPI_HOME}"
 
-if [[ -d $NEPI_REPO_FOLDER ]]; then
-  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
-else
-  setup_folder="${NEPI_SETUP_REPO_FOLDER}/nepi_setup/scripts"
-fi
-
-export NSETUP=$setup_folder
 
 alias nsetup="cd ${NSETUP}"
+
+
+function nepirui() {
+  if [[ -n "$DISPLAY" ]]; then
+
+    if pingn; then
+      if command -v chromium-browser &>/dev/null; then
+            chromium-browser http://${NEPI_IP}:5003/
+      else
+          # Check for an alternative common name if the first one fails
+          if command -v chromium &>/dev/null; then
+                chromium http://${NEPI_IP}:5003/
+          else
+              echo "Chromium Browser not Installed"
+              echo "INSTALL WITH: sudo snap install chromium"
+          fi
+      fi
+    fi
+  else
+    echo "No Display Detected"
+  fi
+
+}
+
+export -f nepirui
+
+function nepistorage() {
+  if pingn; then
+    shdrive=/mnt/nepi_share_storage
+    if [[ ! -d $shdrive ]]; then
+        sudo mkdir $shdrive
+    fi
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+    if ! mountpoint -q $shdrive; then
+      sudo mount.cifs //${NEPI_IP}/nepi_storage $shdrive -o user=$NEPI_USER
+    fi
+    if mountpoint -q $shdrive; then
+      xdg-open $shdrive
+    else
+      echo "Failed to mount and connect shared folder: ${shdrive}"
+    fi
+  fi
+}
+
+function nepiconfig() {
+  if pingn; then
+    shdrive=/mnt/nepi_share_config
+    if [[ ! -d $shdrive ]]; then
+        sudo mkdir $shdrive
+    fi
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+    if ! mountpoint -q $shdrive; then
+      sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_USER
+    fi
+    if mountpoint -q $shdrive; then
+      xdg-open $shdrive
+    else
+      echo "Failed to mount and connect shared folder: ${shdrive}"
+    fi
+  fi
+}
 
 
 function select_ssh_key {
@@ -2649,6 +2800,8 @@ function nepipull {
 
 export -f nepipull
 
+
+
 function nepimain {
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     if [[ -d ${repo_folder} ]]; then
@@ -2658,6 +2811,11 @@ function nepimain {
     fi
 }
 export -f nepimain
+
+
+
+
+export -f nepipull
 
 function nepidev {
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
@@ -2672,10 +2830,6 @@ export -f nepidev
 
 
 ## NEPI deploy complete
-alias nepisetup="
-source ${NEPI_REPO_FOLDER}/nepi_setup/scripts/dev_pc_setup.sh"
-
-## NEPI deploy complete
 alias nepidpl="
 cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_complete.sh"
@@ -2685,19 +2839,34 @@ alias repodpl="
 cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_repos.sh"
 
+function gitmain {
+  git checkout main
+}
 
 function pushn(){
+  cur_path=$(pwd)
+  cur_folder=${PWD##*/}
+  IFS='/' read -r -a path_parts <<< "$cur_path"
+  if [[ ${#path_parts[@]} -lt 4 ]]; then
+      echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+      return 1
+  fi
+  third_folder="${path_parts[3]}"
+  if [[ ${third_folder} != ${NEPI_REPO_NAME} ]]; then
+      echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+      return 1
+  fi
   git add --all
   git commit -m "*$@*" 
   git push >/dev/null 2>&1
-  cur_folder=${PWD##*/}
+
   par_path=$(dirname "$(pwd)")
   par_folder=$(basename "$par_path")
   #echo $cur_folder
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ ("$cur_folder" == "${NEPI_REPO_NAME}" || "$(pwd)" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src") ]]; then
+    if [[ ("$cur_folder" == "${NEPI_REPO_NAME}" || "$cur_path" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
@@ -2717,11 +2886,13 @@ function pushn(){
 }
 
 
+
 utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
 ################################
 nepihome = Change to users home folder
+nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
@@ -2730,7 +2901,8 @@ nepipull = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI Engine repo's main branch
 nepidev = Switch to the NEPI Engine repo's main branch
 nepidpl = Deploy nepi complete to nepi device
-pushn = Add,commit,push repo changes with optional comment msg"
+gitmain = Change to main branch in current repo or submodule folder
+pushn = Add,commit,push repo changes with optional comment msg in current repo or submodule folder"
 
 
 
