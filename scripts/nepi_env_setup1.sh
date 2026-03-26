@@ -235,9 +235,13 @@ else
         #https://www.stereolabs.com/developers/release/4.1
         wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
     elif [[ ${NEPI_ARCH} == 'arm64' ]]; then
-        : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+        #https://www.stereolabs.com/developers/release/4.2
+        # wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
     elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
-        : #wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+        #https://www.stereolabs.com/developers/release/4.2
+        if is_valid_cuda; then
+            wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+        fi
     fi
     sudo sudo apt install zstd -y
 
