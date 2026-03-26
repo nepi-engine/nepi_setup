@@ -538,6 +538,8 @@ if [[ -n "$DISPLAY" ]]; then
             sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
                 "$CHROMIUM_PROFILE/Bookmarks"
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
+            rui_ip=$NEPI_IP
+            find . -type f -exec perl -i -pe 's||${rui_ip}|g' {} +
 
             # Enable the Home button in Preferences without overwriting the whole file
             PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
