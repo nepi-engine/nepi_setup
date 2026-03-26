@@ -42,6 +42,7 @@ export USER=$CONFIG_USER
 
 
 CURRENT_DIR=$(pwd)
+nepi_alias_file=$(basename "${BASH_SOURCE[1]}")
 export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 #echo "BASH_FOLDER ${BASH_FOLDER}"
 
@@ -87,20 +88,20 @@ export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
 
 if [[ -d $NEPI_REPO_FOLDER ]]; then
-  setup_folder="${NEPI_REPO_FOLDER}/nepi_setup/scripts"
+  NEPI_SETUP_FOLDER="${NEPI_REPO_FOLDER}/nepi_setup"
   # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
   #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
   # fi
 elif [[ -d $NEPI_BUILD_REPO_FOLDER ]]; then
-  setup_folder="${NEPI_BUILD_REPO_FOLDER}/nepi_setup/scripts"
+  NEPI_SETUP_FOLDER="${NEPI_BUILD_REPO_FOLDER}/nepi_setup"
   # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
   #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
   # fi
 else
-  setup_folder="${NEPI_SETUP_REPO_FOLDER}/scripts"
+  NEPI_SETUP_FOLDER="${NEPI_SETUP_REPO_FOLDER}"
 fi
 
-export NSETUP=$setup_folder
+export NSETUP="${NEPI_SETUP_FOLDER}/scripts"
 
 ###############################
 
@@ -1943,13 +1944,19 @@ alias nsetup="cd ${NSETUP}"
 function nepirui() {
   if [[ -n "$DISPLAY" ]]; then
 
+    if [[ ${nepi_alias_file} == '.nepi_pc_aliases' ]]; then
+      rui_ip=$NEPI_IP
+    else
+      nepi_id=$(echo "$NEPI_IP" | cut -d '.' -f 4-)
+      rui_ip=localhost
+    fi
     if pingn; then
       if command -v chromium-browser &>/dev/null; then
-            chromium-browser http://${NEPI_IP}:5003/
+            chromium-browser http://${rui_ip}:5003/
       else
           # Check for an alternative common name if the first one fails
           if command -v chromium &>/dev/null; then
-                chromium http://${NEPI_IP}:5003/
+                chromium http://${rui_ip}:5003/
           else
               echo "Chromium Browser not Installed"
               echo "INSTALL WITH: sudo snap install chromium"
