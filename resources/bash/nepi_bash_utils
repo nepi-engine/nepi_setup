@@ -1183,6 +1183,19 @@ function update_yaml_value(){
 export -f update_yaml_value
 
 
+function update_json_value(){
+    local JSON_FILE=$1
+    local JSON_KEY=$2
+    local JSON_VAL=$3
+    if [ -z "$JSON_FILE" ] || [ -z "$JSON_KEY" ] || [ -z "$JSON_VAL" ]; then
+        echo " KEY supports dot notation for nested keys, e.g. browser.show_home_button"
+        return 1
+    fi
+    python3 ${BASH_FOLDER}/nepi_utils/update_json_value.py "$JSON_FILE" "$JSON_KEY" "$JSON_VAL"
+}
+export -f update_json_value
+
+
 function sync_yaml_files(){
     SOURCE_FILE=$1
     TARGET_FILE=$2
@@ -1943,6 +1956,7 @@ ffile = Find filenames with text match recursively
 cmd_loop = Runs the COMMAND_STRING until Ctrl-C every second
 update_text_value = Adds or Replaces value in text file given FILE KEY UPDATE_STRING FILE
 update_yaml_value = Update entry in yaml file given KEY VAL FILE
+update_json_value = Update entry in json file given FILE KEY VAL. KEY supports dot notation for nested keys (e.g. browser.show_home_button)
 print_yaml_file = Prints all of the yaml entries in given FILE
 sync_yaml_files = Sync missing keys between given SOURCE_FILE TARGET_FILE. Add '1' to replace existing values 
 load_yaml_file = Exports all of the yaml entries to system variables in given FILE

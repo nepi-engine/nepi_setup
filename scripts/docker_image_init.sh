@@ -36,12 +36,12 @@ fi
 # This file downloads the Latest NEPI Docker Image to the NEPI Devices Import Folder
 
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
-source $USER_CHECK_FILE
-if [[ "$?" -ne 0 ]]; then
-    return 
+CONFIG_USER=$(id -un)
+if [[ ${CONFIG_USER} == 'root' ]]; then
+    CONFIG_USER=$SUDO_USER
 fi
+export CONFIG_USER=$CONFIG_USER
+NEPI_USER_ID=1000
 
 
 

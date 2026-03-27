@@ -561,33 +561,19 @@ if [[ -n "$DISPLAY" ]]; then
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
 
             # Copy only the Bookmarks file
-            sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
-                "${CHROMIUM_PROFILE}/Bookmarks"
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
+            BOOKMARK_FILE=${CHROMIUM_PROFILE}/Bookmarks
+            sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
             rui_ip=$NEPI_IP
-            # cur_dir=$(pwd)
-            # cd $CHROMIUM_PROFILE
-            # find . -type f -exec perl -i -pe 's||${rui_ip}|g' {} +
-            # cd $
+            cur_dir=$(pwd)
+            cd $CHROMIUM_PROFILE
+            find . -type f -exec perl -i -pe 's|localhost|${rui_ip}|g' {} +
+            cd $cur_dir
 
             # Enable the Home button in Preferences without overwriting the whole file
             PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
-            sudo python3 - "$PREFS_FILE" <<'PYEOF'
-import json, sys, os
-path = sys.argv[1]
-data = {}
-if os.path.isfile(path):
-    with open(path, 'r') as f:
-        try:
-            data = json.load(f)
-        except Exception:
-            data = {}
-data.setdefault('browser', {})['show_home_button'] = True
-data['bookmark_bar'] = data.get('bookmark_bar', {})
-data['bookmark_bar']['show_on_all_tabs'] = True
-with open(path, 'w') as f:
-    json.dump(data, f, indent=3)
-PYEOF
+            update_json_value "$PREFS_FILE" browser.show_home_button true
+            update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
 
             # echo "Cleaning Chromium Files"
