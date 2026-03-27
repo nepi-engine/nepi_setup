@@ -677,13 +677,22 @@ if [[ "$?" -eq 0  ]]; then
     if [[ $LITE_INSTALL -eq 1 ]]; then
 
         echo "Configuring default code editor"
-        CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
-        if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+        MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
+        if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
             echo "VS Code is already the default code editor"
         else
             read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
             if [[ "$response" =~ ^[Yy]$ ]]; then
-                sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+                sudo mkdir -p /home/${CONFIG_USER}/.config
+                if ! sudo grep -q "\[Default Applications\]" "${MIMEAPPS}" 2>/dev/null; then
+                    echo "[Default Applications]" | sudo tee -a "${MIMEAPPS}" > /dev/null
+                fi
+                for mime in text/x-python text/plain text/x-shellscript application/x-shellscript text/x-csrc text/x-c++src text/x-yaml text/x-json; do
+                    if ! sudo grep -q "^${mime}=" "${MIMEAPPS}" 2>/dev/null; then
+                        sudo sed -i "/\[Default Applications\]/a ${mime}=code.desktop" "${MIMEAPPS}"
+                    fi
+                done
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} "${MIMEAPPS}"
                 echo "VS Code set as default code editor"
             else
                 echo "Skipping VS Code default setup"
@@ -691,7 +700,11 @@ if [[ "$?" -eq 0  ]]; then
         fi
 
         echo "Adding config and storage folders to files sidebar"
-        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+        sudo mkdir -p /home/${CONFIG_USER}/.config/gtk-3.0
+        sudo touch /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+        while IFS= read -r bm; do
+            sudo grep -qxF "$bm" /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks || echo "$bm" | sudo tee -a /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks > /dev/null
+        done < ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks
 
 
         CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
