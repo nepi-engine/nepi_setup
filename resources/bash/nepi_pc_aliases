@@ -185,8 +185,8 @@ export RUI="/opt/nepi/nepi_rui/src/rui_webserver/rui-app/src"
 export RUI_ENV="/opt/nepi/nepi_rui"
 export SDK="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk"
 export SHARE="/opt/nepi/nepi_engine/share"
-export SRC="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src"
-export SRCRUI="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src"
+export SRC="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
+export SRCRUI="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
 export TMP="/mnt/nepi_storage/tmp"
 export DRIVE="/mnt/nepi_storage"
 
@@ -326,8 +326,8 @@ rui = /opt/nepi/rui/src/rui_webserver/rui-app/src
 rui_env = /opt/nepi/rui
 sdk = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk
 share = /opt/nepi/nepi_engine/share
-src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
-srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src
+src = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
 tmp = /mnt/nepi_storage/tmp
 dcfg = /mnt/nepi_config/docker_cfg
 fcfg = /mnt/nepi_config/factory_cfg
@@ -342,7 +342,7 @@ ucfg = /mnt/nepi_storage/user_cfg"
 
 ## NEPI deploy complete
 alias nepisetup="
-bash ${NSETUP}/dev_pc_setup.sh
+bash $(NSETUP)/scripts/dev_pc_setup.sh
 sbrc"
 
 

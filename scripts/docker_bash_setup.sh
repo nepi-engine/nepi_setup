@@ -51,6 +51,7 @@ fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+echo "Script Folder: ${SCRIPT_FOLDER}"
 RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
@@ -61,11 +62,13 @@ source $NEPI_UTILS_SOURCE
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
 NEPI_SYSTEM_CONFIG_FILE=/mnt/nepi_confg/system_cfg/etc/load_system_config.sh
 if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    echo "Loading config from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SYSTEM_CONFIG_FILE}
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_SYSTEM_CONFIG_FILE}"
     fi
 elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
+    echo "Loading config from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SETUP_CONFIG_FILE}
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
@@ -150,7 +153,7 @@ echo ""
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
 
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${CONFIG_USER}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
 

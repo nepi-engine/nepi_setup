@@ -98,25 +98,24 @@ bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
 export -f nepiconfig
 
 
-BUILD=${NEPI_STORAGE}/nepi_src/nepi_engine_ws
 ## NEPI build shortcuts
 function nepibld(){
   sudo -v
-  cd $BUILD
+  cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
 }
 
 # NEPI build shortcuts
 function codebld(){
 sudo -v
-cd $BUILD
+cd $NEPI_BUILD_REPO_FOLDER
 source ./build_nepi_code.sh
 }
 
 # NEPI build shortcuts
 function ruibld(){
   sudo -v
-  cd $BUILD
+  cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_rui.sh
 }
 
@@ -183,7 +182,7 @@ export AIF="/opt/nepi/nepi_engine/share/nepi_ai_ifs"
 export API="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_api"
 export APPS="/opt/nepi/nepi_engine/share/nepi_apps"
 export AUTO="/mnt/nepi_storage/automation_scripts"
-export BUILD="/mnt/nepi_storage/nepi_src/nepi_engine_ws"
+export BUILD=$NEPI_BUILD_REPO_FOLDER
 
 export AUTO="/mnt/nepi_storage/automation_scripts"
 export DATA="/mnt/nepi_storage/data"
@@ -203,11 +202,11 @@ export ENGINE="/opt/nepi/nepi_engine"
 export RUI="/opt/nepi/nepi_rui/src/rui_webserver/rui-app/src"
 export RUI_ENV="/opt/nepi/nepi_rui"
 export SCRIPTS="/opt/nepi/scripts"
-export SETUPN="/mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts"
+export SETUPN="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/nepi_setup/scripts"
 export SDK="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk"
 export SHARE="/opt/nepi/nepi_engine/share"
-export SRC="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src"
-export SRCRUI="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src"
+export SRC="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
+export SRCRUI="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src"
 export TMP="/mnt/nepi_storage/tmp"
 export TRAIN="/mnt/nepi_storage/ai_training"
 export DRIVE="/mnt/nepi_storage"
@@ -288,12 +287,12 @@ nfia = /mnt/nepi_storage/nepi_full_img_archive
 nimg = /mnt/nepi_storage/nepi_images
 rui = /opt/nepi/nepi_rui/src/rui_webserver/rui-app/src
 rui_env = /opt/nepi/nepi_rui
-setupn = /mnt/nepi_storage/nepi_src/nepi_engine_ws/nepi_setup/scripts
+setupn = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/nepi_setup/scripts
 scripts = /opt/nepi/scripts
 sdk = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk
 share = /opt/nepi/nepi_engine/share
-src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
-srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src
+src = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_engine/nepi_rui/src/rui_webserver/rui-app/src
 tmp = /mnt/nepi_storage/tmp
 train = /mnt/nepi_storage/ai_training
 drive = /mnt/nepi_storage

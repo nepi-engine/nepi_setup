@@ -67,6 +67,7 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     source ${NEPI_USER_CONFIG_SCRIPT}
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
+        exit
     fi
 fi
 
@@ -95,34 +96,25 @@ echo "########################"
 
     echo " "
     echo "################################# "
-    echo "Updating SSH Keys"
+    echo "Installing System Required Software"
+    echo ""
+
+    if command -v mount.cifs --help &>/dev/null; then
+        echo "cifs-utils is installed."
+    else
+        echo "Installing cifs-utils"
+        sudo apt install cifs-utils
+    fi
+
+    echo " "
+    echo "################################# "
+    echo "Installing Required Python Software"
     echo ""
 
 
-    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
-    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
-    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
-        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
-    else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
-            mkdir -p $NEPI_SSH_KEY_DEST
-        fi
-        sudo chmod 0700 $NEPI_SSH_KEY_DEST
-        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
-        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
-    fi
-
-    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
-        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
-    else
-        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-    fi    
-    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
 
 
-if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
+if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
 
 
     NEPI_USER_CONFIGS=(
@@ -335,13 +327,42 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
 
 
     ####################################################
+
+
+    echo " "
+    echo "################################# "
+    echo "Updating SSH Keys"
+    echo ""
+
+
+    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
+    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
+        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
+    else
+        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
+        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
+            mkdir -p $NEPI_SSH_KEY_DEST
+        fi
+        sudo chmod 0700 $NEPI_SSH_KEY_DEST
+        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
+        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
+    fi
+
+    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
+        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
+    else
+        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+    fi    
+    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+
     echo " "
     echo "################################# "
     echo "Setting up SSH Key ${NEPI_SSH_KEY_FILE}"
     echo ""
 
     nepisetkey $NEPI_SSH_KEY_FILE
-    ssh-add -l
 
 
     echo " "
@@ -400,7 +421,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepihost' ]]; then
     echo "Clearing Known Hosts"
     echo ""
 
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1sb
+    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
@@ -449,6 +470,8 @@ if [[ -n "$DISPLAY" ]]; then
     echo "########################"
     echo "Installing Desktop Utility Apps"
     echo ""
+
+    SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
 
     # sudo apt update
 
@@ -531,15 +554,21 @@ if [[ -n "$DISPLAY" ]]; then
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
-            echo "Setting Chromium Bookmarks and enabling Home button"
-            sudo mkdir -p "$CHROMIUM_PROFILE"
+            echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+            if [[ ! -d ${CHROMIUM_PROFILE} ]]; then
+                sudo mkdir -p "$CHROMIUM_PROFILE"
+            fi
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
 
             # Copy only the Bookmarks file
             sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
-                "$CHROMIUM_PROFILE/Bookmarks"
+                "${CHROMIUM_PROFILE}/Bookmarks"
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
             rui_ip=$NEPI_IP
-            find . -type f -exec perl -i -pe 's||${rui_ip}|g' {} +
+            # cur_dir=$(pwd)
+            # cd $CHROMIUM_PROFILE
+            # find . -type f -exec perl -i -pe 's||${rui_ip}|g' {} +
+            # cd $
 
             # Enable the Home button in Preferences without overwriting the whole file
             PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
@@ -567,12 +596,9 @@ PYEOF
 
 
 fi
-    if command -v mount.cifs &>/dev/null; then
-        echo "cifs-utils is installed."
-    else
-        echo "Installing cifs-utils"
-        sudo apt install cifs-utils
-    fi
+
+
+
 
 
 
@@ -581,7 +607,7 @@ fi
     echo "################################# "
     echo "NEPI DEV PC SETUP COMPLETE"
     echo "################################# "
-
+    echo " "
     NEPI_IP_END=$NEPI_IP
     network_id="$(echo "$NEPI_IP_END" | cut -d'.' -f1-3)"
     nepi_id=$(echo "$NEPI_IP_END" | cut -d '.' -f 4-)

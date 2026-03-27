@@ -83,7 +83,7 @@ echo "Configuring NEPI ETC FILES"
 echo "########################"
 
 # Define Folders
-SOURCE_INSTR_PATH=$(dirname "$SCRIPT_FOLDER")
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_ETC_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 SOURCE_SCRIPTS_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/scripts
 SOURCE_SYS_CONFIG_FILE=${SOURCE_ETC_PATH}/nepi_system_config.yaml
@@ -676,7 +676,7 @@ if [[ "$?" -eq 0  ]]; then
 
     if [[ $LITE_INSTALL -eq 1 ]]; then
 
-        echo "Configuring default code editor"
+       echo "Configuring default code editor"
         CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
         if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
             echo "VS Code is already the default code editor"
@@ -714,32 +714,40 @@ if [[ "$?" -eq 0  ]]; then
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
-            echo "Setting Chromium Bookmarks and enabling Home button"
-            sudo mkdir -p "$CHROMIUM_PROFILE"
+            echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+            if [[ ! -d ${CHROMIUM_PROFILE} ]]; then
+                sudo mkdir -p "$CHROMIUM_PROFILE"
+            fi
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
 
             # Copy only the Bookmarks file
             sudo cp -f "${SOURCE_ETC_PATH}/user/snap/chromium/common/chromium/Default/Bookmarks" \
                 "$CHROMIUM_PROFILE/Bookmarks"
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Bookmarks"
+            rui_ip=$NEPI_IP
+            # cur_dir=$(pwd)
+            # cd $CHROMIUM_PROFILE
+            # find . -type f -exec perl -i -pe 's||${rui_ip}|g' {} +
+            # cd $
 
             # Enable the Home button in Preferences without overwriting the whole file
             PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
-            sudo python3 - "$PREFS_FILE" <<'PYEOF'
-import json, sys, os
-path = sys.argv[1]
-data = {}
-if os.path.isfile(path):
-    with open(path, 'r') as f:
-        try:
-            data = json.load(f)
-        except Exception:
-            data = {}
-data.setdefault('browser', {})['show_home_button'] = True
-data['bookmark_bar'] = data.get('bookmark_bar', {})
-data['bookmark_bar']['show_on_all_tabs'] = True
-with open(path, 'w') as f:
-    json.dump(data, f, indent=3)
-PYEOF
+#             sudo python3 - "$PREFS_FILE" <<'PYEOF'
+# import json, sys, os
+# path = sys.argv[1]
+# data = {}
+# if os.path.isfile(path):
+#     with open(path, 'r') as f:
+#         try:
+#             data = json.load(f)
+#         except Exception:
+#             data = {}
+# data.setdefault('browser', {})['show_home_button'] = True
+# data['bookmark_bar'] = data.get('bookmark_bar', {})
+# data['bookmark_bar']['show_on_all_tabs'] = True
+# with open(path, 'w') as f:
+#     json.dump(data, f, indent=3)
+# PYEOF
             sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
 
             # echo "Cleaning Chromium Files"

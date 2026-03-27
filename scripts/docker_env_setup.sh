@@ -134,29 +134,19 @@ sudo add-apt-repository ppa:rmescandon/yq -y
 
 sudo apt update
 
-sudo apt install apt-utils -y
-sudo apt install yq -y
-sudo apt install git -y
-sudo apt install gitk -y
-sudo apt install htop -y
-sudo apt install ncdu -y
+sudo apt install apt-utils  yq  git gitk htop  ncdu curl gparted \
+    python-is-python3 python3-venv python3-pip nmap trash-cli nano \
+    rsync -y
+
 sudo apt install snap -y  2>/dev/null 
 if is_valid_jetson; then
     snap download snapd --revision=24724
     sudo snap ack snapd_24724.assert
     sudo snap install snapd_24724.snap
     sudo sudo snap refresh --hold snapd
-
 fi
 
-sudo apt install curl -y
-sudo apt install gparted -y
-
-sudo apt install python-is-python3 -y
-sudo apt install python3-venv python3-pip -y
-
-
-if command -v mount.cifs &>/dev/null; then
+if command -v mount.cifs --help &>/dev/null; then
     echo "cifs-utils is installed."
 else
     echo "Installing cifs-utils"
@@ -166,8 +156,7 @@ fi
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
-sudo -H python3 -m pip install --no-input cryptography
-sudo -H python3 -m pip install --no-input python-dotenv
+sudo -H python3 -m pip install --no-input cryptography python-dotenv
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "######################################"
@@ -192,9 +181,6 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "Installing SSH Apps"
     echo ""
 
-    echo "Installing NEPI SSH Management Software"
-
-    echo "Installing NEPI SSH Management Software"
     #sudo apt install --reinstall openssh-server
 
     sudo apt-get remove --purge openssh-server -y
@@ -206,27 +192,24 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     fi
     sudo chmod 0775 /run/sshd
     sudo chown root:root /run/sshd
+    if [[ ! -f "/var/run/sshd" ]]; then
+        sudo mkdir "/var/run/sshd"
+    fi
+    sudo chmod 0775 /var/run/sshd
+    sudo chown root:root /var/run/sshd
 
     echo "############"
     echo "Installing Network Apps"
     echo ""
 
     #sudo apt install netplan.io -y
-    sudo apt install ifupdown -y
-    sudo apt install net-tools -y 
-    sudo apt install iproute2 -y
-    sudo apt install isc-dhcp-client -y
-    sudo apt install wpasupplicant -y
-    sudo apt install nmap -y
-    sudo apt install trash-cli -y
-    sudo apt install nano -y
+    sudo apt install ifupdown net-tools iproute2 isc-dhcp-client wpasupplicant -y
 
 
     echo "############"
     echo "Installing Shared Drive Apps"
     echo ""
-    sudo apt install samba -y
-    sudo apt install smbclient -y
+    sudo apt install samba smbclient -y
 
     # echo "############"
     # echo "Installing Data Annotation Software"
@@ -236,10 +219,10 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     # source $script_path
 
 
-    echo "############"
-    echo "Installing USB Drive Auto Mount Software"
-    echo ""
-    sudo apt install usbmount -y
+    # echo "############"
+    # echo "Installing USB Drive Auto Mount Software"
+    # echo ""
+    # sudo apt install usbmount -y
 
 
 fi 
@@ -261,8 +244,6 @@ sudo apt install --fix-broken
 
 
 
-#################################
-# Install docker if not present
 
 echo ""
 echo "######################################"
@@ -270,76 +251,66 @@ echo "Installing Docker Required Software"
 echo "######################################"
 echo ""
 
-echo "Stopping Docker Service"
-SERVICE_NAME=docker
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Stopping ${SERVICE_NAME} Service"
-    sudo systemctl stop $SERVICE_NAME
-fi
-
-SERVICE_NAME=docker.socket
-if systemctl is-active --quiet "$SERVICE_NAME"; then
-    echo "Stopping ${SERVICE_NAME} Service"
-    sudo systemctl stop $SERVICE_NAME
-fi
 
 echo ""
-echo "######################################"
 echo "NEPI ARCHITECTURE: ${NEPI_ARCH}"
-echo "######################################"
 echo ""
 
-if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-    echo "Checking for Docker software"
-    if command -v docker &>/dev/null; then
-        echo "Removing Docker existing docker installation."
-        sudo apt remove docker -y
-    fi
-    # https://docs.docker.com/engine/install/ubuntu/
-    echo ""
-    echo ""
-    echo "######################################"
-    echo "Installing Docker"
-    echo "######################################"
-    echo ""
-    # Update Package Lists and Install Prerequisites.
-    sudo apt update
-    sudo 
-    echo 1
-    sudo apt install -y apt-transport-https ca-certificates curl software-properties-common 
-    echo 2
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    echo 3
-    sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
-    sudo apt update
-    echo 4
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo docker info
-    docker compose version
-elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-    echo ""
-    echo "######################################"
-    echo "Installing Docker"
-    echo "######################################"
-    echo ""
-    sudo apt-get remove docker docker-engine docker.io containerd runc
-    sudo apt-get update
-    sudo apt-get install ca-certificates curl gnupg
-    sudo install -m 0775 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    echo \
-    "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    \"$(. /etc/os-release && echo \"$VERSION_CODENAME\")\" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-else 
-    arch_val=$(uname -m)
-    echo "Arch ${arch_val} not supported yet"
+
+echo "Checking for Docker software"
+if command -v docker &>/dev/null; then
+    # echo "Removing Docker existing docker installation."
+    # sudo apt remove docker -y
+    echo "Docker Installed"
+else
+
+        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+
+            # https://docs.docker.com/engine/install/ubuntu/
+            echo ""
+            echo "######################################"
+            echo "Installing Docker"
+            echo "######################################"
+            echo ""
+
+            # Update Package Lists and Install Prerequisites.
+            sudo apt update
+            sudo 
+            echo 1
+            sudo apt install -y apt-transport-https ca-certificates curl software-properties-common 
+            echo 2
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            echo 3
+            sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
+            sudo apt update
+            echo 4
+            sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            sudo docker info
+            docker compose version
+        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+            echo ""
+            echo "######################################"
+            echo "Installing Docker"
+            echo "######################################"
+            echo ""
+
+            sudo apt-get remove docker docker-engine docker.io containerd runc
+            sudo apt-get update
+            sudo apt-get install ca-certificates curl gnupg
+            sudo install -m 0775 -d /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            echo \
+            "deb [arch=\"$(dpkg --print-architecture)\" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+            \"$(. /etc/os-release && echo \"$VERSION_CODENAME\")\" stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        else 
+            arch_val=$(uname -m)
+            echo "Arch ${arch_val} not supported yet"
+        fi
 fi
-
-
 
 sudo apt-get update
 sudo apt-get install --fix-broken -y
@@ -353,9 +324,22 @@ if is_valid_cuda; then
     echo "######################################"
     echo ""
 
+
+    echo "Stopping Docker Service"
+    SERVICE_NAME=docker
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        echo "Stopping ${SERVICE_NAME} Service"
+        sudo systemctl stop $SERVICE_NAME
+    fi
+
+    SERVICE_NAME=docker.socket
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        echo "Stopping ${SERVICE_NAME} Service"
+        sudo systemctl stop $SERVICE_NAME
+    fi
+
+
     if dpkg --get-selections | grep nvidia-container-toolkit; then
-
-
         # Install nvidia toolkit
         #https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
         curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -371,9 +355,7 @@ if is_valid_cuda; then
             nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
-
     fi
-
 fi
 
 echo ""
@@ -382,14 +364,9 @@ sudo systemctl daemon-reload
 sudo systemctl start docker.socket
 sudo systemctl start docker
 
+
 sudo apt-get update
 sudo apt-get install --fix-broken -y
-
-
-echo "######################################"
-echo "Installing NEPI required python packages"
-echo "######################################"
-
 
 
 
@@ -441,35 +418,9 @@ if [[ -n "$DISPLAY" ]]; then
 
     fi
 
-    if command -v mount.cifs &>/dev/null; then
-        echo "cifs-utils is installed."
-    else
-        echo "Installing cifs-utils"
-        sudo apt install cifs-utils
-    fi
 fi
 
 
-
-
-
-######
-if command -v code &> /dev/null; then
-    echo "Visual Studio Code is installed and accessible."
-else
-    echo ""
-    echo "Installing visual code editor"
-    
-    if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-        curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-        sudo apt install ./code_arm64.deb
-        wait
-        sudo rm code_arm64.deb
-    elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-        sudo snap install code --channel=edge --classic
-    fi
-
-fi
 
 echo ""
 echo "########################"

@@ -87,21 +87,25 @@ export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
 
-if [[ -d $NEPI_REPO_FOLDER ]]; then
-  NEPI_SETUP_FOLDER="${NEPI_REPO_FOLDER}/nepi_setup"
-  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
-  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
-  # fi
-elif [[ -d $NEPI_BUILD_REPO_FOLDER ]]; then
-  NEPI_SETUP_FOLDER="${NEPI_BUILD_REPO_FOLDER}/nepi_setup"
-  # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
-  #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
-  # fi
-else
-  NEPI_SETUP_FOLDER="${NEPI_SETUP_REPO_FOLDER}"
-fi
 
-export NSETUP="${NEPI_SETUP_FOLDER}/scripts"
+
+function NSETUP() {
+  if [[ -d $NEPI_REPO_FOLDER ]]; then
+    NEPI_SETUP_FOLDER="${NEPI_REPO_FOLDER}/nepi_setup"
+    # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+    #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+    # fi
+  elif [[ -d $NEPI_BUILD_REPO_FOLDER ]]; then
+    NEPI_SETUP_FOLDER="${NEPI_BUILD_REPO_FOLDER}/nepi_setup"
+    # if [[ -d ${NEPI_SETUP_REPO_FOLDER} ]]; then
+    #   rm -r $NEPI_SETUP_REPO_FOLDER >/dev/null 2>&1
+    # fi
+  else
+    NEPI_SETUP_FOLDER="${NEPI_SETUP_REPO_FOLDER}"
+  fi
+  echo "${NEPI_SETUP_FOLDER}"
+}
+export -f NSETUP
 
 ###############################
 
@@ -561,6 +565,8 @@ function netlist() {
 }
 export -f netlist
 
+
+
 function netliststatic() {
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
@@ -617,7 +623,6 @@ function netliststatic() {
 
 }
 export -f netliststatic
-
 
 function netsetstatic() {
     new_ip_netmask=$1
@@ -697,6 +702,8 @@ function netsetstatic() {
     fi   
 }
 export -f netsetstatic
+
+
 
 # ping internet
 function pingi(){
@@ -1006,13 +1013,16 @@ function nls(){
 }
 export function nls
 
+
+
+
 utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
 netlist = list network adapters and IP addresses
 netliststatic = list network adapters and static IP addresses
-netsetstatic = set static_ip for ethernet adapter with provided IP/Netmask like '192.168.179.103/24'
+netsetstatic = Select network adapter and set static_ip for ethernet adapter with provided IP/Netmask like '192.168.179.103/24'
 pingi = Check connection to NEPI IP
 pingnc = ping NEPI IP address continously
 pingi = Check connection to internet
@@ -1751,6 +1761,177 @@ function cmd_loop() {
 export -f cmd_loop
 
 
+function select_ssh_key {
+        sudo -v
+        key_folder=$1
+        if [[ -z $key_folder ]]; then
+          key_folder="/home/${CONFIG_USER}/.ssh"
+        fi
+        sel_ssh_file=''
+        echo "Checking for available key options in folder: ${key_folder}"
+
+        if [[ -d $key_folder ]]; then
+                ###############
+                #echo "Checking for available key options"
+                # Change to the specified directory
+                sudo chmod 0700 $key_folder
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+                pushd "$key_folder" > /dev/null || return 1
+
+                declare -a files
+                for file in "$key_folder"/*; do
+                    pub_file="${file}.pub"
+                    #echo "Checking file: ${file}"
+                    #echo "Looking for public key file: ${pub_file}"
+                    filename=$(basename "$file")
+                    if [[ -f "$file" ]]; then # Check if the item is a regular file
+                        if [[ -f $pub_file ]]; then
+                          files+=( "$filename" ) # Add it to the array
+                          echo $filename
+                        fi
+                    fi
+                done
+                sudo chmod 0700 $key_folder
+                
+
+                # Check if there are any files
+                if [[ ${#files[@]} -eq 0 ]]; then
+                    echo "No SSH Key files found in folder: ${key_folder}"
+                    popd > /dev/null
+                    return 1
+                fi
+
+                # # Check if one file
+                # if [[ ${#files[@]} -eq 1 ]]; then
+                #     echo "${files[0]}"
+                #     popd > /dev/null
+                #     return 0
+                # fi
+                echo ""
+                echo "Select a file from "${folder_path}":"
+                echo "--------------------"
+                echo ""
+                select filename in "${files[@]}"; do
+                    if [[ -n "$filename" ]]; then
+                        sel_ssh_file="$filename"
+                        break
+                    else
+                        echo "Invalid selection. Please try again."
+                    fi
+                done
+                
+                # Return to the original directory
+                popd > /dev/null
+
+                # Output the full path of the selected file
+                if [[ -n "$sel_ssh_file" ]]; then
+                    sel_ssh_path=${key_folder}/$sel_ssh_file
+                    if ssh-add ${sel_ssh_path} > /dev/null; then
+                        echo ${sel_ssh_path}
+                    else
+                      echo "Failed to add SSH key: ${sel_ssh_file}"
+                    fi
+
+                    sudo chmod 0700 $sel_ssh_path
+                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+                    return 0
+                else
+                  return 2
+                fi
+
+        else
+          echo "SSH Key folder not found ${key_folder}"
+          return 1
+        fi
+
+}
+
+export -f select_ssh_key
+
+
+function create_ssh_key {
+        sudo -v
+
+        key_type=ed25519
+
+        key_folder=$1
+        if [[ ! -d $key_folder ]]; then
+          sudo mkdir -p $key_folder
+        fi
+
+        key_name=$2
+        if [[ -z "$key_name" ]]; then
+            key_name="id_${key_type}_$(hostname)_${CONFIG_USER}"
+        fi 
+
+        user_email=$3
+        if [[ -z "$user_email" ]]; then
+            while [[ -z "$ghub_email" ]]; do
+                read -p "Enter your GitHub email address: " USER_INPUT
+                if is_valid_email "$USER_INPUT"; then
+                    echo "Using email ${USER_INPUT}"
+                    user_email=$USER_INPUT
+                else
+                    echo "Not A Valid Email"
+                    return 1
+                fi  
+            done   
+        fi     
+
+
+        if [[ -d $key_folder ]]; then          
+
+              key_file=${key_name}
+              key_path=${key_folder}/${key_file}
+
+              sudo chmod 0700 $key_folder
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+              if [[ -f $key_path ]]; then
+                  echo "${key_path}"
+                  return -2
+              fi
+
+              ssh-keygen -t ${key_type} -f ${key_path} -q -N "" -C "${user_email}"
+              eval "$(ssh-agent -s)"
+              if ssh-add ${key_path} > /dev/null; then
+                echo "Added key: ${key_file}"
+                cat ${key_path}.pub
+              else
+                echo "Failed to add SSH key: ${key_file}"
+              fi
+
+
+              config_file=${key_folder}/config
+              touch ${config_file}
+
+              sudo chmod 0700 $key_folder
+              sudo chmod 0600 $key_path
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+
+
+              if [[ -f $key_path ]]; then
+                  echo "Created ssh_key ${key_file}"
+                  echo "${key_path}"
+                  return 0
+
+              else
+                echo "NEPI Failed to create ssh_key ${key_file}"
+                return 1
+              fi
+
+
+        else
+          echo "SSH Key folder not found ${key_folder}"
+          return 2
+        fi
+
+}
+
+export -f create_ssh_key
 
 #### Update Help Test
 utilsn="${utilsn}
@@ -1787,7 +1968,9 @@ get_hw_type = Echos the current hardware type string (ie. jetson, arm64, amd64, 
 get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname)
 get_os_info = Echos the current OS NameVersion
 get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
-get_sw_desc = Echos NEPI formated software vesion tag"
+get_sw_desc = Echos NEPI formated software vesion tag
+select_ssh_key = Select SSH key from available keys in provided key_folder
+create_ssh_key = Create a new SSH key key pair in  in provided key_folder"
 
 
 
@@ -1938,7 +2121,7 @@ alias nepihome="
 cd ${NEPI_HOME}"
 
 
-alias nsetup="cd ${NSETUP}"
+alias nsetup="cd $(NSETUP)/scripts"
 
 
 function nepirui() {
@@ -1989,6 +2172,8 @@ function nepistorage() {
   fi
 }
 
+export -f nepistorage
+
 function nepiconfig() {
   if pingn; then
     shdrive=/mnt/nepi_share_config
@@ -2007,168 +2192,7 @@ function nepiconfig() {
   fi
 }
 
-
-function select_ssh_key {
-        sudo -v
-        key_folder=$1
-        if [[ -z $key_folder ]]; then
-          key_folder="/home/${CONFIG_USER}/.ssh"
-        fi
-        sel_ssh_file=''
-        echo "Checking for available key options in folder: ${key_folder}"
-
-        if [[ -d $key_folder ]]; then
-                ###############
-                #echo "Checking for available key options"
-                # Change to the specified directory
-                sudo chmod 0700 $key_folder
-                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-                pushd "$key_folder" > /dev/null || return 1
-
-                declare -a files
-                for file in "$key_folder"/*; do
-                    pub_file="${file}.pub"
-                    #echo "Checking file: ${file}"
-                    #echo "Looking for public key file: ${pub_file}"
-                    filename=$(basename "$file")
-                    if [[ -f "$file" ]]; then # Check if the item is a regular file
-                        if [[ -f $pub_file ]]; then
-                          files+=( "$filename" ) # Add it to the array
-                          echo $filename
-                        fi
-                    fi
-                done
-                sudo chmod 0700 $key_folder
-                
-
-                # Check if there are any files
-                if [[ ${#files[@]} -eq 0 ]]; then
-                    echo "No SSH Key files found in folder: ${key_folder}"
-                    popd > /dev/null
-                    return 1
-                fi
-
-                # # Check if one file
-                # if [[ ${#files[@]} -eq 1 ]]; then
-                #     echo "${files[0]}"
-                #     popd > /dev/null
-                #     return 0
-                # fi
-                echo ""
-                echo "Select a file from "${folder_path}":"
-                echo "--------------------"
-                echo ""
-                select filename in "${files[@]}"; do
-                    if [[ -n "$filename" ]]; then
-                        sel_ssh_file="$filename"
-                        break
-                    else
-                        echo "Invalid selection. Please try again."
-                    fi
-                done
-                
-                # Return to the original directory
-                popd > /dev/null
-
-                # Output the full path of the selected file
-                if [[ -n "$sel_ssh_file" ]]; then
-                    sel_ssh_path=${key_folder}/$sel_ssh_file
-                    ssh-add ${sel_ssh_path} 
-                    sudo chmod 0700 $sel_ssh_path
-                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-                    echo ${sel_ssh_path}
-                    return 0
-                else
-                  return 2
-                fi
-
-        else
-          echo "SSH Key folder not found ${key_folder}"
-          return 1
-        fi
-
-}
-
-export -f select_ssh_key
-
-
-function create_ssh_key {
-        sudo -v
-
-        key_type=ed25519
-
-        key_folder=$1
-        if [[ ! -d $key_folder ]]; then
-          sudo mkdir -p $key_folder
-        fi
-
-        key_name=$2
-        if [[ -z "$key_name" ]]; then
-            key_name="id_${key_type}_$(hostname)_${CONFIG_USER}"
-        fi 
-
-        user_email=$3
-        if [[ -z "$user_email" ]]; then
-            while [[ -z "$ghub_email" ]]; do
-                read -p "Enter your GitHub email address: " USER_INPUT
-                if is_valid_email "$USER_INPUT"; then
-                    echo "Using email ${USER_INPUT}"
-                    user_email=$USER_INPUT
-                else
-                    echo "Not A Valid Email"
-                    return 1
-                fi  
-            done   
-        fi     
-
-
-        if [[ -d $key_folder ]]; then          
-
-              key_file=${key_name}
-              key_path=${key_folder}/${key_file}
-
-              sudo chmod 0700 $key_folder
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-              if [[ -f $key_path ]]; then
-                  echo "${key_path}"
-                  return -2
-              fi
-
-              ssh-keygen -t ${key_type} -f ${key_path} -q -N "" -C "${user_email}"
-              eval "$(ssh-agent -s)"
-              ssh-add ${key_path}
-
-              config_file=${key_folder}/config
-              touch ${config_file}
-
-              sudo chmod 0700 $key_folder
-              sudo chmod 0600 $key_path
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-
-
-              if [[ -f $key_path ]]; then
-                  echo "Created ssh_key ${key_file}"
-                  echo "${key_path}"
-                  return 0
-
-              else
-                echo "NEPI Failed to create ssh_key ${key_file}"
-                return 1
-              fi
-
-
-        else
-          echo "SSH Key folder not found ${key_folder}"
-          return 2
-        fi
-
-}
-
-export -f create_ssh_key
-
+export -f nepiconfig
 
 function nepisetkey {
     sudo -v
@@ -2192,41 +2216,22 @@ function nepisetkey {
       return 2
     fi
 
-    if [[ -f $key_path ]]; then
+    sudo chmod 0700 $key_folder
+    sudo chmod 0600 $key_path
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
-        sudo chmod 0700 $key_folder
-        sudo chmod 0600 $key_path
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-        
-
-        SYSTEM_KEYS_FOLDER="${NEPI_SYSTEM_CONFIG}/etc/ssh/ssh_keys"
-        if [[ -d $SYSTEM_KEYS_FOLDER ]]; then
-          sudo cp $key_path "${SYSTEM_KEYS_FOLDER}/${key_file}"
-          sudo cp $pub_path "${SYSTEM_KEYS_FOLDER}/${key_file}.pub"
-          config_file="/home/${CONFIG_USER}/nepi_system_config.yaml"
-          if [[ -f $config_file ]]; then
-            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
-          fi
-          config_file="${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.yaml"
-          if [[ -f $config_file ]]; then
-            update_yaml_value "NEPI_SSH_KEY" $key_file $config_file
-          fi
-          export NEPI_SSH_KEY=$key_file
-          
-
-        fi
-        ssh-add ${key_path}
-        echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
-
-        return 0
-
-
+    if ssh-add ${key_path} > /dev/null; then
+      echo "Added key: ${key_file}"
+      cat ${key_path}.pub
+      export NEPI_SSH_KEY=$key_file
+      echo "NEPI SSH Key updated to key file ${NEPI_SSH_KEY_FILE}"
     else
-        echo "NEPI SSH Key NOT CHANGED"
-        return 1
+      echo "Failed to add SSH key: ${key_file}"
     fi
 
 
+
+    return 0
 
 }
 
@@ -2901,6 +2906,13 @@ utilsn="${utilsn}
 nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
+nepirui = Open Chromium to RUI Dashboard page
+nepistorage = Open file manager to NEPI shared Storage Drive
+nepiconfig = Open file manager to NEPI shared Config Drive 
+nepisetkey = Set provided key name as NEPI device key
+nepisshkey = NEPI SSH key setup function
+nepiauthadd = Add provide key name to SSH authorized_key file
+nepiauthrm = Remove provide key name from SSH authorized_key file
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo

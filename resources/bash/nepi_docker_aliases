@@ -46,50 +46,6 @@ export NEPI_REMOTE_SETUP=0
 HELPN="${UTILSN}"
 
 
-
-function pushn(){
-  git add --all
-  git commit -m "*$@*" 
-  git push >/dev/null 2>&1
-  cur_folder=${PWD##*/}
-  par_path=$(dirname "$(pwd)")
-  par_folder=$(basename "$par_path")
-  #echo $cur_folder
-  #echo $par_folder
-  head_name=$(git rev-parse --abbrev-ref HEAD) >/dev/null 2>&1
-  if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ "$cur_folder" == 'nepi_engine_ws' || "$par_folder" == 'nepi_engine_ws' ]]; then
-        echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
-        git push origin HEAD:develop
-
-    else
-        echo -e "${GREEN}Pushing to repo ${PWD##*/} Head main"
-        git push origin HEAD:main
-    fi
-    if [ ! $? -eq 0 ]; then
-      echo -e "${RED}Push Failed"
-      return 1 # Failed
-    fi
-    echo -e "${GREEN}Push Successfully"
-  else
-    echo -e "${RED}Not in Git Repo"
-  fi
-}
-
-
-
-
-
-HELPN="${HELPN}
-################################
-### NEPI DEV UTIL FUNCTIONS
-################################
-nepihome = Switch to Home folder
-nepidpl = Deploy nepi complete to nepi device
-repodpl = Deploy repos to nepi device
-pushn = Add,commit,push repo changes with provided comment"
-
-
 #############################
 # NEPI SHORTCUT FUNCTIONS
 #############################
@@ -351,7 +307,8 @@ function nepiupdate() {
   ####################################
   # Run NEPI Bash Setup Script
 
-  SCRIPT_FOLDER=${NSETUP}
+  SCRIPT_FOLDER=$(NSETUP)/scripts
+
   script_file=nepi_bash_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -363,7 +320,6 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Folder Setup Script
-  SCRIPT_FOLDER=${NSETUP}
   script_file=nepi_folders_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -375,7 +331,6 @@ function nepiupdate() {
 
   ####################################
   # Run NEPI Files Setup Script
-  SCRIPT_FOLDER=${NSETUP}
   script_file=docker_files_setup.sh
   script_path=${SCRIPT_FOLDER}/${script_file}
   if ! source_script $script_path; then
@@ -412,7 +367,7 @@ export -f nepicreate
 ## NEPI build shortcuts
 alias nepibld="
 sudo -v
-source ${NSETUP}/docker_config_setup.sh
+source $(NSETUP)/scripts/docker_config_setup.sh
 sbrc
 nnet"
 
@@ -441,7 +396,7 @@ nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.
 nepistatus = Show the systemctl status for nepi_docker service.
 nepilogs = Show live NEPI Docker service journal file.
-nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
+nepibld = Build or Update the NEPI Docker File System from source code in ${NEPI_BUILD_REPO_FOLDER}.
 nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
 nepicreate = Export and Import a new NEPI Docker Image from running container
 nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
@@ -554,8 +509,8 @@ export RUI="/opt/nepi/nepi_rui/src/rui_webserver/rui-app/src"
 export RUI_ENV="/opt/nepi/nepi_rui"
 export SDK="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk"
 export SHARE="/opt/nepi/nepi_engine/share"
-export SRC="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src"
-export SRCRUI="/mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src"
+export SRC="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
+export SRCRUI="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
 export TMP="/mnt/nepi_storage/tmp"
 export DRIVE="/mnt/nepi_storage"
 
@@ -671,8 +626,8 @@ rui = /opt/nepi/rui/src/rui_webserver/rui-app/src
 rui_env = /opt/nepi/rui
 sdk = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk
 share = /opt/nepi/nepi_engine/share
-src = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src
-srcrui = /mnt/nepi_storage/nepi_src/nepi_engine_ws/src/nepi_rui/src/rui_webserver/rui-app/src
+src = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
 tmp = /mnt/nepi_storage/tmp"
 
 

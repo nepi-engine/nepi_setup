@@ -231,58 +231,13 @@ else
     echo ""
 
     #
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-debian
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input virtualenv
-
-    #sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input wheel
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input wheel
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input scikit-build 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input ninja 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input cmake
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input cryptography
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-dotenv
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input cffi
-
-    #sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input netifaces
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input netifaces
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input pyserial 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input websockets 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input geographiclib 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input PyGeodesy 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input harvesters 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input WSDiscovery 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-gnupg 
-    # sudo -H python${NEPI_PYTHON} -m pip install --no-input pip install lxml
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input lxml
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif_zeep
-    # sudo -H python${NEPI_PYTHON} -m pip install --no-input onvif 
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input PyUSB
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input usb
-
-    sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input PyYAML
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input declxml
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input licenseheaders
-
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input yapf
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-gnupg
-
-    #sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input tornado
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input Flask
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input supervisor 
-
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input colormath
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input pandas
-    sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input scipy
-    sudo -H python${NEPI_PYTHON} -m pip install --upgrade --no-input empty
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input python-debian \
+        virtualenv wheel  scikit-build ninja cmake cryptography \
+        python-dotenv numpy cffi netifaces pyserial websockets \
+        geographiclib PyGeodesy harvesters WSDiscovery python-gnupg \
+        lxml onvif_zeep PyUSB usb PyYAML declxml licenseheaders \
+        yapf python-gnupg Flask supervisor  colormath pandas scipy \
+        empty
     
 
 
