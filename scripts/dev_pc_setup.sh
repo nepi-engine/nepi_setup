@@ -416,8 +416,6 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
         sudo rm $tfile >/dev/null 2>&1
     fi
 
-    cat /etc/hosts    
-
     echo " "
     echo "################################# "
     echo "Clearing Known Hosts"
