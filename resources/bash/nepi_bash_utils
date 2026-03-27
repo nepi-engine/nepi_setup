@@ -61,9 +61,10 @@ export NEPI_IN_CONTAINER=1
 
 
 export NEPI_HOME=/home/$CONFIG_USER
-export NEPI_BASE=/opt/nepi
+export NEPI_BASE=${NEPI_BASE}
 export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
 export NEPI_STORAGE='/mnt/nepi_storage'
+export NEPI_FACTORY_CONFIG='/mnt/nepi_config/factory_cfg'
 export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
@@ -81,7 +82,7 @@ export NEPI_REPO_NAME=$(basename "${NEPI_REPO_ADDRESS%.*}")
 export NEPI_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
 
 export NEPI_BUILD_REPO_NAME=${NEPI_REPO_NAME}
-export NEPI_BUILD_REPO_FOLDER="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_NAME}"
+export NEPI_BUILD_REPO_FOLDER="${NEPI_SYSTEM_CONFIG}/nepi_src/${NEPI_BUILD_REPO_NAME}"
 
 export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
@@ -437,7 +438,7 @@ function is_nepi_path(){
       return 1
     fi
 
-    if [[ ":$check_path:" == *"/opt/nepi"* ]]; then
+    if [[ ":$check_path:" == *"${NEPI_BASE}"* ]]; then
       return 0
     fi
 
@@ -625,18 +626,22 @@ function netliststatic() {
 export -f netliststatic
 
 function netsetstatic() {
-    new_ip_netmask=$1
+    new_ip_netmask="$1"
+
     if ! systemctl is-active --quiet NetworkManager; then
-      echo "Network Manager Not Running"
+      echo "NetworkManager not running"
       return 1
     fi
 
-    if ! is_valid_ipv4_netmask $new_ip_netmask; then
-      echo "Invalid Address/Netmask Combination ${net_ip}"
-      return 1
+    if [[ -n $new_ip ]]; then
+      if [[ ${new_ip_netmask} != 'auto' ]]; then
+        new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
+        if ! is_valid_ipv4_netmask $new_ip_netmask; then
+          echo "Invalid Address/Netmask Combination ${net_ip}"
+          return 1
+        fi
+      fi
     fi
-
-
 
     selected_adapter=''
 
@@ -682,28 +687,70 @@ function netsetstatic() {
       done
     fi
       
+    if [[ ! -n $new_ip_netmask ]]; then
+        echo ''
+
+    fi
     
     # Output the full path of the selected file
     if [[ -n "$selected_adapter" ]]; then
         echo "Updating Network Adapter ${selected_adapter} with IP Address ${new_ip_netmask}"
+        if systemctl is-active --quiet NetworkManager; then
+          if [[ ${new_ip_netmask} == 'auto' ]]; then
+            cmd='sudo nmcli con mod "'${selected_adapter}'" ipv4.method auto '
+            echo $cmd
+            eval "$cmd"     
 
-        cmd='sudo nmcli connection modify "'${selected_adapter}'" \
-            ipv4.addresses '${new_ip_netmask}' \
-            ipv4.dns 8.8.8.8,8.8.4.4 \
-            ipv4.method manual '
-        echo $cmd
-        eval "$cmd"     
+            cmd='sudo nmcli con mod "'${selected_adapter}'" connection.autoconnect yes '
+            echo $cmd
+            eval "$cmd" 
 
-        cmd='sudo nmcli connection up "'${selected_adapter}'"'
-        #echo $cmd
-        eval "$cmd"     
-        echo ""
+            cmd='sudo nmcli connection up "'${selected_adapter}'"'
+            #echo $cmd
+            eval "$cmd"     
+            echo ""
+          else
+            cmd='sudo nmcli connection modify "'${selected_adapter}'" \
+                ipv4.addresses '${new_ip_netmask}' \
+                ipv4.dns 8.8.8.8,8.8.4.4 \
+                ipv4.method manual '
+            echo $cmd
+            eval "$cmd"     
+
+            cmd='sudo nmcli connection up "'${selected_adapter}'"'
+            #echo $cmd
+            eval "$cmd"     
+            echo ""
+          fi
+        fi
+
+        return 0
         
     fi   
 }
+
 export -f netsetstatic
 
+function netsetauto() {
+  nestsetstatic 'auto'
+  return $?
+}
 
+export -f netsetauto
+
+function netsetcustom() {
+  nestsetstatic
+  return $?
+}
+
+export -f netsetcustom
+
+function netsetnepi() {
+  nestsetstatic $NEPI_IP
+  return $?
+}
+
+export -f netsetnepi
 
 # ping internet
 function pingi(){
@@ -735,11 +782,9 @@ function pingnc(){
 }
 export -f pingnc
 
-# source bashrc
-function sbrc(){
-    source /home/${CONFIG_USER}/.bashrc
-}
-export -f sbrc
+
+alias sbrc="
+source /home/${CONFIG_USER}/.bashrc"
 
 
 
@@ -971,15 +1016,19 @@ export change_password
 
 function fix_chromium(){
   sudo -v
-  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/Singleton* > /dev/null 2>&1
-  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/common/Singleton* > /dev/null 2>&1
-  sudo rm -rf /home/${CONFIG_USER}/.config/chromium/common/chromium/Singleton* > /dev/null 2>&1
+  echo "Locating Chromium profile"
+  if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
+      CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+  elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
+      CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
+  else
+      echo "Chromium profile directory not found"
+      return 1
+  fi
 
+  sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
   sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-  sudo rm -rf /home/${CONFIG_USER}/snap/.cache/chromium > /dev/null 2>&1
 
-  #sudo rm -rf /home/${CONFIG_USER}/.config/chromium/* 2>/dev/null
-  #sudo rm -rf /home/${CONFIG_USER}/snap/chromium/* 2>/dev/null
 }
 export function fix_chromium
 
@@ -1022,7 +1071,10 @@ utilsn="${utilsn}
 ################################
 netlist = list network adapters and IP addresses
 netliststatic = list network adapters and static IP addresses
-netsetstatic = Select network adapter and set static_ip for ethernet adapter with provided IP/Netmask like '192.168.179.103/24'
+netsetstatic = Select network adapter and set static_ip with provided IP like '192.168.179.103' or 'auto'
+netsetauto = Select network adapter and set static_ip to auto'
+netsetcustom = Select network adapter and enter a custom static IP address'
+netsetnepi = Select network adapter and set static_ip to current NEPI_IP value'
 pingi = Check connection to NEPI IP
 pingnc = ping NEPI IP address continously
 pingi = Check connection to internet
@@ -2008,7 +2060,7 @@ fi
 ###################################
 # ROS Util Functions
 ###################################
-NROS=/opt/nepi/nepi_engine/setup.bash
+NROS=${NEPI_BASE}/nepi_engine/setup.bash
 ROS=/opt/ros/noetic/setup.bash
 HAS_ROS=$(dpkg -l | grep ros-)
 if [ 1 ]; then # [[ -z "$HAS_ROS" ]]; then

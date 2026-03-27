@@ -119,7 +119,7 @@ export -f nepiswitch
 
 function nepiinit(){
   sudo -v
-  import_path=/mnt/nepi_storage/nepi_images
+  import_path=${NEPI_STORAGE}/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
       image_path=$1
@@ -167,7 +167,7 @@ export -f nepiinit
 
 function nepiimport(){
   sudo -v
-  import_path=/mnt/nepi_storage/nepi_images
+  import_path=${NEPI_STORAGE}/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
       image_path=$1
@@ -224,7 +224,7 @@ export -f nepisave
 
 function nepiload(){
   sudo -v
-  import_path=/mnt/nepi_storage/nepi_images
+  import_path=${NEPI_STORAGE}/nepi_images
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
       image_path=$1
@@ -255,13 +255,12 @@ function nepiload(){
 export -f nepiload
 
 
-function nepisetup(){
-  sudo -v
-  SHOW_CONFIG_MENU=1
-  bash /mnt/nepi_config/system_cfg/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-  sbrc
-}
-export -f nepisetup
+
+alias nepisetup="
+sudo -v
+SHOW_CONFIG_MENU=1
+source${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+sbrc"
 
 
 function nepistatus(){
@@ -348,11 +347,11 @@ function nepiprint(){
   sudo -v
   echo "NEPI DOCKER SETTINGS"
   echo "--------------------"
-  print_yaml_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+  print_yaml_file ${NEPI_DOCKER_CONFIG}/nepi_docker_config.yaml
   echo ""
   echo "NEPI SYSTEM SETTINGS"
   echo "--------------------"
-  print_yaml_file /mnt/nepi_config/docker_cfg/nepi_docker_config.yaml
+  print_yaml_file ${NEPI_DOCKER_CONFIG}/nepi_docker_config.yaml
 }
 export -f nepiprint
 
@@ -485,41 +484,41 @@ fi
 ###################################
 #NEPI folder shortcuts
 ###################################
-export AI="/mnt/nepi_storage/ai_models"
-export AIF="/opt/nepi/nepi_engine/share/nepi_ai_ifs"
-export API="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_api"
-export APPS="/opt/nepi/nepi_engine/share/nepi_apps"
-export AUTO="/mnt/nepi_storage/automation_scripts"
-export DATA="/mnt/nepi_storage/data"
-export DIST="/opt/nepi/nepi_engine/lib/python3/dist-packages"
-export DRIVE="/mnt/nepi_storage"
-export DRIVERS="/opt/nepi/nepi_engine/lib/nepi_drivers"
-export ENGINE="/opt/nepi/nepi_engine"
-export ETC="/opt/nepi/nepi_engine/etc"
-export INSTALL="/mnt/nepi_storage/intstall"
-export LAUNCH="/opt/nepi/nepi_engine/share/nepi_env/launch"
-export LIB="/opt/nepi/nepi_engine/lib"
-export LIBSDK="/opt/nepi/nepi_engine/lib/nepi_sdk"
-export MANAGERS="/opt/nepi/nepi_engine/lib/nepi_managers"
-export NEPI="/opt/nepi"
-export NIMG="/mnt/nepi_storage/nepi_images"
-export NFI="/mnt/nepi_storage/nepi_full_img"
-export NFIA="/mnt/nepi_storage/nepi_full_img_archive"
-export RUI="/opt/nepi/nepi_rui/src/rui_webserver/rui-app/src"
-export RUI_ENV="/opt/nepi/nepi_rui"
-export SDK="/opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk"
-export SHARE="/opt/nepi/nepi_engine/share"
-export SRC="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
-export SRCRUI="/mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
-export TMP="/mnt/nepi_storage/tmp"
-export DRIVE="/mnt/nepi_storage"
+export AI="${NEPI_STORAGE}/ai_models"
+export AIF="${NEPI_BASE}/nepi_engine/share/nepi_ai_ifs"
+export API="${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api"
+export APPS="${NEPI_BASE}/nepi_engine/share/nepi_apps"
+export AUTO="${NEPI_STORAGE}/automation_scripts"
+export DATA="${NEPI_STORAGE}/data"
+export DIST="${NEPI_BASE}/nepi_engine/lib/python3/dist-packages"
+export DRIVE="${NEPI_STORAGE}"
+export DRIVERS="${NEPI_BASE}/nepi_engine/lib/nepi_drivers"
+export ENGINE="${NEPI_BASE}/nepi_engine"
+export ETC="${NEPI_BASE}/nepi_engine/etc"
+export INSTALL="${NEPI_STORAGE}/intstall"
+export LAUNCH="${NEPI_BASE}/nepi_engine/share/nepi_env/launch"
+export LIB="${NEPI_BASE}/nepi_engine/lib"
+export LIBSDK="${NEPI_BASE}/nepi_engine/lib/nepi_sdk"
+export MANAGERS="${NEPI_BASE}/nepi_engine/lib/nepi_managers"
+export NEPI="${NEPI_BASE}"
+export NIMG="${NEPI_STORAGE}/nepi_images"
+export NFI="${NEPI_STORAGE}/nepi_full_img"
+export NFIA="${NEPI_STORAGE}/nepi_full_img_archive"
+export RUI="${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src"
+export RUI_ENV="${NEPI_BASE}/nepi_rui"
+export SDK="${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk"
+export SHARE="${NEPI_BASE}/nepi_engine/share"
+export SRC="${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
+export SRCRUI="${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
+export TMP="${NEPI_STORAGE}/tmp"
+export DRIVE="${NEPI_STORAGE}"
 
 
 
 
 #NEPI sftp folder shortcuts
 # Function to open sftp to location on nepi device
-# Example call: sftpnl '/mnt/nepi_storage'
+# Example call: sftpnl '${NEPI_STORAGE}'
 
 function ai(){
 	sftpnl $AI
@@ -603,46 +602,46 @@ HELPN="${HELPN}
 ################################
 ## NEPI sftp folder shortcuts ##
 ################################
-ai = /mnt/nepi_storage/ai_models
-aifs = /opt/nepi/nepi_engine/share/nepi_aifs
-api = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_api
-apps = /opt/nepi/nepi_engine/share/nepi_apps
-auto = /mnt/nepi_storage/automation_scripts
-data = /mnt/nepi_storage/data
-dist = /opt/nepi/nepi_engine/lib/python3/dist-packages/
-drive = /mnt/nepi_storage
-drivers = /opt/nepi/nepi_engine/lib/nepi_drivers
-engine = /opt/nepi/nepi_engine
-etc = /opt/nepi/nepi_engine/etc
-intstall = /mnt/nepi_storage/intstall
-lib = /opt/nepi/nepi_engine/lib
-libsdk = /opt/nepi/nepi_engine/lib/sdk
-managers = /opt/nepi/nepi_engine/lib/nepi_managers
-nepi = /opt/nepi
-nfi = /mnt/nepi_storage/nepi_full_img
-nfia = /mnt/nepi_storage/nepi_full_img_archive
-nimg = /mnt/nepi_storage/nepi_images
-rui = /opt/nepi/rui/src/rui_webserver/rui-app/src
-rui_env = /opt/nepi/rui
-sdk = /opt/nepi/nepi_engine/lib/python3/dist-packages/nepi_sdk
-share = /opt/nepi/nepi_engine/share
-src = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
-srcrui = /mnt/nepi_storage/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
-tmp = /mnt/nepi_storage/tmp"
+ai = ${NEPI_STORAGE}/ai_models
+aifs = ${NEPI_BASE}/nepi_engine/share/nepi_aifs
+api = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api
+apps = ${NEPI_BASE}/nepi_engine/share/nepi_apps
+auto = ${NEPI_STORAGE}/automation_scripts
+data = ${NEPI_STORAGE}/data
+dist = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/
+drive = ${NEPI_STORAGE}
+drivers = ${NEPI_BASE}/nepi_engine/lib/nepi_drivers
+engine = ${NEPI_BASE}/nepi_engine
+etc = ${NEPI_BASE}/nepi_engine/etc
+intstall = ${NEPI_STORAGE}/intstall
+lib = ${NEPI_BASE}/nepi_engine/lib
+libsdk = ${NEPI_BASE}/nepi_engine/lib/sdk
+managers = ${NEPI_BASE}/nepi_engine/lib/nepi_managers
+nepi = ${NEPI_BASE}
+nfi = ${NEPI_STORAGE}/nepi_full_img
+nfia = ${NEPI_STORAGE}/nepi_full_img_archive
+nimg = ${NEPI_STORAGE}/nepi_images
+rui = ${NEPI_BASE}/rui/src/rui_webserver/rui-app/src
+rui_env = ${NEPI_BASE}/rui
+sdk = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk
+share = ${NEPI_BASE}/nepi_engine/share
+src = ${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = ${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
+tmp = ${NEPI_STORAGE}/tmp"
 
 
 
 ###################################
 #NEPIHOST folder shortcuts
 #echo "Setting up NEPI Folder Shortcuts"
-export NIMG="/mnt/nepi_storage/nepi_images"
+export NIMG="${NEPI_STORAGE}/nepi_images"
 
-export NDRIVE="/mnt/nepi_storage"
+export NDRIVE="${NEPI_STORAGE}"
 
-export DCFG="/mnt/nepi_config/docker_cfg"
-export FCFG="/mnt/nepi_config/factory_cfg"
-export SCFG="/mnt/nepi_config/system_cfg"
-export UCFG="/mnt/nepi_storage/user_cfg"
+export DCFG="${NEPI_DOCKER_CONFIG}"
+export FCFG="${NEPI_FACTORY_CONFIG}"
+export SCFG="${NEPI_SYSTEM_CONFIG}"
+export UCFG="${NEPI_STORAGE}/user_cfg"
 
 
 # NEPI navigation shortcuts
@@ -657,23 +656,23 @@ alias scfg="cd $SCFG"
 alias ucfg="cd $UCFG"
 
 
-export NDSETUP="/mnt/nepi_config/docker_cfg"
+export NDSETUP="${NEPI_DOCKER_CONFIG}"
 alias ndsetup="cd ${NDSETUP}"
 
-alias nfw="cat /opt/nepi/nepi_engine/etc/fw_version.txt"
+alias nfw="cat ${NEPI_BASE}/nepi_engine/etc/fw_version.txt"
 
 HELPN="${HELPN}
 ################################
 ## NEPIHOST folder shortcuts ##
 ################################
 
-nimg = /mnt/nepi_storage/nepi_images
-ndrive = /mnt/nepi_storage
+nimg = ${NEPI_STORAGE}/nepi_images
+ndrive = ${NEPI_STORAGE}
 
-dcfg = /mnt/nepi_config/docker_cfg
-fcfg = /mnt/nepi_config/factory_cfg
-scfg = /mnt/nepi_config/factory_cfg
-ucfg = /mnt/nepi_storage/user_cfg
+dcfg = ${NEPI_DOCKER_CONFIG}
+fcfg = ${NEPI_FACTORY_CONFIG}
+scfg = ${NEPI_FACTORY_CONFIG}
+ucfg = ${NEPI_STORAGE}/user_cfg
 
 ndsetup = /mnt/nepi_config/docker_config
 

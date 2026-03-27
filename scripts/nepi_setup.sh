@@ -660,16 +660,27 @@ if [[ "$?" -eq 0  ]]; then
         xdg-settings set default-web-browser chromium-browser.desktop
 
 
-        if [[ ! -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
-            echo "Creating Chromium Defualt Folder"
-            sudo mkdir -p /home/${CONFIG_USER}/snap/chromium/common/chromium/Default
+        echo "Locating Chromium profile"
+        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+        elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
+        else
+            echo "Chromium profile directory not found"
+            return 1
         fi
-        echo "Updating Chromium Defualt Files"
-        sudo cp -rf ${SOURCE_ETC_PATH/}/user/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
 
-        # echo "Cleaning Chromium Files"
-        # fix_chromium
+        if [[ -n "$CHROMIUM_PROFILE" ]]; then
+
+            if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
+                sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
+                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+                echo "Updating Chromium Defualt Files"
+                sudo cp -rf ${SOURCE_ETC_PATH/}/user/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
+
+        fi
 
 
     fi
@@ -703,42 +714,39 @@ if [[ "$?" -eq 0  ]]; then
             echo "Chromium already in favourites"
         fi
 
+
         echo "Locating Chromium profile"
-        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium/Default" ]]; then
-            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium/Default"
-        elif [[ -d "/home/${CONFIG_USER}/.config/chromium/Default" ]]; then
-            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium/Default"
+        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+        elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
+            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
         else
             echo "Chromium profile directory not found"
-            CHROMIUM_PROFILE=""
+            return 1
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
-            echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
-            if [[ ! -d ${CHROMIUM_PROFILE} ]]; then
-                sudo mkdir -p "$CHROMIUM_PROFILE"
-            fi
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
 
-            # Copy only the Bookmarks file
-            BOOKMARK_FILE=${CHROMIUM_PROFILE}/Bookmarks
-            sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-            # rui_ip=localhost
-            # cur_dir=$(pwd)
-            # cd $CHROMIUM_PROFILE
-            # find . -type f -exec perl -i -pe 's|localhost|${rui_ip}|g' {} +
-            # cd $cur_dir
+            if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
+                sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
+                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
 
-            # Enable the Home button in Preferences without overwriting the whole file
-            PREFS_FILE="$CHROMIUM_PROFILE/Preferences"
-            update_json_value "$PREFS_FILE" browser.show_home_button true
-            update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} "$CHROMIUM_PROFILE/Preferences"
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
+                CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
+                # Copy only the Bookmarks file
+                BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
+                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
+                rui_ip=localhost
+                sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
 
-            # echo "Cleaning Chromium Files"
-            # fix_chromium
-        fi
+                # Enable the Home button in Preferences without overwriting the whole file
+                PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"
+                update_json_value "$PREFS_FILE" browser.show_home_button true
+                update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
 
     fi
 
