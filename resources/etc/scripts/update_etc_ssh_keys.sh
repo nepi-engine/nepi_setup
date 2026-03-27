@@ -70,11 +70,12 @@ echo "UPDATING ETC SSH KEYS"
 
 if [[ "$NEPI_MANAGES_SSH" -eq 1 || ${CONFIG_USER} == ${NEPI_USER} ]]; then
     if [[ ${NEPI_SSH_KEY_FILE} != ${NEPI_SSH_KEY} ]]; then
-    echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
-    if nepisetkey $NEPI_SSH_KEY; then
-        echo "NEPI SSH key set to ${NEPI_SSH_KEY}"
-        echo "Authorizing NEPI SSH key ${NEPI_SSH_KEY}"
-        nepiauthadd $cur_key
+        echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
+        if nepisetkey $NEPI_SSH_KEY; then
+            echo "NEPI SSH key set to ${NEPI_SSH_KEY}"
+            echo "Authorizing NEPI SSH key ${NEPI_SSH_KEY}"
+            nepiauthadd $cur_key
+        fi
     fi
 else
     nepiauthrm $cur_key

@@ -153,8 +153,7 @@ else
     sudo apt update
     sudo apt-get install --fix-broken -y
 
-    sudo apt install software-properties-common -y
-    sudo apt install apt-utils -y
+    sudo apt install software-properties-common apt-utils -y
     sudo apt install --reinstall ubuntu-advantage-tools -y
     #sudo apt install --reinstall ubuntu-desktop -y
 
@@ -162,53 +161,20 @@ else
     #DEBIAN_FRONTEND=noninteractive apt-get install -y <package_name>
 
     sudo apt update
-    sudo apt install build-essential -y
-    sudo apt install cmake -y
-    sudo apt install cmake-doc ninja-build -y
+    sudo apt install build-essential cmake cmake-doc ninja-build lsb-release vim \
+        nano git trash-cli onboard setools ubuntu-advantage-tools scons dos2unix \
+        libffi-dev libv4l-dev v4l-utils curl v4l-utils psmisc scapy minicom dconf-editor \
+        gparted socat protobuf-compiler gnupg kgpg snapd xz-utils rsync  trash-cli \
+        dialog ncdu -y
 
 
 
-    sudo apt install lsb-release -y
-    sudo apt install vim -y
-    sudo apt install nano -y
-    sudo apt install git -y
-
-
-
-    sudo apt install trash-cli -y
-    sudo apt install onboard -y
-    sudo apt install setools -y
-    sudo apt install ubuntu-advantage-tools -y
-
-    sudo apt install scons -y # Required for num_gpsd
-    sudo apt install dos2unix -y # Required for robust automation_mgr
-    sudo apt install libffi-dev -y # Required for python cryptography library
-    sudo apt install libv4l-dev v4l-utils -y # V4L Cameras (USB, etc.)
-    sudo apt install curl -y # Node.js installation below
-    sudo apt install v4l-utils -y
-    sudo apt install psmisc -y
-    sudo apt install scapy -y
-    sudo apt install minicom -y
-    sudo apt install dconf-editor -y
-    sudo apt install gparted -y
-    sudo apt install socat protobuf-compiler -y
-
-    sudo apt install gnupg -y
-    sudo apt install kgpg -y
-
-    sudo apt install snapd -y
-    sudo apt install xz-utils -y
-    sudo apt install rsync -y
-
-
+    if 
     sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install yq -y
-
     
-    sudo apt install trash-cli -y
-    sudo apt install dialog -y
-    sudo apt install ncdu -y
+   
 
 
 
@@ -243,91 +209,92 @@ else
             wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
         fi
     fi
-    sudo sudo apt install zstd -y
-
-
-    sudo apt install nvidia-utils-515 -y
-
-    sudo apt install linux-generic-hwe-20.04 -y
+    sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
 
 
 
     # https://stackoverflow.com/questions/8430332/uninstall-boost-and-install-another-version
     # First uninstall older version
-    sudo apt -y install libboost-all-dev libboost-doc libboost-dev
+    sudo apt install -y 
 
 
     ######################################
     # Install some additional libraries
     sudo apt update
-    sudo apt install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
-    sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-    sudo apt install -y python3.8-dev python-dev python-numpy python3-numpy
-    sudo apt install -y libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
-    sudo apt install -y libv4l-dev v4l-utils qv4l2 #v4l2ucp    
-    sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev 
-    sudo apt -y install libopenblas-dev
-    sudo apt install -y libxml2-dev libxslt1-dev
-
-    sudo apt install libgpiod2 -y
+    sudo apt install libboost-all-dev libboost-doc libboost-dev libgtk2.0-dev pkg-config libavcodec-dev \
+        libavformat-dev libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev \
+        libjpeg-dev libpng-dev libtiff-dev libdc1394-22-devlibgstreamer1.0-dev \
+        libgstreamer-plugins-base1.0-dev python3.8-dev python-dev python-numpy python3-numpy \
+        libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+        libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev \
+        libopenblas-dev libxml2-dev libxslt1-dev libgpiod2 -y
 
     sudo apt update
     sudo apt-get install --fix-broken -y 
 
+    echo "######################################"
+    echo "Installing NEPI Managed Services Apps"
+    echo "######################################"
 
 
+    echo "############"
+    echo "Installing Hostname Apps"
     echo ""
-    echo "########################"
-    echo "Installing System Applications"
-    echo "########################"
-    echo ""
-
-
     sudo apt install hostapd -y # WiFi access point setup
 
-
-    echo "Installing NEPI NETWORK Management Software"
-    sudo apt install netplan.io -y
-    sudo apt install ifupdown -y 
-    sudo apt install net-tools -y 
-    sudo apt install iproute2 -y
-    sudo apt install isc-dhcp-client -y
-    sudo apt install wpasupplicant -y
-    sudo apt install iputils-ping -y
-
+    echo "############"
+    echo "Installing Time Apps"
+    echo ""
     echo "Installing NEPI TIME Management Software"
-    sudo apt install chrony -y
+    sudo apt-get install chrony -y
 
+    echo "############"
+    echo "Installing SSH Apps"
+    echo ""
 
+    #sudo apt install --reinstall openssh-server
 
-    echo "Installing NEPI SSH Management Software"
-
-    echo "Installing NEPI SSH Management Software"
-    #sudo apt install --reinstall openssh-server -y
-
-    sudo apt remove --purge openssh-server -y
-    sudo apt update
-    sudo apt-get install --fix-broken -y 
-    sudo apt install openssh-server -y
+    sudo apt-get remove --purge openssh-server -y
+    sudo apt-get autoclean 
+    sudo apt-get install --fix-broken -y
+    sudo apt-get install openssh-server -y
     if [[ ! -f "/run/sshd" ]]; then
         sudo mkdir "/run/sshd"
     fi
-    sudo chmod 0755 /run/sshd
+    sudo chmod 0775 /run/sshd
     sudo chown root:root /run/sshd
+    if [[ ! -f "/var/run/sshd" ]]; then
+        sudo mkdir "/var/run/sshd"
+    fi
+    sudo chmod 0775 /var/run/sshd
+    sudo chown root:root /var/run/sshd
 
-
-
-    sudo apt update
-    sudo apt-get install --fix-broken -y 
-
+    echo "############"
+    echo "Installing Network Apps"
     echo ""
-    echo "######################################"
+
+    #sudo apt install netplan.io -y
+    sudo apt install ifupdown net-tools iproute2 isc-dhcp-client wpasupplicant -y
+
+
+    echo "############"
     echo "Installing Shared Drive Apps"
-    echo "######################################"
     echo ""
+    sudo apt install samba smbclient -y
 
-    sudo apt install samba -y
-    sudo apt install smbclient -y
+    # echo "############"
+    # echo "Installing Data Annotation Software"
+    # echo ""
+    # script_file=dev_ai_train_setup.sh
+    # script_path=${SCRIPT_FOLDER}/${script_file}
+    # source $script_path
+
+
+    # echo "############"
+    # echo "Installing USB Drive Auto Mount Software"
+    # echo ""
+    # sudo apt install usbmount -y
+
 
     sudo apt update
     sudo apt-get install --fix-broken -y 
@@ -335,45 +302,6 @@ else
     echo "Installing Supervisor Apps"
     echo "######################################"
     sudo apt install supervisor -y
-
-
-
-
-    if [[ -n "$DISPLAY" ]]; then
-        echo "########################"
-        echo "Installing Desktop Utility Apps"
-        echo "########################"
-        sudo apt update
-
-        #######
-        echo ""
-        echo "Installing mdview"
-        sudo snap install mdview
-
-        echo ""
-        echo "Installing Chromium Browser"
-        sudo snap remove --purge chromium
-        sudo snap install chromium
-        #sudo apt install chromium-browser -y
-        #chromium-browser --disable-features=DnsOverHttps
-
-        if command -v code &> /dev/null; then
-            echo "Visual Studio Code is installed and accessible."
-        else
-            echo ""
-            echo "Installing visual code editor"
-            
-            if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-                curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-                sudo apt install ./code_arm64.deb
-                wait
-                sudo rm code_arm64.deb
-            elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-                sudo snap install code --channel=edge --classic
-            fi
-
-        fi
-    fi
 
 
     echo ""
