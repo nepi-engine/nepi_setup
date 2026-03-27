@@ -739,8 +739,11 @@ if [[ "$?" -eq 0  ]]; then
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
                 sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                rui_ip=localhost
-                sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
+                nepi_id=$(echo "$NEPI_IP" | cut -d '.' -f 4-)
+                rui_ip="127.0.0.${nepi_id}"
+                if is_valid_ipv4 $rui_ip; then
+                    sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
+                fi
 
                 # Enable the Home button in Preferences without overwriting the whole file
                 PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"

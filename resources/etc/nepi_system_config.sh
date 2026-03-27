@@ -705,6 +705,73 @@ if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
     #     sudo systemctl restart networking
 fi
 
+    new_ip=${NEPI_STATIC_IP_END%%/*}
+    network_id="$(echo "$new_ip" | cut -d'.' -f1-3)"
+    nepi_id=$(echo "$new_ip" | cut -d '.' -f 4-)
+    rec_ip=${network_id}.5
+    rui_ip="127.0.0.${nepi_id}"
+
+    # if [[ ${NEPI_IP_END} != ${NEPI_IP_START} ]]; then
+
+    #         slist=$(netliststatic)
+    #         if [[ "$slist" != *"$network_id"*  ]]; then
+    #             echo ""
+    #             echo "Your NEPI IP address has changed from: ${NEPI_IP_START} to: ${NEPI_IP_END}"
+    #             if systemctl is-active --quiet NetworkManager; then
+    #             echo ""
+    #             echo "Do you want to update now?"
+    #             choice=$(ask_yes_no)
+    #             if [[ "$choice" == 'yes' ]]; then
+    #                 echo ""
+    #                 netsetstatic "${rec_ip}/24"
+    #                 echo "###################"
+    #                 echo "Updated Static IPs"
+    #                 netliststatic
+    #                 echo "###################"
+    #                 echo ""
+    #             fi  
+    #             echo ""  
+
+    #         fi
+    #     fi
+    # fi
+
+    echo "Your NEPI DEVICE IP address is set to:" 
+    echo "${NEPI_IP_END}"
+
+    echo ""
+    echo "Your PC's network adapter should be set to "
+    echo "${rec_ip}"
+    if systemctl is-active --quiet NetworkManager; then
+        echo "You can switch network adapter settings by typing:"
+        echo "netnepi  OR   nepiauto"  
+    fi  
+
+    echo " "
+    echo "You can check your NEPI Device connection by typing:"
+    echo "ping ${NEPI_IP}   OR   pingn"
+
+    echo " "
+    echo "You can ssh into your Running NEPI Docker contatiner by typing:"
+    echo "sshn"
+
+    echo " "
+    echo "You can connect to your NEPI Device's shared network drives by typing:"
+    echo "nepistorage  OR   nepiconfig"
+
+    echo " "
+    echo "You can connect to your NEPI Device's RUI in a Chrome browser at:"
+    echo "nepirui   OR   entering  http://${rui_ip}:5003/  in a Chromium browser"
+
+    echo " "
+    echo "To see a list of NEPI command line shortcuts run: nepihelp"
+    echo " "
+
+else
+
+    echo "THIS SCRIPT CANNOT BE RUN BY USER nepi OR nepihost"
+
+fi
 
 
 

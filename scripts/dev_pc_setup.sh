@@ -640,7 +640,7 @@ fi
 
     echo " "
     echo "You can ssh into your NEPI Devices nepi Docker host OR nepi Docker contatiner by typing:"
-    echo "sshnh  OR   ssh"
+    echo "sshnh  OR   sshn"
 
     echo " "
     echo "You can connect to your NEPI Device's shared network drives by typing:"
