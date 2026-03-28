@@ -63,7 +63,7 @@ export NEPI_IN_CONTAINER=1
 
 
 export NEPI_HOME=/home/$CONFIG_USER
-export NEPI_BASE=${NEPI_BASE}
+export NEPI_BASE='/opt/nepi'
 export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
 export NEPI_STORAGE='/mnt/nepi_storage'
 export NEPI_FACTORY_CONFIG='/mnt/nepi_config/factory_cfg'
