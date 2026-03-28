@@ -470,7 +470,7 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     # fi
     # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
 
-    if [[ -n "$DISPLAY" ]]; then
+    if [[ -n $DISPLAY ]]; then
         #####################################
         echo "########################"
         echo "Installing Desktop Utility Apps"

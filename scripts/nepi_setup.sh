@@ -355,7 +355,7 @@ if [[ "$?" -eq 0 ]]; then
 
 
 
-        if [[ ! -f "/etc/docker/daemon.json.org" ]]; then
+        if [[ ! -f "/etc/docker/daemon.json.org" && -f "/etc/docker/daemon.json" ]]; then
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
         fi
 
@@ -601,7 +601,7 @@ source $config_update_file
 # #####################################
 
 systemctl&> /dev/null
-if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
+if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
     if [[ $LITE_INSTALL -eq 0 ]]; then
         echo ""
@@ -662,7 +662,7 @@ if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
             CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
         else
             echo "Chromium profile directory not found"
-            return 1
+            CHROMIUM_PROFILE=''
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
@@ -674,6 +674,7 @@ if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
                 echo "Updating Chromium Defualt Files"
                 sudo cp -rf ${SOURCE_ETC_PATH/}/user/chromium/common/chromium/Default/*  /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/
                 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER} /home/${CONFIG_USER}/snap/chromium/common/chromium/Default/*
+            fi
 
         fi
 
@@ -756,11 +757,10 @@ if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
                 update_json_value "$PREFS_FILE" browser.show_home_button true
                 update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+            fi
+        fi
 
     fi
-
-    #sudo rm -rf ~/.config/chromium/Singleton* 
-
 
 fi
 
