@@ -19,9 +19,9 @@ is recommended.
 ### NEPI Docker Container Build Instructions
 
 **NOTE:**  You can run the following NEPI Container Build steps either 
-directly on a NEPI Host device, or on a network connected Linux Ubuntu PC for NEPI development.
-For the PC build option, you will first need to configure your PC for NEPI development. 
-See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md).
+directly on a NEPI Host device, or on a network connected Linux Ubuntu system for NEPI development.
+For the remote system build option, you will first need to configure your remote system for NEPI remote development. 
+See the NEPI Remote System Development Setup instructions at [here](NEPI_REMOTE_DEV_SETUP.md).
 
 **NOTE:**  At the end of each of the following sections, the NEPI container at that state will be
 committed. If you run into any issues during one of the sections, can restart it from the beginning
@@ -31,13 +31,13 @@ which will use the last steps committed container image.
 ################################################################
 ### NEPI Base Container Setup
 
-**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI DEV PC**
+**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI REMOTE DEV SYSTEM**
 
 Check for internet connection
 
     pingi  # "Run 'ninet' on a NEPI Host Device to try and connect if not connected:
 
-Clone the NEPI Engine repo on your development system (NEPI Device or NEPI Dev PC):
+Clone the NEPI Engine repo on your development system (NEPI Host Device or NEPI Remote Dev System):
 
     git clone git@github.com:nepi-engine/nepi_engine_ws.git 
     cd nepi_engine_ws
@@ -54,7 +54,7 @@ Deploy the NEPI Source Code to the Device
     nepidpl
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Open a terminal on your NEPI Device (or SSH into your NEPI Device from your NEPI Dev PC using the terminal command 'sshnh')
+Open a terminal on your NEPI Device (or SSH into your NEPI Device from your NEPI Remote Dev System using the terminal command 'sshnh')
 
 Enable internet connection and sync clocks (password is 'nepi'):
 

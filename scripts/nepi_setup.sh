@@ -550,11 +550,6 @@ if [[ "$?" -eq 0 ]]; then
 
         echo "***** nepi_check_license license manager is installed... you must still provide a valid license file in /mnt/nepi_storage/license *****"
 
-        
-
-
-
-
     fi
 
 
@@ -606,7 +601,7 @@ source $config_update_file
 # #####################################
 
 systemctl&> /dev/null
-if [[ "$?" -eq 0  ]]; then
+if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
 
     if [[ $LITE_INSTALL -eq 0 ]]; then
         echo ""
@@ -683,9 +678,7 @@ if [[ "$?" -eq 0  ]]; then
         fi
 
 
-    fi
-
-    if [[ $LITE_INSTALL -eq 1 ]]; then
+    elif [[ $LITE_INSTALL -eq 1 ]]; then
 
        echo "Configuring default code editor"
         CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
@@ -756,7 +749,6 @@ if [[ "$?" -eq 0  ]]; then
     #sudo rm -rf ~/.config/chromium/Singleton* 
 
 
-    
 fi
 
 

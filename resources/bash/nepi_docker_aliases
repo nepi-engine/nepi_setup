@@ -256,13 +256,6 @@ export -f nepiload
 
 
 
-alias nepisetup="
-sudo -v
-SHOW_CONFIG_MENU=1
-source${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-sbrc"
-
-
 function nepistatus(){
   sudo -v
   sudo systemctl status nepi_docker
@@ -389,7 +382,6 @@ nepiexport = Export the running NEPI container to a .tar file. Enter a file name
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepitag = Update the Software Description field in the active NEPI container.
-nepisetup = Configure NEPI System settings.
 nepienable = Enable NEPI Docker service on next boot.
 nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.

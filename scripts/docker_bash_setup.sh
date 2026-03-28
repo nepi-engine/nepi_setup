@@ -148,6 +148,11 @@ echo ""
     sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
     
+
+    nepi_mode=HOST
+    export NEPI_MODE=$nepi_mode
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
+
     nepi_ip=${NEPI_STATIC_IP%%/*}
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${nepi_ip}"
 
@@ -228,6 +233,8 @@ echo ""
         echo 'fi' | sudo tee -a $file
     fi
 
+
+
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
     sudo chmod 0644 $file
 
@@ -245,6 +252,14 @@ echo ""
     sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
+
+    echo " "
+    echo "################################# "
+    echo "Emptying Trash"
+    echo ""
+    empty_trash
+
+
 
 
 ################

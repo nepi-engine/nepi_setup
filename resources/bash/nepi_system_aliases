@@ -89,15 +89,6 @@ function nepistart(){
 export -f nepistart
 
 
-function nepiconfig(){
-echo "Running nepi_system_config.sh"
-sudo -v
-SHOW_CONFIG_MENU=1
-source${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-}
-export -f nepiconfig
-
-
 ## NEPI build shortcuts
 
 alias nepibld="
@@ -164,7 +155,6 @@ HELPN="${HELPN}
 nepihome = change to NEPI home dir
 nepistart = start the NEPI processes
 nepistop = stop the NEPI processe
-nepiconfig = Configure NEPI System Settings
 nepibld = Build NEPI bash, config, code repos, and RUI
 codebld = Build NEPI code repos only
 ruibld = Build the RUI only

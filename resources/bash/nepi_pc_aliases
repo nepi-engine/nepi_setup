@@ -335,22 +335,6 @@ scfg = ${NEPI_SYSTEM_CONFIG}
 ucfg = ${NEPI_STORAGE}/user_cfg"
 
 
-###################################
-#NEPI PC Setup Shortcuts
-###################################
-
-
-## NEPI deploy complete
-alias nepisetup="
-source $(NSETUP)/scripts/dev_pc_setup.sh
-sbrc"
-
-
-HELPN="${HELPN}
-################################
-## NEPI PC Setup Shortcuts ##
-################################
-nepisetup = Rerun the pc_dev_setup script"
 
 
 export NTEST='NEPI'

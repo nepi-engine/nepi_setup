@@ -121,25 +121,22 @@ After the import completes, you can print the current installed NEPI Docker Imag
     nepilogin = Log into the running NEPI container as user 'nepi'.
     nepiloginroot = Log into the running NEPI container as user 'root'.
     nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
-    nepicommit = Commit the running NEPI container.
+    nepicommit = Commit the running NEPI container wit provided COMMIT_DESCRIPTION, restarts nepi using new commit unless RESTART=0 is passed .
     nepiinit = Reset, clear, and import new NEPI Image.
     nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
     nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
     nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
     nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
-    nepipull = Import a NEPI image from a remote repository given the PULL_URL.
     nepitag = Update the Software Description field in the active NEPI container.
-    nepiconfig = Configure NEPI System settings.
     nepienable = Enable NEPI Docker service on next boot.
     nepidisable = Disable NEPI Docker service on next boot.
     nepirestart = Restart NEPI docker service.
     nepistatus = Show the systemctl status for nepi_docker service.
     nepilogs = Show live NEPI Docker service journal file.
-    nepireset = Reset all NEPI Config Folders.
-    nepibld = Build or Update the NEPI Docker File System from source code in $HOME/nepi_setup repo.
+    nepibld = Build or Update the NEPI Docker File System from source code in ${NEPI_BUILD_REPO_FOLDER}.
     nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
     nepicreate = Export and Import a new NEPI Docker Image from running container
-    nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings.
+    nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
@@ -196,6 +193,25 @@ Check that your NEPI Container is running after reboot:
         nepistatus
         nepilogs
 
+
+################################################################
+### NEPI Docker Host Config Setup
+
+While most NEPI device settings like static, alias, and ntp IP addresses are configurable real-time through the RUI (Resident User Interface),
+some settings such as User Password, Folders, and SSH Keys must be configured prior to run-time.  You may also want to Factory Reset a NEPI Docker
+configuration.
+
+Run the NEPI Docker Host configuration script by typing:
+
+    nepisetup
+
+Make any changes you want using the menu options presented, then choose the 'APPLY SETTINGS' to apply changes, or 'FACTORY RESET' to factory reset your installation.
+
+**NOTE:** The NEPI System Configuration file is located at '/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml'.
+For production environments, you can just replace this file with a production ready file, or create a custom production script that make any required changes.
+
+**NOTE:** If you want to setup your Device to support both NEPI Docker Host mode and NEPI Remote Dev System modes, you can switch between these modes
+by typing nepisetup_remote and nepisetup_host respectfully.
 
 ################################################################
 ### NEPI GitHub Setup
@@ -313,18 +329,17 @@ If you NEPI Image failed to start, you can try to run it in a dev mode without a
 
             **NOTE:** Some additional NEPI Software command line shortcuts are:
 
-                nepihome = change to nepi home dir
-                nepistart = start the nepi processes
-                nepistop = stop the nepi processe
-                nepiconfig = Configure NEPI System Settings
-                nepibld = Build and deploy all nepi repos and RUI
-                codebld = Build and deploy all nepi repos
-                ruibld = Build and deploy rui system
+                nepihome = change to NEPI home dir
+                nepistart = start the NEPI processes
+                nepistop = stop the NEPI processe
+                nepibld = Build NEPI bash, config, code repos, and RUI
+                codebld = Build NEPI code repos only
+                ruibld = Build the RUI only
                 nepistatus = Print running status of all NEPI processes
                 nepistatus_engine = Print tail of nepi_engine process
                 nepistatus_rui = Print tail of nepi_rui process
                 nepistatus_license = Print tail of nepi_license process
-                nepistatus_ssh = Print tail of nepi_ssh process
+                nepistatus_ssh = Print tail of nepi_ssh process"
 
 **********************
 

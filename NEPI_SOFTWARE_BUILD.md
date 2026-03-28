@@ -8,12 +8,12 @@ For additional support, see the documentation, tuturials, videos, and community 
 ################################################################
 ### NEPI Source-Code Repository Setup
 
-**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI DEV PC**
+**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI REMOTE DEV SYSTEM**
 
 **NOTE:**  You can run the following NEPI Software Build steps either 
-directly on a NEPI Host device, or on a network connected Linux Ubuntu Remote PC for NEPI development.
-For the Remote PC  build option, you will first need to configure your PC for NEPI development. 
-See the NEPI Development PC Setup instructions at [here](NEPI_DEV_PC_SETUP.md).
+directly on a NEPI Host device, or on a network connected Linux Ubuntu Remote Remote Dev for NEPI development.
+For the Remote Remote Dev  build option, you will first need to configure your Remote Dev for NEPI development. 
+See the NEPI Remote Dev Setup instructions at [here](NEPI_REMOTE_DEV_SETUP.md).
 
 Check or Setup an SSH Key for your GitHub Account by typing the following
 
@@ -40,7 +40,7 @@ sshnh = SSH into the NEPI Software Host System
 ################################################################
 ### NEPI Software Deploy, Build, and Test Process
 
-**RUN THESE STEPS YOUR NEPI DEV PC**
+**RUN THESE STEPS YOUR NEPI REMOTE DEV SYSTEM**
 Check network connection to the NEPI HOST Device
 
     pingn # Ctrl-C to stop
@@ -50,7 +50,7 @@ Deploy the NEPI Source Code to the Device
     nepidpl
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Open a terminal on your NEPI Device (or SSH into your NEPI Device from your NEPI Dev PC using the terminal command 'sshnh')
+Open a terminal on your NEPI Device (or SSH into your NEPI Device from your NEPI Remote Dev System using the terminal command 'sshnh')
 
 Run the NEPI Docker Build processes to update your NEPI Docker files (password is 'nepi'):
 
@@ -67,7 +67,7 @@ Log into the running NEPI container (password is 'nepi'):
 
     nepilogin # OR 'nepidev' if the container fails to run
 
-**NOTE:** You can also ssh directly into a running NEPI Container from you PC using the command line shortcut 'sshn'.
+**NOTE:** You can also ssh directly into a running NEPI Container from your Remote Dev System using the command line shortcut 'sshn'.
 
 **RUN THESE STEPS IN THE NEPI CONTAINER**
 Run the NEPI Software Build processes to update your NEPI Container software files (password is 'nepi'):
@@ -99,7 +99,7 @@ by commiting the current running NEPI Container with your changes.  Just type:
 This section covers modifying NEPI Software source code
 **NOTE:** If you just want to update your NEPI Docker Container's software, you can skip this section
 
-**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI DEV PC**
+**RUN THESE STEPS ON A NEPI HOST DEVICE or NEPI REMOTE DEV SYSTEM**
 
 
 **NOTE:** There are several good tutorials related to NEPI Software customization available in the 'NEPI Customization' turoials page at:
@@ -109,12 +109,12 @@ https://nepi.com/tutorials/
 
 
 **NOTE:** If you find errors in the code, you can resolve one of two ways.
-Make changes to the source code on your PC, then
+Make changes to the source code in your device's ~/nepi_engine_ws repo folder, then
 1) Repeat Software Deploy and Software Build steps below.
 2) Deploy and Test quick fixes by opening a terminal in the folder containing the updated source code,
    then use one of the NEPI SFTP command line shortcuts to log into the appropriate folder on the NEPI Device,
   (i.e. 'sdk' for SDK source code folder changes), then use the 'put *' command to deploy the folder files directly.
-Then rerun the "nepistart" command to retest in the container to test your fixes.
+Then rerun the "nepistart" command in your NEPI Host Device to retest in the container to test your fixes.
 
 
 

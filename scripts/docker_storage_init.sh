@@ -77,10 +77,10 @@ else
 
     elif [[ ! -n "$NEPI_IMPORT_PATH" ]]; then
         echo "NEPI Docker Import Folder not defined in variable NEPI_IMPORT_PATH"
-        echo "Run 'nepiconfig' to fix path location and try again"
+        echo "Run 'nepihostsetup' to fix path location and try again"
     elif [[ ! -d "$NEPI_IMPORT_PATH" ]]; then
         echo "NEPI Docker Import Folder not found at ${NEPI_IMPORT_PATH}"
-        echo "Create import path or run 'nepiconfig' to fix path location and try again"
+        echo "Create import path or run 'nepihostsetup' to fix path location and try again"
     else
 
         CURRENT_FOLDER=$(pwd)

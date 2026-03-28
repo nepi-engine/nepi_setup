@@ -188,3 +188,59 @@ echo "NEPI LITE CONFIG SETUP Complete"
 echo "########################"
 echo ""
 
+
+
+NEPI_STATIC_IP_END=$NEPI_STATIC_IP
+NEPI_DEVICE_ID_END=$NEPI_DEVICE_ID
+
+
+new_ip=${NEPI_STATIC_IP_END%%/*}
+new_submask=${new_ip%.*}
+new_addr=${new_ip##*.}
+host_ip="127.0.0.${new_addr}"
+rm_ip=${new_submask}.5
+
+echo "Your NEPI DEVICE IP address is set to:" 
+echo "${NEPI_STATIC_IP_END}"
+
+echo " "
+echo "You can connect to your NEPI Device's RUI in a Chrome browser on this device:"
+echo "nepirui   OR   entering  http://${host_ip}:5003/  in a Chromium browser"
+
+echo " "
+echo "You can ssh into your Running NEPI Docker contatiner by typing:"
+echo "sshn"
+
+
+echo ""
+echo "Your remote dev system network adapter should be set to "
+echo "${rm_ip}"
+
+echo " "
+echo "You can connect to your NEPI Device's RUI in a Chrome browser on a remote device:"
+echo "nepirui   OR   entering  http://${new_ip}:5003/  in a Chromium browser"
+
+echo " "
+echo "To see a list of available NEPI bash command line shortcuts run: nepihelp"
+echo " "
+
+
+
+
+if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
+    remote_ip=${SSH_CLIENT%% *}
+    remote_submask=${remote_ip%.*}
+    remote_addr=${remote_ip##*.}
+
+    echo ""
+    echo "Your NEPI STATIC IP address has changed from: ${NEPI_STATIC_IP_START%%/*} to: ${NEPI_STATIC_IP_END%%/*}"
+    echo ""
+    if systemctl is-active --quiet NetworkManager; then
+        echo "You can switch network adapter settings on this device between "
+        echo "  NEPI Static IP ${new_ip}, Automatic IP, or a Custom IP/Netmask by typing:"
+        echo "netnepi  OR   nepiauto   OR  netsetstatic <ip_address/netmask>"  
+    fi
+    # else
+    #     sudo systemctl restart networking
+fi
+

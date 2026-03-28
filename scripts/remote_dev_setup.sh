@@ -99,6 +99,8 @@ echo "########################"
     echo "Installing System Required Software"
     echo ""
 
+    sudo apt install ncdu -y
+
     if command -v mount.cifs --help &>/dev/null; then
         echo "cifs-utils is installed."
     else
@@ -257,6 +259,10 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
+    nepi_mode=REMOTE
+    export NEPI_MODE=$nepi_mode
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
+
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
@@ -303,7 +309,6 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
     sudo chmod 775 $file
-
 
     # Add NEPI Aliases
     if grep -qnw $file -e "##### Source NEPI Aliases #####" ; then
@@ -465,55 +470,55 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     # fi
     # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
 
-if [[ -n "$DISPLAY" ]]; then
-    #####################################
-    echo "########################"
-    echo "Installing Desktop Utility Apps"
-    echo ""
+    if [[ -n "$DISPLAY" ]]; then
+        #####################################
+        echo "########################"
+        echo "Installing Desktop Utility Apps"
+        echo ""
 
-    SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
+        SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
 
-    # sudo apt update
+        # sudo apt update
 
-    #######
-    echo ""
-    if command -v mdview &>/dev/null; then
-        echo "mdview is installed."
-    else
-        echo "Installing mdview"
-        sudo snap install mdview
-    fi
+        #######
+        echo ""
+        if command -v mdview &>/dev/null; then
+            echo "mdview is installed."
+        else
+            echo "Installing mdview"
+            sudo snap install mdview
+        fi
 
-    if command -v chromium-browser &>/dev/null; then
-        echo "Chromium is installed."
-    else
-        # Check for an alternative common name if the first one fails
-        if command -v chromium &>/dev/null; then
+        if command -v chromium-browser &>/dev/null; then
             echo "Chromium is installed."
         else
-            echo "Installing Chromium Browser"
-            #sudo snap remove --purge chromium
-            sudo snap install chromium
-            #sudo apt install chromium-browser -y
-            #chromium-browser --disable-features=DnsOverHttps
+            # Check for an alternative common name if the first one fails
+            if command -v chromium &>/dev/null; then
+                echo "Chromium is installed."
+            else
+                echo "Installing Chromium Browser"
+                #sudo snap remove --purge chromium
+                sudo snap install chromium
+                #sudo apt install chromium-browser -y
+                #chromium-browser --disable-features=DnsOverHttps
+            fi
         fi
-    fi
 
-    if command -v code &> /dev/null; then
-        echo "Visual Studio Code is installed and accessible."
-    else
-        echo ""
-        echo "Installing visual code editor"
-        
-        if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-            curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-            sudo apt install ./code_arm64.deb
-            wait
-            sudo rm code_arm64.deb
-        elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-            sudo snap install code --channel=edge --classic
+        if command -v code &> /dev/null; then
+            echo "Visual Studio Code is installed and accessible."
+        else
+            echo ""
+            echo "Installing visual code editor"
+            
+            if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+                curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+                sudo apt install ./code_arm64.deb
+                wait
+                sudo rm code_arm64.deb
+            elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+                sudo snap install code --channel=edge --classic
+            fi
         fi
-    fi
 
 
        echo "Configuring default code editor"
@@ -579,11 +584,14 @@ if [[ -n "$DISPLAY" ]]; then
             fi
         fi
 
-
-fi
-
+    fi
 
 
+    # echo " "
+    # echo "################################# "
+    # echo "Emptying Trash"
+    # echo ""
+    # empty_trash
 
 
 
@@ -593,32 +601,38 @@ fi
     echo "NEPI DEV PC SETUP COMPLETE"
     echo "################################# "
     echo " "
+
+
+
+
+
     NEPI_IP_END=$NEPI_IP
     network_id="$(echo "$NEPI_IP_END" | cut -d'.' -f1-3)"
     nepi_id=$(echo "$NEPI_IP_END" | cut -d '.' -f 4-)
     rec_ip=${network_id}.5
 
     if [[ ${NEPI_IP_END} != ${NEPI_IP_START} ]]; then
-
+        echo ""
+        echo "Your NEPI IP address has changed from: ${NEPI_IP_START} to: ${NEPI_IP_END}"
+        if systemctl is-active --quiet NetworkManager; then
             slist=$(netliststatic)
             if [[ "$slist" != *"$network_id"*  ]]; then
-                echo ""
-                echo "Your NEPI IP address has changed from: ${NEPI_IP_START} to: ${NEPI_IP_END}"
-                if systemctl is-active --quiet NetworkManager; then
-                echo ""
-                echo "Do you want to update now?"
-                choice=$(ask_yes_no)
-                if [[ "$choice" == 'yes' ]]; then
-                    echo ""
-                    netsetstatic "${rec_ip}/24"
-                    echo "###################"
-                    echo "Updated Static IPs"
-                    netliststatic
-                    echo "###################"
-                    echo ""
-                fi  
-                echo ""  
 
+                if systemctl is-active --quiet NetworkManager; then
+                    echo ""
+                    echo "Do you want to update now?"
+                    choice=$(ask_yes_no)
+                    if [[ "$choice" == 'yes' ]]; then
+                        echo ""
+                        netsetstatic "${rec_ip}/24"
+                        echo "###################"
+                        echo "Updated Static IPs"
+                        netliststatic
+                        echo "###################"
+                        echo ""
+                    fi  
+                    echo ""  
+                fi
             fi
         fi
     fi
@@ -631,7 +645,7 @@ fi
     echo "${rec_ip}"
     if systemctl is-active --quiet NetworkManager; then
         echo "You can switch network adapter settings by typing:"
-        echo "netnepi  OR   nepiauto"  
+        echo "netnepi  OR   nepiauto  OR  netsetstatic <ip_address/netmask>"   
     fi  
 
     echo " "
@@ -651,13 +665,14 @@ fi
     echo "nepirui   OR   entering  http://${NEPI_IP}:5003/  in a Chromium browser"
 
     echo " "
-    echo "To see a list of NEPI command line shortcuts run: nepihelp"
+    echo "To see a list of available NEPI bash command line shortcuts run: nepihelp"
     echo " "
 
 else
 
-    echo "THIS SCRIPT CANNOT BE RUN BY USER nepi OR nepihost"
+    echo "THIS SCRIPT CANNOT BE RUN BY NEPI_USER ${NEPI_USER}"
 
 fi
+
 
 

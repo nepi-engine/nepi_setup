@@ -1,10 +1,10 @@
-# NEPI Dev PC Setup
+# NEPI Remote Dev System Setup
 
 This tutorial will walk you through setting up a NEPI software development environment. 
 The last section provides instructions for deploying and building NEPI from source for developers
 wanting the latest development version or deploying customized solutions.
 
-**NOTE:** NEPI Dev PC Setup supports can be performed on the following:
+**NOTE:** NEPI Remote Dev System Setup supports can be performed on the following:
 1) Ubuntu Linux PC connected to a NEPI Device over a wired or WiFi connection
 2) NEPI device itself
 3) Windows or MAC PC running a Ubuntu Linux Virtual Environment (See the NOTE below)
@@ -21,7 +21,7 @@ For additional support, visit the NEPI software community forum at:
 [NEPI Community](https://www.community.nepi.com)
 
 ################################################################
-### NEPI Dev PC Setup
+### NEPI Remote Dev System Setup
 
 Update Git application (sudo password is #Nsetup4You):
 
@@ -33,32 +33,23 @@ Clone the NEPI setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI Dev PC Setup script:
+Run the NEPI Remote Dev System Setup script:
 
-    bash /home/${USER}/nepi_setup/scripts/dev_pc_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/remote_dev_setup.sh
     source ~/.bashrc
 
-See the NEPI PC command line shortcuts menu:
+**NOTE:** After the first setup is complete, you can rerun the setup process by typing:
+
+    nepisetup
+
+Other useful NEPI development command line shortcuts.
+
+sshnh = SSH into the NEPI Software Host System
+sshn = SSH into the running NEPI Software Container
+
+See the NEPI Remote Dev System command line shortcuts menu:
 
     nepihelp
-
-
-################################################################
-### NEPI Remote PC Connections Tutorials
-
-**NOTE:** The following section only applies to PC connected Dev Systems.  
-If you are running your NEPI Dev environment on a NEPI Device, you can skip this section.
-
-Setup and test your network or WiFi connected PC connection to your NEPI device following these instructions.
-
-Test that you can connect to your running conatiner from a network connected PC.
-See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
-
-Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
-See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
-
-SSH into either your NEPI Host device or NEPI running container following this tutorial.
-See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
 
 
 ################################################################
@@ -81,15 +72,21 @@ nepipull = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI source-code main repo branch
 nepidev = Switch to the NEPI source-code develop repo branch
 nepidpl = Deploy nepi source-code to nepi device
-nepipush = Push current repo (or submodule repo) if you have push permisions
-
-Other useful NEPI development command line shortcuts.
-
-sshn = SSH into the running NEPI Software Container
-sshnh = SSH into the NEPI Software Host System
+pushn = Push current repo (or submodule repo) if you have push permisions
 
 **NOTE** For instructions on deploying and building NEPI Software from source-code,
 see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
+
+
+################################################################
+### NEPI Software Tutorials
+
+Learn more about using and configuring the NEPI software, as well as building and deploying 
+custom AI Models at nepi.com.
+
+See the documentation, tuturials, videos, and community forum available at NEPI.com:
+[NEPI Website](https://www.nepi.com)
+
 
 ################################################################
 ### NEPI AI Training Software Setup
@@ -98,7 +95,7 @@ see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 this section will walk you through installing the labelImg software.
 
 
-Run the NEPI Annotation PC Setup script:
+Run the NEPI AI Training Setup script:
 
     bash /home/${USER}/nepi_setup/scripts/dev_ai_train_setup.sh
 
@@ -111,17 +108,6 @@ Test that labelImg opens:
 Test that label-studio opens:
 
     label-studio
-
-
-################################################################
-### NEPI Software Tutorials
-
-Learn more about using and configuring the NEPI software, as well as building and deploying 
-custom AI Models at nepi.com.
-
-See the documentation, tuturials, videos, and community forum available at NEPI.com:
-[NEPI Website](https://www.nepi.com)
-
 
 ################################################################
 ### NEPI DEV PC SETUP COMPLETE

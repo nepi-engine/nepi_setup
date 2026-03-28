@@ -127,6 +127,10 @@ echo "########################"
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
 
+    nepi_mode=SYSTEM
+    export NEPI_MODE=$nepi_mode
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
+
     nepi_ip=${NEPI_STATIC_IP%%/*}
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${nepi_ip}"
 
@@ -264,7 +268,7 @@ fi
     sudo chmod 775 $file
 
 
-    # Add NEPI Aliases
+
     if grep -qnw $file -e "##### Source NEPI Aliases #####" ; then
         if grep -qnw $file -e "NEPI_ALIASES_FILE=" ; then
             update_text_value $file "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE=${NEPI_ALIASES_DEST}"

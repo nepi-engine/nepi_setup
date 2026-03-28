@@ -50,6 +50,8 @@ export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ##### NEPI SETTINGS #####
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
 
+export NEPI_MODE=SYSTEM
+
 export NEPI_USER=nepi
 export NEPI_HOST_USER=nepihost
 
@@ -389,6 +391,8 @@ function is_valid_cuda(){
     fi
 }
 export -f is_valid_cuda
+
+
 
 
 function is_space_avail_mb(){
@@ -1483,7 +1487,22 @@ function path_delete(){
 }
 export -f path_delete
 
-
+function path_space_usage(){
+    source_path=$1
+    if [[ -z "$source_path" ]]; then
+      source_path=$(pwd)
+    fi
+    if is_valid_folder $source_path >/dev/null 2>&1; then
+      cur_path=$(pwd)
+      sudo cd $source_path
+      sudo ncdu
+      sudo cd $cur_path
+    else
+      echo "Not a valid path ${source_path}"
+      return 1
+    fi
+}
+export -f path_space_usage
 
 
 function path_space_mb(){
@@ -1586,7 +1605,11 @@ function path_size_gb(){
 export -f path_size_gb
 
 
-
+function empty_trash(){
+  trash-empty
+  sudo rm -rf ${NEPI_HOME}.local/share/Trash/files/* >/dev/null 2>&1
+}
+export -f empty_trash
 
 
 function select_file_from_folder() {
@@ -2019,11 +2042,13 @@ fix_path = Update file or folder owner to 1000 at provided FIX_PATH, and update 
 fix_folder = Update or Make folder and contents with owner to 1000 for provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_scripts = Update files in provided FIX_PATH (or current path if not provided) with owner 1000 and +x access permissions.
 path_delete = Deletes TARGET_PATH with safe checks
+path_space_usage = Analyze provided path for usage
 path_space_mb = Echos available MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_space_gb = Echos available GB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_kb = Echos size of path (file or folder) in KB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_mb = Echos size of path (file or folder) in MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_gb = Echos size of path (file or folder) in GB space for SOURCE_PATH. Echos 0 if path not vald folder
+empty_trash = Empty Trash for current User
 run_script = Uses 'bash' to run script at provided SCRIPT_PATH
 source_script = Uses 'source' to run script at provided SCRIPT_PATH, with an optional SCRIPT_OPTION passed to script
 process_count = Echos number of processes running for provide PROCESS_NAME
@@ -2964,11 +2989,56 @@ function pushn(){
 }
 
 
+## NEPI deploy complete
+alias nepisetup_remote="
+export NEPI_MODE=REMOTE
+echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
+source $(NSETUP)/scripts/remote_dev_setup.sh
+sbrc"
+
+
+alias nepisetup_host="
+sudo -v
+export NEPI_MODE=HOST
+echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
+source $(NSETUP)/scripts/docker_bash_setup.sh
+sbrc
+SHOW_CONFIG_MENU=1
+source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+sbrc"
+
+alias nepisetup_system="
+sudo -v
+export NEPI_MODE=SYSTEM
+echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
+source $(NSETUP)/scripts/nepi_bash_setup.sh
+sbrc
+SHOW_CONFIG_MENU=1
+source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
+sbrc"
+
+
+alias nepisetup="
+sudo -v
+nepi_mode=${NEPI_MODE}
+if [[ ${nepi_mode} == 'REMOTE' ]]; then nepisetup_remote; fi
+if [[ ${nepi_mode} == 'HOST' ]]; then nepisetup_host; fi
+if [[ ${nepi_mode} == 'SYSTEM' ]]; then nepisetup_system; fi
+"
+
+
+
+
+
 
 utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
 ################################
+nepisetup_remote = Setup the current NEPI environment as REMOTE
+nepisetup_host = Setup the current NEPI environment as HOST
+nepisetup_system = Setup the current NEPI environment as SYSTEM
+nepisetup = Run the environment setup script for the current NEPI environment setting
 nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
