@@ -18,11 +18,11 @@
 ## - mailto:nepi@numurus.com
 ##
 
-LITE_INSTALL=0
-if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    LITE_INSTALL=$1
-fi
-export LITE_INSTALL=$LITE_INSTALL
+# LITE_INSTALL=0
+# if [[ "$1" -eq 1 ]] 2>/dev/null; then
+#     LITE_INSTALL=$1
+# fi
+# export LITE_INSTALL=$LITE_INSTALL
 
 # echo "LITE_INSTALL=${LITE_INSTALL}"
 
@@ -620,6 +620,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         echo "Updating USER Desktop Files"
         echo "########################"
         echo ""
+        echo "Running in FULL INSTALL mode"
         ##############################################
         # Update User Files
         echo ""
@@ -707,7 +708,20 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
     elif [[ $LITE_INSTALL -eq 1 ]]; then
 
+        echo ""
+        echo "########################"
+        echo "Updating USER Desktop Files"
+        echo "########################"
+        echo ""
+        echo "Running in LITE INSTALL mode"
+        ##############################################
+        # Update User Files
+        echo ""
+        echo "########"
+        echo "Updating Desktop settings for user ${CONFIG_USER}"
+        echo ""
         echo "Configuring default code editor"
+
         MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
         if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
             echo "VS Code is already the default code editor"

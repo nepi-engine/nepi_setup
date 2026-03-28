@@ -2990,46 +2990,56 @@ function pushn(){
 
 
 ## NEPI deploy complete
-alias nepisetup_remote="
-export NEPI_MODE=REMOTE
-echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
+function nepisetup_remote() {
 source $(NSETUP)/scripts/remote_dev_setup.sh
-sbrc"
+source /home/${CONFIG_USER}/.bashrc
+NEPI_MODE='NEPI_REMOTE'
+export NEPI_MODE=$NEPI_MODE
+echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
+}
 
-
-alias nepisetup_host="
+function nepisetup_host() {
 sudo -v
-export NEPI_MODE=HOST
-echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
 source $(NSETUP)/scripts/docker_bash_setup.sh
-sbrc
+source /home/${CONFIG_USER}/.bashrc
+NEPI_MODE='HOST'
+export NEPI_MODE=$NEPI_MODE
+echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
 SHOW_CONFIG_MENU=1
-source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-sbrc"
+echo ${SHOW_CONFIG_MENU}
+source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh ${SHOW_CONFIG_MENU}
+source /home/${CONFIG_USER}/.bashrc
+}
 
-alias nepisetup_system="
+function nepisetup_system() {
 sudo -v
-export NEPI_MODE=SYSTEM
-echo 'Running NEPI Setup in NEPI_MODE: '${NEPI_MODE}''
 source $(NSETUP)/scripts/nepi_bash_setup.sh
-sbrc
+source /home/${CONFIG_USER}/.bashrc
+NEPI_MODE='SYSTEM'
+export NEPI_MODE=$NEPI_MODE
+echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
 SHOW_CONFIG_MENU=1
-source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
-sbrc"
-
+echo ${SHOW_CONFIG_MENU}
+source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh ${SHOW_CONFIG_MENU}
+source /home/${CONFIG_USER}/.bashrc
+}
 
 alias nepimode="
 echo ${NEPI_MODE}
 "
 
-
-alias nepisetup="
-sudo -v
+function nepisetup() {
+source /home/${CONFIG_USER}/.bashrc
 nepi_mode=${NEPI_MODE}
-if [[ ${nepi_mode} == 'REMOTE' ]]; then nepisetup_remote; fi
-if [[ ${nepi_mode} == 'HOST' ]]; then nepisetup_host; fi
-if [[ ${nepi_mode} == 'SYSTEM' ]]; then nepisetup_system; fi
-"
+echo "NEPI_MODE: ${nepi_mode}"
+if [[ ${nepi_mode} == 'REMOTE' ]]; then 
+  nepisetup_remote
+elif [[ ${nepi_mode} == 'HOST' ]]; then 
+  nepisetup_host
+elif [[ ${nepi_mode} == 'SYSTEM' ]]; then 
+  nepisetup_system
+fi
+}
 
 
 

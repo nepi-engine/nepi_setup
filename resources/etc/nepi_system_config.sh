@@ -20,12 +20,19 @@
 
 # This file configigues an installed NEPI File System
 
+
+show_menu=$1
+echo "GOT SHOW_CONFIG_MENU ${show_menu}"
 SHOW_CONFIG_MENU=0
-if [[ "$1" -eq 1 ]]; then
-    SHOW_CONFIG_MENU=1
-elif [[ "$1" -eq 0 ]]; then
-    SHOW_CONFIG_MENU=0
+if [[ -n $show_menu ]]; then
+    if [[ $show_menu -eq 1 ]]; then
+        SHOW_CONFIG_MENU=1
+    elif [[ $show_menu -eq 0 ]]; then
+        SHOW_CONFIG_MENU=0
+    fi
 fi
+
+echo "RUNNING SYSTEM CONFIG with SHOW_CONFIG_MENU: ${SHOW_CONFIG_MENU}"
 
 sudo -v
 
@@ -68,7 +75,7 @@ echo "########################"
 echo "NEPI SYSTEM CONFIG SETUP"
 echo "########################"
 
-echo "GOT SHOW_CONFIG_MENU ${SHOW_CONFIG_MENU}"
+
 
 
 
