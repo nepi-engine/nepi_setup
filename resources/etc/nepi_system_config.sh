@@ -714,6 +714,7 @@ if [[ "$SHOW_CONFIG_MENU" -eq 1 ]]; then
                 echo "You can switch network adapter settings on this device between "
                 echo "  NEPI Static IP ${new_ip}, Automatic IP, or a Custom IP/Netmask by typing:"
                 echo "netnepi  OR   nepiauto   OR  netsetstatic <ip_address/netmask>"  
+                echo ''
             else
 
                 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then

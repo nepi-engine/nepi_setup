@@ -383,7 +383,7 @@ export -f is_valid_amd64
 
 
 function is_valid_cuda(){
-    lspci | grep -i nvidia >/dev/null 2>&1
+    lspci >/dev/null 2>&1 | grep -i nvidia
     if [[ "$?" -eq 0 ]]; then
       return 0
     else
@@ -1760,11 +1760,11 @@ export -f dev_version_string
 
 
 function get_hw_type() {
-  if is_valid_jetson; then
+  if is_valid_jetson >/dev/null 2>&1; then
       hw_type=jetson
-  elif is_valid_arm64; then
+  elif is_valid_arm64 >/dev/null 2>&1; then
       hw_type=arm64
-  elif is_valid_amd64; then
+  elif is_valid_amd64 >/dev/null 2>&1; then
       hw_type=amd64
   else
       hw_type=$(uname -m)
@@ -1775,11 +1775,11 @@ export -f get_hw_type
 
 
 function get_hw_arch() {
-  if is_valid_jetson; then
+  if is_valid_jetson >/dev/null 2>&1; then
       hw_type=arm64
-  elif is_valid_arm64; then
+  elif is_valid_arm64 >/dev/null 2>&1; then
       hw_type=arm64
-  elif is_valid_amd64; then
+  elif is_valid_amd64 >/dev/null 2>&1; then
       hw_type=amd64
   else
       hw_type=$(uname -m)
