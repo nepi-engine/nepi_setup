@@ -426,7 +426,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             fi
                             ;;
                         "Update NEPI_STATIC_IP")
-                            read -p $'\n'"Enter a new Static IP Address\Netmask: " USER_INPUT
+                            read -p $'\n'"Enter a new Static IP Address/Netmask: " USER_INPUT
                             if [[ "$USER_INPUT" == '' ]]; then
                                 echo ""
                                 break # Exit the select statement, re-display menu
@@ -456,7 +456,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             fi
                             ;;
                         "Update NEPI_ALIAS_IP_1")
-                            read -p $'\n'"Enter a new Alias IP Address\Netmask, or Empty Line for None: " USER_INPUT
+                            read -p $'\n'"Enter a new Alias IP Address/Netmask, or Empty Line for None: " USER_INPUT
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
@@ -469,7 +469,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             fi
                             ;;
                         "Update NEPI_ALIAS_IP_2")
-                            read -p $'\n'"Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
+                            read -p $'\n'"Enter a new Alias IP Address/Netmask,, or Empty Line for None: " USER_INPUT
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
@@ -482,7 +482,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             fi
                             ;;
                         "Update NEPI_ALIAS_IP_3")
-                            read -p $'\n'"Enter a new Alias IP Address\Netmask,, or Empty Line for None: " USER_INPUT
+                            read -p $'\n'"Enter a new Alias IP Address/Netmask,, or Empty Line for None: " USER_INPUT
                             if [[ "${USER_INPUT}" == "" ]]; then
                                 USER_INPUT=None
                             fi
