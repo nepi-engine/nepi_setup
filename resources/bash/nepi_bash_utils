@@ -67,7 +67,7 @@ export NEPI_BASE=${NEPI_BASE}
 export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
 export NEPI_STORAGE='/mnt/nepi_storage'
 export NEPI_FACTORY_CONFIG='/mnt/nepi_config/factory_cfg'
-export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/sytem_cfg'
+export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/system_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
 export NEPI_SSH_FOLDER="/home/${CONFIG_USER}/.ssh"
@@ -3018,6 +3018,11 @@ source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh $SHOW_CONFIG_MENU
 sbrc"
 
 
+alias nepimode="
+echo ${NEPI_MODE}
+"
+
+
 alias nepisetup="
 sudo -v
 nepi_mode=${NEPI_MODE}
@@ -3035,10 +3040,11 @@ utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
 ################################
-nepisetup_remote = Setup the current NEPI environment as REMOTE
-nepisetup_host = Setup the current NEPI environment as HOST
-nepisetup_system = Setup the current NEPI environment as SYSTEM
-nepisetup = Run the environment setup script for the current NEPI environment setting
+nepisetup_remote = Setup the current NEPI environment MODE as REMOTE
+nepisetup_host = Setup the current NEPI environment MODE as HOST
+nepisetup_system = Setup the current NEPI environment MODE as SYSTEM
+nepimode = Echo the current NEPI environment MODE
+nepisetup = Run the environment setup script for the current NEPI environment MODE
 nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder

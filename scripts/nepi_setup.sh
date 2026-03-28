@@ -678,14 +678,7 @@ if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
         fi
 
 
-<<<<<<< HEAD
     elif [[ $LITE_INSTALL -eq 1 ]]; then
-=======
-    fi
-fi
-
-    if [[ $LITE_INSTALL -eq 1 ]]; then
->>>>>>> 98525f8fc101333291f3da9a3dddfb9569856773
 
         echo "Configuring default code editor"
         MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
