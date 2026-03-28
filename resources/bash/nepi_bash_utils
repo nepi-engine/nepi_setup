@@ -1800,7 +1800,7 @@ export -f get_os_info
 
 
 function get_cuda_version(){
-    lspci | grep -i nvidia >/dev/null 2>&1
+    lspci >/dev/null 2>&1 | grep -i nvidia 
     if [[ "$?" -eq 0 ]]; then
         if nvcc --version  >/dev/null 2>&1; then
           string=$(nvcc --version) 
