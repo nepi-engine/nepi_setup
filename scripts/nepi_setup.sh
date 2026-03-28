@@ -763,8 +763,6 @@ if [[ "$?" -eq 0 && -n "$DISPLAY" ]]; then
 
 
 fi
-    fi
-fi
 
 
 echo ""
