@@ -74,7 +74,7 @@ fi
 
 echo ""
 echo "Cleaning and Fixing Folders"
-sudo rm -r /tmp/*
+#sudo rm -r /tmp/*
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
 echo ""

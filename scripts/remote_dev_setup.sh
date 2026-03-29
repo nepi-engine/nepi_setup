@@ -99,7 +99,7 @@ echo "########################"
     echo "Installing System Required Software"
     echo ""
 
-    sudo apt install ncdu -y
+    sudo apt install yq ncdu -y
 
     if command -v mount.cifs --help &>/dev/null; then
         echo "cifs-utils is installed."

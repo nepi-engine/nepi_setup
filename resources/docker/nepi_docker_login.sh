@@ -61,7 +61,7 @@ else
     
     echo ""
     echo "Cleaning and Fixing Folders"
-    sudo rm -r /tmp/* >/dev/null 2>&1
+    #sudo rm -r /tmp/* >/dev/null 2>&1
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
     echo ""  

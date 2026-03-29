@@ -1487,7 +1487,7 @@ function path_delete(){
 }
 export -f path_delete
 
-function path_space_usage(){
+function path_usage(){
     source_path=$1
     if [[ -z "$source_path" ]]; then
       source_path=$(pwd)
@@ -1502,7 +1502,7 @@ function path_space_usage(){
       return 1
     fi
 }
-export -f path_space_usage
+export -f path_usage
 
 
 function path_space_mb(){
@@ -2042,7 +2042,7 @@ fix_path = Update file or folder owner to 1000 at provided FIX_PATH, and update 
 fix_folder = Update or Make folder and contents with owner to 1000 for provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_scripts = Update files in provided FIX_PATH (or current path if not provided) with owner 1000 and +x access permissions.
 path_delete = Deletes TARGET_PATH with safe checks
-path_space_usage = Analyze provided path for usage
+path_usage = Analyze provided path for usage
 path_space_mb = Echos available MB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_space_gb = Echos available GB space for SOURCE_PATH. Echos 0 if path not vald folder
 path_size_kb = Echos size of path (file or folder) in KB space for SOURCE_PATH. Echos 0 if path not vald folder
