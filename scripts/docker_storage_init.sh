@@ -158,7 +158,7 @@ else
             fi
 
             #sudo find $NEPI_STORAGE -type d -exec chown ${NEPI_USER_ID}:${NEPI_USER_ID} {} +
-            sudo chown -R ${NEPI_USER_ID}:${NEPI_USER_ID} ${NEPI_STORAGE}
+            sudo chown -R 1000:1000 ${NEPI_STORAGE}
             cd $CURRENT_FOLDER
 
 

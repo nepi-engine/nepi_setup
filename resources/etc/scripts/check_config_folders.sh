@@ -68,7 +68,7 @@ for rfolder in "${rfolders[@]}"; do
         if [[ ! -d "$rfolder" ]]; then
             echo "Creating NEPI Folder: ${rfolder}"
             sudo mkdir -p $rfolder
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $rfolder
+            sudo chown -R 1000:1000 $rfolder
             sudo chmod -R 0775 $rfolder
         fi
     else
@@ -111,7 +111,7 @@ if [ ! -d "${nconfig}" ]; then
 fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
 sudo rm -r ${nfolder}/.Trash* 2>/dev/null
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
+sudo chown 1000:1000 $nconfig
 
 
 dconfig=${NEPI_CONFIG}/docker_cfg
@@ -134,7 +134,7 @@ fi
 
 
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG
+sudo chown -R 1000:1000 $NEPI_CONFIG
 sudo chmod -R 0775 $NEPI_CONFIG
 
 
@@ -146,7 +146,7 @@ if [[ "$NEPI_CONFIG" != "/mnt/nepi_config" && ! -d "$NEPI_CONFIG" ]]; then
     sudo ln -sf $fconfig "/mnt/nepi_config/factory_cfg"
     sudo ln -sf $sconfig "/mnt/nepi_config/system_cfg"
 
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+    sudo chown -R 1000:1000 /mnt/nepi_config
     sudo chmod -R 0775 /mnt/nepi_config
 fi
 
@@ -166,8 +166,8 @@ if [ ! -d "${nfolder}" ]; then
 fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
 sudo rm -r ${nfolder}/.Trash* 2>/dev/null
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nfolder
-sudo find $nfolder -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} \;
+sudo chown 1000:1000 $nfolder
+sudo find $nfolder -type d -exec chown 1000:1000 {} \;
 sudo chmod 0775 $nfolder
 
 declare -a rfolders=(  
@@ -192,7 +192,7 @@ for rfolder in "${rfolders[@]}"; do
         if [[ ! -d "$rfolder" ]]; then
             echo "Creating NEPI Folder: ${rfolder}"
             sudo mkdir -p $rfolder
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $rfolder
+            sudo chown -R 1000:1000 $rfolder
             sudo chmod -R 0775 $rfolder
         fi
     else
@@ -208,21 +208,21 @@ if [ ! -d "${nconfig}" ]; then
     echo "Creating NEPI Folder: ${nconfig}"
     sudo mkdir "${nconfig}"
 fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
+sudo chown 1000:1000 $nconfig
 
 nconfig=${NEPI_OPT}/etc
 if [ ! -d "${nconfig}" ]; then
     echo "Creating NEPI Folder: ${nconfig}"
     sudo mkdir "${nconfig}"
 fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
+sudo chown 1000:1000 $nconfig
 
 nconfig=${NEPI_OPT}/docker
 if [ ! -d "${nconfig}" ]; then
     echo "Creating NEPI Folder: ${nconfig}"
     sudo mkdir "${nconfig}"
 fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
+sudo chown 1000:1000 $nconfig
     
 
 nconfig=${NEPI_OPT}/bash
@@ -230,4 +230,4 @@ if [ ! -d "${nconfig}" ]; then
     echo "Creating NEPI Folder: ${nconfig}"
     sudo mkdir "${nconfig}"
 fi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $nconfig
+sudo chown 1000:1000 $nconfig
