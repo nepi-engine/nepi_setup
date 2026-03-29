@@ -88,6 +88,8 @@ NEPI_PYTHON=$pyver
 nepistop
 
 
+
+
 TMP=/mnt/nepi_storage/tmp
 
 ####################################
@@ -144,11 +146,11 @@ echo "######################################"
 echo ""
 
 sudo apt update
-sudo apt install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
-sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-sudo apt install -y libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
-sudo apt install -y libv4l-dev v4l-utils qv4l2 #v4l2ucp    
-sudo apt install -y libopenblas-base libopenmpi-dev libomp-dev 
+sudo apt install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev \
+     libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev \
+     libdc1394-22-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+     libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
+     libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev 
 
 
 
@@ -200,7 +202,12 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
     echo "######################################"
     cd $TMP
 
-
+    cur_folder=$(pwd)
+    tmp_folder="/home/${CONFIG_USER}/tmp"
+    if [[ ! -d $tmp_folder ]]; then
+        mkdir $tmp_folder
+    fi
+    cd $tmp_folder
     if is_valid_jetson; then
         #https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=aarch64-jetson&Compilation=Native&Distribution=Ubuntu&target_version=20.04&target_type=deb_local
         # wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/arm64/cuda-ubuntu2004.pin
@@ -209,21 +216,50 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         # wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda-tegra-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb
         # sudo dpkg -i cuda-tegra-repo-ubuntu2004-11-8-local_11.8.0-1_arm64.deb
         # sudo cp /var/cuda-tegra-repo-ubuntu2004-11-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
-        # sudo apt update
-        # sudo apt install -y cuda
-
         sudo apt-get install cuda-toolkit-11-8
+        sudo apt update
+        sudo apt install -y cuda
+
     elif is_valid_arm64; then
-        sudo apt install cuda-11-8 cuda-drivers=520.61.05-1
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/arm64/cuda-keyring_1.0-1_all.deb
+        sudo dpkg -i cuda-keyring_1.0-1_all.deb
+
+        sudo apt-get update
+        sudo apt-get -y install cuda-11-8
+
     elif is_valid_amd64; then
-        sudo apt install cuda-11-8 cuda-drivers=520.61.05-1
+        wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
+        echo ""
+        echo "Cuda installation will take several minutes"
+        echo ""
+        echo "When promted:"
+        echo "enter 'accetp'"
+        echo "Disable the 'Driver' option"
+        echo "Select the 'Install' option"
+        echo ""
+        sudo sh cuda_11.8.0_520.61.05_linux.run
+        sudo apt install pciutils
+        sudo update-pciids
     else
         arch_val=$(uname -m)
         echo "Arch ${arch_val} not supported yet"
         return 
     fi
 
-   
+
+
+        cd $cur_folder
+        sudo rm -r "/home/${CONFIG_USER}/tmp/*"
+        
+
+        export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+        SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+        source ${SCRIPT_FOLDER}/nepi_bash_setup.sh
+
+        nvcc --version
+        nvidia-smi
 
     new_cuda_version=$(find_cuda_version)
     echo "Got CUDA version ${MIN_CUDA_VERSION}"
@@ -708,8 +744,56 @@ CUDA_ARCH_BIN=8.7
 
 # Connect NEPI to internet and start a yolov5 model from RUI AI detector
 
+##################################
+### Install Driver Support Libs
+##################################
+    cuda_version=$(get_cuda_version)
+
+    if [[ ${cuda_version} != '0' ]]; then
+        cur_folder=$(pwd)
+        tmp_folder="/home/${CONFIG_USER}/tmp"
+        if [[ ! -d $tmp_folder ]]; then
+            mkdir $tmp_folder
+        fi
+        cd $tmp_folder
+
+        sudo chmod 0766 /home/${CONFIG_USER}/.local/bin
+
+        if [[ ${NEPI_ARCH} == 'jetson' ]]; then
+            #https://www.stereolabs.com/developers/release/4.1
+            wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+        elif [[ ${NEPI_ARCH} == 'arm64' ]]; then
+            #https://www.stereolabs.com/developers/release/4.2
+            # wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+        elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
+            #https://www.stereolabs.com/developers/release/4.2
+            wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+        fi
+
+            # To continue you have to accept the EULA. Accept  [Y/n] ?Y
+            # Installing...
+            # Installation path: /usr/local/zed
+            # Checking CUDA version...
+            # OK: Found CUDA 11.8
+            # Do you want to also install the static version of the ZED SDK (AI module will still require libsl_ai.so) [Y/n] ?Y
+            # Do you want to install the AI module (required for Object detection and Neural Depth, recommended), cuDNN 8.9 and TensorRT 8.6 will be installed [Y/n] ?n
+            # Install samples (recommended) [Y/n] ?Y
+            # Installation path: /usr/local/zed/samples/
+            # Dependencies installation complete
+            # Do you want to install the Python API (recommended) [Y/n] ?Y
 
 
+        sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
+        chmod +x zstd.run
+        ./zstd.run
+
+
+        python${NEPI_PYTHON} -m pip uninstall numpy
+        sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+        
+        cd $cur_folder
+        sudo rm -r "/home/${CONFIG_USER}/tmp/*"
+    fi
 
 
 ##################################

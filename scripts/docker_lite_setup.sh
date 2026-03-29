@@ -239,6 +239,7 @@ if [[ ${NEPI_STATIC_IP_END} != ${NEPI_STATIC_IP_START} ]]; then
         echo "You can switch network adapter settings on this device between "
         echo "  NEPI Static IP ${new_ip}, Automatic IP, or a Custom IP/Netmask by typing:"
         echo "netnepi  OR   nepiauto   OR  netsetstatic <ip_address/netmask>"  
+        ehco ""
     fi
     # else
     #     sudo systemctl restart networking

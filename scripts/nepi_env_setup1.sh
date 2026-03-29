@@ -195,27 +195,6 @@ else
 
 
 
-    ### Install Driver Support Libs
-
-    if [[ ${NEPI_ARCH} == 'jetson' ]]; then
-        #https://www.stereolabs.com/developers/release/4.1
-        wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
-    elif [[ ${NEPI_ARCH} == 'arm64' ]]; then
-        #https://www.stereolabs.com/developers/release/4.2
-        # wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
-    elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
-        #https://www.stereolabs.com/developers/release/4.2
-        if is_valid_cuda; then
-            wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
-        fi
-    fi
-    sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
-
-
-
-    # https://stackoverflow.com/questions/8430332/uninstall-boost-and-install-another-version
-    # First uninstall older version
-    sudo apt install -y 
 
 
     ######################################

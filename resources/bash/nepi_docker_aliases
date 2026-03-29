@@ -429,7 +429,9 @@ alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH 
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
 
 
-
+function sftpnl(){
+sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi:../.."$@"
+}
 
 
 

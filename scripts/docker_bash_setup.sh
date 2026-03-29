@@ -164,6 +164,9 @@ echo ""
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=1"
 
+
+
+
     # UPDATE NEPI Python Vesion
     pyver=$(python3 --version | awk '{print $2}')
     if [[ -n "$pyver" ]]; then
@@ -180,6 +183,44 @@ echo ""
     sudo chmod 755 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-packages
 
 
+
+        echo ' ' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo '##### Python Config #####' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo 'export NEPI_PYTHON='${NEPI_PYTHON} | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo 'export PYTHONPATH='${NEPI_ENGINE}'/etc:${PYTHONPATH}' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo 'export PYTHONPATH='${NEPI_ENGINE}'/lib/nepi_drivers:${PYTHONPATH}' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo 'export PYTHONPATH=/usr/local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        echo 'export PYTHONPATH=/home/'${CONFIG_USER}'/.local/lib/python'${NEPI_PYTHON}'/site-packages:${PYTHONPATH}' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        if [[ "$CONFIG_USER" == 'nepi' ]]; then
+            echo 'export SETUPTOOLS_USE_DISTUTILS=stdlib' | sudo tee -a $NEPI_UTILS_FILE_DEST
+        fi
+
+
+    cuda_version=$(get_cuda_version)
+
+    if [[ ${cuda_version} != '0' ]]; then
+        export NEPI_HAS_CUDA=1
+        export NEPI_CUDA_VERSION=$cuda_version
+    else
+        export NEPI_HAS_CUDA=0
+        export NEPI_CUDA_VERSION=0
+    fi
+
+
+    if [[ "$NEPI_HAS_CUDA" -eq 1 ]]; then
+        
+
+        CUDA_HOME=/usr/local/cuda-${NEPI_CUDA_VERSION}
+
+            echo ' ' | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo '##### CUDA SETUP #####' | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export CUDA_PATH='${CUDA_HOME} | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export CUDA_HOME='${CUDA_HOME} | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export CUPY_NVCC_GENERATE_CODE=current' | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export LD_LIBRARY_PATH='${CUDA_HOME}'/lib64:$LD_LIBRARY_PATH' | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export PATH='${CUDA_HOME}'/bin:${PATH}' | sudo tee -a $NEPI_UTILS_FILE_DEST
+            echo 'export CUDA_VISIBLE_DEVICES=0' | sudo tee -a $NEPI_UTILS_FILE_DEST
+    fi
 
 
 

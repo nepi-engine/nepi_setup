@@ -202,10 +202,11 @@ sudo chmod 755 /home/${CONFIG_USER}/.local/lib/python${NEPI_PYTHON}/site-package
     fi
 
 
+cuda_version=$(get_cuda_version)
 
-if is_valid_cuda; then
+if [[ ${cuda_version} != '0' ]]; then
     export NEPI_HAS_CUDA=1
-    export NEPI_CUDA_VERSION=$(get_cuda_version)
+    export NEPI_CUDA_VERSION=$cuda_version
 else
     export NEPI_HAS_CUDA=0
     export NEPI_CUDA_VERSION=0

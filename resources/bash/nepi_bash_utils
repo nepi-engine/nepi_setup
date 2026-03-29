@@ -1800,8 +1800,7 @@ export -f get_os_info
 
 
 function get_cuda_version(){
-    lspci >/dev/null 2>&1 | grep -i nvidia 
-    if [[ "$?" -eq 0 ]]; then
+
         if nvcc --version  >/dev/null 2>&1; then
           string=$(nvcc --version) 
           key=release
@@ -1818,10 +1817,6 @@ function get_cuda_version(){
           done
           echo $cuda_version
         fi
-    else
-        echo 0
-        return 1
-    fi
 }
 export -f get_cuda_version
 

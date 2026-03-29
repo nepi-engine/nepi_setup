@@ -231,9 +231,12 @@ else
     echo ""
 
     #
+    python${NEPI_PYTHON} -m pip uninstall numpy
+    sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+
     sudo -H python${NEPI_PYTHON} -m pip install --no-input python-debian \
         virtualenv wheel  scikit-build ninja cmake cryptography \
-        python-dotenv numpy cffi netifaces pyserial websockets \
+        python-dotenv cffi netifaces pyserial websockets \
         geographiclib PyGeodesy harvesters WSDiscovery python-gnupg \
         lxml onvif_zeep PyUSB usb PyYAML declxml licenseheaders \
         yapf python-gnupg Flask supervisor  colormath pandas scipy \
