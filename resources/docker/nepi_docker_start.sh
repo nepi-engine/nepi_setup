@@ -122,7 +122,6 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=ho
 -p 9091:9091 \
 -p 9092:9092 \
 -p 11311:11311 \
---name samba-server \
 -p 137:137/udp \
 -p 138:138/udp \
 -p 139:139/tcp \

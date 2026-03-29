@@ -296,41 +296,6 @@ export -f nepirestart
 
 function nepiupdate() {
   sudo -v
-  ####################################
-  # Run NEPI Bash Setup Script
-
-  SCRIPT_FOLDER=$(NSETUP)/scripts
-
-  script_file=nepi_bash_setup.sh
-  script_path=${SCRIPT_FOLDER}/${script_file}
-  if ! source_script $script_path; then
-      script_error=$?
-      echo "Script ${script_path} failed with error ${script_error}"
-      exit 1
-  fi
-
-
-  ####################################
-  # Run NEPI Folder Setup Script
-  script_file=nepi_folders_setup.sh
-  script_path=${SCRIPT_FOLDER}/${script_file}
-  if ! source_script $script_path; then
-      script_error=$?
-      echo "Script ${script_path} failed with error ${script_error}"
-      exit 1
-  fi
-
-
-  ####################################
-  # Run NEPI Files Setup Script
-  script_file=docker_files_setup.sh
-  script_path=${SCRIPT_FOLDER}/${script_file}
-  if ! source_script $script_path; then
-      script_error=$?
-      echo "Script ${script_path} failed with error ${script_error}"
-      exit 1
-  fi
-
 
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_update.sh
 }

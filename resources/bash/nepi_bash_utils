@@ -1494,9 +1494,9 @@ function path_usage(){
     fi
     if is_valid_folder $source_path >/dev/null 2>&1; then
       cur_path=$(pwd)
-      sudo cd $source_path
+      cd $source_path
       sudo ncdu
-      sudo cd $cur_path
+      cd $cur_path
     else
       echo "Not a valid path ${source_path}"
       return 1
