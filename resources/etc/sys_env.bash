@@ -4,15 +4,6 @@
 # The ROOTNAME is used as the first namespace element. It is numurus by default, but can be overridden here
 export ROOTNAME=nepi
 
-# The DEVICE_ID is included in the device ROS namespace. If left unset, it will be assigned to the S/N
-export DEVICE_ID=device1
-
-# The DEVICE_TYPE is the Manf Hardware Name
-export DEVICE_TYPE=S2X
-
-# The DEVICE_SN must be set and should be a unique serial number/identifier for each system.
-export DEVICE_SN=000000
-
 # Controls logging for both ROS1 and ROS2
 export ROS_LOG_DIR=/mnt/nepi_storage/logs/ros_log
 
