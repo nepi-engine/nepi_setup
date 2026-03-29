@@ -2988,17 +2988,12 @@ function pushn(){
 function nepisetup_remote() {
 source $(NSETUP)/scripts/remote_dev_setup.sh
 source /home/${CONFIG_USER}/.bashrc
-NEPI_MODE='NEPI_REMOTE'
-export NEPI_MODE=$NEPI_MODE
-echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
 }
 
 function nepisetup_host() {
 sudo -v
 source $(NSETUP)/scripts/docker_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
-NEPI_MODE='HOST'
-export NEPI_MODE=$NEPI_MODE
 echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
 SHOW_CONFIG_MENU=1
 echo ${SHOW_CONFIG_MENU}
@@ -3010,9 +3005,6 @@ function nepisetup_system() {
 sudo -v
 source $(NSETUP)/scripts/nepi_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
-NEPI_MODE='SYSTEM'
-export NEPI_MODE=$NEPI_MODE
-echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"
 SHOW_CONFIG_MENU=1
 echo ${SHOW_CONFIG_MENU}
 source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh ${SHOW_CONFIG_MENU}
