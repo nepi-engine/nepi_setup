@@ -186,9 +186,9 @@ function dcheck() {
 # Fix Folder Owners Pre Run
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chown 1000:1000 /mnt/nepi_config
 sudo chmod 0775 /mnt/nepi_config
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chown 1000:1000 /mnt/nepi_storage
 sudo chmod 0775 /mnt/nepi_storage
 
 
@@ -227,14 +227,7 @@ while [[ -z "$CONTAINER_ID" && "$RETRY_COUNT" -lt "$NEPI_RETRY_COUNT" ]]; do
 done
 
 
-################## 
-# Fix Folder Owners Post Run
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
-sudo chmod 0775 /opt/nepi
-sudo chown 1000:1000 /mnt/nepi_config
-sudo chmod 0775 /mnt/nepi_config
-sudo chown 1000:1000 /mnt/nepi_storage
-sudo chmod 0775 /mnt/nepi_storage
+
 
 if [[ -z "$CONTAINER_ID" ]]; then
 
