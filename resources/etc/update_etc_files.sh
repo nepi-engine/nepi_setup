@@ -21,6 +21,8 @@
 
 sudo -v
 
+
+
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
     if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -60,7 +62,7 @@ etc_folder=$CONFIG_FOLDER
 test_folder=$1
 if [[ -n $test_folder ]]; then
     if [ ! -f "${test_folder}/load_system_config.sh" ]; then
-        echo "Could not find config file in requested config folder ${test_folder}/load_system_config.sh"
+        echo " "
     else
         echo "Running ETC Update from config file ${test_folder}/load_system_config.sh"
         etc_folder=$test_folder

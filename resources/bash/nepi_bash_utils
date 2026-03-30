@@ -110,6 +110,15 @@ function NSETUP() {
 }
 export -f NSETUP
 
+function NRUI_IP() {
+  rui_ip=$NEPI_IP
+  if [[ ${NEPI_MODE} == 'HOST' ]]; then
+    rui_ip=localhost
+  fi
+  echo "${rui_ip}"
+}
+export -f NRUI_IP
+
 ###############################
 
 utilsn=""
@@ -1828,8 +1837,11 @@ export -f get_cuda_version
 
 function get_sw_desc() {
   os_desc=$(get_os_info)
+  sw_desc=${os_desc}
   cuda_ver=$(get_cuda_version)
-  sw_desc=${os_desc}_CUDA${cuda_ver}
+  if [[ "$cuda_ver" == '0' ]]; then
+    sw_desc="${sw_desc}_CUDA${cuda_ver}"
+  fi
   echo "${sw_desc}"
 }
 export -f get_sw_desc
@@ -2217,16 +2229,17 @@ alias nsetup="cd $(NSETUP)/scripts"
 
 function nepirui() {
   if [[ -n "$DISPLAY" ]]; then
-
-    if [[ ${nepi_alias_file} == '.nepi_pc_aliases' ]]; then
-      rui_ip=$NEPI_IP
-    else
-      nepi_id=$(echo "$NEPI_IP" | cut -d '.' -f 4-)
-      rui_ip=localhost
-    fi
-    if pingn; then
+    if [[ ${NEPI_MODE} != 'SYSTEM' ]]; then
+      rui_ip=$(NRUI_IP)
+      echo "Will Connect to NEPI RUI at: ${rui_ip}"
+      if [[ ${NEPI_MODE} != 'REMOTE' ]]; then
+        if ! pingn; then
+          return
+        fi
+      fi
+      
       if command -v chromium-browser &>/dev/null; then
-            chromium-browser http://${rui_ip}:5003/
+                chromium-browser http://${rui_ip}:5003/
       else
           # Check for an alternative common name if the first one fails
           if command -v chromium &>/dev/null; then
