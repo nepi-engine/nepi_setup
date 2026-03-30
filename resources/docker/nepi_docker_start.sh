@@ -75,8 +75,8 @@ if [[ -d '/tmp' ]]; then
     cd $cur_folder
 fi
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chown 1000:1000 /mnt/nepi_config
+sudo chown 1000:1000 /mnt/nepi_storage
 echo ""
 
 
@@ -186,9 +186,9 @@ function dcheck() {
 # Fix Folder Owners
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chown 1000:1000 /mnt/nepi_config
 sudo chmod 0775 /mnt/nepi_config
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chown 1000:1000 /mnt/nepi_storage
 sudo chmod 0775 /mnt/nepi_storage
 
 

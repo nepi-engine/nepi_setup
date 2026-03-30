@@ -52,9 +52,9 @@ fi
 echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chown 1000:1000 /mnt/nepi_config
 sudo chmod 0750 /mnt/nepi_config
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chown 1000:1000 /mnt/nepi_storage
 sudo chmod 0750 /mnt/nepi_storage
 
 
@@ -116,7 +116,7 @@ sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chown 1000:1000 ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
 
@@ -141,7 +141,7 @@ sudo chmod 775 ${UPDATE_PATH}
 # sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 # sudo chmod 775 ${SOURCE_PATH}
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+# sudo chown 1000:1000 ${UPDATE_PATH}
 # sudo chmod 775 ${UPDATE_PATH}
 
 
@@ -175,7 +175,7 @@ sudo chmod 755 ${UPDATE_PATH}
 # Fix Folder Owners
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
+sudo chown 1000:1000 /mnt/nepi_config
 sudo chmod 0775 /mnt/nepi_config
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
+sudo chown 1000:1000 /mnt/nepi_storage
 sudo chmod 0775 /mnt/nepi_storage
