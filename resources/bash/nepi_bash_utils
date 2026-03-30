@@ -383,12 +383,17 @@ export -f is_valid_amd64
 
 
 function is_valid_cuda(){
-    lspci >/dev/null 2>&1 | grep -i nvidia
+    no_cuda=1
+    lspci 2>/dev/null | grep -i nvidia
     if [[ "$?" -eq 0 ]]; then
-      return 0
+      no_cuda=0
     else
-        return 1
+      lspci 2>/dev/null | grep -i NVIDA
+      if [[ "$?" -eq 0 ]]; then
+        no_cuda=0
+      fi  
     fi
+    return $no_cuda
 }
 export -f is_valid_cuda
 
