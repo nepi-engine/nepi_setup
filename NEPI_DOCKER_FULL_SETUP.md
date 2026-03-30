@@ -95,34 +95,6 @@ You can change settings later in the 'NEPI Docker Customization' section.
 Log into the `nepihost` user using password  'nepi'
 (sudo password is 'nepi')
 
-
-**OPTIONAL:** IF YOU WANT TO HAVE REMOTE NETWORK ACCESS TO NEPI's STORAGE AND CONFIG FOLDERS
-          USING NEPI's BUILT IN SAMBA NETWORK DRIVE SHARING SYSTEM, 
-          CREATE THE FOLLOWING MOUNTED PARTIONS BEFORE CONTINUING:
-
-            **NOTE:** If you skip this step, the following folders will be created in your 
-            main File System's partition.  Make sure you have at least 60 GB of free space
-            on that partition using 'df -h' and checking the 'Avail' column for your
-            main File System's patition (i.e. /dev/nvme0n1p1 or something like that)
-
-            **NOTE:** There are many tutorials on line for creating new partitions
-
-            **NOTE:** If you need to reduce the size of your main File System partition to
-            free space for the following new partitions, don't reduce it below 40 GB.
-
-            **NOTE:** If these folders allready exist as folders and not mounted partitions,
-            you should delete them before creating and mounting the following partitions.
-            
-             FILE_SYSTEM   LABEL_NAME      MOUNT_POINT       MIN_SIZE     RECOMMENDED_SIZE 
-            1)  ext4      nepi_docker     /mnt/nepi_docker    30 GB           100 GB
-            2)  ext4      nepi_config     /mnt/nepi_config    200 MB          200 MB
-            3)  ext4      nepi_config     /mnt/nepi_storage   30 GB           150+ GB
-
-
-Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
-
-    source /home/nepihost/nepi_setup/scripts/docker_full_config_setup.sh
-
 This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
     This is where NEPI processes store user files such as:

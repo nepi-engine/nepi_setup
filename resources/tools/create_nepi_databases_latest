@@ -1,0 +1,2 @@
+cd /mnt/nepi_storage
+zip -r nepi_databases-latest.zip databases
