@@ -150,6 +150,9 @@ else
             if [[ "$HW_TYPE" == 'jetson' ]]; then
                 nepi_latest_yaml_link='https://www.dropbox.com/scl/fi/j3ewsgmy22f6tsxyr70i7/nepi-jetson-latest.yaml?rlkey=p5imjukvwlxuonw9v5burnr0j&st=acftb28k&dl=0'
                 nepi_latest_image_link='https://www.dropbox.com/scl/fi/j3ewsgmy22f6tsxyr70i7/nepi-jetson-latest.yaml?rlkey=p5imjukvwlxuonw9v5burnr0j&st=06e983zv&dl=0'
+            elif [[ "$HW_TYPE" == 'amd64' ]]; then
+                nepi_latest_yaml_link='https://www.dropbox.com/scl/fi/yz94zpdohgbacbgbqf8a3/nepi-amd64-latest.yaml?rlkey=9b1ztl0ov2aldqkcrzj9ir5mp&st=lm25pd9z&dl=0'
+                nepi_latest_image_link='https://www.dropbox.com/scl/fi/z8jd351w1rzeqwi01xdef/nepi-amd64-latest.img?rlkey=apcbmz8pfu1rs2lcozcndwvsn&st=camkre5e&dl=0'
             else
                 echo "No NEPI Image File available for hardware architecture ${arch_val}"
                 return     

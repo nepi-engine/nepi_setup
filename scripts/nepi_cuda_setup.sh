@@ -243,7 +243,7 @@ if [[ "$cur_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
         echo ""
         echo "When promted:"
         echo "enter 'accetp'"
-        echo "Disable the 'Driver' option"
+        echo "Disable all install options except 'CUDA Toolkit'"
         echo "Select the 'Install' option"
         echo ""
         printf "Press Enter to continue..."
