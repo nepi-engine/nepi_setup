@@ -2891,7 +2891,7 @@ function nepiclonedev {
 export -f nepiclonedev
 
 
-function nepipull {
+function pulln {
   if is_valid_internet ; then
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     if [[ -d ${repo_folder} ]]; then
@@ -2901,7 +2901,7 @@ function nepipull {
   fi
 }
 
-export -f nepipull
+export -f pulln
 
 
 
@@ -2910,22 +2910,19 @@ function nepimain {
     if [[ -d ${repo_folder} ]]; then
       cd $repo_folder
       git checkout main
-      nepipull
+      pulln
     fi
 }
 export -f nepimain
 
 
 
-
-export -f nepipull
-
 function nepidev {
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     if [[ -d ${repo_folder} ]]; then
       cd $repo_folder
       git checkout develop
-      nepipull
+      pulln
     fi
 }
 export -f nepidev
@@ -2944,6 +2941,7 @@ source ./deploy_nepi_repos.sh"
 
 function gitmain {
   git checkout main
+  git pull
 }
 
 function pushn(){
@@ -3060,7 +3058,7 @@ nepiauthrm = Remove provide key name from SSH authorized_key file
 nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
-nepipull = Update to the latest NEPI source-code repo
+pulln = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI Engine repo's main branch
 nepidev = Switch to the NEPI Engine repo's main branch
 nepidpl = Deploy nepi complete to nepi device
