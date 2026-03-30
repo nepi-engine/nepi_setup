@@ -175,9 +175,15 @@ sudo py3clean .
 
 
 
-function find_cuda_version(){
-    lspci | grep -i nvidia >/dev/null 2>&1
-    if [[ "$?" -eq 0 ]]; then
+
+function get_cuda_version(){
+
+        if nvcc --version  >/dev/null 2>&1; then
+          string=$(nvcc --version) 
+          key=release
+          value=$(echo "$string" | grep "${key}" | awk '{print $NF}' | cut -d'.' -f1-2)
+          echo "${value#V}"
+        else
           cuda_version=0
           cuda_path=/usr/local
           declare -a files
@@ -186,16 +192,17 @@ function find_cuda_version(){
                   cuda_version=${file##*-}
               fi
           done
-    else
-        echo "Failed to get CUDA version"
-        echo 0
-        return 1
-    fi
+          echo $cuda_version
+        fi
 }
+export -f get_cuda_version
+
+
+
 echo ""
 echo "######################################"
 echo "Checking for minimum CUDA version ${MIN_CUDA_VERSION}"
-cur_cuda_version=$(find_cuda_version)
+cur_cuda_version=$(get_cuda_version)
 echo "Got CUDA version ${cur_cuda_version}"
 cur_cuda_version="${cur_cuda_version//./}"
 if [[ "$cur_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
@@ -262,7 +269,7 @@ if [[ "$cur_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
         nvcc --version
         nvidia-smi
 
-    new_cuda_version=$(find_cuda_version)
+    new_cuda_version=$(get_cuda_version)
     echo "Got CUDA version ${new_cuda_version}"
     new_cuda_version="${new_cuda_version//./}"
     if [[ "$new_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
@@ -305,139 +312,139 @@ echo 'Installing cupy'
 echo "######################################"
 echo ""
 
-cur_cuda_version=$(find_cuda_version)
+cur_cuda_version=$(get_cuda_version)
 CUDA_ARCH="${cur_cuda_version%%.*}"
 #sudo -H python${NEPI_PYTHON} -m pip install -upgrade cython
 sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 
 
 
-#################################
-# Install open3d with cuda support
-##################################
-echo "######################################"
-echo 'Installing Open3d with Cuda Support'
-echo "######################################"
-#https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
+# #################################
+# # Install open3d with cuda support
+# ##################################
+# echo "######################################"
+# echo 'Installing Open3d with Cuda Support'
+# echo "######################################"
+# #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
 
 
-sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-sudo apt-get install libosmesa6-dev -y
+# sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
+# sudo apt-get install libosmesa6-dev -y
 
 
-                    # #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
-                    # cd $TMP
+#                     # #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
+#                     # cd $TMP
 
 
-                    # git clone --recursive https://github.com/devshank3/Open3D-for-Jetson.git
-                    # cd Open3D-for-Jetson/
-                    # cd util/scripts/
-                    # ./install-deps-ubuntu.sh
-                    # cd ../..
-                    # file=$(pwd)/CMakeLists.txt
-                    # sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
-                    # mkdir build
-                    # cd build
+#                     # git clone --recursive https://github.com/devshank3/Open3D-for-Jetson.git
+#                     # cd Open3D-for-Jetson/
+#                     # cd util/scripts/
+#                     # ./install-deps-ubuntu.sh
+#                     # cd ../..
+#                     # file=$(pwd)/CMakeLists.txt
+#                     # sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
+#                     # mkdir build
+#                     # cd build
 
-                    # sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
-                    #     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-                    #     -DCMAKE_BUILD_TYPE=Release \
-                    #     -DBUILD_SHARED_LIBS=ON \
-                    #     -DBUILD_CUDA_MODULE=ON \
-                    #     -DBUILD_GUI=OFF \
-                    #     -DENABLE_HEADLESS_RENDERING=ON \
-                    #     -DUSE_SYSTEM_GLEW=OFF \
-                    #     -DUSE_SYSTEM_GLFW=OFF \
-                    #     -DBUILD_TENSORFLOW_OPS=OFF \
-                    #     -DBUILD_PYTORCH_OPS=OFF \
-                    #     -DBUILD_UNIT_TESTS=OFF \
-                    #     -DPYTHON_EXECUTABLE=$(which python) \
-                    #     ..
+#                     # sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
+#                     #     -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+#                     #     -DCMAKE_BUILD_TYPE=Release \
+#                     #     -DBUILD_SHARED_LIBS=ON \
+#                     #     -DBUILD_CUDA_MODULE=ON \
+#                     #     -DBUILD_GUI=OFF \
+#                     #     -DENABLE_HEADLESS_RENDERING=ON \
+#                     #     -DUSE_SYSTEM_GLEW=OFF \
+#                     #     -DUSE_SYSTEM_GLFW=OFF \
+#                     #     -DBUILD_TENSORFLOW_OPS=OFF \
+#                     #     -DBUILD_PYTORCH_OPS=OFF \
+#                     #     -DBUILD_UNIT_TESTS=OFF \
+#                     #     -DPYTHON_EXECUTABLE=$(which python) \
+#                     #     ..
 
-                    # sudo make -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -j
-                    # #make -j3
-
-
+#                     # sudo make -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -j
+#                     # #make -j3
 
 
 
-cd $TMP
-sudo rm -r Open3D >/dev/null 2>&1
-git clone --recursive https://github.com/intel-isl/Open3D
-cd Open3D
-git submodule update --init --recursive
-util/install_deps_ubuntu.sh
-
-#b)Edit the CMakeLists.txt 
-#############################
-echo ""
-echo "Updating Open3D CMakeLists"
-# Open3D build options
-file=$(pwd)/CMakeLists.txt
-
-sed -i 's/option(BUILD_SHARED_LIBS          "Build shared libraries"                   OFF)/option(BUILD_SHARED_LIBS          "Build shared libraries"                   ON )/g' $file
-sed -i 's/option(BUILD_EXAMPLES             "Build Open3D examples programs"           ON )/option(BUILD_EXAMPLES             "Build Open3D examples programs"           OFF )/g' $file
-sed -i 's/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/g' $file
-sed -i 's/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/g' $file
-sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
-sed -i 's/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    OFF)/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    ON )/g' $file
-sed -i 's/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/g' $file
-sed -i 's/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/g' $file
 
 
-sed -i 's/find_package(Python3 3.6/find_package(Python3 3.8 EXACT COMPONENTS/g' $file
+# cd $TMP
+# sudo rm -r Open3D >/dev/null 2>&1
+# git clone --recursive https://github.com/intel-isl/Open3D
+# cd Open3D
+# git submodule update --init --recursive
+# util/install_deps_ubuntu.sh
+
+# #b)Edit the CMakeLists.txt 
+# #############################
+# echo ""
+# echo "Updating Open3D CMakeLists"
+# # Open3D build options
+# file=$(pwd)/CMakeLists.txt
+
+# sed -i 's/option(BUILD_SHARED_LIBS          "Build shared libraries"                   OFF)/option(BUILD_SHARED_LIBS          "Build shared libraries"                   ON )/g' $file
+# sed -i 's/option(BUILD_EXAMPLES             "Build Open3D examples programs"           ON )/option(BUILD_EXAMPLES             "Build Open3D examples programs"           OFF )/g' $file
+# sed -i 's/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/option(BUILD_UNIT_TESTS           "Build Open3D unit tests"                  OFF)/g' $file
+# sed -i 's/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/option(BUILD_BENCHMARKS           "Build the micro benchmarks"               OFF)/g' $file
+# sed -i 's/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/option(BUILD_PYTHON_MODULE        "Build the python module"                  ON )/g' $file
+# sed -i 's/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    OFF)/option(BUILD_CUDA_MODULE          "Build the CUDA module"                    ON )/g' $file
+# sed -i 's/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/option(BUILD_WITH_CUDA_STATIC     "Build with static CUDA libraries"         ON )/g' $file
+# sed -i 's/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/option(BUILD_COMMON_CUDA_ARCHS    "Build for common CUDA GPUs (for release)" OFF)/g' $file
 
 
-#d) Build Open3D cpp and python modules
-
-mkdir build
-cd build
+# sed -i 's/find_package(Python3 3.6/find_package(Python3 3.8 EXACT COMPONENTS/g' $file
 
 
-##f) Build with GUI ON first
-sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_SHARED_LIBS=ON \
-    -DBUILD_CUDA_MODULE=ON \
-    -DBUILD_GUI=ON \
-    -DENABLE_HEADLESS_RENDERING=OFF \
-    -DUSE_SYSTEM_GLEW=OFF \
-    -DUSE_SYSTEM_GLFW=OFF \
-    -DBUILD_TENSORFLOW_OPS=OFF \
-    -DBUILD_PYTORCH_OPS=OFF \
-    -DBUILD_UNIT_TESTS=OFF \
-    -DPYTHON_EXECUTABLE=$(which python) \
-    ..
+# #d) Build Open3D cpp and python modules
 
-sudo make -j$(nproc)
-
-sudo make install
+# mkdir build
+# cd build
 
 
-##f) For headless rendering, remake with the following options. Takes about 30min to rebuild.
-sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_SHARED_LIBS=ON \
-    -DBUILD_CUDA_MODULE=ON \
-    -DBUILD_GUI=OFF \
-    -DENABLE_HEADLESS_RENDERING=ON \
-    -DUSE_SYSTEM_GLEW=OFF \
-    -DUSE_SYSTEM_GLFW=OFF \
-    -DBUILD_TENSORFLOW_OPS=OFF \
-    -DBUILD_PYTORCH_OPS=OFF \
-    -DBUILD_UNIT_TESTS=OFF \
-    -DPYTHON_EXECUTABLE=$(which python) \
-    ..
+# ##f) Build with GUI ON first
+# sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DBUILD_SHARED_LIBS=ON \
+#     -DBUILD_CUDA_MODULE=ON \
+#     -DBUILD_GUI=ON \
+#     -DENABLE_HEADLESS_RENDERING=OFF \
+#     -DUSE_SYSTEM_GLEW=OFF \
+#     -DUSE_SYSTEM_GLFW=OFF \
+#     -DBUILD_TENSORFLOW_OPS=OFF \
+#     -DBUILD_PYTORCH_OPS=OFF \
+#     -DBUILD_UNIT_TESTS=OFF \
+#     -DPYTHON_EXECUTABLE=$(which python) \
+#     ..
 
-sudo make -j$(nproc)
+# sudo make -j$(nproc)
 
-sudo make install
-
-# Install Open3D python package (optional)
-sudo make install-pip-package -j$(nproc)
+# sudo make install
 
 
-sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+# ##f) For headless rendering, remake with the following options. Takes about 30min to rebuild.
+# sudo CUDACXX=/usr/local/cuda-11.8/bin/nvcc cmake \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DBUILD_SHARED_LIBS=ON \
+#     -DBUILD_CUDA_MODULE=ON \
+#     -DBUILD_GUI=OFF \
+#     -DENABLE_HEADLESS_RENDERING=ON \
+#     -DUSE_SYSTEM_GLEW=OFF \
+#     -DUSE_SYSTEM_GLFW=OFF \
+#     -DBUILD_TENSORFLOW_OPS=OFF \
+#     -DBUILD_PYTORCH_OPS=OFF \
+#     -DBUILD_UNIT_TESTS=OFF \
+#     -DPYTHON_EXECUTABLE=$(which python) \
+#     ..
+
+# sudo make -j$(nproc)
+
+# sudo make install
+
+# # Install Open3D python package (optional)
+# sudo make install-pip-package -j$(nproc)
+
+
+# sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
 
 
 # ############################################
@@ -452,7 +459,7 @@ sudo python3 -c "import open3d; from open3d._build_config import _build_config; 
 #Jetson TX2	6.2
 #Jetson NANO 5.3
 
-CUDA_ARCH_BIN=8.7
+# CUDA_ARCH_BIN=8.7
 
 # declare -A cuda_archs
 # cuda_archs["ORIN"]=8.7

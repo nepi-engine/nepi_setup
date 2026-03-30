@@ -68,12 +68,12 @@ fi
 echo ""
 echo "Cleaning and Fixing Folders"
 
-if [[ -d '/tmp' ]]; then
-    cur_folder=$(pwd)
-    cd /tmp
-    sudo find . -mindepth 1 -not -name "snap-private-tmp" -exec sudo rm -rf {} +
-    cd $cur_folder
-fi
+# if [[ -d '/tmp' ]]; then
+#     cur_folder=$(pwd)
+#     cd /tmp
+#     sudo find . -mindepth 1 -not -name "snap-private-tmp" -exec sudo rm -rf {} +
+#     cd $cur_folder
+# fi
 
 sudo chown 1000:1000 /mnt/nepi_config
 sudo chown 1000:1000 /mnt/nepi_storage
