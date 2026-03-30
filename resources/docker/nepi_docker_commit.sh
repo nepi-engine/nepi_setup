@@ -111,7 +111,7 @@ else
                 fi
             fi
             if [[ ${COMMIT_DESC} == '-' ]]; then
-                HM=$(date "+%H%M"/)
+                HM=$(date "+%H%M")
                 COMMIT_DESC="-${HM}"
             fi
 
