@@ -24,7 +24,7 @@ sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
-source $LICENSE_CHECK_FILE
+source $LICENSE_CHECK_FILE $LITE_INSTALL
 if [[ "$?" -ne 0 ]]; then
     return 
 fi

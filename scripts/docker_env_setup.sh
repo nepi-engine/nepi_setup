@@ -18,17 +18,13 @@
 ## - mailto:nepi@numurus.com
 ##
 
-LITE_INSTALL=0
-if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    LITE_INSTALL=$1
-fi
-# echo "LITE_INSTALL=${LITE_INSTALL}"
+LITE_INSTALL=$1
 
 sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
-source $LICENSE_CHECK_FILE
+INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
+source $INSTALL_CHECK_FILE $LITE_INSTALL
 if [[ "$?" -ne 0 ]]; then
     return 
 fi
@@ -41,15 +37,6 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
-    fi
-fi
-
-sudo -v
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)

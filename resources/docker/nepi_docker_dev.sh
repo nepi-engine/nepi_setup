@@ -74,9 +74,12 @@ fi
 
 echo ""
 echo "Cleaning and Fixing Folders"
-sudo rm -r /tmp/systemd-private*  >/dev/null 2>&1
-sudo rm -r /tmp/temp*  >/dev/null 2>&1
-sudo rm -r /tmp/tmp*  >/dev/null 2>&1
+if [[ -d '/tmp' ]]; then
+    cur_folder=$(pwd)
+    cd /tmp
+    sudo find . -mindepth 1 -not -name "snap-private-tmp" -exec sudo rm -rf {} +
+    cd $cur_folder
+fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_config
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /mnt/nepi_storage
 echo ""

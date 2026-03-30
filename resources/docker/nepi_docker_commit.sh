@@ -111,7 +111,8 @@ else
                 fi
             fi
             if [[ ${COMMIT_DESC} == '-' ]]; then
-                COMMIT_DESC=''
+                HM=$(date "+%H%M"/)
+                COMMIT_DESC="-${HM}"
             fi
 
             COMMIT_TAG="nepi-${COMMIT_VERSION}-${COMMIT_HW_TYPE}-${COMMIT_SW_DESC}-${COMMIT_DATE}${COMMIT_DESC}"

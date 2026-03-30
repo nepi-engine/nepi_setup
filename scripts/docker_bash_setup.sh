@@ -18,21 +18,18 @@
 ## - mailto:nepi@numurus.com
 ##
 
-LITE_INSTALL=0
-if [[ "$1" -eq 1 ]] 2>/dev/null; then
-    LITE_INSTALL=$1
-fi
-export LITE_INSTALL=$LITE_INSTALL
-# echo "LITE_INSTALL=${LITE_INSTALL}"
+LITE_INSTALL=$1
+
+sudo -v
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $1
+source $INSTALL_CHECK_FILE $LITE_INSTALL
 if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-sudo -v
+
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh

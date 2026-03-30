@@ -18,14 +18,16 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# LITE_INSTALL=0
-# if [[ "$1" -eq 1 ]] 2>/dev/null; then
-#     LITE_INSTALL=$1
-# fi
-# export LITE_INSTALL=$LITE_INSTALL
+LITE_INSTALL=$1
 
-# echo "LITE_INSTALL=${LITE_INSTALL}"
+sudo -v
 
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
+source $INSTALL_CHECK_FILE $LITE_INSTALL
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
@@ -140,6 +142,9 @@ echo ""
 echo "########"
 echo "Setting up udev rules"
     # IQR Pan/Tilt
+if [[ ! -d '/etc/udev/rules.d' ]]; then
+    sudo mkdir -p '/etc/udev/rules.d'
+fi
 sudo cp ${SOURCE_ETC_PATH}/udev/rules.d/* /etc/udev/rules.d/
 
 echo ""
@@ -175,43 +180,6 @@ if ! source_script $NEPI_SYS_CONFIG_LOAD; then
     echo "Script ${NEPI_SYS_CONFIG_LOAD} failed with error ${script_error}"
 fi
 
-if [[ "$NEPI_INSTALL" == "LITE" || "$LITE_INSTALL" -eq 1 ]]; then
-    NEPI_INSTALL=LITE
-    SERVICES_MANAGED=0
-else
-    NEPI_INSTALL=FULL
-    SERVICES_MANAGED=1
-fi
-
-
-echo "Running setup in ${NEPI_INSTALL} mode"
-
-echo "Updating NEPI Config File"
-
-export NEPI_INSTALL=$NEPI_INSTALL
-update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_HOSTNAME=$((NEPI_MANAGES_HOSTNAME * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_NETWORK=$((NEPI_MANAGES_NETWORK * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_TIME=$((NEPI_MANAGES_TIME * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SSH=$((NEPI_MANAGES_SSH * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SHARE=$((NEPI_MANAGES_SHARE * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_SOFTWARE=$((NEPI_MANAGES_SOFTWARE * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
-
-export NEPI_MANAGES_DOCKER=$((NEPI_MANAGES_DOCKER * SERVICES_MANAGED))
-update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
-
 
 
 
@@ -224,6 +192,46 @@ echo "########################"
 # Update ETC files if systemd is running (Not in Container)
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
+
+
+if [[ "$LITE_INSTALL" -eq 1 ]]; then
+    NEPI_INSTALL=LITE
+    SERVICES_MANAGED=0
+else
+    NEPI_INSTALL=FULL
+    SERVICES_MANAGED=1
+fi
+
+
+    echo "Running setup in ${NEPI_INSTALL} mode"
+
+    echo "Updating NEPI Config File"
+
+    export NEPI_INSTALL=$NEPI_INSTALL
+    update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_HOSTNAME=$((NEPI_MANAGES_HOSTNAME * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_NETWORK=$((NEPI_MANAGES_NETWORK * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_TIME=$((NEPI_MANAGES_TIME * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_SSH=$((NEPI_MANAGES_SSH * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_SHARE=$((NEPI_MANAGES_SHARE * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_SOFTWARE=$((NEPI_MANAGES_SOFTWARE * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
+
+    export NEPI_MANAGES_DOCKER=$((NEPI_MANAGES_DOCKER * SERVICES_MANAGED))
+    update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
+
+
 
 
 
