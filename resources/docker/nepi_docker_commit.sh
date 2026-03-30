@@ -109,6 +109,8 @@ else
                 if [[ -n $TAG_ARRAY[5] ]]; then
                     COMMIT_DESC="-${TAG_ARRAY[5]}"
                 fi
+            else
+                COMMIT_DESC="-${COMMIT_DESC}"
             fi
             if [[ ${COMMIT_DESC} == '-' ]]; then
                 HM=$(date "+%H%M")

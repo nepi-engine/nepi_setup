@@ -28,14 +28,13 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
 USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
 source $USER_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
 NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
@@ -65,10 +64,13 @@ echo "########################"
 NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=jetson
+    MIN_CUDA_VERSION=11.8
 elif is_valid_arm64; then
     NEPI_ARCH=arm64
+    MIN_CUDA_VERSION=11.8
 elif is_valid_amd64; then
     NEPI_ARCH=amd64
+    MIN_CUDA_VERSION=12.1
 else
     arch_val=$(uname -m)
     echo "Arch ${arch_val} not supported yet"
@@ -150,9 +152,8 @@ sudo apt install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-d
      libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev \
      libdc1394-22-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
      libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
-     libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev 
-
-
+     libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev \
+     dkms linux-headers-$(uname -r)
 
 # Find missing deb files in
 #https://repo.download.nvidia.com/jetson/
@@ -172,7 +173,7 @@ sudo py3clean .
 # Upgrade Cuda Version
 ########################################################
 
-MIN_CUDA_VERSION=118
+
 
 function find_cuda_version(){
     lspci | grep -i nvidia >/dev/null 2>&1
@@ -195,9 +196,9 @@ echo ""
 echo "######################################"
 echo "Checking for minimum CUDA version ${MIN_CUDA_VERSION}"
 cur_cuda_version=$(find_cuda_version)
-echo "Got CUDA version ${MIN_CUDA_VERSION}"
+echo "Got CUDA version ${cur_cuda_version}"
 cur_cuda_version="${cur_cuda_version//./}"
-if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
+if [[ "$cur_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
     echo "Installing Cuda ${MIN_CUDA_VERSION}"
     echo "######################################"
     cd $TMP
@@ -228,7 +229,7 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         sudo apt-get -y install cuda-11-8
 
     elif is_valid_amd64; then
-        wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
+        wget https://developer.download.nvidia.com/compute/cuda/12.1.1/local_installers/cuda_12.1.1_530.30.02_linux.run
         echo ""
         echo "Cuda installation will take several minutes"
         echo ""
@@ -237,7 +238,7 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         echo "Disable the 'Driver' option"
         echo "Select the 'Install' option"
         echo ""
-        sudo sh cuda_11.8.0_520.61.05_linux.run
+        sudo sh cuda_12.1.1_530.30.02_linux.run
         sudo apt install pciutils
         sudo update-pciids
     else
@@ -252,8 +253,8 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         sudo rm -r "/home/${CONFIG_USER}/tmp/*"
         
 
-        export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
-        export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        export PATH=/usr/local/cuda-${MIN_CUDA_VERSION}/bin${PATH:+:${PATH}}
+        export LD_LIBRARY_PATH=/usr/local/cuda-${MIN_CUDA_VERSION}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
         SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
         source ${SCRIPT_FOLDER}/nepi_bash_setup.sh
@@ -262,17 +263,17 @@ if [[ "$cur_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
         nvidia-smi
 
     new_cuda_version=$(find_cuda_version)
-    echo "Got CUDA version ${MIN_CUDA_VERSION}"
+    echo "Got CUDA version ${new_cuda_version}"
     new_cuda_version="${new_cuda_version//./}"
-    if [[ "$new_cuda_version" -lt $MIN_CUDA_VERSION ]]; then
+    if [[ "$new_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
         echo "Minimum CUDA Version not setup"
         return 
     else
         #############################
         echo ""
         echo "Updating Bash Variables"
-        new_cuda_version=$(find_cuda_version)
-        sed -i "s/cuda-${cur_cuda_version}/cuda_${new_cuda_version}/g" /home/${CONFIG_USER}/.bashrc
+        source "${SCRIPT_FOLDER}/.nepi_bash_setup"
+        
 
         # cat /home/${CONFIG_USER}/.bashrc
 
@@ -767,7 +768,7 @@ CUDA_ARCH_BIN=8.7
             # wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
         elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
             #https://www.stereolabs.com/developers/release/4.2
-            wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+            wget https://download.stereolabs.com/zedsdk/4.2/cu12/ubuntu20 -O 'zstd.run'
         fi
 
             # To continue you have to accept the EULA. Accept  [Y/n] ?Y

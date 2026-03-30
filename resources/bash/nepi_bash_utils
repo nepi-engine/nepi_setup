@@ -2455,10 +2455,12 @@ function nepiauthrm {
           authorized_keys_path="${key_folder}/authorized_keys"
           touch ${authorized_keys_path}
 
-          key_pub=$(cat $key_path.pub)
+          key_pub=$(cat ${key_path}.pub)
           key_email="${key_pub##* }"
           echo "Removing existing key for id ${key_email}"
-          if [[ -n $key_email ]]; then        
+          if [[ -n $key_email ]]; then   
+            sudo chmod 0777 $authorized_keys_path
+            echo "Editing file ${authorized_keys_path}"   
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
@@ -2506,17 +2508,23 @@ function nepiauthadd {
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
           authorized_keys_path="${key_folder}/authorized_keys"
+          if [[ -f $authorized_keys_path ]]; then
+            sudo rm $authorized_keys_path
+          fi
           touch ${authorized_keys_path}
 
-          key_pub=$(cat $key_path.pub)
+          key_pub=$(cat ${key_path}.pub)
           key_email="${key_pub##* }"
           echo "Removing existing key for id ${key_email}"
-          if [[ -n $key_email ]]; then        
+          if [[ -n $key_email ]]; then     
+            sudo chmod 0777 $authorized_keys_path
+            echo "Editing file ${authorized_keys_path}"   
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          
-          cat ${key_path}.pub >> $authorized_keys_path
+          echo "Adding key ${key_file}"
+          sudo cat ${key_path}.pub >> $authorized_keys_path
+          echo "Autherized Key file Updated"
 
           sudo chmod 0700 $key_folder
           sudo chmod 0600 $authorized_keys_path
@@ -2905,27 +2913,6 @@ export -f pulln
 
 
 
-function nepimain {
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git checkout main
-      pulln
-    fi
-}
-export -f nepimain
-
-
-
-function nepidev {
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git checkout develop
-      pulln
-    fi
-}
-export -f nepidev
 
 
 
@@ -3059,8 +3046,6 @@ nepigithub = Check and Setup a GitHub SSH key for your GitHub account
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
 pulln = Update to the latest NEPI source-code repo
-nepimain = Switch to the NEPI Engine repo's main branch
-nepidev = Switch to the NEPI Engine repo's main branch
 nepidpl = Deploy nepi complete to nepi device
 gitmain = Change to main branch in current repo or submodule folder
 pushn = Add,commit,push repo changes with optional comment msg in current repo or submodule folder"

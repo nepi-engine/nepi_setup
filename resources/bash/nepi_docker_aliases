@@ -50,6 +50,13 @@ HELPN="${UTILSN}"
 # NEPI SHORTCUT FUNCTIONS
 #############################
 
+function nepipull(){
+  sudo -v
+  docker_link=$1
+  echo "Pulling NEPI Docker Image ${docker_link}"
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
+}
+export -f nepipull
 
 
 # NEPI stop and start shortcuts
@@ -99,10 +106,11 @@ export -f nepiloginroot
 function nepicommit(){
   sudo -v
   commit_desc=$1
+  restart=$2
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
-  if [[ -z "$2" ]]; then
+  if [[ -z $restart ]]; then
     nepistart
-  elif [[ "$2" -eq 1 ]]; then
+  elif [[ "$restart" -eq 1 ]]; then
     nepistart
   fi
 }
@@ -341,6 +349,7 @@ nepilogin = Log into the running NEPI container as user 'nepi'.
 nepiloginroot = Log into the running NEPI container as user 'root'.
 nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
 nepicommit = Commit the running NEPI container wit provided COMMIT_DESCRIPTION, restarts nepi using new commit unless RESTART=0 is passed .
+nepipull = Download and install a NEPI Docker image from the provided link
 nepiinit = Reset, clear, and import new NEPI Image.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.

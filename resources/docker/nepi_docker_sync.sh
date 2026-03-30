@@ -85,7 +85,7 @@ sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chown 1000:1000 ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}

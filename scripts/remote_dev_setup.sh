@@ -239,7 +239,8 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     echo "################################# "
     echo "Updating Bash Files"
     echo ""
-
+    
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
     ##############
     echo "Setting up NEPI Bash Utils file"
@@ -586,12 +587,6 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
 
     fi
 
-
-    # echo " "
-    # echo "################################# "
-    # echo "Emptying Trash"
-    # echo ""
-    # empty_trash
 
 
 

@@ -69,7 +69,7 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         if [[ -f "$BACKUP_FILE" ]]; then
             echo "Backup File Exists Updating Config File"
             sudo cp $BACKUP_FILE $NEPI_CONFIG_FILE  
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
+            sudo chown 1000:1000 $NEPI_CONFIG_FILE
             success=0
             eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
             eval "$eval_cmd"
@@ -90,10 +90,10 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         if [[ "$success" -eq 1 ]]; then
             echo "Backing Up NEPI Config File..."
             sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE 2>/dev/null
+            sudo chown 1000:1000 $BACKUP_FILE 2>/dev/null
         fi
 
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_CONFIG_FILE
+        sudo chown 1000:1000 $NEPI_CONFIG_FILE
     fi
 
 else

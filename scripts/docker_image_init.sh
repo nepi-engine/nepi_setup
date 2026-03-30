@@ -28,22 +28,49 @@ if [[ "$?" -ne 0 ]]; then
     return 
 fi
 
-# This file downloads the Latest NEPI Docker Image to the NEPI Devices Import Folder
 
-
-CONFIG_USER=$(id -un)
-if [[ ${CONFIG_USER} == 'root' ]]; then
-    CONFIG_USER=$SUDO_USER
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
 fi
-export CONFIG_USER=$CONFIG_USER
-NEPI_USER_ID=1000
-
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
+source $USER_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+echo "Script Folder: ${SCRIPT_FOLDER}"
+RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
+
+NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+nepi_config_loaded=0
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/home/${CONFIG_USER}/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
+    source ${NEPI_SYSTEM_CONFIG_FILE} >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        nepi_config_loaded=1
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE && $nepi_config_loaded -eq 0 ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SETUP_CONFIG_FILE}"
+    source ${NEPI_SETUP_CONFIG_FILE}  >/dev/null 2>&1
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
+fi
+
 
 ninet > /dev/null 2>&1
 

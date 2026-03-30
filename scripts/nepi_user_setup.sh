@@ -127,8 +127,6 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
     sudo usermod -aG sudo $CONFIG_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
-    sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
     sudo adduser ${CONFIG_USER} dialout
     sudo usermod -aG dialout ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
@@ -391,6 +389,12 @@ sudo chmod 0755 /home/${username}
 if [[ -d /home/${CONFIG_USER}/nepi_setup ]]; then
     sudo rm -r /home/${CONFIG_USER}/nepi_setup
 fi
+
+# echo "###################################"
+# echo "Adding NEPI user to NEPI groups"
+# echo "###################################"
+sudo usermod -aG $SYS_USER_1 $CONFIG_USER >/dev/null 2>&1
+sudo usermod -aG $SYS_USER_2 $CONFIG_USER >/dev/null 2>&1
 
 # echo "###################################"
 # echo "Adding NEPI users to sudo users"

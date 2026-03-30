@@ -19,22 +19,10 @@
 ##
 
 LITE_INSTALL=$1
-
-sudo -v
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $LITE_INSTALL
-if [[ "$?" -ne 0 ]]; then
-    return 
+if [[ -z $LITE_INSTALL ]]; then
+    LITE_INSTALL=0
 fi
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $1
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
 
 sudo -v
 
@@ -207,9 +195,6 @@ fi
 
     echo "Updating NEPI Config File"
 
-    export NEPI_INSTALL=$NEPI_INSTALL
-    update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $NEPI_SYS_CONFIG_FILE
-
     export NEPI_MANAGES_HOSTNAME=$((NEPI_MANAGES_HOSTNAME * SERVICES_MANAGED))
     update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
 
@@ -232,64 +217,6 @@ fi
     update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
 
 
-
-
-
-    if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
-
-        echo ""
-        echo "########"
-        echo "Configuring Samba Service"
-
-
-        echo "Updating Samba ETC config file"
-        if [[ "$CONFIG_USER" == "nepi" ]]; then
-            source_file=${SOURCE_ETC_PATH}/samba/smb.conf
-        else
-            source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-        fi
-
-        dest_file=/etc/samba/smb.conf
-        if [[ -f "$source_file" ]]; then
-            sudo cp -d $source_file $dest_file
-        fi
-
-
-        SYSTEMD_SERVICE_PATH=/etc/systemd/system
-
-
-        echo "Restarting Samba Service"
-
-        sudo systemctl enable smbd
-        sudo systemctl restart smbd
-        
-
-        echo "Updating Samba Users"
-        if [[ ${NEPI_USER_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_USER"
-        fi
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
-
-
-        if [[ ${NEPI_HOST_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_HOST_USER"
-        fi
-        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
-
-
-        if [[ ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_ADMIN_USER"
-        fi        
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
-
-        sudo systemctl restart sshd
-    fi
 
 
     if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
@@ -352,6 +279,17 @@ fi
         if [[ -f "$source_file" ]]; then
             sudo cp $source_file $dest_file
         fi
+
+        if [[ ! -f "/run/sshd" ]]; then
+            sudo mkdir "/run/sshd"
+        fi
+        sudo chmod 0755 /run/sshd
+        sudo chown root:root /run/sshd
+        if [[ ! -f "/var/run/sshd" ]]; then
+            sudo mkdir "/var/run/sshd"
+        fi
+        sudo chmod 0775 /var/run/sshd
+        sudo chown root:root /var/run/sshd
 
         echo "Enabling ssh service"
         sudo systemctl enable sshd >/dev/null 2>&1        
@@ -452,7 +390,62 @@ fi
         # sudo docker info
     fi
 
+    if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
 
+        echo ""
+        echo "########"
+        echo "Configuring Samba Service"
+
+
+        echo "Updating Samba ETC config file"
+        if [[ "$CONFIG_USER" == "nepi" ]]; then
+            source_file=${SOURCE_ETC_PATH}/samba/smb.conf
+        else
+            source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+        fi
+
+        dest_file=/etc/samba/smb.conf
+        if [[ -f "$source_file" ]]; then
+            sudo cp -d $source_file $dest_file
+        fi
+
+
+        SYSTEMD_SERVICE_PATH=/etc/systemd/system
+
+
+        echo "Restarting Samba Service"
+
+        sudo systemctl enable smbd
+        sudo systemctl restart smbd
+        
+
+        echo "Updating Samba Users"
+        if [[ ${NEPI_USER_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+        # else
+        #     sudo smbpasswd -a "$NEPI_USER"
+        fi
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+
+
+        if [[ ${NEPI_HOST_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
+        # else
+        #     sudo smbpasswd -a "$NEPI_HOST_USER"
+        fi
+        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+
+        if [[ ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
+            echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
+        # else
+        #     sudo smbpasswd -a "$NEPI_ADMIN_USER"
+        fi        
+        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
+
+
+        sudo systemctl restart sshd
+    fi
 
 
 
@@ -467,6 +460,16 @@ else
     echo "Copying ${source_file} to ${dest_file}"
     sudo cp $source_file $dest_file
 
+    if [[ ! -f "/run/sshd" ]]; then
+        sudo mkdir "/run/sshd"
+    fi
+    sudo chmod 0755 /run/sshd
+    sudo chown root:root /run/sshd
+    if [[ ! -f "/var/run/sshd" ]]; then
+        sudo mkdir "/var/run/sshd"
+    fi
+    sudo chmod 0775 /var/run/sshd
+    sudo chown root:root /var/run/sshd
 
     ###################
     echo ""
@@ -818,9 +821,6 @@ echo "########################"
 echo "Cleaning Config System"
 echo ""
 
-
-sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/info/ 2>/dev/null 
-sudo rm -r  /home/${CONFIG_USER}/.local/share/Trash/files/ 2>/dev/null
 #sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 

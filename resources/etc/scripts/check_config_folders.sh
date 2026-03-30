@@ -109,8 +109,8 @@ if [ ! -d "${nconfig}" ]; then
     echo "Creating NEPI Folder: ${nconfig}"
     sudo mkdir "${nconfig}"
 fi
-echo "Emptying Trash for NEPI Folder: ${nfolder}"
-sudo rm -r ${nfolder}/.Trash* 2>/dev/null
+echo "Emptying Trash for NEPI Folder: ${nconfig}"
+sudo rm -r ${nconfig}/.Trash* 2>/dev/null
 sudo chown 1000:1000 $nconfig
 
 

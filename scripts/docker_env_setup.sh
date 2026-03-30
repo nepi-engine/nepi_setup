@@ -31,6 +31,14 @@ fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
+
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
 source $USER_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
@@ -38,11 +46,31 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 
-
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+echo "Script Folder: ${SCRIPT_FOLDER}"
+RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
-NEPI_UTILS_SOURCE=$(dirname "${SCRIPT_FOLDER}")/resources/bash/nepi_bash_utils
+NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+
+# Load System Config File
+#echo "Loading NEPI SYSTEM CONFIG"
+nepi_config_loaded=0
+NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=/home/${CONFIG_USER}/load_system_config.sh
+if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
+    source ${NEPI_SYSTEM_CONFIG_FILE} >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        nepi_config_loaded=1
+    fi
+elif [[ -f $NEPI_SETUP_CONFIG_FILE && $nepi_config_loaded -eq 0 ]]; then
+    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SETUP_CONFIG_FILE}"
+    source ${NEPI_SETUP_CONFIG_FILE}  >/dev/null 2>&1
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
+    fi
+fi
 
 
 if ! is_valid_internet; then
@@ -177,7 +205,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     if [[ ! -f "/run/sshd" ]]; then
         sudo mkdir "/run/sshd"
     fi
-    sudo chmod 0775 /run/sshd
+    sudo chmod 0755 /run/sshd
     sudo chown root:root /run/sshd
     if [[ ! -f "/var/run/sshd" ]]; then
         sudo mkdir "/var/run/sshd"
@@ -420,8 +448,8 @@ sudo apt-get clean
 sudo apt-get update
 sudo apt update
 sudo apt-get install --fix-broken -y
-sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
-sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
+# sudo rm -r ~/.local/share/Trash/info/ 2>/dev/null 
+# sudo rm -r ~/.local/share/Trash/files/ 2>/dev/null
 #sudo rm -r /tmp/* 2>/dev/null
 sudo rm /var/crash/* 2>/dev/null
 

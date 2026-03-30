@@ -131,7 +131,8 @@ YOU ARE NOW IN THE NEPI HOST
 
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "user_setup"
+    restart=0
+    nepicommit "user_setup" $restart
 
 
 
@@ -176,7 +177,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "env_setup1"
+    restart=0
+    nepicommit "env_setup1" $restart
 
 
 ################################################################
@@ -221,7 +223,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "env_setup2"
+    restart=0
+    nepicommit "env_setup2" $restart
 
 
 ################################################################
@@ -262,7 +265,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "ros_setup"
+    restart=0
+    nepicommit "ros_setup" $restart
 
     
 
@@ -292,9 +296,13 @@ Test the NEPI Container's SSH Service (port 2222)
 **NOTE** You will see a message that port 22 is in use
 
     scripts
+    sudo su
     source ./nepi_ssh_start
 
+
 **Ctrl-C** to stop the process
+
+    exit # exit sudo user
 
 Test Run an AI Detectror
 
@@ -304,7 +312,9 @@ Test Run an AI Detectror
 
 **Ctrl-C** to stop the process
 
-    exit # exit sudo uer
+    exit # exit sudo user
+
+    
 
 Log out of the container:
 
@@ -316,7 +326,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "config_setup"
+    restart=0
+    nepicommit "config_setup" $restart
 
 
 
@@ -362,7 +373,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "engine_setup"
+    restart=0
+    nepicommit "engine_setup" $restart
 
 
 
@@ -407,7 +419,8 @@ YOU ARE NOW IN THE NEPI HOST
 **RUN THESE STEPS IN THE NEPI HOST**
 Commit your NEPI container with a description (password is 'nepi'):
 
-    nepicommit "rui_setup"
+    restart=0
+    nepicommit "rui_setup" $restart
 
 
 
