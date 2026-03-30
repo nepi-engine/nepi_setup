@@ -353,11 +353,20 @@ else
     # NEPI_REQ_SOURCE=$(dirname "$(pwd)")/resources/requirements
     # sudo cp ${NEPI_REQ_SOURCE}/nepi_requirements.txt ./
     # cat nepi_requirements.txt | sed -e '/^\s*#.*$/d' -e '/^\s*$/d' | xargs -n 1 sudo python${NEPI_PYTHON} -m pip install
-    python${NEPI_PYTHON} -m pip uninstall numpy
-    sudo -H python${NEPI_PYTHON} -m pip uninstall numpy
-    sudo rm -r /usr/lib/python3/dist-packages/numpy
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
-    python -c "import numpy; print(numpy.__version__)"
+
+
+
+    #################
+    np_required=1.23.5
+    np_version=$(python -c "import numpy; print(numpy.__version__)") 
+    if [[ ${np_version//./} != ${np_required//./} ]]; then
+        python${NEPI_PYTHON} -m pip uninstall numpy
+        sudo -H python${NEPI_PYTHON} -m pip uninstall numpy
+        sudo rm -r /usr/lib/python3/dist-packages/numpy
+        sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+        python -c "import numpy; print(numpy.__version__)"
+        sudo dpkg --configure -a
+    fi
 
     # which python # (or where python on Windows) to see the executable path
     # python -c "import numpy; print(numpy.__version__)"

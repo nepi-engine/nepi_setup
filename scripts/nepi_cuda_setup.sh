@@ -238,16 +238,22 @@ if [[ "$cur_cuda_version" -lt "${MIN_CUDA_VERSION//./}" ]]; then
     elif is_valid_amd64; then
         wget https://developer.download.nvidia.com/compute/cuda/12.1.1/local_installers/cuda_12.1.1_530.30.02_linux.run
         echo ""
-        echo "Cuda installation will take several minutes"
+        echo "#######################################"
+        echo "Ready to install Cuda ${MIN_CUDA_VERSION}"
         echo ""
         echo "When promted:"
         echo "enter 'accetp'"
         echo "Disable the 'Driver' option"
         echo "Select the 'Install' option"
         echo ""
+        printf "Press Enter to continue..."
+        read
+        echo ""
+        echo "Cuda installation will take several minutes"
         sudo sh cuda_12.1.1_530.30.02_linux.run
         sudo apt install pciutils
         sudo update-pciids
+        echo "#######################################"
     else
         arch_val=$(uname -m)
         echo "Arch ${arch_val} not supported yet"
@@ -770,12 +776,15 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
         if [[ ${NEPI_ARCH} == 'jetson' ]]; then
             #https://www.stereolabs.com/developers/release/4.1
             wget https://download.stereolabs.com/zedsdk/4.1/l4t35.1/jetsons -O 'zstd.run'
+            sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
         elif [[ ${NEPI_ARCH} == 'arm64' ]]; then
-            #https://www.stereolabs.com/developers/release/4.2
-            # wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+            # https://www.stereolabs.com/developers/release/4.2
+            wget https://download.stereolabs.com/zedsdk/4.2/cu11/ubuntu20 -O 'zstd.run'
+            sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
         elif [[ ${NEPI_ARCH} == 'amd64' ]]; then
             #https://www.stereolabs.com/developers/release/4.2
             wget https://download.stereolabs.com/zedsdk/4.2/cu12/ubuntu20 -O 'zstd.run'
+            sudo sudo apt install zstd nvidia-utils-535 linux-generic-hwe-20.04 -y
         fi
 
             # To continue you have to accept the EULA. Accept  [Y/n] ?Y
@@ -790,18 +799,21 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
             # Dependencies installation complete
             # Do you want to install the Python API (recommended) [Y/n] ?Y
 
-
-        sudo sudo apt install zstd nvidia-utils-515 linux-generic-hwe-20.04 -y
         chmod +x zstd.run
         ./zstd.run
 
-
-        python${NEPI_PYTHON} -m pip uninstall numpy
-        sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
-        
         cd $cur_folder
         sudo rm -r "/home/${CONFIG_USER}/tmp/*"
     fi
+
+    np_required=1.23.5
+    np_version=$(python -c "import numpy; print(numpy.__version__)") 
+    if [[ ${np_version//./} != ${np_required//./} ]]; then
+        python${NEPI_PYTHON} -m pip uninstall numpy
+        python -c "import numpy; print(numpy.__version__)"
+        #sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+    fi
+
 
 
 ##################################

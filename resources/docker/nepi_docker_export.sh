@@ -153,9 +153,9 @@ else
                     NEW_DESC="-${NEPI_DESC}"
                 fi
                 if [[ "$NEW_DESC" == '-' ]]; then
-                    NEW_DESC=''
+                    HM=$(date "+%H%M")
+                    NEW_DESC="-${HM}"
                 fi
-
         
         
                 NEPI_EXPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
