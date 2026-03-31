@@ -1,7 +1,7 @@
 # NEPI Docker Demo Setup Instructions
 This tutorial will walk you through setting up, configuring, and running a NEPI Docker Demo Installation on a supported device.
 
-**SUPPORTED DEVICES:** nvidia-jetson, amd64
+**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA JETSON
 
 NEPI Docker Demo Installations are recommended for a quick demo of the NEPI Software Container for expienced linux users.
 **NOTE:** If you are not an experienced linux user, you may want to try the NEPI Docker Lite installation which includes
@@ -30,7 +30,11 @@ Check that Docker is installed on your device by typing:
 
 Create NEPI required system folders on your device and add your user to account groups:
 
-    sudo -v && CONFIG_USER=$(id -un) && USER_1000=$(id -nu 1000)
+    sudo -v 
+
+then 
+
+    CONFIG_USER=$(id -un) && USER_1000=$(id -nu 1000)
     sudo mkdir /mnt/nepi_config 
     sudo chown 1000:1000 /mnt/nepi_config 
     sudo mkdir /mnt/nepi_storage 
@@ -44,6 +48,7 @@ Create NEPI required system folders on your device and add your user to account 
     sudo usermod -aG docker ${CONFIG_USER}
     sudo usermod -aG ${USER_1000} ${CONFIG_USER}
     exec su -l $CONFIG_USER
+
 
 Install the latest NEPI Docker Image for your device
 
@@ -67,7 +72,11 @@ Once the NEPI Docker Image download completes, retag the download image to 'nepi
 
 Install the latest NEPI Storage Files which include sample Data, AI Model, and Configuration files:
 
-    sudo -v && cd /mnt/nepi_storage
+    sudo -v 
+
+then 
+
+    cd /mnt/nepi_storage
     storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=hj0yewy3&dl=0'
     storage_latest_zip=nepi_storage-latest.zip
     sudo rm ${storage_latest_zip} 2> /dev/null
@@ -76,6 +85,7 @@ Install the latest NEPI Storage Files which include sample Data, AI Model, and C
     sudo rm ${storage_latest_zip} 2> /dev/null
     sudo chown -R 1000:1000 ${NEPI_STORAGE}
     ls ./
+
 
 
 ################################################################
