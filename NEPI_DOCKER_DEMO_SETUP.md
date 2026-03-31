@@ -26,7 +26,7 @@ Check that Docker is installed on your device by typing:
 
     docker
 
-**NOTE** If Docker is not installed, install docker along with any additional software required if you also need NVIDIA GPU support.
+**NOTE:** If Docker is not installed, install docker along with any additional software required if you also need NVIDIA GPU support.
 
 Create NEPI required system folders on your device and add your user to account groups:
 
@@ -52,8 +52,6 @@ then
 
 Install the latest NEPI Docker Image for your device
 
-**NOTE** NEPI Docker images are large files and will take several minutes to download and install
-
 **For NONE GPU or RADEON GPU SUPPORT**
 
     docker pull nepi-latest
@@ -65,6 +63,8 @@ Install the latest NEPI Docker Image for your device
 **For NVIDIA JETSON GPU SUPPORT**
 
     docker pull nepi-jetson-latest
+
+**NOTE:** NEPI Docker images are large files and will take several minutes to download and install
 
 Once the NEPI Docker Image download completes, retag the download image to 'nepi_software':
 
