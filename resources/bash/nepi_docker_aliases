@@ -222,6 +222,12 @@ function nepiexport(){
 }
 export -f nepiexport
 
+function nepiexportclean(){
+  sudo -v
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh 'clean'
+}
+export -f nepiexportclean
+
 
 function nepisave(){
   sudo -v
@@ -353,6 +359,7 @@ nepipull = Download and install a NEPI Docker image from the provided link
 nepiinit = Reset, clear, and import new NEPI Image.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
+nepiexportclean = Export the running NEPI container without a tailing description.
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepitag = Update the Software Description field in the active NEPI container.

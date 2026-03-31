@@ -149,6 +149,7 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
         export NEPI_HOST_USER=$NEPI_HOST_USER
         update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $config_file
         export NEPI_SSH_KEY=$NEPI_SSH_KEY
+        update_yaml_value "NEPI_INSTALL" 'LITE' $config_file
     }
     
     echo "Bringin Up NEPI Configuration Menu"
@@ -273,6 +274,8 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
+
+    
 
 
 
