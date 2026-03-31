@@ -67,12 +67,12 @@ Once the NEPI Docker Image download completes, retag the download image to 'nepi
 
 Install the latest NEPI Storage Files which include sample Data, AI Model, and Configuration files:
 
-    cd /mnt/nepi_storage
+    sudo -v && cd /mnt/nepi_storage
     storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=hj0yewy3&dl=0'
     storage_latest_zip=nepi_storage-latest.zip
     sudo rm ${storage_latest_zip} 2> /dev/null
     sudo wget ${storage_latest_link} -O ${storage_latest_zip}
-    sudo unzip -o -q $storage_latest_zip
+    sudo -v && sudo unzip -o -q $storage_latest_zip
     sudo rm ${storage_latest_zip} 2> /dev/null
     sudo chown -R 1000:1000 ${NEPI_STORAGE}
     ls ./
