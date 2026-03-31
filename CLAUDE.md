@@ -85,9 +85,9 @@ Defaults from `nepi_system_config.yaml`:
 | `NEPI_ALIAS_IP_1` | `192.168.0.103/24` | First IP alias |
 | `NEPI_ALIAS_IP_2` | `192.168.1.103/24` | Second IP alias |
 | `NEPI_SSH_PORT` | `2222` | SSH port inside container |
-| `NEPI_USER` | `nepi` / pw: `nepi` | Container user |
-| `NEPI_HOST_USER` | `nepihost` / pw: `nepi` | Host OS user (Full only) |
-| `NEPI_ADMIN_USER` | `nepiadmin` / pw: `nepiadmin` | Admin user |
+| `NEPI_USER` | `nepi` | Container user |
+| `NEPI_HOST_USER` | `nepihost` | Host OS user (Full only) |
+| `NEPI_ADMIN_USER` | `nepiadmin` | Admin user |
 | `NEPI_DEVICE_ID` | `device1` | Hostname/namespace |
 | `NEPI_BASE` | `/opt/nepi` | NEPI installation root |
 | `NEPI_STORAGE` | `/mnt/nepi_storage` | User data (60+ GB) |
