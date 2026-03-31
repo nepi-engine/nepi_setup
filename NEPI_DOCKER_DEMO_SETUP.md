@@ -54,15 +54,15 @@ Install the latest NEPI Docker Image for your device
 
 **NOTE** NEPI Docker images are large files and will take several minutes to download and install
 
-**FOR NONE GPU or RADEON GPU SUPPORT**
+**For NONE GPU or RADEON GPU SUPPORT**
 
     docker pull nepi-latest
 
-**FOR NVIDIA GPU SUPPORT**
+**For NVIDIA GPU SUPPORT**
 
     docker pull nepi-cuda-latest
 
-**FOR NVIDIA JETSON GPU SUPPORT**
+**For NVIDIA JETSON GPU SUPPORT**
 
     docker pull nepi-jetson-latest
 
@@ -94,7 +94,7 @@ This section will start and test your NEPI Docker solution.
 
 Start your NEPI container running with the following command:
 
-**FOR NONE GPU or RADEON GPU SUPPORT**
+**For NONE GPU or RADEON GPU SUPPORT**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
@@ -107,7 +107,7 @@ Start your NEPI container running with the following command:
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     nepi_software:latest /bin/bash -c '/nepi_start_all'
 
-**FOR NVIDIA GPU SUPPORT**
+**For NVIDIA GPU SUPPORT**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
@@ -122,7 +122,7 @@ Start your NEPI container running with the following command:
     nepi_software:latest /bin/bash -c '/nepi_start_all'
 
 
-**FOR NVIDIA JETSON GPU SUPPORT**
+**For NVIDIA JETSON GPU SUPPORT**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
