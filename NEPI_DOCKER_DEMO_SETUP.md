@@ -7,13 +7,7 @@ NEPI Docker Demo Installations are recommended for a quick demo of the NEPI Soft
 **NOTE:** If you are not an experienced linux user, you may want to try the NEPI Docker Lite installation which includes
 a fully automated setup process. See the NEPI DOCKER LITE SETUP instructions at [here](NEPI_DOCKER_LITE_SETUP.md)
 
-**NOTE:** NEPI Docker Demo installation will not install NEPI's Docker Management System and make minimal changes 
-to your device's operating system configuration with no NEPI management of operating system services 
-(i.e. HOSTNAME, NETWORK, WIFI, SSH, SAMBA SHARED DRIVES, DOCKER ...) which are provided by NEPI Lite and Full installations.
-
 **NOTE:** NEPI Docker installation will require a minimum of 20 GB of available free hard drive space on your device. 
-See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
-
 
 ################################################################
 ### NEPI Docker Demo Env Setup
