@@ -1,7 +1,7 @@
 # NEPI Docker Lite Setup Instructions
 This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite Installation on a  supported device.
 
-**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA JETSON
+**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA Jetson
 
 NEPI Docker Lite Installations are recommended for PC base installations, trial Edge-Compute processor installations, and NEPI Software development.
 With fully-automated NEPI Docker setup processes, it is also recommended for non-experienced linux users.

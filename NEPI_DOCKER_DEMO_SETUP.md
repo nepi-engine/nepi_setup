@@ -1,7 +1,7 @@
 # NEPI Docker Demo Setup Instructions
 This tutorial will walk you through setting up, configuring, and running a NEPI Docker Demo Installation on a supported device.
 
-**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA JETSON
+**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA Jetson
 
 NEPI Docker Demo Installations are recommended for a quick demo of the NEPI Software Container for expienced linux users.
 **NOTE:** If you are not an experienced linux user, you may want to try the NEPI Docker Lite installation which includes

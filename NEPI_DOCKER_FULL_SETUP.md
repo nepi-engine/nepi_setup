@@ -1,7 +1,7 @@
 # NEPI Docker Full Setup Instructions
 This tutorial will walk you through setting up, configuring, and running a NEPI Docker Full installation on a supported device.
 
-**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA JETSON
+**SUPPORTED DEVICES:** Ubuntu PC, NVIDIA Jetson
 
 NEPI Docker Full Installations are recommended for embedded Edge-Compute processor installations, production deployments, and NEPI Software development.
 
