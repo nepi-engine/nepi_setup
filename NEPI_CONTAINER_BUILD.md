@@ -1,5 +1,5 @@
 # NEPI Docker Build Setup Instructions
-This tutorial will walk you through setting up, configuring, and building a NEPI Docker production container on a suitable edge processor.
+This tutorial will walk you through setting up, configuring, and building a NEPI Docker production container on a suitable device.
 
 For additional support, see the documentation, tuturials, videos, and community forum available at NEPI.com:
 [NEPI Website](https://www.nepi.com)

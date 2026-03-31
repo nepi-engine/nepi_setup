@@ -1,5 +1,9 @@
 # NEPI Docker Full Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Full installation on a suitable edge processor.
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Full installation on a supported device.
+
+**SUPPORTED DEVICES:** nvidia-jetson, amd64
+
+NEPI Docker Full Installations are recommended for embedded Edge-Compute processor installations, production deployments, and NEPI Software development.
 
 **NOTE:** NEPI Docker Full installation will make significant changes to your device's operating system configuration and 
 setup NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, DOCKER ...) that support both local and remote
@@ -10,17 +14,12 @@ see the NEPI DOCKER LITE SETUP instructions at [here](NEPI_DOCKER_LITE_SETUP.md)
 
 **If you choose to proceed, make sure you have a way to reflash the device, or backup and restore your device's existing file system if needed.**
 
-**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space. 
+**NOTE:** NEPI Docker installation will require a minimum of 40 GB of available free hard drive space on your device.  
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
 
 
-For a detailed tutorials and videos on this process see the "NEPI Docker Full Setup" tutorial under the "NEPI Installation" section at:
-[NEPI Tutorials](https://www.nepi.com/tutorials)
-
-
-
 ################################################################
-### NEPI Docker User Setup
+### NEPI Docker FULL User Setup
 
 This step will setup NEPI Docker required user accounts on your device
 

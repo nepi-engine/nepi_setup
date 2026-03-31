@@ -1,22 +1,17 @@
 # NEPI Docker Lite Setup Instructions
-This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite Installation on a suitable edge processor.
+This tutorial will walk you through setting up, configuring, and running a NEPI Docker Lite Installation on a  supported device.
 
+**SUPPORTED DEVICES:** nvidia-jetson, amd64
 
-**NOTE:** NEPI Docker Lite installation will make minimal changes to your device's operating system configuration with
-no NEPI management of operating system services (i.e. HOSTNAME, NETWORK, WIFI, SSH, SAMBA SHARED DRIVES, DOCKER ...) 
+NEPI Docker Lite Installations are recommended for PC base installations, trial Edge-Compute processor installations, and NEPI Software development.
+With fully-automated NEPI Docker setup processes, it is also recommended for non-experienced linux users.
 
-NEPI Lite Installations are recommended for PC base installations and trial Edge-Compute processor installations.
+After testing with the Lite installation, you can upgrade your system to a Full installation for production deployments
+with support for both local and remote real-time management of operating system services through User Interface and API controls.
+see the NEPI DOCKER FULL SETUP instructions at [here](NEPI_DOCKER_FULL_SETUP.md)
 
-After testing with the Lite installation, you can upgrade your system to a Full installation with support for both local and remote
-real-time management of operating system services through User Interface and API controls.
-see the NEPI DOCKER PRODUCTION SETUP instructions at [here](NEPI_DOCKER_PRODUCTION_SETUP.md)
-
-
-**NOTE:** NEPI Docker installation will require a minimum of 60 GB of available free hard drive space. 
+**NOTE:** NEPI Docker installation will require a minimum of 30 GB of available free hard drive space on your device. 
 See the 'Check Available Disk Space' section at the end of these instructions for more information on checking available space.
-
-For a detailed tutorials and videos on this process see the "NEPI Docker Lite Setup" tutorial under the "NEPI Installation" section at:
-[NEPI Tutorials](https://www.nepi.com/tutorials)
 
 
 ################################################################
