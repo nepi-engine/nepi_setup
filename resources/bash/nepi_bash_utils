@@ -1306,23 +1306,37 @@ function sync_yaml_files(){
 }
 export -f sync_yaml_files
 
+clean_yaml_file() {
+    local input_file="$1"
+    if [[ -z "$input_file" ]]; then
+        echo "Usage: remove_invalid_yaml_lines <filename>" >&2
+        return 1
+    fi
 
-
-function clean_yaml_file(){
-    yaml_file=$1
-    #echo $yaml_file
-    if [ -f "$yaml_file" ]; then
-
-      success=0
-      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/clean_yaml_file.py $tmp_file)"  #2>/dev/null"
-      eval "$eval_cmd"
-      
-    else
-        echo "Yaml file not found ${yaml_file}"
+    # Use yq to re-parse and output the YAML, which filters invalid content
+    # If the file is completely invalid, this command will fail.
+    # The output is a new, valid YAML stream.
+    if ! yq eval '.' "$input_file" > /dev/null; then
+        echo "Error: Could not process the YAML file entirely. Check for major syntax errors." >&2
         return 1
     fi
 }
-export -f clean_yaml_file
+
+# function clean_yaml_file(){
+#     yaml_file=$1
+#     #echo $yaml_file
+#     if [ -f "$yaml_file" ]; then
+
+#       success=0
+#       eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/clean_yaml_file.py $tmp_file)"  #2>/dev/null"
+#       eval "$eval_cmd"
+      
+#     else
+#         echo "Yaml file not found ${yaml_file}"
+#         return 1
+#     fi
+# }
+# export -f clean_yaml_file
 
 function load_yaml_file(){
     yaml_file=$1
@@ -1330,6 +1344,7 @@ function load_yaml_file(){
     if [ -f "$yaml_file" ]; then
     
       success=0
+      clean_yaml_file $yaml_file
       eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $yaml_file)"  #2>/dev/null"
       eval "$eval_cmd"
       
