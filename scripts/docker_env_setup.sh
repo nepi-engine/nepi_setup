@@ -210,7 +210,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     if [[ ! -f "/var/run/sshd" ]]; then
         sudo mkdir "/var/run/sshd"
     fi
-    sudo chmod 0775 /var/run/sshd
+    sudo chmod 0755 /var/run/sshd
     sudo chown root:root /var/run/sshd
 
     echo "############"

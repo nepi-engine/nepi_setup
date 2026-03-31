@@ -11,6 +11,8 @@ import asyncio
 import websockets
 import random
 import shutil
+import netifaces
+import subprocess
 
 NEPI_LICENSE_USER_FOLDER = '/mnt/nepi_storage/license'
 NEPI_LICENSE_SYS_FOLDER = '/mnt/nepi_config/system_cfg/license'
@@ -25,8 +27,6 @@ NEPI_VERSION_FILE = '/opt/nepi/nepi_engine/etc/fw_version.txt'
 LICENSE_WARNING_FILE = '/opt/nepi/etc/license/UNLICENSED_NEPI_ENGINE.txt'
 UNLICENSED_LICENSE_DICT = {'licensed_components':{'nepi_base':{'commercial_license_type': 'Unlicensed'}}}
 
-
-NEPI_CONFIG_FILE = '/opt/nepi/etc/nepi_system_config.yaml'
 
 HARDWARE_ID="Unknown"
 
@@ -43,27 +43,58 @@ def read_dict_from_file(file_path):
     return dict_from_file
 
 
+
+
+def get_network_mac():
+    mac_address = None
+    interfaces = ['eth0','wpl0']
+    devices = netifaces.interfaces()
+    adapter = None
+
+    for device in devices:
+        for interface in interfaces:
+            if interface in device:
+                adpater = device
+                break
+                
+        if adapter is not None:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', bytes(adapter, 'utf-8')[:15]))
+            mac_address = ''.join('%02x' % b for b in info[18:24])
+            print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(adapter))
+            break
+
+    return mac_address
+
+def get_bluetooth_mac():
+    interface="hci0"
+    mac_address = None
+    try:
+        # Run the hciconfig command
+        result = subprocess.run(['hciconfig', interface], capture_output=True, text=True, check=True)
+        output = result.stdout
+        
+        # Parse the output to find the "BD Address"
+        for line in output.splitlines():
+            if 'BD Address:' in line:
+                # Extract the MAC address part
+                mac_address = line.split('BD Address:')[1].split()[0].strip()
+                print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(interface))
+                break
+    except:
+        pass
+    return mac_address
+
 def getHardwareId():
     global HARDWARE_ID
     if HARDWARE_ID == "Unknown":
-        NEPI_WIRED_INTERFACE = 'eth0'
-        NEPI_CONFIG_DICT=read_dict_from_file(NEPI_CONFIG_FILE)
-        #print("Got NEPI CONFIG Dict: " + str(NEPI_CONFIG_DICT))
-        if NEPI_CONFIG_DICT is not None:
-            if "NEPI_WIRED_INTERFACE" in NEPI_CONFIG_DICT.keys():
-                wif = NEPI_CONFIG_DICT['NEPI_WIRED_INTERFACE']
-                if wif is not None:
-                    if wif != "":
-                        NEPI_WIRED_INTERFACE=wif
-                        #print("Got network interface id: " + str(wif))
-        #print("Using network interface id: " + str(NEPI_WIRED_INTERFACE))
-        
-        
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', bytes(NEPI_WIRED_INTERFACE, 'utf-8')[:15]))
-        hardware_id = ''.join('%02x' % b for b in info[18:24])
-        print("Got Hardware ID: " + str(hardware_id) + " for network interface id: " + str(NEPI_WIRED_INTERFACE))
-        HARDWARE_ID=hardware_id
+        hardware_id = None
+        if hardware_id is None:
+            hardware_id = get_network_mac()
+        if hardware_id is None:
+            hardware_id = get_bluetooth_mac()
+        if hardware_id is not None:
+            HARDWARE_ID = hardware_id
     return HARDWARE_ID
 
 def getNEPIVersion():
@@ -76,6 +107,7 @@ def checkLicense():
     license_folder = ''
     license_key_file = ''
     license_info_file = ''
+    error = 'folder check failed with unknown error'
     for check_folder in NEPI_LICENSE_FOLDERS:
         try:
             detected_key = HARDWARE_ID #getHardwareId()
@@ -140,13 +172,13 @@ def checkLicense():
             license_info_file = license_fullpath.replace(NEPI_LICENSE_EXTENSION,'.txt')
             break
         except Exception as e:
-            pass
+            error = e
         
     if license_folder == '':
         with open(LICENSE_WARNING_FILE, 'w') as f:
             f.write("THIS DEVICE IS RUNNING AN UNLICENSED VERSION OF NEPI.\n")
             f.write("-----------------------------------------------------------------------------------\n")
-            f.write("Failed to validate commercial license: " + str(e) + "\n")
+            f.write("Failed to validate commercial license: " + str(error) + "\n")
             #print("Debug: " + str(e))
         exception_license = UNLICENSED_LICENSE_DICT.copy()
         try:
@@ -155,8 +187,8 @@ def checkLicense():
         except:
             pass
         
-        exception_license['licensed_components']['nepi_base']['status'] = str(e)
-        #print("Debug: License invalid: " + str(e))
+        exception_license['licensed_components']['nepi_base']['status'] = str(error)
+        #print("Debug: License invalid: " + str(error))
         return yaml.dump(exception_license)
     else:
         print("License valid: " + str(license_contents))
