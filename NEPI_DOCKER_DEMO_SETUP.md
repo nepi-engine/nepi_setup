@@ -54,21 +54,24 @@ Install the latest NEPI Docker Image for your device
 
 **For NONE GPU or RADEON GPU SUPPORT**
 
-    docker pull nepi-latest
+    sudo docker pull numurusnepi/nepi:latest
 
-**For NVIDIA GPU SUPPORT**
+Retag image as nepi:
 
-    docker pull nepi-cuda-latest
+    sudo docker tag numurusnepi/nepi:latest nepi:latest
+    sudo docker rmi numurusnepi/nepi:latest
 
-**For NVIDIA JETSON GPU SUPPORT**
+**For NVIDIA GPU SUPPORT or For NVIDIA JETSON GPU SUPPORT**
 
-    docker pull nepi-jetson-latest
+    sudo docker pull numurusnepi/nepi:latest-cuda
+
+Retag image as nepi:
+
+    sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
+    sudo docker rmi numurusnepi/nepi:latest-cuda
 
 **NOTE:** NEPI Docker images are large files and will take several minutes to download and install
 
-Once the NEPI Docker Image download completes, retag the download image to 'nepi_software':
-
-   ####retag nepi_software####
 
 Install the latest NEPI Storage Files which include sample Data, AI Model, and Configuration files:
 
