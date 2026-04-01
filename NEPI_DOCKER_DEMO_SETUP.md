@@ -22,7 +22,13 @@ Check that Docker is installed on your device by typing:
 
 **NOTE:** If Docker is not installed, install docker along with any additional software required if you also need NVIDIA GPU support.
 
-Create NEPI required system folders on your device and add your user to account groups:
+Check that a Chromium web-browser is installed on your device by typing:
+
+    chromium
+
+**NOTE:** If Chromium is not installed, install chromium.
+
+Create NEPI required system folders on your device, and add your user to required system groups:
 
     sudo -v 
 

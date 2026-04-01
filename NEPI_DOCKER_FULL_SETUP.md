@@ -27,8 +27,8 @@ Log into a user account on the device with 'Adminstrator' privilages
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
-**NOTE:**  If you allready have a 'nepi_host' account created during a NEPI Docker Lite installation,
-You will want to delete the 'nepi_host' account using the Settings/User panel.
+**NOTE:**  If you allready have a 'nepihost' account created during a NEPI Docker Lite installation,
+You will want to delete the 'nepihost' account using the Settings/User panel.
 
 Make sure your system has internet access by running the following command:
 
@@ -107,8 +107,6 @@ This process will create (if not allready created) and setup the following NEPI 
 2) NEPI bash alias and util functions added to 'nepihost user bash profile.
 3) NEPI folder shortcuts added to File Manager folder bookmarks.
 4) Chromium browser updated with useful NEPI browser bookmarks.
-
-
 
 **NOTE:** After this process, network IP addresses, internet connections, and clock sycn processes are managed by NEPI processes. 
     If you need to connect to the internet you can run the command line shortcut **ninet**
