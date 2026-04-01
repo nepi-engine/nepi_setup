@@ -108,7 +108,7 @@ Start your NEPI container running with the following command:
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
     --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
-    nepi_software:latest /bin/bash -c '/nepi_start_all'
+    nepi:latest /bin/bash -c '/nepi_start_all'
 
 **For NVIDIA GPU SUPPORT**
 
@@ -122,7 +122,7 @@ Start your NEPI container running with the following command:
     --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
-    nepi_software:latest /bin/bash -c '/nepi_start_all'
+    nepi:latest /bin/bash -c '/nepi_start_all'
 
 
 **For NVIDIA JETSON GPU SUPPORT**
@@ -139,7 +139,7 @@ Start your NEPI container running with the following command:
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
     -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp 
     -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon
-    nepi_software:latest /bin/bash -c '/nepi_start_all'    
+    nepi:latest /bin/bash -c '/nepi_start_all'    
 
 
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
