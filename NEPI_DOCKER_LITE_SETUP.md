@@ -164,7 +164,13 @@ Check that the NEPI Resident User Interface (RUI) is running by opening the Chro
     localhost:5003 
 
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
-**NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service running.
+**NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt are not enabled for NEPI Demo installations.
+
+You can also access the NEPI admin page for managing nepi software configurations by entering the following in the search bar:
+
+    localhost:5003/admin
+
+the default admin password is: **nepiadmin**
 
 
 ################################################################
