@@ -1876,95 +1876,6 @@ function cmd_loop() {
 export -f cmd_loop
 
 
-function select_ssh_key {
-        sudo -v
-        key_folder=$1
-        if [[ -z $key_folder ]]; then
-          key_folder="/home/${CONFIG_USER}/.ssh"
-        fi
-        sel_ssh_file=''
-        echo "Checking for available key options in folder: ${key_folder}"
-
-        if [[ -d $key_folder ]]; then
-                ###############
-                #echo "Checking for available key options"
-                # Change to the specified directory
-                sudo chmod 0700 $key_folder
-                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-                pushd "$key_folder" > /dev/null || return 1
-
-                declare -a files
-                for file in "$key_folder"/*; do
-                    pub_file="${file}.pub"
-                    #echo "Checking file: ${file}"
-                    #echo "Looking for public key file: ${pub_file}"
-                    filename=$(basename "$file")
-                    if [[ -f "$file" ]]; then # Check if the item is a regular file
-                        if [[ -f $pub_file ]]; then
-                          files+=( "$filename" ) # Add it to the array
-                          echo $filename
-                        fi
-                    fi
-                done
-                sudo chmod 0700 $key_folder
-                
-
-                # Check if there are any files
-                if [[ ${#files[@]} -eq 0 ]]; then
-                    echo "No SSH Key files found in folder: ${key_folder}"
-                    popd > /dev/null
-                    return 1
-                fi
-
-                # # Check if one file
-                # if [[ ${#files[@]} -eq 1 ]]; then
-                #     echo "${files[0]}"
-                #     popd > /dev/null
-                #     return 0
-                # fi
-                echo ""
-                echo "Select a file from "${folder_path}":"
-                echo "--------------------"
-                echo ""
-                select filename in "${files[@]}"; do
-                    if [[ -n "$filename" ]]; then
-                        sel_ssh_file="$filename"
-                        break
-                    else
-                        echo "Invalid selection. Please try again."
-                    fi
-                done
-                
-                # Return to the original directory
-                popd > /dev/null
-
-                # Output the full path of the selected file
-                if [[ -n "$sel_ssh_file" ]]; then
-                    sel_ssh_path=${key_folder}/$sel_ssh_file
-                    if ssh-add ${sel_ssh_path} > /dev/null; then
-                        echo ${sel_ssh_path}
-                    else
-                      echo "Failed to add SSH key: ${sel_ssh_file}"
-                    fi
-
-                    sudo chmod 0700 $sel_ssh_path
-                    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-                    return 0
-                else
-                  return 2
-                fi
-
-        else
-          echo "SSH Key folder not found ${key_folder}"
-          return 1
-        fi
-
-}
-
-export -f select_ssh_key
-
 
 function create_ssh_key {
         sudo -v
@@ -2048,6 +1959,125 @@ function create_ssh_key {
 
 export -f create_ssh_key
 
+
+
+function add_ssh_key {
+  sudo -v
+  key_path=$1
+  if [[ -n $key_path ]]; then
+
+      # Output the full path of the selected file
+      if [[ -f $key_path ]]; then
+          if ssh-add ${key_path} > /dev/null; then
+              echo "Added SSH key: ${key_path}"
+          else
+            echo "Failed to add SSH key: ${key_path}"
+            return 3
+          fi
+
+          sudo chmod 0700 $key_path
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_path
+
+          return 0
+      else
+        echo "File not found at key path: ${key_path}"
+        return 2
+      fi
+  else
+    echo "No Key Path Provided"
+    return 1
+  fi
+
+
+
+}
+
+export -f add_ssh_key
+
+
+function select_ssh_key {
+        sudo -v
+        key_folder=$1
+        if [[ -z $key_folder ]]; then
+          key_folder="/home/${CONFIG_USER}/.ssh"
+        fi
+        sel_ssh_file=''
+        echo "Checking for available key options in folder: ${key_folder}"
+
+        if [[ -d $key_folder ]]; then
+                ###############
+                #echo "Checking for available key options"
+                # Change to the specified directory
+                sudo chmod 0700 $key_folder
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+                pushd "$key_folder" > /dev/null || return 1
+
+                declare -a files
+                for file in "$key_folder"/*; do
+                    pub_file="${file}.pub"
+                    #echo "Checking file: ${file}"
+                    #echo "Looking for public key file: ${pub_file}"
+                    filename=$(basename "$file")
+                    if [[ -f "$file" ]]; then # Check if the item is a regular file
+                        if [[ -f $pub_file ]]; then
+                          files+=( "$filename" ) # Add it to the array
+                          echo $filename
+                        fi
+                    fi
+                done
+                sudo chmod 0700 $key_folder
+                
+
+                # Check if there are any files
+                if [[ ${#files[@]} -eq 0 ]]; then
+                    echo "No SSH Key files found in folder: ${key_folder}"
+                    popd > /dev/null
+                    return 1
+                fi
+
+                # # Check if one file
+                # if [[ ${#files[@]} -eq 1 ]]; then
+                #     echo "${files[0]}"
+                #     popd > /dev/null
+                #     return 0
+                # fi
+                echo ""
+                echo "Select a file from "${folder_path}":"
+                echo "--------------------"
+                echo ""
+                select filename in "${files[@]}"; do
+                    if [[ -n "$filename" ]]; then
+                        sel_ssh_file="$filename"
+                        break
+                    else
+                        echo "Invalid selection. Please try again."
+                    fi
+                done
+                
+                # Return to the original directory
+                popd > /dev/null
+
+                # Output the full path of the selected file
+                if [[ -n "$sel_ssh_file" ]]; then
+                    sel_ssh_path=${key_folder}/$sel_ssh_file
+                    add_ssh_key $sel_ssh_path
+                    return $?
+                else
+                  return 2
+                fi
+
+        else
+          echo "SSH Key folder not found ${key_folder}"
+          return 1
+        fi
+
+}
+
+export -f select_ssh_key
+
+
+
 #### Update Help Test
 utilsn="${utilsn}
 ################################
@@ -2087,8 +2117,10 @@ get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname
 get_os_info = Echos the current OS NameVersion
 get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
 get_sw_desc = Echos NEPI formated software vesion tag
-select_ssh_key = Select SSH key from available keys in provided key_folder
-create_ssh_key = Create a new SSH key key pair in  in provided key_folder"
+add_ssh_key = Add the ssh key in the provided full path ssh_key file
+create_ssh_key = Create a new SSH key key pair in provided key_folder
+select_ssh_key = Select SSH key from available keys in provided key_folder"
+
 
 
 
@@ -2557,6 +2589,7 @@ function nepiauthadd {
           sudo chmod 0700 $key_folder
           sudo chmod 0600 $authorized_keys_path
           sudo chmod 0600 $key_path
+          sudo chmod 0600 $key_pub
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
           systemctl&> /dev/null

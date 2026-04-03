@@ -106,7 +106,7 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     nepi:latest /bin/bash -c '/nepi_start_all'
 
@@ -119,7 +119,7 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
     nepi:latest /bin/bash -c '/nepi_start_all'
@@ -134,7 +134,7 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
     -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp 
