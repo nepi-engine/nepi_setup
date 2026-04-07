@@ -483,8 +483,8 @@ export RUI="${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src"
 export RUI_ENV="${NEPI_BASE}/nepi_rui"
 export SDK="${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk"
 export SHARE="${NEPI_BASE}/nepi_engine/share"
-export SRC="${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src"
-export SRCRUI="${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
+export SRC="${NEPI_BUILD_REPO_FOLDER}/src"
+export SRCRUI="${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src"
 export TMP="${NEPI_STORAGE}/tmp"
 export DRIVE="${NEPI_STORAGE}"
 
@@ -600,8 +600,8 @@ rui = ${NEPI_BASE}/rui/src/rui_webserver/rui-app/src
 rui_env = ${NEPI_BASE}/rui
 sdk = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk
 share = ${NEPI_BASE}/nepi_engine/share
-src = ${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src
-srcrui = ${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
+src = ${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = ${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
 tmp = ${NEPI_STORAGE}/tmp"
 
 
