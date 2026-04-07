@@ -99,6 +99,10 @@ echo "########################"
     echo "Installing System Required Software"
     echo ""
 
+    sudo add-apt-repository ppa:rmescandon/yq -y
+
+    sudo apt update
+
     sudo apt install yq ncdu -y
 
     if command -v mount.cifs --help &>/dev/null; then
@@ -116,7 +120,6 @@ echo "########################"
 
 
 echo "Starting NEPI Configuration for user ${CONFIG_USER}"
-if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     
     echo ''
 
@@ -666,11 +669,7 @@ if [[ ${CONFIG_USER} != ${NEPI_USER} ]]; then
     echo "To see a list of available NEPI bash command line shortcuts run: nepihelp"
     echo " "
 
-else
 
-    echo "THIS SCRIPT CANNOT BE RUN BY NEPI_USER ${NEPI_USER}"
-
-fi
 
 
 
