@@ -17,7 +17,7 @@
 ## - mailto:nepi@numurus.com
 ##
 
-# This file imports an image from a tar file to the inactive fs
+# This file pulls a NEPI image from DockerHub and installs it to the inactive fs
 sudo -v
 
 if [[ ! -n $CONFIG_USER ]]; then
@@ -47,293 +47,160 @@ DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
-########################
-# Update Docker Config
-echo ""
-echo "Updating Docker Config File"
 
-source $DOCKER_CONFIG_UPDATE_FILE
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
+ninet > /dev/null 2>&1
+
+if ! is_valid_internet > /dev/null; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+
 else
 
     ########################
-    # Start Processes
-    PULL_REF=$1
+    # Update Docker Config
+    echo ""
+    echo "Updating Docker Config File"
 
-    if [[ "$NEPI_IMPORTING" -eq 1 ]]; then
-        echo "Image import allready in progress"
-    elif [[ -z "$PULL_REF" ]]; then
-        echo "No Pull Reference Provided"
-
+    source $DOCKER_CONFIG_UPDATE_FILE
+    if [[ "$?" -eq 1 ]]; then
+        echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
     else
+
+        # Accept image passed as script argument
+        PASSED_IMAGE="$1"
+
         ########################
-        echo "Proceeding with the import..."
-    
-
-
-        PULL_FS="${PULL_REF%%:*}"
-
-        if [[ "$PULL_REF" == *:*  ]]; then
-            PULL_TAG="${PULL_REF##*:}"
-        else
-            PULL_TAG=latest
+        # Select hub image based on hardware
+        HUB_IMAGE=""
+        if is_valid_amd64; then
+            if is_valid_cuda; then
+                HUB_IMAGE="numurusnepi/nepi:latest-cuda"
+            else
+                HUB_IMAGE="numurusnepi/nepi:latest"
+            fi
+        elif is_valid_jetson; then
+            HUB_IMAGE="numurusnepi/nepi:latest-cuda"
+        elif is_valid_arm64; then
+            HUB_IMAGE="numurusnepi/nepi:latest"
         fi
 
-        echo "Importing image from: ${PULL_REF} with name ${PULL_FS} and tag ${PULL_TAG}"
-                        
+        if [[ -n "$PASSED_IMAGE" ]]; then
+            HUB_IMAGE="$PASSED_IMAGE"
+        fi
 
-            ###########
-            if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
-                NEPI_IMPORT_FS=$2
-            elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
+        if [[ -z "$HUB_IMAGE" ]]; then
+            echo "Unsupported hardware platform — cannot determine DockerHub image"
+        elif [[ "$NEPI_IMPORTING" -eq 1 ]]; then
+            echo "Image pull already in progress"
+        else
+
+            ########################
+            # Determine target filesystem slot
+            if [[ "$NEPI_AB_FS" -eq 1 ]]; then
                 NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
             else
                 NEPI_IMPORT_FS=nepi_fs_a
             fi
 
-
-            ###########
-            # Get Imported Tag and IMPORT_ID 
-            NEPI_IMPORT_TAG=$2
-            if [[ -z "$NEPI_IMPORT_TAG" ]]; then
-                NEPI_IMPORT_TAG=$NEPI_IMPORT_TAG
-                if [[ "$NEPI_IMPORT_TAG" == 'unknown' ]]; then               
-                    NEPI_IMPORT_TAG=$PULL_TAG
-            fi
-
-
-            if [[ "${NEPI_IMPORT_TAG:0:4}" == 'nepi' ]]; then # NEPI Produced Image
-
-
-
-                IFS='-' read -ra TAG_ARRAY <<< "$NEPI_IMPORT_TAG"
-                
-
-                NEW_NAME=nepi
-
-                #echo "NEPI_VERSION = ${NEPI_VERSION}"
-                NEW_VERSION=$NEPI_VERSION
-                if [[ -z "$NEW_VERSION" ]]; then
-                    NEW_VERSION="${TAG_ARRAY[1]}"
-                    if [[ -z "$NEW_VERSION" ]]; then
-                        NEW_VERSION="0p0p0"
-                    fi
-                fi
-                NEW_VERSION=$(clean_tag_string "${NEW_VERSION}")
-
-                NEW_HW_TYPE=$NEPI_HW_TYPE
-                if [[ -z "$NEW_HW_TYPE" ]]; then
-                    NEW_HW_TYPE="${TAG_ARRAY[2]}"
-                    if [[ -z "$NEW_HW_TYPE" ]]; then
-                        NEW_HW_TYPE=$(get_hw_type)
-                    fi
-                fi
-                NEW_HW_TYPE=$(clean_tag_string "${NEW_HW_TYPE}")
-
-                NEW_SW_DESC="${TAG_ARRAY[3]}"
-                if [[ -z "$NEW_SW_DESC" ]]; then
-                        NEW_SW_DESC=$NEPI_SW_DESC # Updated by NEPI Software 
-                        if [[ -z "$NEW_SW_DESC" ]]; then
-                            NEW_SW_DESC="unknown" # Uknown until NEPI runs 
-                    fi
-                fi
-                NEW_SW_DESC=$(clean_tag_string "${NEW_SW_DESC}")
-
-                NEW_DATE="${TAG_ARRAY[4]}"
-                if [[ -z "$NEW_DATE" ]]; then
-                    NEW_DATE=$(date +%Y%m%d-%H%M)
-                fi       
-                NEW_DATE=$(clean_tag_string "${NEW_DATE}")   
-
-                NEW_DESC="${TAG_ARRAY[5]}"   
-                NEW_DESC=$(clean_tag_string "${NEW_DESC}")   
-                if [[ -n "$NEW_DESC" ]]; then
-                    NEW_DESC="-${NEW_DESC}"
-                fi   
-        
-        
-                NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}${NEW_DESC}"
-
-            else # Non NEPI Produced Image
-                
-                NEW_NAME=nepi
-                NEW_VERSION="0p0p0"
-                NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
-
-                new_fs_name=$PULL_FS
-                if [[ "$new_fs_name" == */* ]]; then
-                    new_fs_name="${PULL_FS##*/}"
-                fi
-                sw_desc=${new_fs_name}'_'${PULL_TAG}
-                echo $PULL_TAG
-                echo $sw_desc
-                echo $(clean_tag_string $sw_desc)
-                NEW_SW_DESC=$(clean_tag_string $sw_desc) # Updated by NEPI Software 
-
-                NEW_DATE=$(date +%Y%m%d-%H%M)        
-
-                NEPI_IMPORT_TAG="${NEW_NAME}-${NEW_VERSION}-${NEW_HW_TYPE}-${NEW_SW_DESC}-${NEW_DATE}"
-
-            fi
-
-
-            # NEW_DESC="${TAG_ARRAY[5]}"
-            # if [[ -n "$NEW_DESC" ]]; then
-            #     NEPI_IMPORT_TAG="${NEPI_IMPORT_TAG}-${NEW_DESC}"
-            # fi
-        
-            
-
+            ########################
+            # Build NEPI-format local tag
+            NEW_HW_TYPE=$(clean_tag_string $(get_hw_type))
+            NEW_DATE=$(date +%Y%m%d-%H%M)
+            NEW_HUB_TAG=$(echo "$HUB_IMAGE" | cut -d: -f2)
+            NEPI_IMPORT_TAG="nepi-0p0p0-${NEW_HW_TYPE}-${NEW_HUB_TAG}-${NEW_DATE}"
             NEPI_IMPORT_TAG=${NEPI_IMPORT_TAG,,}
 
+            echo ""
+            echo "Pulling DockerHub image: ${HUB_IMAGE}"
+            echo "Target filesystem slot: ${NEPI_IMPORT_FS}"
+            echo "Local tag: ${NEPI_IMPORT_TAG}"
 
             ##########
-            update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_IMPORTING" 1 "$DOCKER_CONFIG_FILE"
-            update_yaml_value "NEPI_IMPORT_FILE" $PULL_REF "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_IMPORT_FS" $NEPI_IMPORT_FS "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_IMPORT_TAG" $NEPI_IMPORT_TAG "$DOCKER_CONFIG_FILE"
 
-
-\
             #########################
-            # Clear any existing staging images
+            # Check available space
+            NEPI_DOCKER_ROOT=$(sudo docker info --format '{{ .DockerRootDir }}')
+            # Estimate: hub images are typically 10+ GB; use a conservative 12 GB floor
+            NEEDED_GB=12
+            if ! is_space_avail_gb $NEPI_DOCKER_ROOT $NEEDED_GB; then
+                echo "Not enough free space in ${NEPI_DOCKER_ROOT} to pull image (need ~${NEEDED_GB} GB)"
+            else
+                STAGING_NAME=nepi_staging
 
-            STAGING_NAME=nepi_staging
-            if [[ -n "$exists_ids" ]]; then
-            exist_ids=($(sudo docker images --filter "reference=${STAGING_NAME}" --format "{{.ID}}"))
-            echo "Removing existing Staging Images ${STAGING_NAME}"
-                for id in "${exist_ids[@]}"; do
-                    echo "Removing ${id}"
-                    sudo docker rmi -f $id
-                done
-            fi
+                # Remove stale staging images
+                exist_ids=($(sudo docker images --filter "reference=${STAGING_NAME}" --format "{{.ID}}"))
+                if [[ -n "${exist_ids[*]}" ]]; then
+                    echo "Removing existing staging images"
+                    for id in "${exist_ids[@]}"; do
+                        sudo docker rmi -f $id
+                    done
+                fi
 
+                echo "Pulling docker image this process can take several minutes..."
+                sudo docker pull $HUB_IMAGE
+                wait
 
-            #########################
-            NEPI_DOCKER=$(sudo docker info --format '{{ .DockerRootDir }}')
-            NEPI_DOCKER_SPACE=$(path_space_gb $NEPI_DOCKER)
-            NEPI_GB_CONTAINER=$(path_size_gb $PULL_REF)
-            echo "Checking avail space in ${NEPI_DOCKER}"
+                PULL_ID=$(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}" | head -1)
+                PULL_ID=${PULL_ID:0:12}
 
-            check_drive=$NEPI_DOCKER
-            check_space=$NEPI_GB_CONTAINER
-            if ! is_space_avail_gb $check_drive $check_space; then
-                
-                run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
-                if [[ -n "$run_names" ]]; then
+                if [[ -n "$PULL_ID" ]]; then
+                    echo "Docker pull succeeded with ID: $PULL_ID"
+
+                    # Stop and remove any running containers using the target slot
+                    run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
                     for run_name in "${run_names[@]}"; do
                         if [[ -n "$run_name" ]]; then
-                            echo "Removing running images for ${run_name}"
                             run_id=$(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
                             if [[ -n "$run_id" ]]; then
-                                echo "Removing ${run_id}"
-                                sudo docker stop -f $run_id
+                                echo "Removing running container ${run_id}"
+                                sudo docker stop $run_id
                                 wait
                                 sudo docker rm -f $run_id
                             fi
                         fi
                     done
-                fi
 
+                    # Remove existing images in the target slot
+                    exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
+                    if [[ -n "${exist_ids[*]}" ]]; then
+                        echo "Removing existing images for ${NEPI_IMPORT_FS}"
+                        for id in "${exist_ids[@]}"; do
+                            sudo docker rmi -f $id
+                        done
+                    fi
 
-                exist_refs=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.Repository}}:{{.Tag}}"))
-                if [[ -n "$exist_refs" ]]; then
-                echo "Removing existing images ${NEPI_IMPORT_FS}"
-                    for ref in "${exist_refs[@]}"; do
-                        echo "Removing ${ref}"
-                        sudo docker rmi "$ref"
-                    done
-                fi
-            fi
+                    # Tag pulled image into the NEPI slot
+                    echo "Tagging ${HUB_IMAGE} → ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                    sudo docker tag "${HUB_IMAGE}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                    wait
+                    sudo docker rmi "${HUB_IMAGE}"
 
-            #########################
-            NEPI_DOCKER_SPACE=$(path_space_gb $NEPI_DOCKER)
-            check_drive=$NEPI_DOCKER
-            check_space=$NEPI_GB_CONTAINER
-            if ! is_space_avail_gb $check_drive $check_space; then
-                echo "Can't install Image file ${NEPI_IMPORT_FS}"
-                echo "Not enough free space in folder: ${NEPI_DOCKER}"
-                echo "Need ${NEPI_GB_CONTAINER}GB, but only ${NEPI_DOCKER_SPACE}GB is aviable"
-            else
-                #IMPORT_ID=debug
-                echo "Importing image ${PULL_REF} for NEPI Docker Image: ${NEPI_IMPORT_FS}"
-                res=$(sudo docker pull $PULL_REF)
-                wait
-                IMPORT_ID=$(sudo docker images -q ${PULL_FS})
-
-                if [[ -n "$IMPORT_ID" ]]; then
-                        echo "Docker import succeeded with IMPORT_ID: $IMPORT_ID"
-                        
-                        run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
-                        if [[ -n "$run_names" ]]; then
-                            for run_name in "${run_names[@]}"; do
-                                if [[ -n "$run_name" ]]; then
-                                    echo "Removing running images for ${run_name}"
-                                    run_id=$(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
-                                    if [[ -n "$run_id" ]]; then
-                                        echo "Removing ${run_id}"
-                                        sudo docker rm -f $run_id
-                                        wait
-                                        sudo docker rm -f $run_id
-                                    fi
-                                fi
-                            done
-                        fi
-
-                        # Remove existing NEPI image if needed
-                        exist_refs=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.Repository}}:{{.Tag}}"))
-                        if [[ -n "$exist_refs" ]]; then
-                        echo "Removing existing images ${NEPI_IMPORT_FS}"
-                            for ref in "${exist_refs[@]}"; do
-                                echo "Removing ${ref}"
-                                sudo docker rmi "$ref"
-                            done
-                        fi
-
-                        # Copy the Staging to the NEPI_FSA image
-                        PULL_TAG=($(sudo docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${IMPORT_ID}" | awk '{print $2}'))
-                        echo "Renaming import to ${PULL_FS}:${PULL_TAG} to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
-
-                        sudo docker tag "${PULL_FS}:${PULL_TAG}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}" 
-                        wait
-                        echo "Removing pull import tag"
-                        sudo docker rmi "${PULL_FS}:${PULL_TAG}"
-
-                        #############
-                        echo ""
-                        echo "--------------------------"
-                        echo "NEPI Image Import Complete"
-                        echo ""
-                        dimg
-
-
+                    echo ""
+                    echo "--------------------------"
+                    echo "NEPI Image Pull Complete"
+                    echo ""
+                    dimg
                 else
                     echo ""
                     echo "--------------------------"
-                    echo "NEPI Image Failed to Import: ${PULL_REF}"
-                    
+                    echo "NEPI Image Pull Failed: ${HUB_IMAGE}"
                 fi
-                
-                update_yaml_value "NEPI_FS_IMPORT" 0 "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORTING" 0 "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_FILE" "unknown" "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_FS" "unknown" "$DOCKER_CONFIG_FILE"
-                update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
-                
-
-                ########################
-                # Update Docker Config
-                echo ""
-                echo "Updating Docker Config File"
-                bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-                wait
-
             fi
-        else
-            echo "Failed to find NEPI Image '.tar' file at: ${PULL_REF}"
+
+            update_yaml_value "NEPI_IMPORTING" 0 "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_IMPORT_FS" "unknown" "$DOCKER_CONFIG_FILE"
+            update_yaml_value "NEPI_IMPORT_TAG" "unknown" "$DOCKER_CONFIG_FILE"
+
+            ########################
+            # Update Docker Config
+            echo ""
+            echo "Updating Docker Config File"
+            bash ${DOCKER_CONFIG_UPDATE_FILE}
+            wait
+
         fi
     fi
-    
+
 fi

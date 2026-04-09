@@ -346,7 +346,7 @@ nnet"
 
 HELPN="${HELPN}
 ################################
-## NEPI Docer Shortcut Functions ##
+## NEPI Docker Shortcut Functions ##
 ################################
 nepistart = Start the NEPI docker container.
 nepidev = Start the NEPI docker container in a dev mode with no processes running, and an OPTIONAL_RUN_COMMAND.
