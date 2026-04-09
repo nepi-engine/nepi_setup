@@ -32,7 +32,18 @@ fi
 export CONFIG_USER=$CONFIG_USER
 
 
+ufile=/home/${CONFIG_USER}/.nepi_bash_utils
+
+if [[ -f "$ufile" ]]; then
+    source $ufile
+else
+    echo "NEPI Utils bash file not found at: ${ufile}"
+fi
+
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+
+
+
 
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
 

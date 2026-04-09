@@ -178,9 +178,16 @@ echo "########################"
 
 ################################
 # Update ETC files if systemd is running (Not in Container)
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
 
+
+echo ""
+echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
+echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
+echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
+echo "NEPI_MANAGES_SSH ${NEPI_MANAGES_SSH}"
+echo "NEPI_MANAGES_SHARE ${NEPI_MANAGES_SHARE}"
+echo "NEPI_MANAGES_SOFTWARE ${NEPI_MANAGES_SOFTWARE}"
+echo "NEPI_MANAGES_DOCKER ${NEPI_MANAGES_DOCKER}"
 
 if [[ "$LITE_INSTALL" -eq 1 ]]; then
     NEPI_INSTALL=LITE
@@ -189,6 +196,16 @@ else
     NEPI_INSTALL=FULL
     SERVICES_MANAGED=1
 fi
+echo "Running setup in ${NEPI_INSTALL} mode"
+echo "NEPI MANAGES SERVICES ${SERVICES_MANAGED}"
+
+echo ""
+
+
+
+
+systemctl&> /dev/null
+if [[ "$?" -eq 0 ]]; then
 
 
     echo "Running setup in ${NEPI_INSTALL} mode"

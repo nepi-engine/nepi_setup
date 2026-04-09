@@ -599,7 +599,7 @@ else
     # sudo cp ${NEPI_SYSTEM_CONFIG_SOURCE} ${SYSTEM_SYS_CONFIG_FILE}
 fi
 
-
+print_yaml_file $SYSTEM_SYS_CONFIG_FILE
 
 
 echo ""
