@@ -219,7 +219,7 @@ while [[ -z "$CONTAINER_ID" && "$RETRY_COUNT" -lt "$NEPI_RETRY_COUNT" ]]; do
 
     eval "$RUN_COMMAND"
 
-    sleep 4
+    sleep 2
 
     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
     CONTAINER_ID=${CONTAINER_ID[0]}

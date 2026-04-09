@@ -3037,7 +3037,8 @@ function pushn(){
 
 ## NEPI deploy complete
 function nepisetup_remote() {
-source $(NSETUP)/scripts/remote_dev_setup.sh
+skip_software=1
+source $(NSETUP)/scripts/remote_dev_setup.sh $skip_software
 source /home/${CONFIG_USER}/.bashrc
 }
 

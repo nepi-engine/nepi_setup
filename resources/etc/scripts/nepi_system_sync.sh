@@ -35,7 +35,6 @@ export CONFIG_USER=$CONFIG_USER
 
 
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
 
 if [[ -f "$ufile" ]]; then
     source $ufile
