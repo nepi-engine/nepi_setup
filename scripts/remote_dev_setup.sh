@@ -19,6 +19,13 @@
 
 sudo -v
 
+skip_software=$1
+if [[ $skip_software -eq 1 ]]; then
+    SKIP_SOFTWARE=1
+else
+    SKIP_SOFTWARE=0
+fi
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
@@ -90,10 +97,10 @@ fi
 
 # This file sets up nepi bash aliases and util functions
 echo "########################"
-echo "NEPI DEV PC SETUP"
+echo "NEPI REMOTE DEV SETUP"
 echo "########################"
 
-
+if [[ $skip_software -eq 0 ]]; then
     echo " "
     echo "################################# "
     echo "Installing System Required Software"
@@ -117,7 +124,7 @@ echo "########################"
     echo "Installing Required Python Software"
     echo ""
 
-
+fi
 
 echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     
@@ -477,6 +484,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     # fi
     # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
 
+if [[ $skip_software -eq 0 ]]; then
     if [[ -n $DISPLAY ]]; then
         #####################################
         echo "########################"
@@ -592,7 +600,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
         fi
 
     fi
-
+fi
 
 
 
