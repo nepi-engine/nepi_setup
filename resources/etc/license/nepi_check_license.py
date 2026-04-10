@@ -54,7 +54,7 @@ def get_network_mac():
     for device in devices:
         for interface in interfaces:
             if interface in device:
-                adpater = device
+                adapter = device
                 break
                 
         if adapter is not None:
@@ -79,6 +79,7 @@ def get_bluetooth_mac():
             if 'BD Address:' in line:
                 # Extract the MAC address part
                 mac_address = line.split('BD Address:')[1].split()[0].strip()
+                mac_address = mac_address.replace(":","")
                 print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(interface))
                 break
     except:

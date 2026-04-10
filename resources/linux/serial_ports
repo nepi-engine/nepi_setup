@@ -12,25 +12,48 @@ sudo gpasswd --add ${USER} dialout
 #sudo chmod a+rw /dev/ttyACM0
 #sudo chown root:dialout /dev/ttyACM0
 
+# STANDARD_BUAD_RATES = [110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
+
 ###################
-# Connect and Test
+# Set up listener in a termainal
+
+sudo -v
+#then
+export TEST_PORT=USB0
+sudo chmod 666 /dev/tty${TEST_PORT}
+sudo cat /dev/tty${TEST_PORT}
+
+###################
+# Connect and Send Messages in another termainal
 
 # Set serial port buadrate
-# STANDARD_BUAD_RATES = [110, 150, 300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
-sudo ls
+sudo -v
+# then
 export TEST_PORT=USB0
 sudo stty -F /dev/tty${TEST_PORT} icanon
 sudo stty -F /dev/tty${TEST_PORT} 9600
 sudo stty -F /dev/tty${TEST_PORT} -echo
 stty -F /dev/tty${TEST_PORT}
+
+
+# Send info request message
 echo -e '#AMRE0011R/r/n' > /dev/tty${TEST_PORT}
 
+# Read speed
+echo -e '#AMRS0000R/r/n' > /dev/tty${TEST_PORT}
+# Set speed
+echo -e '#AMSP0020W/r/n' > /dev/tty${TEST_PORT}
 
-sudo -v
+# Move home
+echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
+#Get Position
+echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
 
-export TEST_PORT=USB0
-sudo chmod 666 /dev/tty${TEST_PORT}
-sudo cat /dev/tty${TEST_PORT}
+# Move to different position
+echo -e '#AMML4500W/r/n' > /dev/tty${TEST_PORT}
+# Get Position
+echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
+
 
 
 export TEST_PORT=ACM0
@@ -140,27 +163,7 @@ the console=ttyTCU0,115200 or similar entry from the APPEND line,
 then reboot the system. This prevents the UART from being used for debug output,
 freeing it for other uses. 
 
-#read speed
-echo -e '#AMRS0000R/r/n' > /dev/tty${TEST_PORT}
-#set speed
-echo -e '#AMSP0020W/r/n' > /dev/tty${TEST_PORT}
 
-#AMMF0000W
-echo -e '$AMMF0000W/r/n' > /dev/tty${TEST_PORT}
-
-4943.
-#move 
-echo -e '$AMML5000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML4940W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMML4943W/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMML4500W/r/n' > /dev/tty${TEST_PORT}
-
-echo -e '$AMMF0000W/r/n' > /dev/tty${TEST_PORT}
-echo -e '$AMML4940W/r/n' > /dev/tty${TEST_PORT}
-
-#Get Position
-echo -e '$AMRL0000R/r/n' > /dev/tty${TEST_PORT}
-echo -e '#AMRL0000R/r/n' > /dev/tty${TEST_PORT}
 
 
 #AMRL0000R
