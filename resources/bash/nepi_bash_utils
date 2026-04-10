@@ -2995,16 +2995,16 @@ function gitmain {
 function pushn(){
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
-  IFS='/' read -r -a path_parts <<< "$cur_path"
-  if [[ ${#path_parts[@]} -lt 4 ]]; then
-      echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
-      return 1
-  fi
-  third_folder="${path_parts[3]}"
-  if [[ ${third_folder} != ${NEPI_REPO_NAME} ]]; then
-      echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
-      return 1
-  fi
+  # IFS='/' read -r -a path_parts <<< "$cur_path"
+  # if [[ ${#path_parts[@]} -lt 4 ]]; then
+  #     echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+  #     return 1
+  # fi
+  # third_folder="${path_parts[3]}"
+  # if [[ ${third_folder} != ${NEPI_REPO_NAME} ]]; then
+  #     echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+  #     return 1
+  # fi
   git add --all
   git commit -m "*$@*" 
   git push >/dev/null 2>&1
@@ -3015,7 +3015,7 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    if [[ ("$cur_folder" == "${NEPI_REPO_NAME}" || "$cur_path" == "/home/${CONFIG_USER}/${NEPI_REPO_NAME}/src") ]]; then
+    if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
 
