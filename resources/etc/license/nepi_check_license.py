@@ -14,21 +14,23 @@ import shutil
 import netifaces
 import subprocess
 
-NEPI_LICENSE_USER_FOLDER = '/mnt/nepi_storage/license'
-NEPI_LICENSE_SYS_FOLDER = '/mnt/nepi_config/system_cfg/license'
+NEPI_LICENSE_USER_FOLDER = "/mnt/nepi_storage/license"
+NEPI_LICENSE_SYS_FOLDER = "/mnt/nepi_config/system_cfg/license"
 NEPI_LICENSE_FOLDERS = [NEPI_LICENSE_USER_FOLDER,NEPI_LICENSE_SYS_FOLDER]
-NEPI_LICENSE_BASENAME = '/nepi_license_'
-NEPI_LICENSE_EXTENSION = '.gpg'
-NEPI_LICENSE_REQUEST = '/nepi_license_request_'
-NEPI_LICENSE_REQUEST_EXTENSION = '.yaml'
-NEPI_GPG_KEYPATH = '/home/nepi/.gnupg'
-NEPI_VERSION_FILE = '/opt/nepi/nepi_engine/etc/fw_version.txt'
+NEPI_LICENSE_BASENAME = "/nepi_license_"
+NEPI_LICENSE_EXTENSION = ".gpg"
+NEPI_LICENSE_REQUEST = "/nepi_license_request_"
+NEPI_LICENSE_REQUEST_EXTENSION = ".yaml"
+NEPI_GPG_KEYPATH = "/home/nepi/.gnupg"
+NEPI_VERSION_FILE = "/opt/nepi/nepi_engine/etc/fw_version.txt"
 
-LICENSE_WARNING_FILE = '/opt/nepi/etc/license/UNLICENSED_NEPI_ENGINE.txt'
-UNLICENSED_LICENSE_DICT = {'licensed_components':{'nepi_base':{'commercial_license_type': 'Unlicensed'}}}
+LICENSE_WARNING_FILE = "/opt/nepi/etc/license/UNLICENSED_NEPI_ENGINE.txt"
+UNLICENSED_LICENSE_DICT = {"licensed_components":{"nepi_base":{"commercial_license_type": "Unlicensed"}}}
 
 
 HARDWARE_ID="Unknown"
+LICENSE_VALID=False
+
 
 def read_dict_from_file(file_path):
     dict_from_file = None
@@ -47,7 +49,7 @@ def read_dict_from_file(file_path):
 
 def get_network_mac():
     mac_address = None
-    interfaces = ['eth0','wpl0']
+    interfaces = ["eth0","wpl0"]
     devices = netifaces.interfaces()
     adapter = None
 
@@ -79,7 +81,6 @@ def get_bluetooth_mac():
             if 'BD Address:' in line:
                 # Extract the MAC address part
                 mac_address = line.split('BD Address:')[1].split()[0].strip()
-                mac_address = mac_address.replace(":","")
                 print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(interface))
                 break
     except:
@@ -105,75 +106,85 @@ def getNEPIVersion():
         return f.readline()
 
 def checkLicense():
+    global LICENSE_VALID
     license_folder = ''
     license_key_file = ''
     license_info_file = ''
-    error = 'folder check failed with unknown error'
+    error = "License file does not exist in folders: " + str(NEPI_LICENSE_FOLDERS)
     for check_folder in NEPI_LICENSE_FOLDERS:
-        try:
-            detected_key = HARDWARE_ID #getHardwareId()
-            license_fullpath = check_folder + NEPI_LICENSE_BASENAME + detected_key + NEPI_LICENSE_EXTENSION
-            if not os.path.exists(license_fullpath):
-                raise Exception("License file not found")
+        if os.path.exists(check_folder):
+            try:
+                detected_key = HARDWARE_ID #getHardwareId()
+                license_fullpath = check_folder + NEPI_LICENSE_BASENAME + detected_key + NEPI_LICENSE_EXTENSION
+                if not os.path.exists(license_fullpath):
+                    pass
+                else:
+                    if os.path.getsize(license_fullpath) == 0:
+                        error = "License file empty: " + str(license_fullpath)
 
-            gpg = gnupg.GPG(gnupghome=NEPI_GPG_KEYPATH)
-            
-            license_text = ''
-            with open(license_fullpath, 'rb') as license_file:
-                license_obj = gpg.decrypt_file(license_file, always_trust=True, extra_args=['--ignore-time-conflict'])
-                print('ok:' + str(license_obj.ok) + ", status: " + license_obj.status + ", stderr: " + license_obj.stderr)
-                if (not license_obj.ok):
-                    if (license_obj.status != "signature valid"):
-                        raise Exception("License decrypt failed: " + license_obj.status)
-                license_text = str(license_obj)
+                    else:
 
-            license_contents = yaml.load(license_text, Loader=yaml.FullLoader)
-            
-            if ('licensed_components' not in license_contents) or ('nepi_base' not in license_contents['licensed_components']):
-                raise Exception("Bad format")
-            
-            nb_license_contents = license_contents['licensed_components']['nepi_base']
-            
-            if ('hardware_key' not in nb_license_contents):
-                raise Exception("Missing h/w key")
-            
-            if detected_key != nb_license_contents['hardware_key']:
-                raise Exception("H/W key mismatch")
-            
-            if ('commercial_license_type' not in nb_license_contents):
-                raise Exception("Missing lic. type")
-                    
-            now = datetime.now()
-            if ('expiration_date' in nb_license_contents):
-                print("Debug: expiration_date = " + nb_license_contents['expiration_date'])
-                expiration = datetime.strptime(nb_license_contents['expiration_date'], '%m/%d/%Y')
-                if (now > expiration):
-                    raise Exception('Expired: ' + nb_license_contents['expiration_date'])
-            if ('expiration_version' in nb_license_contents):
-                version_parts = getNEPIVersion().split('.')
-                if len(version_parts) < 3:
-                    raise Exception("Bad f/w version format")
+                        gpg = gnupg.GPG(gnupghome=NEPI_GPG_KEYPATH)
+                        
+                        license_text = ''
+                        with open(license_fullpath, 'rb') as license_file:
+                            license_obj = gpg.decrypt_file(license_file, always_trust=True, extra_args=['--ignore-time-conflict'])
+                            print('ok:' + str(license_obj.ok) + ", status: " + license_obj.status + ", stderr: " + license_obj.stderr)
+                            if (not license_obj.ok):
+                                if (license_obj.status != "signature valid"):
+                                    raise Exception("License decrypt failed: " + license_obj.status)
+                            license_text = str(license_obj)
+
+                        license_contents = yaml.load(license_text, Loader=yaml.FullLoader)
+                        
+                        if ('licensed_components' not in license_contents) or ('nepi_base' not in license_contents['licensed_components']):
+                            raise Exception("Bad format")
+                        
+                        nb_license_contents = license_contents['licensed_components']['nepi_base']
+                        
+                        if ('hardware_key' not in nb_license_contents):
+                            raise Exception("Missing h/w key")
+                        
+                        if detected_key != nb_license_contents['hardware_key']:
+                            raise Exception("H/W key mismatch")
+                        
+                        if ('commercial_license_type' not in nb_license_contents):
+                            raise Exception("Missing lic. type")
                                 
-                expiration_parts = nb_license_contents['expiration_version'].split('.')
-                if len(expiration_parts) < 3:
-                    raise Exception("Bad lic. expiration version format")
+                        now = datetime.now()
+                        if ('expiration_date' in nb_license_contents):
+                            print("Debug: expiration_date = " + nb_license_contents['expiration_date'])
+                            expiration = datetime.strptime(nb_license_contents['expiration_date'], '%m/%d/%Y')
+                            if (now > expiration):
+                                raise Exception('Expired: ' + nb_license_contents['expiration_date'])
+                        if ('expiration_version' in nb_license_contents):
+                            version_parts = getNEPIVersion().split('.')
+                            if len(version_parts) < 3:
+                                raise Exception("Bad f/w version format")
+                                            
+                            expiration_parts = nb_license_contents['expiration_version'].split('.')
+                            if len(expiration_parts) < 3:
+                                raise Exception("Bad lic. expiration version format")
+                            
+                            print("Debug: " + str(version_parts) + ", " + str(expiration_parts))
+                            
+                            if (version_parts[0] >= expiration_parts[0]) or \
+                            ((version_parts[0] == expiration_parts[0]) and (version_parts[1] > expiration_parts[1])) or \
+                            ((version_parts[0] == expiration_parts[0]) and (version_parts[1] == expiration_parts[1]) and (version_parts[1] >= expiration_parts[1])):
+                                raise Exception('Expired: ' + nb_license_contents['expiration_version'])
+                                
+                        if os.path.exists(LICENSE_WARNING_FILE):
+                            os.remove(LICENSE_WARNING_FILE)
+                        license_contents['licensed_components']['nepi_base']['status'] = 'Valid'
+                        license_folder = check_folder
+                        license_key_file = license_fullpath
+                        license_info_file = license_fullpath.replace(NEPI_LICENSE_EXTENSION,'.txt')
+                        error = "License check succeeded for license file: " + str(license_fullpath)
+                        break
+            except Exception as e:
+                error = "License check failed with error: " + str(e)
                 
-                print("Debug: " + str(version_parts) + ", " + str(expiration_parts))
-                
-                if (version_parts[0] >= expiration_parts[0]) or \
-                ((version_parts[0] == expiration_parts[0]) and (version_parts[1] > expiration_parts[1])) or \
-                ((version_parts[0] == expiration_parts[0]) and (version_parts[1] == expiration_parts[1]) and (version_parts[1] >= expiration_parts[1])):
-                    raise Exception('Expired: ' + nb_license_contents['expiration_version'])
-                    
-            if os.path.exists(LICENSE_WARNING_FILE):
-                os.remove(LICENSE_WARNING_FILE)
-            license_contents['licensed_components']['nepi_base']['status'] = 'Valid'
-            license_folder = check_folder
-            license_key_file = license_fullpath
-            license_info_file = license_fullpath.replace(NEPI_LICENSE_EXTENSION,'.txt')
-            break
-        except Exception as e:
-            error = e
+        
         
     if license_folder == '':
         with open(LICENSE_WARNING_FILE, 'w') as f:
@@ -191,7 +202,8 @@ def checkLicense():
         exception_license['licensed_components']['nepi_base']['status'] = str(error)
         #print("Debug: License invalid: " + str(error))
         return yaml.dump(exception_license)
-    else:
+    elif LICENSE_VALID == False:
+        LICENSE_VALID = True
         print("License valid: " + str(license_contents))
 
 
@@ -223,7 +235,7 @@ def checkLicense():
 
 
         
-        return yaml.dump(license_contents)
+    return yaml.dump(license_contents)
 
 
 def generateLicenseRequest():

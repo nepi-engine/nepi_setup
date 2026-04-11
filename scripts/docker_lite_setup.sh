@@ -179,6 +179,7 @@ if [[ ${CONFIG_USER} != 'nepi' && ${CONFIG_USER} != 'nepiadmin' && ${CONFIG_USER
     fi
 fi
 
+
 echo ""
 echo "########################"
 echo "NEPI LITE CONFIG SETUP"

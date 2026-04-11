@@ -1889,21 +1889,12 @@ function create_ssh_key {
 
         key_name=$2
         if [[ -z "$key_name" ]]; then
-            key_name="id_${key_type}_$(hostname)_${CONFIG_USER}"
+            key_name="nepi_$(hostname)_${CONFIG_USER}_ssh_key"
         fi 
 
         user_email=$3
         if [[ -z "$user_email" ]]; then
-            while [[ -z "$ghub_email" ]]; do
-                read -p "Enter your GitHub email address: " USER_INPUT
-                if is_valid_email "$USER_INPUT"; then
-                    echo "Using email ${USER_INPUT}"
-                    user_email=$USER_INPUT
-                else
-                    echo "Not A Valid Email"
-                    return 1
-                fi  
-            done   
+            user_email=${CONFIG_USER}@nepi.com
         fi     
 
 
@@ -2430,7 +2421,7 @@ function nepisshkey {
                     ;;
                 "Create SSH Key")
                     key_email='nepi@numurus'
-                    key_name="$(hostname)_${CONFIG_USER}_nepi"
+                    key_name="nepi_$(hostname)_${CONFIG_USER}_ssh_key"
                     key_path="${key_folder}/key_name"
                     if [[ -f $key_path ]]; then
                       echo "NEPI SSH Key with name allready exists: ${key_name}"

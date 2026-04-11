@@ -262,14 +262,14 @@ else
         yapf python-gnupg Flask supervisor  colormath pandas scipy \
         empty
     
-
+    sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing -y
 
     #sudo -H python${NEPI_PYTHON} -m pip install --no-input yap
     #sudo -H python${NEPI_PYTHON} -m pip install --no-input labelImg # For onboard training
 
-
-
-    #sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
+    if is_valid_jetson; then
+        sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
+    fi
 
     #############
     # Other general python utilities

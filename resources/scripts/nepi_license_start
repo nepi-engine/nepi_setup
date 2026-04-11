@@ -10,5 +10,13 @@
 
 # Start NEPI License System
 echo "Starting NEPI License Processes"
-sudo python /opt/nepi/etc/license/nepi_check_license.py
+gnupg_folder=/home/nepi/.gnupg
+if [[ ! -d $gnupg_folder ]]; then
+    echo "GNUPG folder not found at ${gnupg_folder}"
+else
+    sudo chmod 0700 $gnupg_folder
+    find "${gnupg_folder}" -type f -exec sudo chmod 600 {} +
+    sudo chown -R root:root $gnupg_folder
+    sudo python /opt/nepi/etc/license/nepi_check_license.py
+fi
 
