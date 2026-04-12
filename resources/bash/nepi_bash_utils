@@ -53,6 +53,7 @@ export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
 export NEPI_MODE=SYSTEM
 
 export NEPI_USER=nepi
+export NEPI_ADMIN_USER=nepiadmin
 export NEPI_HOST_USER=nepihost
 
 export NEPI_IP=192.168.179.103
@@ -772,7 +773,7 @@ export -f netsetnepi
 
 # ping internet
 function pingi(){
-    if ! ping -c 1 google.com > /dev/null 2>&1; then
+    if ! ping -c 1 -W 1 google.com > /dev/null 2>&1; then
         echo "No Internet Connection"
         return 1
     else
@@ -784,7 +785,7 @@ export -f pingi
 # ping nepi
 function pingn(){
     ip="${NEPI_IP%%/*}"
-    if ! ping -c 1 ${ip} > /dev/null 2>&1; then
+    if ! ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
         echo "No NEPI Connection at ${ip}"
         return 1
     else
@@ -2299,45 +2300,173 @@ function nepirui() {
 
 export -f nepirui
 
+
 function nepistorage() {
-  if pingn; then
-    shdrive=/mnt/nepi_share_storage
-    if [[ ! -d $shdrive ]]; then
-        sudo mkdir $shdrive
-    fi
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
-    if ! mountpoint -q $shdrive; then
-      sudo mount.cifs //${NEPI_IP}/nepi_storage $shdrive -o user=$NEPI_USER
-    fi
-    if mountpoint -q $shdrive; then
-      xdg-open $shdrive
+  sudo -v
+  if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    if pingn; then
+      shdrive=/mnt/nepi_share_storage
+      if [[ ! -d $shdrive ]]; then
+          sudo mkdir $shdrive
+      fi
+      sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+      if ! mountpoint -q $shdrive; then
+        sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_ADMIN_USER
+      fi
+      if mountpoint -q $shdrive; then
+        cd $shdrive
+        return 0
+      else
+        echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+        return 1
+      fi
     else
-      echo "Failed to mount and connect shared folder: ${shdrive}"
+        return 1
+    fi
+  else
+    shdrive=/mnt/nepi_config
+    if [[ -d $shdrive ]]; then
+      cd $shdrive
+      return 0
+    else
+      echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+      return 1
     fi
   fi
 }
 
 export -f nepistorage
 
-function nepiconfig() {
-  if pingn; then
-    shdrive=/mnt/nepi_share_config
-    if [[ ! -d $shdrive ]]; then
-        sudo mkdir $shdrive
-    fi
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
-    if ! mountpoint -q $shdrive; then
-      sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_USER
-    fi
-    if mountpoint -q $shdrive; then
+function nepistorageopen() {
+  sudo -v
+  if nepistorage; then
       xdg-open $shdrive
+  fi
+}
+
+export -f nepistorageopen
+
+
+function nepiconfig() {
+  sudo -v
+
+  if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    if pingn; then
+      shdrive=/mnt/nepi_share_config
+      if [[ ! -d $shdrive ]]; then
+          sudo mkdir $shdrive
+      fi
+      sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+      if ! mountpoint -q $shdrive; then
+        sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_ADMIN_USER
+      fi
+      if mountpoint -q $shdrive; then
+        cd $shdrive
+        return 0
+      else
+        echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+        return 1
+      fi
     else
-      echo "Failed to mount and connect shared folder: ${shdrive}"
+        return 1
+    fi
+  else
+    shdrive=/mnt/nepi_config
+    if [[ -d $shdrive ]]; then
+      cd $shdrive
+      return 0
+    else
+      echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+      return 1
     fi
   fi
 }
 
 export -f nepiconfig
+
+function nepiconfigopen() {
+  sudo -v
+  if nepiconfig; then
+      xdg-open $shdrive
+  fi
+}
+
+export -f nepiconfigopen
+
+
+function nepisync {
+
+    # Sync SSH Keys
+    echo ""
+    echo "Syncing NEPI System Config Files"
+    cur_folder=$(pwd)
+    if nepiconfig 2> /dev/null ; then
+        NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
+        NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
+        echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
+        if [ -f $NEPI_CONFIG_SOURCE ]; then
+            sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
+            source $(pwd)/system_cfg/etc/load_system_config.sh
+        else
+          echo "NEPI SYSTEM CONFIG file not found at: ${NEPI_CONFIG_SOURCE} "
+        fi
+    else
+      echo "Failed to connect to NEPI CONFIG"
+    fi
+
+
+    # Sync SSH Keys
+    echo ""
+    echo "Syncing SSH Keys"
+
+    NEPI_SSH_KEYS_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+    NEPI_SSH_KEYS_DEST=/home/${CONFIG_USER}/.ssh
+
+
+    if [[ ! -d "$NEPI_SSH_KEYS_DEST" ]]; then
+        mkdir -p $NEPI_SSH_KEYS_DEST
+    fi
+    # Sync keys with nepi system config key folder
+
+    
+
+    if [ -d $NEPI_SSH_KEYS_SOURCE ]; then
+        echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SOURCE} to ${NEPI_SSH_KEYS_DEST}"
+        sudo cp -p ${NEPI_SSH_KEYS_SOURCE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+    fi
+ 
+    if nepiconfig 2> /dev/null; then
+        NEPI_SSH_KEYS_SHARE="$(pwd)/system_cfg/etc/ssh/ssh_keys"
+        if [ -d $NEPI_SSH_KEYS_SHARE ]; then
+            if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
+              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
+              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/
+            else
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
+              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
+              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+            fi
+        else
+          echo "NEPI SYSTEM SSH folder not found at: ${NEPI_SSH_KEYS_SHARE} "
+        fi
+    else
+      echo "Failed to connect to NEPI CONFIG"
+    fi
+
+
+    sudo chmod 0700 $NEPI_SSH_KEYS_DEST
+    sudo chmod 0600 $NEPI_SSH_KEYS_DEST/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEYS_DEST/*
+
+    cd $cur_folder
+
+}
+
+export -f nepisync
+
 
 function nepisetkey {
     sudo -v
@@ -3031,6 +3160,7 @@ function pushn(){
 
 ## NEPI deploy complete
 function nepisetup_remote() {
+sudo -v
 skip_software=1
 source $(NSETUP)/scripts/remote_dev_setup.sh $skip_software
 source /home/${CONFIG_USER}/.bashrc
@@ -3062,7 +3192,7 @@ echo ${NEPI_MODE}
 "
 
 function nepisetup() {
-source /home/${CONFIG_USER}/.bashrc
+sudo -v
 nepi_mode=${NEPI_MODE}
 echo "NEPI_MODE: ${nepi_mode}"
 if [[ ${nepi_mode} == 'REMOTE' ]]; then 
@@ -3092,8 +3222,11 @@ nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
 nepirui = Open Chromium to RUI Dashboard page
-nepistorage = Open file manager to NEPI shared Storage Drive
-nepiconfig = Open file manager to NEPI shared Config Drive 
+nepistorage = Change dir to NEPI shared Storage Drive if accessable
+nepistorageopen = Open file manager to NEPI shared Storage Drive if accessable
+nepiconfig = Change dir to NEPI shared Config Drive if accessable
+nepiconfigopen = Open file manager to NEPI shared Config Drive if accessable
+nepisync = Sync NEPI SSH Key files
 nepisetkey = Set provided key name as NEPI device key
 nepisshkey = NEPI SSH key setup function
 nepiauthadd = Add provide key name to SSH authorized_key file

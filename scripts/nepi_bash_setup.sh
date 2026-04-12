@@ -79,32 +79,8 @@ echo "########################"
     echo "Updating SSH Keys"
     echo ""
 
+    nepisync
 
-    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
-    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
-
-    echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
-    if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
-        mkdir -p $NEPI_SSH_KEY_DEST
-    fi
-    # Sync keys with nepi system config key folder
-    NEPI_SYSTEM_SSH_KEYS=${NEPI_SYSTEM_CONFIG}/etc/ssh/ssh_keys
-    sudo cp ${NEPI_SYSTEM_SSH_KEYS}/* ${NEPI_SSH_KEY_DEST}/
-    sudo cp  ${NEPI_SSH_KEY_DEST}/* ${NEPI_SYSTEM_SSH_KEYS}/
-
-    sudo chmod 0700 $NEPI_SSH_KEY_DEST
-
-    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
-        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
-    else
-        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
-    fi
-
-    sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
-
-
-   
     if [[ -n $NEPI_SSH_KEY ]]; then
         NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
         if [[ -f $NEPI_SSH_KEY_PATH ]]; then
@@ -119,7 +95,6 @@ echo "########################"
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
-
 
     #####################################
     echo " "

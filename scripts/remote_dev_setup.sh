@@ -212,7 +212,8 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                         echo "Not A Valid User Name"
                     fi          
                 ;;
-                "Update NEPI Host User")
+                "Update NEPI SSH KEY FILE")
+                    nepisync
                     nepisshkey
                 ;;
 
@@ -356,27 +357,29 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     echo ""
 
 
-    NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
-    NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
-    if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
-        echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
-    else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
-            mkdir -p $NEPI_SSH_KEY_DEST
-        fi
-        sudo chmod 0700 $NEPI_SSH_KEY_DEST
-        sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
-        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
-    fi
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
-    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
-        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
+    echo " "
+    echo "################################# "
+    echo "Updating SSH Keys"
+    echo ""
+
+    nepisync
+
+    if [[ -n $NEPI_SSH_KEY ]]; then
+        NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
+        if [[ -f $NEPI_SSH_KEY_PATH ]]; then
+            NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
+        else
+            NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+        fi
     else
         NEPI_SSH_KEY_FILE=nepi_default_ssh_key
     fi    
+    echo "Using NEPI_SSH_KEY ${NEPI_SSH_KEY}"
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
+    NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
+    NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
 
     echo " "
     echo "################################# "
@@ -667,7 +670,8 @@ fi
 
     echo " "
     echo "You can connect to your NEPI Device's shared network drives by typing:"
-    echo "nepistorage  OR   nepiconfig"
+    echo "nepistorage  OR   nepiconfig   to change to sharedrive drive"
+    echo "nepistorageopen  OR   nepiconfigopen   to open file manager to sharedrive drive"
 
     echo " "
     echo "You can connect to your NEPI Device's RUI in a Chrome browser at:"

@@ -693,9 +693,13 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     echo "nepirui   OR   entering  http://${host_ip}:5003/  in a Chromium browser"
 
     echo " "
+    echo "You can connect to your NEPI Device's shared network drives by typing:"
+    echo "nepistorage  OR   nepiconfig   to change to sharedrive drive"
+    echo "nepistorageopen  OR   nepiconfigopen   to open file manager to sharedrive drive"
+
+    echo " "
     echo "You can ssh into your Running NEPI Docker contatiner by typing:"
     echo "sshn"
-
 
     echo ""
     echo "Your remote dev system network adapter should be set to "
