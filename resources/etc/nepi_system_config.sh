@@ -155,6 +155,13 @@ fi
 NEPI_STATIC_IP_START=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
+nepi_ssh_key_path="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY}"
+echo "Looking for ssh key file ${NEPI_SSH_KEY}"
+if [[ ! -f $nepi_ssh_key_path ]]; then
+    echo "ssh key file ${NEPI_SSH_KEY}"
+    export NEPI_SSH_KEY=nepi_default_ssh_key
+    update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+fi
 ###################
 #  Upated NEPI Config Settings
 
@@ -304,8 +311,8 @@ function udpate_config_file(){
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     update_current_config
     
-    if [[ "$SHOW_CONFIG_MENU" -eq 1 && LITE_INSTALL -eq 0 ]]; then
-
+    if [[ "$SHOW_CONFIG_MENU" -eq 1 && $LITE_INSTALL -eq 0 ]]; then
+        echo "Configuring Setup Menu"
 
         echo ""
         PS3=$'\n'"Please enter your choice by NUMBER: "
@@ -590,18 +597,19 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     done
             done
             echo ""
-    elif [[ ${NEPI_MODE} == 'HOST' && $LITE_INSTALL -eq 1 && ${CURRENT_NEPI_SSH_KEY}== 'nepi_default_ssh_key' ]]; then
+    elif [[ ${NEPI_MODE} == 'HOST' && $LITE_INSTALL -eq 1 && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
         echo "Creating a Custom NEPI SSH KEY"
 
         ret=$(create_ssh_key)
-        sel_error=$?
+        error=$?
+        echo "Got select SSH Key file error: ${error}"
         key_file=$(echo $ret | awk '{print $NF}')
-        #echo "Got select SSH Key file error: ${sel_error}"
+        echo "Got select SSH Key file: ${key_file}"
         
-        if [[ $? -eq 0 && -n key_file ]]; then
+        if [[ $error -eq 0 && -n key_file ]]; then
             echo ''
-            echo "Created Custom NEPI SSH KEY: ${sel_file}"
-            CURRENT_NEPI_SSH_KEY=$key_file
+            echo "Created Custom NEPI SSH KEY: ${key_file}"
+            CURRENT_NEPI_SSH_KEY=$(basename $key_file)
         else
             echo "Failed to create Custom NEPI SSH KEY"
         fi     

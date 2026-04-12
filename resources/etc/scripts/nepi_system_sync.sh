@@ -79,12 +79,16 @@ sudo sed -i "/NEPI_IP/d" "$UPDATE_FILE" >/dev/null 2>&1
 sudo sed -i "/NEPI_IP/d" "${UPDATE_FILE}.bak" >/dev/null 2>&1
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+
+if [[ ! -f $SOURCE_FILE ]]; then
+    sudo cp $UPDATE_FILE $SOURCE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
+sync_yaml_files $UPDATE_FILE $SOURCE_FILE  
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -107,12 +111,15 @@ SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -f $UPDATE_FILE ]]; then
+    sudo cp $SOURCE_FILE $UPDATE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sync_yaml_files $SOURCE_FILE ${UPDATE_FILE}.bak
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
+sync_yaml_files $UPDATE_FILE $SOURCE_FILE  
+sudo rsync -ar --exclude=${CONFIG_FILENAME} ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 sudo chown 1000:1000 ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}

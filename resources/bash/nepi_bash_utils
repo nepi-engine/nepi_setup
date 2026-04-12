@@ -1883,6 +1883,9 @@ function create_ssh_key {
         key_type=ed25519
 
         key_folder=$1
+        if [[ -z $key_folder ]]; then
+          key_folder=/home/${CONFIG_USER}/.ssh
+        fi
         if [[ ! -d $key_folder ]]; then
           sudo mkdir -p $key_folder
         fi
@@ -1907,8 +1910,8 @@ function create_ssh_key {
               sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
               if [[ -f $key_path ]]; then
-                  echo "${key_path}"
-                  return -2
+                  echo "Key allready exists ${key_path}"
+                  return 0
               fi
 
               ssh-keygen -t ${key_type} -f ${key_path} -q -N "" -C "${user_email}"

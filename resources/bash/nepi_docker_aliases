@@ -173,6 +173,15 @@ function nepiinit(){
 export -f nepiinit
 
 
+
+function nepidownload(){
+  sudo -v
+  nepi_image_link=$1
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_download.sh ${nepi_image_link}
+}
+export -f nepidownload
+
+
 function nepiimport(){
   sudo -v
   import_path=${NEPI_STORAGE}/nepi_images
@@ -357,6 +366,7 @@ nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
 nepicommit = Commit the running NEPI container wit provided COMMIT_DESCRIPTION, restarts nepi using new commit unless RESTART=0 is passed .
 nepipull = Download and install a NEPI Docker image from the provided link
 nepiinit = Reset, clear, and import new NEPI Image.
+nepidownload = Download and install image from provided 'dropbox_shared_folder_link_address' in qoutes.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
 nepiexportclean = Export the running NEPI container without a tailing description.

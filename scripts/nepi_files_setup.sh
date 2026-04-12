@@ -66,6 +66,9 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -f $UPDATE_FILE ]]; then
+    sudo cp $SOURCE_FILE $UPDATE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
@@ -86,6 +89,9 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -f $UPDATE_FILE ]]; then
+    sudo cp $SOURCE_FILE $UPDATE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 

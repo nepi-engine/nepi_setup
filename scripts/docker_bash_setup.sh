@@ -58,7 +58,7 @@ source $NEPI_UTILS_SOURCE
 #echo "Loading NEPI SYSTEM CONFIG"
 nepi_config_loaded=0
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
-NEPI_SYSTEM_CONFIG_FILE=/home/${CONFIG_USER}/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/etc/load_system_config.sh
 if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SYSTEM_CONFIG_FILE} >/dev/null 2>&1
@@ -84,7 +84,6 @@ echo "########################"
 echo ""
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-#############
 
     echo " "
     echo "################################# "
@@ -94,24 +93,40 @@ echo ""
 
     NEPI_SSH_KEY_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
     NEPI_SSH_KEY_DEST=/home/${CONFIG_USER}/.ssh
+
+    echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
+    if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
+        mkdir -p $NEPI_SSH_KEY_DEST
+    fi
+    # Sync keys with nepi system config key folder
+    NEPI_SYSTEM_SSH_KEYS=${NEPI_SYSTEM_CONFIG}/etc/ssh/ssh_keys
+    sudo cp ${NEPI_SYSTEM_SSH_KEYS}/* ${NEPI_SSH_KEY_DEST}/
+    sudo cp  ${NEPI_SSH_KEY_DEST}/* ${NEPI_SYSTEM_SSH_KEYS}/
+
+    sudo chmod 0700 $NEPI_SSH_KEY_DEST
+
     if [ ! -d $NEPI_SSH_KEY_SOURCE ]; then
         echo "FAILED TO FIND NEPI SOURCE KEYS FOLDER at: ${NEPI_SSH_KEY_SOURCE} "
     else
-        echo "Installing NEPI SSH Private Keys from: ${NEPI_SSH_KEY_SOURCE} "
-        if [[ ! -d "$NEPI_SSH_KEY_DEST" ]]; then
-            mkdir -p $NEPI_SSH_KEY_DEST
-        fi
-        sudo chmod 0700 $NEPI_SSH_KEY_DEST
         sudo cp -p $NEPI_SSH_KEY_SOURCE/* ${NEPI_SSH_KEY_DEST}/
-        sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
     fi
 
-    if [[ -n $NEPI_SSH_KEY_FILE ]]; then
-        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY_FILE
+    sudo chmod 0600 $NEPI_SSH_KEY_DEST/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEY_DEST/*
+
+
+   
+    if [[ -n $NEPI_SSH_KEY ]]; then
+        NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
+        if [[ -f $NEPI_SSH_KEY_PATH ]]; then
+            NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
+        else
+            NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+        fi
     else
         NEPI_SSH_KEY_FILE=nepi_default_ssh_key
     fi    
+    echo "Using NEPI_SSH_KEY ${NEPI_SSH_KEY}"
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"

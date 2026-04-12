@@ -242,6 +242,9 @@ if [[ "$?" -eq 0 ]]; then
         echo "Enabling Chrony Time Services"
         sudo systemctl enable chrony
         sudo systemctl start chrony
+
+        sudo ufw allow 123
+
     fi
 
 
@@ -306,6 +309,9 @@ if [[ "$?" -eq 0 ]]; then
         echo "Enabling ssh service"
         sudo systemctl enable sshd >/dev/null 2>&1        
         sudo systemctl start sshd
+
+        sudo ufw allow 22
+        sudo ufw allow 2222
 
     fi
 
@@ -455,9 +461,31 @@ if [[ "$?" -eq 0 ]]; then
         fi        
         sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
 
-
+        sudo ufw allow 445
         sudo systemctl restart sshd
+
     fi
+
+    #Open other required ports
+    sudo ufw allow 137
+    sudo ufw allow 138
+    sudo ufw allow 139
+
+    # Open ROS Ports
+    sudo ufw allow 11311
+
+    # Open RUI Ports
+    sudo ufw allow 5003
+    sudo ufw allow 9090
+    sudo ufw allow 9091
+    sudo ufw allow 9092
+
+
+    # Enable Firewall
+    sudo ufw --force enable
+    echo "Enabled network firewall with ports"
+    echo $(sudo ufw status)
+
 
 
 

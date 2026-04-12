@@ -59,7 +59,7 @@ source $NEPI_UTILS_SOURCE
 #echo "Loading NEPI SYSTEM CONFIG"
 nepi_config_loaded=0
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
-NEPI_SYSTEM_CONFIG_FILE=/home/${CONFIG_USER}/load_system_config.sh
+NEPI_SYSTEM_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/etc/load_system_config.sh
 if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SYSTEM_CONFIG_FILE}"
     source ${NEPI_SYSTEM_CONFIG_FILE} >/dev/null 2>&1
@@ -117,6 +117,9 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -f $UPDATE_FILE ]]; then
+    sudo cp $SOURCE_FILE $UPDATE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
@@ -141,6 +144,9 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
+if [[ ! -f $UPDATE_FILE ]]; then
+    sudo cp $SOURCE_FILE $UPDATE_FILE 
+fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
