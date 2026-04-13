@@ -599,7 +599,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
             echo ""
     elif [[ ${NEPI_MODE} == 'HOST' && $LITE_INSTALL -eq 1 && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
         echo "Creating a Custom NEPI SSH KEY"
-
+        sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
         ret=$(create_ssh_key)
         error=$?
         echo "Got select SSH Key file error: ${error}"

@@ -2438,16 +2438,16 @@ function nepisync {
     if nepiconfig 2> /dev/null; then
         NEPI_SSH_KEYS_SHARE="$(pwd)/system_cfg/etc/ssh/ssh_keys"
         if [ -d $NEPI_SSH_KEYS_SHARE ]; then
-            if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
-              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
-              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+            if [[ ${NEPI_MODE} == 'HOST' ]]; then
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
               sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
+              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
             else
-              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
-              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
               sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+              echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
+              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/
             fi
         else
           echo "NEPI SYSTEM SSH folder not found at: ${NEPI_SSH_KEYS_SHARE} "
