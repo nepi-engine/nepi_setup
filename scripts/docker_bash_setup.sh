@@ -53,6 +53,10 @@ RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
+USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+if [[ -f $USER_UTILS_SOURCE ]]; then
+    source $USER_UTILS_SOURCE
+fi
 
 # Load System Config File
 #echo "Loading NEPI SYSTEM CONFIG"

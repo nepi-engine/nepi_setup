@@ -62,13 +62,11 @@ if [ $? -eq 1 ]; then
     
 fi
 
-ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-
-if [[ -f "$ufile" ]]; then
-    source $ufile
-else
-    echo "NEPI Utils bash file not found at: ${ufile}"
-    exit 1
+NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
+source $NEPI_UTILS_SOURCE
+USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+if [[ -f $USER_UTILS_SOURCE ]]; then
+    source $USER_UTILS_SOURCE
 fi
 
 echo "########################"
@@ -280,7 +278,7 @@ function print_current_config(){
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
     echo "NEPI_SSH_KEY: ${CURRENT_NEPI_SSH_KEY}"
-    echo "NEPI_VPN_ENABlED: ${CURRENT_NEPI_VPN_ENABLED}"
+    echo "NEPI_VPN_ENABLED: ${CURRENT_NEPI_VPN_ENABLED}"
     echo ""
 }
 
@@ -309,7 +307,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
-    update_yaml_value "NEPI_VPN_ENABlED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_VPN_ENABLED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
 
 
     systemctl &> /dev/null
@@ -678,14 +676,16 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
 
     systemctl &> /dev/null
-    if [[ "$?" -eq 0 && $NEPI_VPN_VERSION != 0 ]]; then
+    if [[ "$?" -eq 0 ]]; then
         #################################################
-        echo "Updating NEPI VPN Settings to ${NEP_VPN_ENABLED} with version ${NEPI_VPN_VERSION}"
+        echo "Updating NEPI VPN Settings to ${NEPI_VPN_ENABLED} with version ${NEPI_VPN_VERSION}"
 
-        if [[ $NEP_VPN_ENABLED -eq 1  ]]; then
-            sudo systemctl start openvpn
-        else
-            sudo systemctl stop openvpn
+        if [[ ${NEPI_VPN_VERSION} != '0' ]]; then
+            if [[ $NEPI_VPN_ENABLED -eq 1  ]]; then
+                sudo systemctl start openvpn
+            else
+                sudo systemctl stop openvpn
+            fi
         fi
     fi
 
