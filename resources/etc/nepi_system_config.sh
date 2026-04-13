@@ -675,19 +675,19 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     fi
 
 
-    systemctl &> /dev/null
-    if [[ "$?" -eq 0 ]]; then
-        #################################################
-        echo "Updating NEPI VPN Settings to ${NEPI_VPN_ENABLED} with version ${NEPI_VPN_VERSION}"
+    # systemctl &> /dev/null
+    # if [[ "$?" -eq 0 ]]; then
+    #     #################################################
+    #     echo "Updating NEPI VPN Settings to ${NEPI_VPN_ENABLED} with version ${NEPI_VPN_VERSION}"
 
-        if [[ ${NEPI_VPN_VERSION} != '0' ]]; then
-            if [[ $NEPI_VPN_ENABLED -eq 1  ]]; then
-                sudo systemctl start openvpn
-            else
-                sudo systemctl stop openvpn
-            fi
-        fi
-    fi
+    #     if [[ ${NEPI_VPN_VERSION} != '0' ]]; then
+    #         if [[ $NEPI_VPN_ENABLED -eq 1  ]]; then
+    #             sudo systemctl start openvpn
+    #         else
+    #             sudo systemctl stop openvpn
+    #         fi
+    #     fi
+    # fi
 
 
 
