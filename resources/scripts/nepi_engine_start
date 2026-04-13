@@ -14,4 +14,4 @@
 sudo -v
 echo "Fixing nepi_config folder ownership"
 sudo chown -R nepi:nepi /mnt/nepi_config/
-bash /opt/nepi/nepi_engine/etc/nepi_env/nepi_launch.sh
+sudo bash /opt/nepi/nepi_engine/etc/nepi_env/nepi_launch.sh
