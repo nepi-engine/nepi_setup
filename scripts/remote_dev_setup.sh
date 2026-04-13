@@ -45,7 +45,16 @@ RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
+USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+if [[ -f $USER_UTILS_SOURCE ]]; then
+    source $USER_UTILS_SOURCE
+else
+    source $NEPI_UTILS_SOURCE
+fi
+
+
+NEPI_IP_START=$NEPI_IP
+echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
 
 # Load System Config File
@@ -78,20 +87,6 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
-NEPI_IP_START=${NEPI_STATIC_IP%%/*}
-echo "Got Starting NEPI IP: ${NEPI_IP_START}"
-
-if [[ -n $NEPI_STATIC_IP ]]; then
-    export NEPI_DEVICE_ID=device1
-    export NEPI_IP=${NEPI_STATIC_IP%%/*}
-    export NEPI_HOST_USER=nepihost
-    export NEPI_IN_CONTAINER=1
-else
-    export NEPI_DEVICE_ID=device1
-    export NEPI_IP=192.168.179.103
-    export NEPI_HOST_USER=nepihost
-    export NEPI_IN_CONTAINER=1
-fi
 
 
 
@@ -132,7 +127,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     NEPI_USER_CONFIGS=(
     NEPI_DEVICE_ID \
-    NEPI_IP \
+    NEPI_STATIC_IP \
     NEPI_IN_CONAINTER \
     NEPI_HOST_USER \
     NEPI_SSH_KEY_FILE \
@@ -142,7 +137,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
         echo ""
         echo "Current Settings"
         echo "---------------------"
-        echo "NEPI_IP: ${NEPI_IP}"
+        echo "NEPI_DEVICE_IP: ${NEPI_STATIC_IP%%/*}"
         echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo "NEPI_HOST_USER: ${NEPI_HOST_USER}"
         echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY_FILE}"
@@ -151,15 +146,14 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     function udpate_config_file(){
         config_file=$1
-        update_yaml_value "NEPI_STATIC_IP" "${NEPI_IP}/24" $config_file
-        export NEPI_STATIC_IP="${NEPI_IP}/24"
+        update_yaml_value "NEPI_STATIC_IP" "${NEPI_STATIC_IP}" $config_file
+        export NEPI_STATIC_IP="${NEPI_STATIC_IP}"
         update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
         export NEPI_DEVICE_ID=$NEPI_DEVICE_ID
         update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
         export NEPI_HOST_USER=$NEPI_HOST_USER
         update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $config_file
         export NEPI_SSH_KEY=$NEPI_SSH_KEY
-        update_yaml_value "NEPI_INSTALL" 'LITE' $config_file
     }
     
     echo "Bringin Up NEPI Configuration Menu"
@@ -169,7 +163,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     echo ""
     PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "Update NEPI SSH KEY FILE" "CONTINUE" )
+    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -180,14 +174,15 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
             case $opt in
 
                 "Update Static IP Address")
-                    read -p $'\n'"Enter a new Static IP Address (Current = ${NEPI_IP}): " USER_INPUT
+                    read -p $'\n'"Enter a new Static IP Address (Current = ${NEPI_STATIC_IP%%/*}): " USER_INPUT
                     echo ""
                     if is_valid_ipv4 "$USER_INPUT"; then
+                        export NEPI_STATIC_IP=${USER_INPUT}/24
                         export NEPI_IP=$USER_INPUT
                         echo ""
                         break # Exit the select statement, re-display menu
                     else
-                        echo "Not A Valid Password"
+                        echo "Not A Valid IP Address"
                     fi           
                     ;;
                 "Update Device ID Name")
@@ -196,9 +191,10 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                     if is_valid_did "$USER_INPUT"; then
                         export NEPI_DEVICE_ID=$USER_INPUT
                         echo ""
+
                         break # Exit the select statement, re-display menu
                     else
-                        echo "Not A Valid Password"
+                        echo "Not A Valid Device ID"
                     fi          
                 ;;
                 "Update NEPI Host User")
@@ -212,10 +208,14 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                         echo "Not A Valid User Name"
                     fi          
                 ;;
-                "Update NEPI SSH KEY FILE")
-                    nepisync
-                    nepisshkey
-                ;;
+                # "Update NEPI SSH KEY FILE")
+                #     echo ""
+                #     echo "Syncing NEPI Configs"
+                #     nepisync
+                #     echo ""
+                #     echo "Syncing NEPI Configs"
+                #     nepisshkey
+                # ;;
 
 
                 "CONTINUE")
@@ -236,6 +236,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     print_current_config
     echo ""
 
+
     USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
     echo "Updating NEPI CONFIG File: ${USER_CONFIG_FILE} "
     if [[ -f "$USER_CONFIG_FILE" ]]; then
@@ -243,210 +244,89 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     fi
 
 
+nepi_ip=${NEPI_STATIC_IP%%/*}
+echo ""
+network_id="$(echo "$nepi_ip" | cut -d'.' -f1-3)"
+nepi_id=$(echo "$nepi_ip" | cut -d '.' -f 4-)
 
 
-
-    #####################################
-    echo " "
-    echo "################################# "
-    echo "Updating Bash Files"
+if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
     echo ""
-    
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
+    echo "Your NEPI DEVICE IP address has changed from: ${NEPI_IP_START} to: ${nepi_ip}"
 
-    ##############
-    echo "Setting up NEPI Bash Utils file"
+    remote_ip=${network_id}.5
+    if ! ping -c 1 -W 1 ${remote_ip} > /dev/null 2>&1; then
+        echo ""
+        echo "Your Remote System's IP address needs to be updated"
+        echo ""
+        echo "Do you want to use the defualt Remote System IP ${remote_ip} for your device"
+        choice=$(ask_yes_no)
+        if [[ "$choice" == 'no' ]]; then
+        valid_ip=0
+            while $valid_ip -eq 0; do
+                echo ""
+                read -p $'\n'"Enter a new Remote System IP Address (Current = ${REMOTE_IP}): " USER_INPUT
+                echo ""
+                if is_valid_ipv4 "$USER_INPUT"; then
+                    export REMOTE_IP=$USER_INPUT
+                    echo ""
+                    valid_ip=1
+                else
+                    echo "Not A Valid IP Address"
+                    echo ""
+                fi         
+            done
+        fi  
+        echo ""     
+        if systemctl is-active --quiet NetworkManager; then
+            slist=$(netliststatic)
+            if [[ "$slist" != *"$network_id"*  ]]; then
 
+                if systemctl is-active --quiet NetworkManager; then
+                    echo ""
+                    echo "Do you want to update now?"
+                    choice=$(ask_yes_no)
+                    if [[ "$choice" == 'yes' ]]; then
+                        echo ""
+                        netsetstatic "${remote_ip}/24"
+                        echo ""
+                        echo "Updated Static IPs"
+                        netliststatic
+                        # echo ""
+                        # echo "Syncing NEPI Configs"
+                        # nepisync
+                    fi  
+                    echo ""  
+                fi
+            fi
+        else
+            echo ""
+            echo "Unable to update your systems Network Adapter automatically"   
+            echo ""
+            echo "Your PC's network adapter should be set to ${REMOTE_IP}"
 
-    NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_utils
-    NEPI_UTILS_DEST=/home/${CONFIG_USER}
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_SOURCE
-    sudo chmod 775 $NEPI_UTILS_SOURCE
-    sudo cp -R -p $NEPI_UTILS_SOURCE $NEPI_UTILS_DEST/
-
-    NEPI_UTILS_FILE_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-    NEPI_UTILS_FILE_DEST=/home/${CONFIG_USER}/.nepi_bash_utils
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_UTILS_FILE_SOURCE
-    sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
-    sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
-
-    nepi_mode=REMOTE
-    export NEPI_MODE=$nepi_mode
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
-
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
-
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
-
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
-
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
-
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
-
-    
-
-
-
-    ##############
-    echo "Installing NEPI PC Aliases file"
-
-    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_pc_aliases
-    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
-    echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
-
-    if [ -f "$NEPI_ALIASES_DEST" ]; then
-        sudo rm $NEPI_ALIASES_DEST
-    fi
-    sudo cp $NEPI_ALIASES_SOURCE $NEPI_ALIASES_DEST
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_ALIASES_DEST
-    sudo chmod 775 $NEPI_ALIASES_DEST
-
-
-
-
-    ##############
-    echo "Updating ${CONFIG_USER} user .bashrc file"
-
-    BASHRC=/home/${CONFIG_USER}/.bashrc
-    file=$BASHRC
-    bfile=${BASHRC}.bak
-
-    if [[ ! -f "$file"  ]]; then
-        cp /etc/skel/.bashrc $file
-    fi
-
-    if [[ ! -f $bfile ]]; then
-        path_backup $file $bfile
-    fi
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
-    sudo chmod 775 $file
-
-    # Add NEPI Aliases
-    if grep -qnw $file -e "##### Source NEPI Aliases #####" ; then
-        if grep -qnw $file -e "NEPI_ALIASES_FILE=" ; then
-            update_text_value $file "NEPI_ALIASES_FILE=" "NEPI_ALIASES_FILE=${NEPI_ALIASES_DEST}"
         fi
-    else
-        echo ' ' | sudo tee -a $file
-        echo '##### Source NEPI Aliases #####' | sudo tee -a $file
-        echo 'NEPI_ALIASES_FILE='${NEPI_ALIASES_DEST} | sudo tee -a $file
-        echo 'if [ -f ${NEPI_ALIASES_FILE} ]; then' | sudo tee -a $file
-        echo '    . ${NEPI_ALIASES_FILE}' | sudo tee -a $file
-        echo 'fi' | sudo tee -a $file
     fi
+fi
+nepisync
 
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} ~/.bashrc
-    sudo chmod 0644 ~/.bashrc
+echo ""
+echo "Loading Updated NEPI Config Settings" 
+source  $NEPI_USER_CONFIG_SCRIPT
+
+
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+source ${SCRIPT_FOLDER}/remote_bash_setup.sh
+
+
+
+  
 
     echo ""
     echo "Sourcing updated bash files"
     source /home/${CONFIG_USER}/.bashrc
     wait
-
-
-    ####################################################
-
-
-    echo " "
-    echo "################################# "
-    echo "Updating SSH Keys"
-    echo ""
-
-
-    sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
-
-    echo " "
-    echo "################################# "
-    echo "Updating SSH Keys"
-    echo ""
-
-    nepisync
-
-    if [[ -n $NEPI_SSH_KEY ]]; then
-        NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
-        if [[ -f $NEPI_SSH_KEY_PATH ]]; then
-            NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
-        else
-            NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-        fi
-    else
-        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-    fi    
-    echo "Using NEPI_SSH_KEY ${NEPI_SSH_KEY}"
-    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
-    NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
-    NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
-
-    echo " "
-    echo "################################# "
-    echo "Setting up SSH Key ${NEPI_SSH_KEY_FILE}"
-    echo ""
-
-    nepisetkey $NEPI_SSH_KEY_FILE
-
-
-    echo " "
-    echo "################################# "
-    echo "Updating ETC Hosts File"
-    echo ""
-
-
-    file=/etc/hosts
-    tfile=${file}.tmp
-                    
-    if [[ -f $tfile ]]; then
-        sudo rm $tfile
-    fi
-
-    sudo cp $file $tfile 
-
-
-    if [[ -n ${NEPI_STATIC_IP} ]]; then
-        nepi_ip="${NEPI_STATIC_IP%%/*}"
-    else
-        nepi_ip=192.168.170.103
-    fi
-    if ! is_valid_ipv4 "${nepi_ip}"; then
-        nepi_ip=192.168.170.103
-    fi
-
-    echo "Updating NEPI IP in ${tfile}"
-    sudo sed -i "/${nepi_ip}/d" "$tfile"
-    sudo sed -i "/${NEPI_DEVICE_ID}/d" "$tfile"
-    sudo sed -i "/nepi/d" "$tfile"
-    sudo sed -i "/nepiadmin/d" "$tfile"
-    sudo sed -i "/nepihost/d" "$tfile"
-
-
-    echo "${nepi_ip} ${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} nepi" | sudo tee -a $tfile
-    echo "${nepi_ip} nepi-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} nepihost" | sudo tee -a $tfile
-    echo "${nepi_ip} nepihost-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} nepiadmin" | sudo tee -a $tfile
-    echo "${nepi_ip} nepiadmin-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-    echo "${nepi_ip} nepiuser" | sudo tee -a $tfile
-    echo "${nepi_ip} nepiuser-${NEPI_DEVICE_ID}" | sudo tee -a $tfile
-
-    sudo cp $tfile $file >/dev/null 2>&1
-
-    if [[ -f $tfile ]]; then
-        sudo rm $tfile >/dev/null 2>&1
-    fi
-
-    echo " "
-    echo "################################# "
-    echo "Clearing Known Hosts"
-    echo ""
-
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
-    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
-    # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
-
 
 
     #####################################
@@ -591,7 +471,7 @@ if [[ $skip_software -eq 0 ]]; then
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
                 sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                rui_ip=$NEPI_IP
+                rui_ip=$nepi_ip
                 sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
 
                 # Enable the Home button in Preferences without overwriting the whole file
@@ -615,57 +495,27 @@ fi
     echo " "
 
 
-
-
-
-    NEPI_IP_END=$NEPI_IP
-    network_id="$(echo "$NEPI_IP_END" | cut -d'.' -f1-3)"
-    nepi_id=$(echo "$NEPI_IP_END" | cut -d '.' -f 4-)
-    rec_ip=${network_id}.5
-
-    if [[ ${NEPI_IP_END} != ${NEPI_IP_START} ]]; then
-        echo ""
-        echo "Your NEPI IP address has changed from: ${NEPI_IP_START} to: ${NEPI_IP_END}"
-        if systemctl is-active --quiet NetworkManager; then
-            slist=$(netliststatic)
-            if [[ "$slist" != *"$network_id"*  ]]; then
-
-                if systemctl is-active --quiet NetworkManager; then
-                    echo ""
-                    echo "Do you want to update now?"
-                    choice=$(ask_yes_no)
-                    if [[ "$choice" == 'yes' ]]; then
-                        echo ""
-                        netsetstatic "${rec_ip}/24"
-                        echo "###################"
-                        echo "Updated Static IPs"
-                        netliststatic
-                        echo "###################"
-                        echo ""
-                    fi  
-                    echo ""  
-                fi
-            fi
-        fi
-    fi
-
     echo "Your NEPI DEVICE IP address is set to:" 
-    echo "${NEPI_IP_END}"
+    echo "${NEPI_IP}"
 
     echo ""
-    echo "Your PC's network adapter should be set to "
-    echo "${rec_ip}"
+    if pings; then
+        echo "Your Dev device network adapter is set to ${REMOTE_IP}"
+    else
+        echo "Your Dev device network adapter should be set to ${REMOTE_IP}"
+    fi
     if systemctl is-active --quiet NetworkManager; then
         echo "You can switch network adapter settings by typing:"
-        echo "netnepi  OR   nepiauto  OR  netsetstatic <ip_address/netmask>"   
+        echo "netsetnepi  OR   netsetauto  OR  netsetcustom 'ip_address/netmask'"   
     fi  
 
     echo " "
     echo "You can check your NEPI Device connection by typing:"
-    echo "ping ${NEPI_IP}   OR   pingn"
+    echo "pingn   OR   ping ${nepi_ip}"
 
     echo " "
-    echo "You can ssh into your NEPI Devices nepi Docker host OR nepi Docker contatiner by typing:"
+    echo "Your NEPI ssh key is set to ${NEPI_SSH_KEY}"
+    echo "You can ssh into your NEPI Docker Host OS or running NEPI Docker Contatiner by typing:"
     echo "sshnh  OR   sshn"
 
     echo " "
@@ -675,7 +525,7 @@ fi
 
     echo " "
     echo "You can connect to your NEPI Device's RUI in a Chrome browser at:"
-    echo "nepirui   OR   entering  http://${NEPI_IP}:5003/  in a Chromium browser"
+    echo "nepirui   OR   entering  http://${nepi_ip}:5003/  in a Chromium browser"
 
     echo " "
     echo "To see a list of available NEPI bash command line shortcuts run: nepihelp"

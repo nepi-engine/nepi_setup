@@ -698,8 +698,11 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     echo "nepistorageopen  OR   nepiconfigopen   to open file manager to sharedrive drive"
 
     echo " "
-    echo "You can ssh into your Running NEPI Docker contatiner by typing:"
-    echo "sshn"
+    echo "Your NEPI ssh key is set to ${NEPI_SSH_KEY}"
+    if [[ ${NEPI_MODE} == 'HOST' ]]; then
+        echo "You can ssh into your Running NEPI Docker contatiner by typing:"
+        echo "sshn"
+    fi
 
     echo ""
     echo "Your remote dev system network adapter should be set to "

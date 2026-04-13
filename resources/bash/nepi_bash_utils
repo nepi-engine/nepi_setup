@@ -61,6 +61,7 @@ export NEPI_DEVICE_ID=device1
 export NEPI_RECOVERY_DEVICE_ID=device1
 export NEPI_RECOVERY_IP=192.168.179.103
 export NEPI_IN_CONTAINER=1
+export REMOTE_IP=192.168.179.5
 
 
 export NEPI_HOME=/home/$CONFIG_USER
@@ -91,7 +92,9 @@ export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
 
-
+alias nepimode="
+echo ${NEPI_MODE}
+"
 
 function NSETUP() {
   if [[ -d $NEPI_REPO_FOLDER ]]; then
@@ -119,6 +122,9 @@ function NRUI_IP() {
   echo "${rui_ip}"
 }
 export -f NRUI_IP
+
+
+
 
 ###############################
 
@@ -751,21 +757,26 @@ function netsetstatic() {
 export -f netsetstatic
 
 function netsetauto() {
-  nestsetstatic 'auto'
+  netsetstatic 'auto'
   return $?
 }
 
 export -f netsetauto
 
 function netsetcustom() {
-  nestsetstatic
+  netsetstatic $1
   return $?
 }
 
 export -f netsetcustom
 
 function netsetnepi() {
-  nestsetstatic $NEPI_IP
+  if [[ $NEPI_MODE == 'REMOTE' ]]; then
+    ip="${REMOTE_IP%%/*}"
+  else
+    ip="${NEPI_IP%%/*}"
+  fi
+  netsetstatic $ip
   return $?
 }
 
@@ -782,6 +793,24 @@ function pingi(){
 }
 export -f pingi
 
+# ping self
+function pings(){
+    if [[ $NEPI_MODE == 'REMOTE' ]]; then
+      ip="${REMOTE_IP%%/*}"
+    else
+      ip="${NEPI_IP%%/*}"
+    fi
+    if ! ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
+        echo "No Connection at ${ip}"
+        return 1
+    else
+        echo "Connected at ${ip}"
+    fi
+}
+export -f pings
+
+
+
 # ping nepi
 function pingn(){
     ip="${NEPI_IP%%/*}"
@@ -795,7 +824,7 @@ function pingn(){
 export -f pingn
 
 
-# ping nepi
+# ping nepi continously
 function pingnc(){
   ping "${NEPI_IP%%/*}"
 }
@@ -805,6 +834,39 @@ export -f pingnc
 alias sbrc="
 source /home/${CONFIG_USER}/.bashrc"
 
+
+## NEPI deploy complete
+function ubrc_remote() {
+sudo -v
+source $(NSETUP)/scripts/remote_bash_setup.sh $skip_software
+source /home/${CONFIG_USER}/.bashrc
+}
+
+function ubrc_host() {
+sudo -v
+source $(NSETUP)/scripts/docker_bash_setup.sh $skip_software
+source /home/${CONFIG_USER}/.bashrc
+}
+
+function ubrc_system() {
+sudo -v
+source $(NSETUP)/scripts/nepi_bash_setup.sh $skip_software
+source /home/${CONFIG_USER}/.bashrc
+}
+
+
+function ubrc() {
+sudo -v
+nepi_mode=${NEPI_MODE}
+echo "NEPI_MODE: ${nepi_mode}"
+if [[ ${nepi_mode} == 'REMOTE' ]]; then 
+  ubrc_remote
+elif [[ ${nepi_mode} == 'HOST' ]]; then 
+  ubrc_host
+elif [[ ${nepi_mode} == 'SYSTEM' ]]; then 
+  ubrc_system
+fi
+}
 
 
 function ask_yes_no {
@@ -1094,9 +1156,10 @@ netsetstatic = Select network adapter and set static_ip with provided IP like '1
 netsetauto = Select network adapter and set static_ip to auto'
 netsetcustom = Select network adapter and enter a custom static IP address'
 netsetnepi = Select network adapter and set static_ip to current NEPI_IP value'
-pingi = Check connection to NEPI IP
-pingnc = ping NEPI IP address continously
 pingi = Check connection to internet
+pings = Check connection to Self IP address
+pingn = Check connection to NEPI IP
+pingnc = Ping NEPI IP address continously
 nipa= Echo NEPI set IP address
 naipa= Echo NEPI set IP alias addresses
 nnipa= Echo NEPI set NTP IP addresses
@@ -1108,6 +1171,7 @@ nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues
 fix_ipv4_netmask = Check valid IP and add 24 netmask if not provided
+ubrc = Update and source the current user's bashrc files
 sbrc = Source the current user's bashrc files" 
 
 ###################################
@@ -2311,7 +2375,7 @@ function nepistorage() {
       fi
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
       if ! mountpoint -q $shdrive; then
-        sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_ADMIN_USER
+        sudo mount.cifs //${NEPI_IP}/nepi_storage $shdrive -o user=$NEPI_USER
       fi
       if mountpoint -q $shdrive; then
         cd $shdrive
@@ -3187,9 +3251,6 @@ source ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.sh ${SHOW_CONFIG_MENU}
 source /home/${CONFIG_USER}/.bashrc
 }
 
-alias nepimode="
-echo ${NEPI_MODE}
-"
 
 function nepisetup() {
 sudo -v
