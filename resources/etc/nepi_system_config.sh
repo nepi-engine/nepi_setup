@@ -186,6 +186,10 @@ fi
 #####################################
 # Config Setup
 
+if [[ -z $NEPI_VPN_ENABLED ]]; then
+    NEPI_VPN_ENABLED=0
+fi
+
 NEPI_USER_CONFIGS=(
 NEPI_USER_PW \
 NEPI_HOST_PW \
@@ -202,7 +206,8 @@ NEPI_NTP_IP \
 NEPI_FS_AB \
 NEPI_IMPORT_PATH \
 NEPI_EXPORT_PATH \
-NEPI_SSH_KEY
+NEPI_SSH_KEY \
+NEPI_VPN_ENABLED
 )
 
 function update_current_config() {
@@ -225,6 +230,7 @@ function update_current_config() {
     CURRENT_NEPI_IMPORT_PATH="$NEPI_IMPORT_PATH"
     CURRENT_NEPI_EXPORT_PATH="$NEPI_EXPORT_PATH"
     CURRENT_NEPI_SSH_KEY="$NEPI_SSH_KEY"   
+    CURRENT_NEPI_VPN_ENABLED="$NEPI_VPN_ENABLED"
 }     
 
 function print_user_config(){
@@ -274,6 +280,7 @@ function print_current_config(){
     echo "NEPI_IMPORT_PATH: ${CURRENT_NEPI_IMPORT_PATH}"
     echo "NEPI_EXPORT_PATH: ${CURRENT_NEPI_EXPORT_PATH}"
     echo "NEPI_SSH_KEY: ${CURRENT_NEPI_SSH_KEY}"
+    echo "NEPI_VPN_ENABlED: ${CURRENT_NEPI_VPN_ENABLED}"
     echo ""
 }
 
@@ -301,6 +308,19 @@ function udpate_config_file(){
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_VPN_ENABlED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
+
+
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+    vpn_version=$(get_openvpn_version)
+        if [[ -z $vpn_version ]]; then
+            vpn_version=0
+        fi
+        export NEPI_VPN_VERSION=$vpn_version
+        update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
+    fi
 
 }
 
@@ -321,6 +341,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                             "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                             "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY"\
+                            "Update NEPI_VPN_ENABLED" \
                             "FACTORY RESET" "APPLY SETTINGS" )
 
         while true; do
@@ -571,6 +592,24 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
                                 ;;
 
+                            "Update NEPI_VPN_ENABLED")
+                                    vpn_version=$(get_openvpn_version)
+                                    if [[ -z $vpn_version ]]; then
+                                        vpn_version=0
+                                    fi    
+                                    if [[ "$vpn_version" == '0' ]]; then
+                                        echo "No VPN software installed"
+                                        break # Exit the select statement
+                                    fi                        
+                                    echo "Do you want to enable NEPI VPN service on your device"
+                                    choice=$(ask_yes_no)
+                                    if [[ "$choice" == 'yes' ]]; then
+                                        CURRENT_NEPI_VPN_ENABLED=1
+                                    else
+                                        CURRENT_NEPI_VPN_ENABLED=0
+                                    fi
+                                    break # Exit the select statement
+                                ;;
                             "FACTORY RESET")
                                 echo "ARE YOU SURE"
                                 choice=$(ask_yes_no)
@@ -636,6 +675,20 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         echo "Failed to load ${SYSTEM_ETC_PATH}/load_system_config.sh"
         exit 1
     fi
+
+
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 && $NEPI_VPN_VERSION != 0 ]]; then
+        #################################################
+        echo "Updating NEPI VPN Settings to ${NEP_VPN_ENABLED} with version ${NEPI_VPN_VERSION}"
+
+        if [[ $NEP_VPN_ENABLED -eq 1  ]]; then
+            sudo systemctl start openvpn
+        else
+            sudo systemctl stop openvpn
+        fi
+    fi
+
 
 
 

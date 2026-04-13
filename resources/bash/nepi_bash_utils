@@ -1915,6 +1915,17 @@ function get_cuda_version(){
 export -f get_cuda_version
 
 
+function get_openvpn_version(){
+        if openvpn --version >/dev/null 2>&1; then
+          value=$(openvpn --version 2>&1 | head -1 | awk '{print $2}')
+          echo "${value}"
+        else
+          echo 0
+        fi
+}
+export -f get_openvpn_version
+
+
 function get_sw_desc() {
   os_desc=$(get_os_info)
   sw_desc=${os_desc}
@@ -2175,6 +2186,7 @@ get_hw_type = Echos the current hardware type string (ie. jetson, arm64, amd64, 
 get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname)
 get_os_info = Echos the current OS NameVersion
 get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
+get_openvpn_version = Echos OpenVPN version number if openvpn installed or 0
 get_sw_desc = Echos NEPI formated software vesion tag
 add_ssh_key = Add the ssh key in the provided full path ssh_key file
 create_ssh_key = Create a new SSH key key pair in provided key_folder

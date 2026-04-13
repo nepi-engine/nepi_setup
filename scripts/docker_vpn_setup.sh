@@ -95,11 +95,14 @@ echo ""
 ##### CLIENT SIDE 
 
 sudo apt update
+sudo apt install upgrade openvpn
 sudo apt install network-manager-openvpn network-manager-openvpn-gnome
 
 
-# Copy client file from host to pc: /home/nepihost/client.ovpn
+# Copy client file from host to pc: /home/nepihost/client.ovpn to your home folder
 
 # Change mod on copied file 600
 
+
+# sudo openvpn --config /home/${USER}/client.ovpn
 # Open ubuntu settings/network, click + next to VPN, select import, choose file
