@@ -67,15 +67,7 @@ else
         # Start Processes
         EXPORT_PATH=$NEPI_EXPORT_PATH
         sudo rm -r /mnt/nepi_storage/.Trash* >/dev/null 2>&1
-        export_clean=0
-        arg=$1
-        if [[ -n $arg ]]; then
-            if [[ "$arg" == 'clean' ]]; then
-                export_clean=1
-            else
-                EXPORT_PATH=$NEPI_EXPORT_PATH
-            fi
-        fi
+        export_desc=$1
 
         if [[ ! -d "${EXPORT_PATH}" ]] ; then
             EXPORT_PATH=/mnt/nepi_storage/nepi_images
@@ -138,11 +130,13 @@ else
                 NEW_DATE=$(date +%Y%m%d)
 
 
-                if [[ "$export_clean" == 1 ]]; then
+                if [[ "$export_desc" == 'clean' ]]; then
                     NEW_DESC=''
                 else
                     NEW_DESC=${TAG_ARRAY[6]}
-                    if [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
+                    if [[ -n "$export_desc" ]]; then
+                        NEW_DESC="${export_desc}_$(date +%H%M)"
+                    elif [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
                         NEW_DESC=${NEW_DESC%?????}
                         NEW_DESC="${NEW_DESC}_$(date +%H%M)"
                     elif [[ -n "$NEW_DESC" ]]; then
