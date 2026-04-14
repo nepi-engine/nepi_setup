@@ -339,7 +339,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                             "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                             "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY"\
-                            "Update NEPI_VPN_ENABLED" \
                             "FACTORY RESET" "APPLY SETTINGS" )
 
         while true; do
@@ -590,24 +589,24 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
                                 ;;
 
-                            "Update NEPI_VPN_ENABLED")
-                                    vpn_version=$(get_openvpn_version)
-                                    if [[ -z $vpn_version ]]; then
-                                        vpn_version=0
-                                    fi    
-                                    if [[ "$vpn_version" == '0' ]]; then
-                                        echo "No VPN software installed"
-                                        break # Exit the select statement
-                                    fi                        
-                                    echo "Do you want to enable NEPI VPN service on your device"
-                                    choice=$(ask_yes_no)
-                                    if [[ "$choice" == 'yes' ]]; then
-                                        CURRENT_NEPI_VPN_ENABLED=1
-                                    else
-                                        CURRENT_NEPI_VPN_ENABLED=0
-                                    fi
-                                    break # Exit the select statement
-                                ;;
+                            # "Update NEPI_VPN_ENABLED")
+                            #         vpn_version=$(get_openvpn_version)
+                            #         if [[ -z $vpn_version ]]; then
+                            #             vpn_version=0
+                            #         fi    
+                            #         if [[ "$vpn_version" == '0' ]]; then
+                            #             echo "No VPN software installed"
+                            #             break # Exit the select statement
+                            #         fi                        
+                            #         echo "Do you want to enable NEPI VPN service on your device"
+                            #         choice=$(ask_yes_no)
+                            #         if [[ "$choice" == 'yes' ]]; then
+                            #             CURRENT_NEPI_VPN_ENABLED=1
+                            #         else
+                            #             CURRENT_NEPI_VPN_ENABLED=0
+                            #         fi
+                            #         break # Exit the select statement
+                            #     ;;
                             "FACTORY RESET")
                                 echo "ARE YOU SURE"
                                 choice=$(ask_yes_no)
