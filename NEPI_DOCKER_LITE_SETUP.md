@@ -93,6 +93,23 @@ After the import completes, you can print the current installed NEPI Docker Imag
     dimg
 
 
+
+################################################################
+### NEPI Docker Image Testing
+This section will start and test your NEPI Docker solution. 
+
+refresh your .bashrc file:
+
+    sbrc
+
+Start your NEPI container running:
+
+    nepistart
+
+The start script will let you know if the installed NEPI Image started successfully.
+
+
+
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
 
     nepistart = Start the NEPI docker container.
@@ -120,27 +137,6 @@ After the import completes, you can print the current installed NEPI Docker Imag
 
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
-
-
-################################################################
-### NEPI Docker Image Testing
-This section will start and test your NEPI Docker solution. 
-
-refresh your .bashrc file:
-
-    source ~/.bashrc
-
-Start your NEPI container running:
-
-    nepistart
-
-The start script will let you know if the installed NEPI Image started successfully.
-
-
-**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
-see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
-
-
 **OPEN CHROMIUM WEB BROSWER**
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
 
@@ -154,6 +150,10 @@ You can also access the NEPI admin page for managing nepi software configuration
     localhost:5003/admin
 
 the default admin password is: **nepiadmin**
+
+
+**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
+see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
 
 
 ################################################################

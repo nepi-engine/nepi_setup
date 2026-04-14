@@ -158,16 +158,30 @@ Run the NEPI Docker Image Initialization script (sudo password is now 'nepi'):
 
     source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
 
-Run the NEPI Docker Import command (sudo password is now 'nepi'):
-
-**NOTE:** This step imports a large NEPI image file into the system which takes several minutes to complete.
-
-    nepiimport
-
 After the import completes, you can print the current installed NEPI Docker Image by typing:
 
 
     dimg
+
+**NOTE:** This process downloads the Lite AI models, AI training scripts, 
+sample data files, and user_configurations to folders in /mnt/nepi_storage.
+
+**NOTE:** This process downolads the latest NEPI Docker Image for your system's
+architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
+
+################################################################
+### NEPI Docker Image Testing
+This section will start and test your NEPI Docker solution. 
+
+refresh your .bashrc file:
+
+    sbrc
+
+Start your NEPI container running:
+
+    nepistart
+
+The start script will let you know if the installed NEPI Image started successfully.
 
 
 **NOTE:** Some additional NEPI Docker command line shortcuts are:
@@ -198,40 +212,23 @@ After the import completes, you can print the current installed NEPI Docker Imag
     # Type **nepihelp** to see all NEPI Software command line shortcuts
 
 
-**NOTE:** This process downloads the Lite AI models, AI training scripts, 
-sample data files, and user_configurations to folders in /mnt/nepi_storage.
-
-**NOTE:** This process downolads the latest NEPI Docker Image for your system's
-architecture NEPI Docker's import folder at /mnt/nepi_storage/nepi_images.
-
-################################################################
-### NEPI Docker Image Testing
-This section will start and test your NEPI Docker solution. 
-
-
-Start your NEPI container running:
-
-    nepistart
-
-The start script will let you know if the installed NEPI Image started successfully. 
-
-**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
-see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
-
-
 **OPEN CHROMIUM WEB BROSWER**
 Check that the NEPI Resident User Interface (RUI) is running by opening the Chromium browser and entering the following in the search bar:
 
     localhost:5003 
 
 This will take you to the NEPI RUI dashboard.  Once the NEPI core software system is running, you should see a blinking Green indicator and messages.
-**NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt require the NEPI Docker service running.
+**NOTE:**  RUI Controls related to User, Device, Time, Network, and Software managemnt are not enabled for NEPI Demo installations.
 
 You can also access the NEPI admin page for managing nepi software configurations by entering the following in the search bar:
 
     localhost:5003/admin
 
 the default admin password is: **nepiadmin**
+
+
+**NOTE:** If you encounter any issues starting and running the NEPI Software container, 
+see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
 
 
 ################################################################
