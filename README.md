@@ -14,9 +14,9 @@ See NEPI Docker Lite Setup instructions at [here](NEPI_DOCKER_LITE_SETUP.md)
 
 See NEPI Docker Full Setup instructions at [here](NEPI_DOCKER_FULL_SETUP.md)
 
-### NEPI Development Setup Instructions
+### NEPI Remote Setup Instructions
 
-See the NEPI Development System Setup instructions at [here](NEPI_DEV_SETUP.md)
+See the NEPI Development System Setup instructions at [here](NEPI_REMTOE_SETUP.md)
 
 ### NEPI Software Build Instructions
 
