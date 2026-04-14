@@ -246,28 +246,6 @@ see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
 
 
 ################################################################
-### (OPTIONAL) NEPI Docker Remote PC Connections
-If you want to connect to your NEPI device from a remote network connected PC, setup and test a remote connection following these instructions.
-
-**NOTE:** You will manually need to set your NEPI Device's network adapater IPV4 settings to 'Manual' 
-with the following values 
-    ADDRESS = 192.168.179.103
-    NETMADK = 255.255.255.0
-Then reboot your NEPI Device and continue to the tutorials listed below.
-
-Test that you can connect to your running conatiner from a network connected PC.
-See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
-
-**NOTE:** NEPI Docker Lite Installations do not configure NEPI's Network Shared Drive support, but
-the NEPI Storage and NEPI Config Folders, you can access them locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
-
-**NOTE:** NEPI Docker Lite Installations do not configure NEPI Host SSH, but do support NEPI Container SSH connections. Learn more about the NEPI Folders content, see this tutorial for remote SSH access.
-
-    SSH into either your NEPI Host device or NEPI running container following this tutorial.
-    See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
-
-
-################################################################
 ### NEPI Software Tutorials
 
 Learn more about using and configuring the NEPI software, as well as building and deploying 

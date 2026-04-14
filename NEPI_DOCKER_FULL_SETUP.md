@@ -273,23 +273,19 @@ Make any changes you want using the menu options presented, then choose the 'APP
 For production environments, you can just replace this file with a production ready file, or create a custom production script that make any required changes.
 
 ################################################################
-### NEPI Docker Remote PC Connections
-Setup and test a network connected PC connection to your NEPI device following these instructions.
+### NEPI Remote System Connections
+If you want to connect to your NEPI device from a remote network connected PC, setup and test a remote connection following these instructions.
 
-**NOTE:** For Linux and Mac PC's, run through the NEPI Dev PC Setup first following the
-instructions at [here](NEPI_REMOTE_DEV_SETUP.md). 
+**NOTE:** If you're remote system is a Linux Ubunutu device, you can jump to the automated remote system setup instructions at:
+ [NEPI_REMTOE_SETUP](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_REMOTE_SETUP.md)
 
-**NOTE:** For Windows PC's just follow the instructions provided in the turial links below.
+**NOTE:** For other Operating system's, you will need to manually set up your remote system following the instructions provided in the tutorial links below.
 
 Test that you can connect to your running conatiner from a network connected PC.
 See a tutorial at [Connecting and Setup](https://nepi.com/nepi-tutorials/nepi-engine-connecting-and-setup/)
 
-**NOTE:** If you skipped setting up seperate mounted partitions for the NEPI Folders in the NEPI Docker Config Setup section, 
-then the NEPI Storage and NEPI Config drives will only be available locally on the NEPI Device at /mnt/nepi_storage and /mnt/nepi_config.
-Learn more about the NEPI Folders content, see this torial for remote access.
-
-   Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
-   See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
+Test that you can connect your PC to NEPI Device's 'nepi_storage' folder using your PC's File Manager application. 
+See a tutorial at [Accessing the User Storage Drive](https://nepi.com/nepi-tutorials/nepi-engine-user-storage-drive/)
 
 SSH into either your NEPI Host device or NEPI running container following this tutorial.
 See a tutorial at [NEPI SSH SETUP](https://nepi.com/nepi-tutorials/nepi-engine-accessing-the-nepi-file-system/)
