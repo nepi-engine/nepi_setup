@@ -1,10 +1,10 @@
-# NEPI Remote Dev System Setup
+# NEPI Remote Setup
 
-This tutorial will walk you through setting up a NEPI software development environment. 
+This tutorial will walk you through setting up a NEPI software Remote environment. 
 The last section provides instructions for deploying and building NEPI from source for developers
-wanting the latest development version or deploying customized solutions.
+wanting the latest Remote version or deploying customized solutions.
 
-**NOTE:** NEPI Remote Dev System Setup supports can be performed on the following:
+**NOTE:** NEPI Remote System Setup supports can be performed on the following:
 1) Ubuntu Linux PC connected to a NEPI Device over a wired or WiFi connection
 2) NEPI device itself
 3) Windows or MAC PC running a Ubuntu Linux Virtual Environment (See the NOTE below)
@@ -21,7 +21,7 @@ For additional support, visit the NEPI software community forum at:
 [NEPI Community](https://www.community.nepi.com)
 
 ################################################################
-### NEPI Remote Dev System Setup
+### NEPI Remote System Setup
 
 Update Git application (sudo password is #Nsetup4You):
 
@@ -33,21 +33,21 @@ Clone the NEPI setup repo:
     git clone https://github.com/nepi-engine/nepi_setup.git
 
 
-Run the NEPI Remote Dev System Setup script:
+Run the NEPI Remote System Setup script:
 
-    bash /home/${USER}/nepi_setup/scripts/remote_dev_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/remote_env_setup.sh
     source ~/.bashrc
 
 **NOTE:** After the first setup is complete, you can rerun the setup process by typing:
 
     nepisetup
-
-Other useful NEPI development command line shortcuts.
+    
+Other useful NEPI Remote command line shortcuts.
 
 sshnh = SSH into the NEPI Software Host System
 sshn = SSH into the running NEPI Software Container
 
-See the NEPI Remote Dev System command line shortcuts menu:
+See the NEPI Remote System command line shortcuts menu:
 
     nepihelp
 
@@ -67,7 +67,7 @@ Check or Setup an SSH Key for your GitHub Account by typing the following
 Aditional command line NEPI Github commands are available
 
 nepiclone = Clone the latest NEPI source-code repo
-nepiclonedev = Clone the latest NEPI Development branch source-code repo
+nepiclonedev = Clone the latest NEPI Remote branch source-code repo
 nepipull = Update to the latest NEPI source-code repo
 nepimain = Switch to the NEPI source-code main repo branch
 nepidev = Switch to the NEPI source-code develop repo branch
