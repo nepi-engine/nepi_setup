@@ -2350,7 +2350,7 @@ function nepirui() {
     if [[ ${NEPI_MODE} != 'SYSTEM' ]]; then
       rui_ip=$(NRUI_IP)
       echo "Will Connect to NEPI RUI at: ${rui_ip}"
-      if [[ ${NEPI_MODE} != 'REMOTE' ]]; then
+      if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
         if ! pingn; then
           return
         fi
