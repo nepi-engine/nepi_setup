@@ -45,16 +45,6 @@ then if prompted enter: `y` or 'yes' :
 
     source ./docker_lite_setup.sh
 
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
-
-The docker lite setup script will run through the following steps NEPI Docker Lite Environment Setup, NEPI Docker Lite Config Setup, and NEPI Docker Init Setup.
-
-### NEPI Docker Lite Environment Setup
-
-This step will configure the NEPI Docker installation using the defualt settings. 
-You can change settings later in the 'NEPI Docker Customization' section.
-
-### NEPI Docker Lite Config Setup
 
 This step will configure the NEPI Docker installation using the defualt settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
@@ -66,7 +56,6 @@ This process will create (if not allready created) and setup the following NEPI 
         ai_models - **AI models**
         nepi_images - **Import/Export Docker Images**
         user_cfg - **User Saved Configurations**
-- **NEPI Docker** folder created at '/mnt/nepi_docker'. This is where NEPI Docker Images are stored.
 - **NEPI Config** folder created at '/mnt/nepi_config, along with several config subfolders.
 
 
@@ -75,6 +64,8 @@ This process will create (if not allready created) and setup the following NEPI 
 2) NEPI folder shortcuts added to File Manager folder bookmarks.
 3) Chromium browser updated with useful NEPI browser bookmarks.
 
+
+**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
 ################################################################
 ### NEPI Docker Init Setup
@@ -95,12 +86,6 @@ Run the NEPI Docker Image Initialization script (sudo password is now 'nepi'):
 **NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
 
     source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
-
-Run the NEPI Docker Import command (sudo password is now 'nepi'):
-
-**NOTE:** This step imports a large NEPI image file into the system which takes several minutes to complete.
-
-    nepiimport
 
 After the import completes, you can print the current installed NEPI Docker Image by typing:
 
@@ -151,8 +136,6 @@ Start your NEPI container running:
 
 The start script will let you know if the installed NEPI Image started successfully.
 
-**NOTE** Newly installed NEPI Docker Images may take several attempts to start successfully
-the first time after installation.  Try running several times if it fails
 
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
 see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
