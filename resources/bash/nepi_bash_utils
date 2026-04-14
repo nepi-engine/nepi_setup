@@ -3239,7 +3239,7 @@ function pushn(){
 function nepisetup_remote() {
 sudo -v
 skip_software=1
-source $(NSETUP)/scripts/remote_dev_setup.sh $skip_software
+source $(NSETUP)/scripts/remote_env_setup.sh $skip_software
 source /home/${CONFIG_USER}/.bashrc
 }
 

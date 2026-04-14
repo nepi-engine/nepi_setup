@@ -35,7 +35,7 @@ Clone the NEPI setup repo:
 
 Run the NEPI  System Setup script:
 
-    bash /home/${USER}/nepi_setup/scripts/_env_setup.sh
+    bash /home/${USER}/nepi_setup/scripts/remote_env_setup.sh
     source ~/.bashrc
 
 **NOTE:** After the first setup is complete, you can rerun the setup process by typing:
