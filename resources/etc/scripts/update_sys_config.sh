@@ -45,7 +45,9 @@ fi
 
 
 ##############################
-
+echo "Got NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
+echo "Got NEPI_DEVICE_MD: ${NEPI_DEVICE_MD}"
+echo "Got NEPI_DEVICE_SN: ${NEPI_DEVICE_SN}"
 
 # UPDATE config file values
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
@@ -108,7 +110,7 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     # UPDATE ROS VERSION
     rosver=${ROS_DISTRO}
     echo "Got ROS Version ${rosver}"
-    if [[ -z "$rosver" ]]; then
+    if [[ -z $rosver ]]; then
         rosver=0
     fi
     echo "Updating NEPI_ROS to ${rosver}"

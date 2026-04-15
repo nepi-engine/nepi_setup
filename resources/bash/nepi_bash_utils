@@ -1421,7 +1421,7 @@ function load_yaml_file(){
       eval "$eval_cmd"
       
       for entry in $load_vals; do
-         export ${entry}
+         export ${entry} 2> /dev/null
       done
 
       if [[ "$success" -ne 1 ]]; then
