@@ -163,7 +163,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     echo ""
     PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "CONTINUE" )
+    options=(  "Update Static IP Address" "Update Device ID Name" "Update NEPI Host User" "Update NEPI SSH KEY FILE" "CONTINUE" )
 
     while true; do
         #clear # Optional: Clear the screen before displaying the menu
@@ -208,14 +208,14 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                         echo "Not A Valid User Name"
                     fi          
                 ;;
-                # "Update NEPI SSH KEY FILE")
-                #     echo ""
-                #     echo "Syncing NEPI Configs"
-                #     nepisync
-                #     echo ""
-                #     echo "Syncing NEPI Configs"
-                #     nepisshkey
-                # ;;
+                "Update NEPI SSH KEY FILE")
+                    echo ""
+                    echo "Syncing NEPI Configs"
+                    nepisync
+                    echo ""
+                    echo "Syncing NEPI Configs"
+                    nepisshkey
+                ;;
 
 
                 "CONTINUE")
