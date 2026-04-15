@@ -64,27 +64,27 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
 fi
 
 
-###################
-SYS_BASH_FILE=/opt/nepi/etc/sys_env.bash
+# ###################
+# SYS_BASH_FILE=/opt/nepi/etc/sys_env.bash
 
-if [ ! -f ${SYS_BASH_FILE} ]; then
-	echo "ERROR! Could not find ${SYS_BASH_FILE}"
-else
+# if [ ! -f ${SYS_BASH_FILE} ]; then
+# 	echo "ERROR! Could not find ${SYS_BASH_FILE}"
+# else
 
-    echo ""
-    echo "Updating nepi system bash file"
-    echo "Using Device ID: ${NEPI_DEVICE_ID}"
-    update_text_value ${SYS_BASH_FILE} "export DEVICE_ID" "export DEVICE_ID=${NEPI_DEVICE_ID}"
+#     echo ""
+#     echo "Updating nepi system bash file"
+#     echo "Using Device ID: ${NEPI_DEVICE_ID}"
+#     update_text_value ${SYS_BASH_FILE} "export DEVICE_ID" "export DEVICE_ID=${NEPI_DEVICE_ID}"
 
 
 
-    # Check if system hostname has changed
-    if [[ "${HOSTNAME}" != "${NEPI_DEVICE_ID}" ]]; then
-        echo "System Hostname has changed, Running ETC hostname update script"
-        . /opt/nepi/etc/scripts/update_etc_hostname.sh
-    fi
+#     # Check if system hostname has changed
+#     if [[ "${HOSTNAME}" != "${NEPI_DEVICE_ID}" ]]; then
+#         echo "System Hostname has changed, Running ETC hostname update script"
+#         . /opt/nepi/etc/scripts/update_etc_hostname.sh
+#     fi
 
-fi
+# fi
 
 
 
