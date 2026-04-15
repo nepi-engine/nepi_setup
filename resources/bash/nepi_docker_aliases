@@ -296,7 +296,8 @@ export -f nepilogs
 function nepienable(){
   sudo -v
   sudo systemctl enable nepi_docker
-  echo "NEPI Docker Service enabled on next boot"
+  sudo systemctl start nepi_docker
+  echo $(nepistatus)
 }
 export -f nepienable
 

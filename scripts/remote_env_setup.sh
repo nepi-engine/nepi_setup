@@ -262,8 +262,8 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
         echo "Do you want to use the defualt Remote System IP ${remote_ip} for your device"
         choice=$(ask_yes_no)
         if [[ "$choice" == 'no' ]]; then
-        valid_ip=0
-            while $valid_ip -eq 0; do
+            valid_ip=0
+            while [[ $valid_ip -eq 0 ]]; do
                 echo ""
                 read -p $'\n'"Enter a new Remote System IP Address (Current = ${REMOTE_IP}): " USER_INPUT
                 echo ""
@@ -308,26 +308,28 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
         fi
     fi
 fi
-nepisync
 
-echo ""
-echo "Loading Updated NEPI Config Settings" 
-source  $NEPI_USER_CONFIG_SCRIPT
+
+# echo ""
+# echo "Loading Updated NEPI Config Settings" 
+# source  $NEPI_USER_CONFIG_SCRIPT
 
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 source ${SCRIPT_FOLDER}/remote_bash_setup.sh
 
+ 
+
+echo ""
+echo "Sourcing updated bash files"
+source /home/${CONFIG_USER}/.bashrc
+wait
 
 
-  
-
-    echo ""
-    echo "Sourcing updated bash files"
-    source /home/${CONFIG_USER}/.bashrc
-    wait
-
+echo ""
+echo "Loading Updated NEPI Config Settings" 
+source  $NEPI_USER_CONFIG_SCRIPT
 
     #####################################
     echo " "
