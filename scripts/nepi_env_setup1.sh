@@ -182,7 +182,7 @@ else
         nano git trash-cli onboard setools ubuntu-advantage-tools scons dos2unix \
         libffi-dev libv4l-dev v4l-utils curl v4l-utils psmisc scapy minicom dconf-editor \
         gparted socat protobuf-compiler gnupg kgpg snapd xz-utils rsync  trash-cli \
-        dialog ncdu -y
+        dialog ncdu usbutils -y
 
 
     sudo add-apt-repository ppa:rmescandon/yq -y

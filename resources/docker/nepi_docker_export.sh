@@ -129,13 +129,13 @@ else
 
                 NEW_DATE=$(date +%Y%m%d)
 
-
+                echo "Got export description: ${export_desc}"
                 if [[ "$export_desc" == 'clean' ]]; then
                     NEW_DESC=''
                 else
                     NEW_DESC=${TAG_ARRAY[6]}
-                    if [[ -n "$export_desc" ]]; then
-                        NEW_DESC="${export_desc}_$(date +%H%M)"
+                    if [[ -n $export_desc ]]; then
+                        NEW_DESC="${export_desc}"
                     elif [[ "$NEW_DESC" =~ _[0-9]{4}$ ]]; then
                         NEW_DESC=${NEW_DESC%?????}
                         NEW_DESC="${NEW_DESC}_$(date +%H%M)"
@@ -144,9 +144,10 @@ else
                     else
                         NEW_DESC="$(date +%H%M)"
                     fi
-                    NEW_DESC=$(clean_tag_string $NEW_DESC)
-                    NEW_DESC="-${NEPI_DESC}"
+                    clean_desc=$(clean_tag_string $NEW_DESC)
+                    NEW_DESC='-'"${clean_desc}"
                 fi
+                echo "Using export description: ${NEW_DESC}"
                 if [[ "$NEW_DESC" == '-' ]]; then
                     HM=$(date "+%H%M")
                     NEW_DESC="-${HM}"
@@ -225,6 +226,7 @@ else
 
 
                     fi
+                    sudo chmod +x ${EXPORT_PATH}/*
                     ########################
                     # Update Docker Config
                     echo ""

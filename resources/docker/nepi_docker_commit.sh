@@ -104,9 +104,10 @@ else
             
             COMMIT_DATE=$(date +%Y%m%d)
 
-            COMMIT_DESC=$1
-            if [[ -n "$COMMIT_DESC" ]]; then
-                COMMIT_DESC="-${COMMIT_DESC}"
+            commit_desc=$1
+            if [[ -n "$commit_desc" ]]; then
+                clean_desc=$(clean_tag_string $commit_desc)
+                COMMIT_DESC='-'"${clean_desc}"
             else
                 HM=$(date "+%H%M")
                 COMMIT_DESC="-${HM}"

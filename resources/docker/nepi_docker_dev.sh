@@ -83,6 +83,8 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged -it -e UDEV=1 --ipc=host  --
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
+--mount type=bind,source=/etc/udev,target=/etc/udev \
+--mount type=bind,source=/dev/bus/usb,target=/dev/bus/usb \
 --cap-add=SYS_TIME --volume=/var/empty:/var/empty -v /etc/ntpd.conf:/etc/ntpd.conf \
     -e DISPLAY=$DISPLAY \
 --net=host \
