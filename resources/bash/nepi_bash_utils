@@ -414,6 +414,13 @@ function is_valid_cuda(){
 export -f is_valid_cuda
 
 
+function is_valid_rpi(){
+  if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
 
 
 function is_space_avail_mb(){
