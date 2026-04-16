@@ -45,16 +45,13 @@ RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
-if [[ -f $USER_UTILS_SOURCE ]]; then
-    source $USER_UTILS_SOURCE
-else
-    source $NEPI_UTILS_SOURCE
-fi
-
-
-NEPI_IP_START=$NEPI_IP
-echo "Got Starting NEPI IP: ${NEPI_IP_START}"
+source $NEPI_UTILS_SOURCE
+# USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+# if [[ -f $USER_UTILS_SOURCE ]]; then
+#     source $USER_UTILS_SOURCE
+# else
+#     source $NEPI_UTILS_SOURCE
+# fi
 
 
 # Load System Config File
@@ -87,6 +84,8 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
+NEPI_IP_START=${NEPI_STATIC_IP%%/*}
+echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
 
 
@@ -105,7 +104,7 @@ if [[ $skip_software -eq 0 ]]; then
 
     sudo apt update
 
-    sudo apt install yq ncdu -y
+    sudo apt install ncdu -y
 
     if command -v mount.cifs --help &>/dev/null; then
         echo "cifs-utils is installed."
@@ -276,6 +275,8 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
                     echo ""
                 fi         
             done
+        else
+            REMOTE_IP=$remote_ip
         fi  
         echo ""     
         if systemctl is-active --quiet NetworkManager; then
@@ -288,7 +289,7 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
                     choice=$(ask_yes_no)
                     if [[ "$choice" == 'yes' ]]; then
                         echo ""
-                        netsetstatic "${remote_ip}/24"
+                        netsetstatic "${REMOTE_IP}/24"
                         echo ""
                         echo "Updated Static IPs"
                         netliststatic

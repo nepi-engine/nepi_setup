@@ -49,8 +49,11 @@ echo "################################# "
 echo "Sourcing NEPI Bash Utils File"
 echo ""
 
+if [[ -n $REMOTE_IP ]]; then
+    remote_ip=$REMOTE_IP
+fi
+
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
 USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
 if [[ -f $USER_UTILS_SOURCE ]]; then
     source $USER_UTILS_SOURCE
@@ -89,11 +92,12 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
-NEPI_IP_START=$NEPI_IP
 NEPI_IP=${NEPI_STATIC_IP%%/*}
 
-if [[ -z $REMOTE_IP ]]; then
-    network_id="$(echo "$nepi_ip" | cut -d'.' -f1-3)"
+if [[ -n $remote_ip ]]; then
+    export REMOTE_IP=$remote_ip
+else
+    network_id="$(echo "$NEPI_IP" | cut -d'.' -f1-3)"
     remote_ip=${network_id}.5
     export REMOTE_IP=$remote_ip
 fi
