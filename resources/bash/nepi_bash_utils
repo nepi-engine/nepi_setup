@@ -1828,7 +1828,7 @@ export -f source_script
 function process_count(){
   pname=$1
   pcount=$(ps aux | grep "${pname}" | grep -v grep | wc -l)
-  echo $pname
+  echo $pcount
 }
 export -f process_count
 
