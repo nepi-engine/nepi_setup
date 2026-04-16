@@ -118,6 +118,7 @@ if [[ $skip_software -eq 0 ]]; then
     echo "Installing Required Python Software"
     echo ""
 
+    python3 -m pip install yaml
 fi
 
 echo "Starting NEPI Configuration for user ${CONFIG_USER}"
