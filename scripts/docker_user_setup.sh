@@ -74,14 +74,6 @@ fi
 
 
 
-#####################
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    if [[ "$CONFIG_USER" != 'nepihost' ]]; then
-        echo "Current user is ${CONFIG_USER}. This script must be run by user 'nepihost'"
-        return
-    fi
-fi
-
 
 if ! [ $(id -u) = 0 ]; then
     echo 'This scripts must be run as root user. Type "sudo su" and retry'
