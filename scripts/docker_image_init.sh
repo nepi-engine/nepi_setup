@@ -79,15 +79,47 @@ if ! is_valid_internet > /dev/null; then
 
 else
 
-    if is_valid_cuda; then
-        sudo docker pull numurusnepi/nepi:latest-cuda
-        sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
-        sudo docker rmi numurusnepi/nepi:latest-cuda
-    else
-        sudo docker pull numurusnepi/nepi:latest    
-        sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
-        sudo docker rmi numurusnepi/nepi:latest-cuda
-    fi 
+    # if is_valid_cuda; then
+    #     sudo docker pull numurusnepi/nepi:latest-cuda
+    #     sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
+    #     sudo docker rmi numurusnepi/nepi:latest-cuda
+    # else
+    #     sudo docker pull numurusnepi/nepi:latest    
+    #     sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
+    #     sudo docker rmi numurusnepi/nepi:latest-cuda
+    # fi 
+
+#**For AMD64 NONE GPU or RADEON GPU SUPPORT**
+
+    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414
+
+Retag image as nepi:
+
+    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414 nepi:latest
+    sudo docker rmi numurusnepi/nepi:latest
+
+#**For AMD64 NVIDIA GPU SUPPORT **
+
+    sudo docker pull numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331
+
+Retag image as nepi:
+
+    sudo docker tag numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331 nepi:latest-cuda
+    sudo docker rmi numurusnepi/nepi:latest-cuda
+
+
+#**For NVIDIA JETSON GPU SUPPORT**
+
+
+
+    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231
+
+Retag image as nepi:
+
+    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231 nepi:latest-cuda
+    sudo docker rmi numurusnepi/nepi:latest-cuda
+
+
 
 fi
 

@@ -52,23 +52,36 @@ then
 
 Install the latest NEPI Docker Image for your device
 
-**For NONE GPU or RADEON GPU SUPPORT**
+**For AMD64 NONE GPU or RADEON GPU SUPPORT**
 
-    sudo docker pull numurusnepi/nepi:latest
+    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414
 
 Retag image as nepi:
 
-    sudo docker tag numurusnepi/nepi:latest nepi:latest
+    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414 nepi:latest
     sudo docker rmi numurusnepi/nepi:latest
 
-**For NVIDIA GPU SUPPORT or For NVIDIA JETSON GPU SUPPORT**
+**For AMD64 NVIDIA GPU SUPPORT **
 
-    sudo docker pull numurusnepi/nepi:latest-cuda
+    sudo docker pull numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331
 
 Retag image as nepi:
 
-    sudo docker tag numurusnepi/nepi:latest-cuda nepi:latest-cuda
+    sudo docker tag numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331 nepi:latest-cuda
     sudo docker rmi numurusnepi/nepi:latest-cuda
+
+
+**For NVIDIA JETSON GPU SUPPORT**
+
+
+    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231
+
+Retag image as nepi:
+
+    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231 nepi:latest-cuda
+    sudo docker rmi numurusnepi/nepi:latest-cuda
+
+
 
 **NOTE:** NEPI Docker images are large files and will take several minutes to download and install
 
@@ -106,9 +119,9 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
-    nepi_software:latest /bin/bash -c '/nepi_start_all'
+    nepi:latest /bin/bash -c '/nepi_start_all'
 
 **For NVIDIA GPU SUPPORT**
 
@@ -119,10 +132,10 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
-    nepi_software:latest /bin/bash -c '/nepi_start_all'
+    nepi:latest /bin/bash -c '/nepi_start_all'
 
 
 **For NVIDIA JETSON GPU SUPPORT**
@@ -134,12 +147,12 @@ Start your NEPI container running with the following command:
     --mount type=bind,source=/etc/udev,target=/etc/udev \
     --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
     -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
-    --net=host -p 2222:22 -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
     -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp 
     -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon
-    nepi_software:latest /bin/bash -c '/nepi_start_all'    
+    nepi:latest /bin/bash -c '/nepi_start_all'    
 
 
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
