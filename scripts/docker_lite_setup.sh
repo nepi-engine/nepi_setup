@@ -129,25 +129,27 @@ else
     return 
 fi
 
-############################################################################################
+#################
+
+###########################################################################
 
 
-echo ""
-echo "########################"
-echo "NEPI LITE Folders SETUP"
-echo "########################"
-echo ""
+# echo ""
+# echo "########################"
+# echo "NEPI LITE Folders SETUP"
+# echo "########################"
+# echo ""
 
-####################################
-# Run NEPI Files Setup Script
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=docker_folders_setup.sh
-script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
-    script_error=$?
-    echo "Script ${script_path} failed with error ${script_error}"
-    return 
-fi
+# ####################################
+# # Run NEPI Files Setup Script
+# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+# script_file=docker_folders_setup.sh
+# script_path=${SCRIPT_FOLDER}/${script_file}
+# if ! source_script $script_path $LITE_INSTALL; then
+#     script_error=$?
+#     echo "Script ${script_path} failed with error ${script_error}"
+#     return 
+# fi
 
 echo ""
 echo "########################"
