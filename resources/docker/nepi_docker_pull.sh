@@ -75,7 +75,7 @@ else
             if is_valid_cuda; then
                 HUB_IMAGE="numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414" #latest-cuda"
             else
-                HUB_IMAGE="numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331" #latest"
+                HUB_IMAGE="numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331" #latest"
             fi
         elif is_valid_jetson; then
             HUB_IMAGE=="numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231" #latest-cuda"
