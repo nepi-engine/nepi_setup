@@ -94,6 +94,11 @@ You can change settings later in the 'NEPI Docker Customization' section.
 Log into the `nepihost` user using password  'nepi'
 (sudo password is 'nepi')
 
+
+Run the NEPI Docker configuration setup script (sudo password is now 'nepi'):
+
+    source /home/nepihost/nepi_setup/scripts/docker_full_config_setup.sh
+
 This process will create (if not allready created) and setup the following NEPI Folders:
 - **NEPI Storage** folder created at '/mnt/nepi_storage', along with several user subfolders.  
     This is where NEPI processes store user files such as:

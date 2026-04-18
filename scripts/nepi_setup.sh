@@ -319,8 +319,8 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl enable sshd >/dev/null 2>&1        
         sudo systemctl start sshd
 
-        sudo ufw allow 22
-        sudo ufw allow 2222
+        sudo ufw allow 22 >/dev/null 2>&1
+        sudo ufw allow 2222 >/dev/null 2>&1
 
     fi
 
@@ -470,24 +470,24 @@ if [[ "$?" -eq 0 ]]; then
         fi        
         sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
 
-        sudo ufw allow 445
+        sudo ufw allow 445 >/dev/null 2>&1
         sudo systemctl restart sshd
 
     fi
 
     #Open other required ports
-    sudo ufw allow 137
-    sudo ufw allow 138
-    sudo ufw allow 139
+    sudo ufw allow 137 >/dev/null 2>&1
+    sudo ufw allow 138 >/dev/null 2>&1
+    sudo ufw allow 139 >/dev/null 2>&1
 
     # Open ROS Ports
-    sudo ufw allow 11311
+    sudo ufw allow 11311 >/dev/null 2>&1
 
     # Open RUI Ports
-    sudo ufw allow 5003
-    sudo ufw allow 9090
-    sudo ufw allow 9091
-    sudo ufw allow 9092
+    sudo ufw allow 5003 >/dev/null 2>&1
+    sudo ufw allow 9090 >/dev/null 2>&1
+    sudo ufw allow 9091 >/dev/null 2>&1
+    sudo ufw allow 9092 >/dev/null 2>&1
 
 
     # Enable Firewall
