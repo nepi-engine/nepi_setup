@@ -28,24 +28,25 @@
 ########################
 if is_valid_amd64; then
    if [[ "$NEPI_RUNNING_TAG" == *"$cuda"* ]]; then
-         hub_tag="numurusinc/nepi:latest-amd64-cuda"
+         hub_tag="latest-amd64-cuda"
    else
-         hub_tag="numurusinc/nepi:latest-amd64"
+         hub_tag="latest-amd64"
    fi
    platform=linux/amd64
 
 elif is_valid_jetson; then
-   hub_tag=="numurusinc/nepi:latest-jetson"
+   hub_tag=="latest-jetson"
    platform=linux/arm64
 
 elif is_valid_arm64; then
-   hub_tag="numurusinc/nepi:latest-arm64"
+   hub_tag="latest-arm64"
    platform=linux/arm64
 fi
 
    
 4. PUSH
-
+   nepiupdate
+   source ${DCFG}/load_docker_config.sh
    sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} numurusinc/nepi:${hub_tag}
    docker push numurusinc/nepi:${hub_tag}
    sudo docker rmi numurusinc/nepi:${hub_tag}
