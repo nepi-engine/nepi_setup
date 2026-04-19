@@ -1804,12 +1804,14 @@ function source_script(){
   if [[ ! -v "$1" && -n "$1" ]]; then
     script_path=$1
     if [[ -f "$script_path" ]]; then
-      echo "Sourcing script: $(basename $script_path)"
+      echo "Sourcing script: ${script_path}"
       arg=$2
       if [[ -n $arg ]]; then
-        source ${script_path} $arg
+        echo "Passing arg ${arg}"
+        source $script_path $arg
       else 
-       source ${script_path}
+        echo "Passing no args"
+        source ${script_path}
       fi
       script_error=$?
       if [[ "$script_error" -ne 0 ]]; then
