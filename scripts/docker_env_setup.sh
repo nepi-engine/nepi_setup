@@ -90,7 +90,7 @@ echo "########################"
 ####################################
 # Run NEPI Bash Setup Script
 
-
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $LITE_INSTALL; then
@@ -102,7 +102,7 @@ fi
 
 ####################################
 # Run NEPI Folder Setup Script
-
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_folders_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path; then
