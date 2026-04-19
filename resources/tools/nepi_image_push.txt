@@ -1,8 +1,7 @@
 1. LOG IN TO DOCKER HUB
 
-
+   sudo su (Run this as sudo)
    docker login -u numurusinc -p <password-or-token>
-
 
    If you have a Personal Access Token, use that instead of the password — it's safer and can be revoked without changing the account password. You can generate one at hub.docker.com → Account Settings → Personal Access Tokens (set scope to Read & Write).
 
@@ -10,46 +9,53 @@
 2. SET UP BUILDX BUILDER (one-time setup)
 
 
-   docker buildx create --name nepi_builder --use
+   #docker buildx create --name nepi_builder --use
 
-   docker buildx inspect --bootstrap
+   #docker buildx inspect --bootstrap
 
 
    You only need to do this once per machine.
 
 
-3. SETUP CORRECT PLATFORM
+3. UPDATE INFO
 
-
- For Jetson:
-   hub_tag=latest-jetson
-   platform=linux/arm64
-   
- For ARM64:
-   hub_tag=latest-arm64
-   platform=linux/arm64
-
- For x86 / amd64 with cuda:
-   hub_tag=latest-amd64-cuda
-   platform=linux/amd64
-   
- For x86 / amd64 No Cuda:
-   hub_tag=latest-amd64
-   platform=linux/amd64
-       
-   
-4. PUSH
    nepiupdate
    source ${DCFG}/load_docker_config.sh
-   sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} nepi:${hub_tag}
+
+
+3. SETUP CORRECT PLATFORM
+
+########################
+if is_valid_amd64; then
+   if [[ "$NEPI_RUNNING_TAG" == *"$cuda"* ]]; then
+         hub_tag="numurusinc/nepi:latest-amd64-cuda"
+   else
+         hub_tag="numurusinc/nepi:latest-amd64"
+   fi
+   platform=linux/amd64
+
+elif is_valid_jetson; then
+   hub_tag=="numurusinc/nepi:latest-jetson"
+   platform=linux/arm64
+
+elif is_valid_arm64; then
+   hub_tag="numurusinc/nepi:latest-arm64"
+   platform=linux/arm64
+fi
+
+   
+4. PUSH
+
+   sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} numurusinc/nepi:${hub_tag}
    docker push numurusinc/nepi:${hub_tag}
+   sudo docker rmi numurusinc/nepi:${hub_tag}
    #cd $TMP
    #docker_file=$(pwd)/Dockerfile
    #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
    #touch $docker_file
    #echo "FROM nepi:${hub_tag}" >> $docker_file
    #docker buildx build --platform  "${platform}" --tag numurusinc/nepi:${hub_tag} --push .
-   if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
+   #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
 
 5. VERIFY IT WORKED
 

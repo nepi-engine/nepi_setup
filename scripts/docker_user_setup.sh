@@ -38,12 +38,17 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-USER_CHECK_FILE=${SCRIPT_FOLDER}/nepi_user_check.sh
-source $USER_CHECK_FILE
-if [[ "$?" -ne 0 ]]; then
-    return 
+if [[ $LITE_INSTALL == 0 ]]; then
+    CONFIG_USER=nepihost
+else
+    CONFIG_USER=$(id -un)
+    if [[ ${CONFIG_USER} == 'root' ]]; then
+        CONFIG_USER=$SUDO_USER
+    fi
+if [[ ! -n $CONFIG_USER ]]; then
+    CONFIG_USER=$(id -nu 1000)
 fi
+export CONFIG_USER=$CONFIG_USER
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -87,7 +92,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 
 
 ###############
-# Create a tmp folder for all users
+# Create a tmp folder for config user
 sudo mkdir -p /tmp/$CONFIG_USER
 sudo chmod -R 0777 /tmp/$CONFIG_USER
 
@@ -107,7 +112,7 @@ SYS_USER_1=nepi
 SYS_USER_2=nepiadmin
 
 ########
-CONFIG_USER_PW=nepi
+
 SYS_USER_1_PW=nepi
 SYS_USER_2_PW=nepiadmin
 
@@ -140,6 +145,7 @@ else
     #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -
     sudo groupdel "$CONFIG_USER" >/dev/null 2>&1
     sudo adduser --gecos "$CONFIG_USER" --disabled-password "$CONFIG_USER"
+    CONFIG_USER_PW=nepi
     echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 fi    
 
