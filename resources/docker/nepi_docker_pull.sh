@@ -73,14 +73,14 @@ else
         HUB_IMAGE=""
         if is_valid_amd64; then
             if is_valid_cuda; then
-                HUB_IMAGE="numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414" #latest-cuda"
+                HUB_IMAGE="numurusinc/nepi:latest-amd64-cuda"
             else
-                HUB_IMAGE="numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331" #latest"
+                HUB_IMAGE="numurusinc/nepi:latest-amd64"
             fi
         elif is_valid_jetson; then
-            HUB_IMAGE=="numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231" #latest-cuda"
+            HUB_IMAGE=="numurusinc/nepi:latest-jetson"
         elif is_valid_arm64; then
-            HUB_IMAGE="numurusnepi/nepi:latest"
+            HUB_IMAGE="numurusinc/nepi:latest-arm64"
         fi
 
         if [[ -n "$PASSED_IMAGE" ]]; then

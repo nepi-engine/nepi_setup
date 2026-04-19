@@ -54,32 +54,31 @@ Install the latest NEPI Docker Image for your device
 
 **For AMD64 NO GPU or RADEON GPU SUPPORT**
 
-    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414
-
+    sudo docker pull numurusinc/nepi:latest-amd64
 Retag image as nepi:
 
-    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414 nepi:latest
-    sudo docker rmi numurusnepi/nepi:nepi-3p2p0_rc14a-amd64-ubuntu20p04_cuda12p1-20260414 #numurusnepi/nepi:latest
+    sudo docker tag numurusinc/nepi:latest-amd64-cuda nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64-cuda
 
 **For AMD64 NVIDIA GPU SUPPORT **
 
-    sudo docker pull numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331
+    sudo docker pull numurusinc/nepi:latest-amd64
 
 Retag image as nepi:
 
-    sudo docker tag numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331 nepi:latest-cuda
-    sudo docker rmi numurusnepi/nepi:numurusnepi/nepi:nepi-3p2p0_rc14-amd64-ubuntu20p04-20260331 #numurusnepi/nepi:latest-cuda
+    sudo docker tag numurusinc/nepi:latest-amd64 nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64
 
 
 **For NVIDIA JETSON GPU SUPPORT**
 
 
-    sudo docker pull numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231
+    sudo docker pull numurusinc/nepi:latest-jetson
 
 Retag image as nepi:
 
-    sudo docker tag numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231 nepi:latest-jetson
-    sudo docker rmi numurusnepi/nepi:nepi-3p2p0_rc14-jetson-ubuntu20p04_cuda11p4-19691231 #numurusnepi/nepi:latest-jeston
+    sudo docker tag numurusinc/nepi:latest-jetson nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-jetson
 
 
 

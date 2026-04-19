@@ -37,27 +37,23 @@
    hub_tag=latest-amd64
    platform=linux/amd64
        
-
-
- 
    
 4. PUSH
-   
-
    nepiupdate
    source ${DCFG}/load_docker_config.sh
    sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} nepi:${hub_tag}
-   cd $TMP
-   docker_file=$(pwd)/Dockerfile
-   if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
-   touch $docker_file
-   echo "FROM nepi:${hub_tag}" >> $docker_file
-   docker buildx build --platform  "${platform}" --tag numurusinc/nepi:${hub_tag} --push .
+   docker push numurusinc/nepi:${hub_tag}
+   #cd $TMP
+   #docker_file=$(pwd)/Dockerfile
+   #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
+   #touch $docker_file
+   #echo "FROM nepi:${hub_tag}" >> $docker_file
+   #docker buildx build --platform  "${platform}" --tag numurusinc/nepi:${hub_tag} --push .
    if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
 
 5. VERIFY IT WORKED
 
 
-   docker buildx imagetools inspect numurusnepi/nepi:<hub-tag>
+   docker buildx imagetools inspect numurusinc/nepi:${hub_tag}
 
 
