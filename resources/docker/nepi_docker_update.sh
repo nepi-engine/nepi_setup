@@ -295,17 +295,19 @@ else
     RUN_NAME=${RUN_NAME[0]}
     if [[ -n "$RUN_NAME" ]]; then
         RUN_FS=$NEPI_FSA
+        RUN_TAG=$NEPI_FSA_TAG
     else
         RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
         RUN_NAME=${RUN_NAME[0]}
         if [[ -n "$RUN_NAME" ]]; then
             RUN_FS=$NEPI_FSB
+            RUN_TAG=$NEPI_FSB_TAG
         fi
     fi
 
     if [[ -n "$RUN_FS" ]]; then
         RUN_ID=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_FS}" | awk '{print $1}')
-        RUN_TAG="${RUN_FS#*:}"
+        #RUN_TAG="${RUN_FS#*:}"
         started_at_str=$(sudo docker inspect --format='{{.State.StartedAt}}' "$RUN_ID")
         
         started_at_human=$(echo "$started_at_str" | sed 's/\..*Z/ /; s/T/ /')
