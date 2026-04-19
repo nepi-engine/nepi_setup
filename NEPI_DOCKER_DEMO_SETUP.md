@@ -57,17 +57,17 @@ Install the latest NEPI Docker Image for your device
     sudo docker pull numurusinc/nepi:latest-amd64
 Retag image as nepi:
 
-    sudo docker tag numurusinc/nepi:latest-amd64-cuda nepi:latest
-    sudo docker rmi numurusinc/nepi:latest-amd64-cuda
+    sudo docker tag numurusinc/nepi:latest-amd64 nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64
 
 **For AMD64 NVIDIA GPU SUPPORT **
 
-    sudo docker pull numurusinc/nepi:latest-amd64
+    sudo docker pull numurusinc/nepi:latest-amd64-cuda
 
 Retag image as nepi:
 
-    sudo docker tag numurusinc/nepi:latest-amd64 nepi:latest
-    sudo docker rmi numurusinc/nepi:latest-amd64
+    sudo docker tag numurusinc/nepi:latest-amd64-cuda nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64-cuda
 
 
 **For NVIDIA JETSON GPU SUPPORT**
