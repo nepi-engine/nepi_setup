@@ -78,7 +78,7 @@ else
                 HUB_IMAGE="numurusinc/nepi:latest-amd64"
             fi
         elif is_valid_jetson; then
-            HUB_IMAGE=="numurusinc/nepi:latest-jetson"
+            HUB_IMAGE="numurusinc/nepi:latest-jetson"
         elif is_valid_arm64; then
             HUB_IMAGE="numurusinc/nepi:latest-arm64"
         fi
