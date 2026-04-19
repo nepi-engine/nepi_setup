@@ -1805,7 +1805,12 @@ function source_script(){
     script_path=$1
     if [[ -f "$script_path" ]]; then
       echo "Sourcing script: $(basename $script_path)"
-      source ${script_path} $2
+      arg=$2
+      if [[ -n $arg ]]; then
+        source ${script_path} $arg
+      else 
+       source ${script_path}
+      fi
       script_error=$?
       if [[ "$script_error" -ne 0 ]]; then
         echo "Script $(basename $script_path) returned error ${script_error}"
