@@ -252,7 +252,7 @@ if [[ "$?" -eq 0 ]]; then
         sudo systemctl enable chrony
         sudo systemctl start chrony
 
-        sudo ufw allow 123
+        sudo ufw allow 123 >/dev/null 2>&1
 
     fi
 
@@ -491,9 +491,9 @@ if [[ "$?" -eq 0 ]]; then
 
 
     # Enable Firewall
-    sudo ufw --force enable
-    echo "Enabled network firewall with ports"
-    echo $(sudo ufw status)
+    # sudo ufw --force enable
+    # echo "Enabled network firewall with ports"
+    # echo $(sudo ufw status)
 
 
 

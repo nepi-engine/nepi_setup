@@ -108,7 +108,7 @@ echo ""
 
 ####################################
 # Run NEPI Docker Environment Setup Script
-
+export LITE_INSTALL=1
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_env_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
@@ -159,6 +159,7 @@ echo ""
 
 ####################################
 # Run NEPI Files Setup Script
+export LITE_INSTALL=1
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_files_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
@@ -190,6 +191,7 @@ echo ""
 
 ####################################
 # Run NEPI Config Setup Script
+export LITE_INSTALL=1
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
