@@ -89,6 +89,8 @@ else
     return 
 fi
 
+echo "HW type is $(get_hw_type)"
+
 # base_image=nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
 # base_image=ultralytics/ultralytics:latest-jetson-jetpack5
 
