@@ -350,7 +350,8 @@ alias nepibld="
 sudo -v
 source $(NSETUP)/scripts/docker_config_setup.sh
 sbrc
-nnet"
+nnet
+pingn"
 
 
 

@@ -155,35 +155,6 @@ function is_not_blank() {
 export -f is_not_blank
 
 
-# Function to check if a variable is not blank
-function is_valid_password() {
-  sudo -v
-  # Strip all whitespace characters using parameter expansion (Bash specific)
-  username=$1
-  password=$2
-  if [[ -n $username && -n $password ]]; then
-    if [[ ! -d "/home/${user}" ]]; then
-      return 3
-    else
-
-      # Get the stored hash (requires sudo)
-      shadow_entry=$(sudo getent shadow "$username" | cut -d: -f2)
-      # Extract salt (characters between first and third '$')
-      salt=$(echo "$shadow_entry" | cut -d'$' -f1-3)
-      # Re-hash and compare
-      if [[ "$shadow_entry" == $(openssl passwd -6 -salt "$salt" "$password") ]]; then
-          return 0
-      else
-          return 1
-      fi
-    fi
-  else
-    return 2
-  fi
-}
-
-export -f is_valid_password
-
 
 function is_valid_uid() {
     local input=$1
