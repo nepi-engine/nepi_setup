@@ -32,7 +32,7 @@ source $NEPI_UTILS_SOURCE
 ####################################
 # Run NEPI Config Setup Script
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-script_file=nepi_setup.sh
+script_file=docker_config_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
