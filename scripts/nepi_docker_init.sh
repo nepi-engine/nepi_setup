@@ -74,6 +74,9 @@ NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=jetson
     base_image=ultralytics/ultralytics:latest-jetson-jetpack5
+elif is_valid_rpi; then
+    NEPI_ARCH=arm64
+    base_image=ultralytics/ultralytics:latest-arm64
 elif is_valid_arm64; then
     NEPI_ARCH=arm64
     base_image=ultralytics/ultralytics:latest-arm64
