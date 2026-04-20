@@ -102,7 +102,7 @@ sudo chmod 775 ${UPDATE_PATH}
 
 # Synce from /opt/nepi first
 
-SOURCE_PATH=/opt/nepi/docker
+SOURCE_PATH=/opt/nepi/docker/docker_cfg
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
 CONFIG_FILENAME=nepi_docker_config.yaml
 

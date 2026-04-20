@@ -26,7 +26,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
 source $INSTALL_CHECK_FILE $LITE_INSTALL
 if [[ "$?" -ne 0 ]]; then
-    return 
+    return 1
 fi
 
 
@@ -34,7 +34,7 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
 source $LICENSE_CHECK_FILE
 if [[ "$?" -ne 0 ]]; then
-    return 
+    return 1
 fi
 
 
@@ -45,6 +45,7 @@ else
     if [[ ${CONFIG_USER} == 'root' ]]; then
         CONFIG_USER=$SUDO_USER
     fi
+fi
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -nu 1000)
 fi

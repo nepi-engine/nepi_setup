@@ -51,7 +51,7 @@ Run the NEPI Docker user setup script (sudo password is #Nsetup4You):
 
 then
 
-    ./docker_full_user_setup.sh
+    source ./docker_full_user_setup.sh
 
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**

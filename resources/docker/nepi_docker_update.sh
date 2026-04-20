@@ -47,6 +47,10 @@ fi
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_BLANK=${DOCKER_FOLDER}/nepi_docker_config.yaml.blank
+if [[ -f $DOCKER_CONFIG_BLANK ]]; then
+    cp $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_FILE
+fi
 DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 
 ###############################
