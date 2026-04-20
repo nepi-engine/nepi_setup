@@ -1890,6 +1890,8 @@ export -f get_hw_type
 function get_hw_arch() {
   if is_valid_jetson >/dev/null 2>&1; then
       hw_type=arm64
+  elif is_valid_rpi >/dev/null 2>&1; then
+      hw_type=rpi
   elif is_valid_arm64 >/dev/null 2>&1; then
       hw_type=arm64
   elif is_valid_amd64 >/dev/null 2>&1; then
