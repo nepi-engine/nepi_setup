@@ -33,6 +33,7 @@ if [[ ! -n $CONFIG_USER ]]; then
         CONFIG_USER=$SUDO_USER
     fi
 fi
+
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -nu 1000)
 fi
@@ -64,11 +65,11 @@ else
 
 
         docker_hub_account=''
-        if docker info | grep Username $> /dev/null; then
-            docker_hub_account=$( docker info | grep Username | awk '{print $2}')
+        if docker info 2> /dev/null; then
+            docker_hub_account=$( docker info | grep "Username:" | awk '{print $2}')
             echo "Logged into docker hub account ${docker_hub_account}"
         else
-            "You are not logged into docker hub account. Run 'docker login -u <Account Name>' then try again"
+            echo "You are not logged into docker hub account. Run 'docker login -u <Account Name>' then try again"
             exit 0
         fi
 
@@ -84,26 +85,27 @@ else
             if [[ "$?" -eq 1 ]]; then
                 echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
                 exit 0
-            else
+            fi
 
 
 
             ########################
             if is_valid_amd64; then
-            if [[ "$NEPI_RUNNING_TAG" == *"$cuda"* ]]; then
-                    hub_tag="latest-amd64-cuda"
-            else
-                    hub_tag="latest-amd64"
-            fi
-            platform=linux/amd64
-
+                if [[ "$NEPI_RUNNING_TAG" == *"cuda"* ]]; then
+                        hub_tag="latest-amd64-cuda"
+                        platform=linux/amd64
+                else
+                        hub_tag="latest-amd64"
+                        platform=linux/amd64
+                fi
+            
             elif is_valid_jetson; then
-            hub_tag=="latest-jetson"
-            platform=linux/arm64
+                hub_tag=="latest-jetson"
+                platform=linux/arm64
 
             elif is_valid_arm64; then
-            hub_tag="latest-arm64"
-            platform=linux/arm64
+                hub_tag="latest-arm64"
+                platform=linux/arm64
             fi
 
         sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ${docker_hub_account}/nepi:${hub_tag}
