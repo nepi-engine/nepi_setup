@@ -110,7 +110,8 @@ echo ""
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
-  
+    nepisetkey $NEPI_SSH_KEY_FILE
+    nepiauthadd $NEPI_SSH_KEY_FILE
 
     #####################################
     echo " "

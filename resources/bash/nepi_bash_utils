@@ -2009,7 +2009,7 @@ function create_ssh_key {
               sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
               if [[ -f $key_path ]]; then
-                  echo "Key allready exists ${key_path}"
+                  echo "Key already exists ${key_path}"
                   return 0
               fi
 
@@ -2592,7 +2592,7 @@ function nepisetkey {
     sudo chmod 0700 $key_folder
     sudo chmod 0600 $key_path
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
+    eval "$(ssh-agent -s)"
     if ssh-add ${key_path} > /dev/null; then
       echo "Added key: ${key_file}"
       cat ${key_path}.pub
@@ -2746,16 +2746,10 @@ function nepiauthrm {
             sed -i "/$key_email/d" "$authorized_keys_path"
           fi
 
-          systemctl&> /dev/null
-          res=$?
-          if [[ "$res" -eq 0 ]];  then
+          if sudo systemctl status >/dev/null 2>&1;  then
             sudo systemctl restart sshd
-          fi
-
-          supervisorctl&> /dev/null
-          res=$?
-          if [[ "$res" -eq 0 ]];  then
-            sudo supervisorctl restart sshd
+          elif sudo supervisorctl status >/dev/null 2>&1; then
+            sudo supervisorctl restart nepi_ssh
           fi
 
           return 0
@@ -2805,27 +2799,23 @@ function nepiauthadd {
           fi
 
           echo "Adding key ${key_file}"
-          sudo cat ${key_path}.pub >> $authorized_keys_path
+          sudo echo $(cat ${key_path}.pub) >> $authorized_keys_path
           echo "Autherized Key file Updated"
 
           sudo chmod 0700 $key_folder
           sudo chmod 0600 $authorized_keys_path
           sudo chmod 0600 $key_path
-          sudo chmod 0600 $key_pub
+          sudo chmod 0600 ${key_path}.pub
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
-          systemctl&> /dev/null
-          res=$?
-          if [[ "$res" -eq 0 ]];  then
+          echo "Key folder permissions set"
+          if sudo systemctl status >/dev/null 2>&1;  then
+            echo "Restarting systemctl SSH agent"
             sudo systemctl restart sshd
+          elif sudo supervisorctl status >/dev/null 2>&1; then
+            echo "Restarting supervisorctl SSH agent"
+            sudo supervisorctl restart nepi_ssh
           fi
-
-          supervisorctl&> /dev/null
-          res=$?
-          if [[ "$res" -eq 0 ]];  then
-            sudo supervisorctl restart sshd
-          fi
-
+          echo "Key Autherization Complete"
           return 0
           
         else

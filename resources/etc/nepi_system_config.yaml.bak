@@ -83,22 +83,39 @@ NEPI_WIFI_ACCESS_POINT_ENABLED: 0
 NEPI_WIFI_ACCESS_POINT_ID: nepi_device_ap
 NEPI_WIFI_ACCESS_POINT_PW: nepi_device_ap
 
-# SET ROS MASTER IP Address. Will fall back to NEPI_STATIC_IP if not found
-NEPI_ROS_IP: 192.168.179.103
-NEPI_ROS_PORT: 11311
+
 
 ####################################################
 # NEPI SOFTWARE Config
 ####################################################
 NEPI_INSTALL: unknown
 NEPI_PYTHON: X.X
-NEPI_ROS: unknown
+
 NEPI_HAS_CUDA: 0
 NEPI_CUDA_VERSION: X.X
 NEPI_HAS_XPU: 0
 NEPI_FS_AB: 0
 NEPI_VPN_ENABLED: 0
 NEPI_VPN_VERSION: 0
+
+####################################################
+# NEPI ROS SOFTWARE Config
+####################################################
+NEPI_ROS: unknown
+NEPI_ROS_IP: 192.168.179.103
+NEPI_ROS_PORT: 11311
+
+ROS_NAME: nepi
+ROS_LOG_DIR: /mnt/nepi_storage/logs/ros_log
+ROS_MASTER_URI: http://localhost:11311
+
+# ROS1 Stuff
+ROS1_LAUNCH_FILE: nepi_base.launch
+
+# ROS2 Stuff - Leave it all TBD to avoid launching any ROS2 nodes
+ROS2_PACKAGE: TBD
+ROS2_LAUNCH_FILE: TBD
+ROS2_LAUNCH_ARGS: TBD
 
 ####################################################
 ### NEPI HARDWARE SETTINGS

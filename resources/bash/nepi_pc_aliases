@@ -70,6 +70,7 @@ nepi_port=2222
 # Setup Connection Shortcuts
 # Setup Connection Shortcuts
 alias sshn="ssh -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
+alias sshnv="ssh -vvv -o StrictHostKeyChecking=no -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
 alias scpn="scp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
 alias sftpn="sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
 
