@@ -99,7 +99,7 @@ else
                 fi
             
             elif is_valid_jetson; then
-                hub_tag=="latest-jetson"
+                hub_tag="latest-jetson"
                 platform=linux/arm64
 
             elif is_valid_arm64; then
