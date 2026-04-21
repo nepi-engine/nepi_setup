@@ -60,14 +60,11 @@ ninet > /dev/null 2>&1
 
 if ! is_valid_internet > /dev/null; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-
 else
-
 
         docker_hub_account=''
         if docker info 2> /dev/null; then
             docker_hub_account=$( docker info | grep "Username:" | awk '{print $2}')
-            echo "Logged into docker hub account ${docker_hub_account}"
         else
             echo "You are not logged into docker hub account. Run 'docker login -u <Account Name>' then try again"
             exit 0
@@ -75,9 +72,11 @@ else
 
         if [[ -z $docker_hub_account ]]; then
             "Failed to get valid docker hub account name"
+            exit 0
         fi
 
 
+        echo "Logged into docker hub account ${docker_hub_account}"
         nepistart
         nepiupdate
 
@@ -119,7 +118,5 @@ else
         #echo "FROM nepi:${hub_tag}" >> $docker_file
         #docker buildx build --platform  "${platform}" --tag ${docker_hub_account}/nepi:${hub_tag} --push .
         #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
-
-
 
 fi
