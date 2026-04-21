@@ -111,7 +111,9 @@ echo ""
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
     nepisetkey $NEPI_SSH_KEY_FILE
-    nepiauthadd $NEPI_SSH_KEY_FILE
+    if [[ $LITE_INSTALL -eq 0 ]]; then
+        nepiauthadd $NEPI_SSH_KEY_FILE
+    fi
 
     #####################################
     echo " "
