@@ -48,6 +48,7 @@ fi
    nepiupdate
    source ${DCFG}/load_docker_config.sh
    sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} numurusinc/nepi:${hub_tag}
+   echo "Pushing docker tag ${docker_tag}"
    docker push numurusinc/nepi:${hub_tag}
    sudo docker rmi numurusinc/nepi:${hub_tag}
    #cd $TMP
