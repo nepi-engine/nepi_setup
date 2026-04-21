@@ -49,13 +49,14 @@ LOAD_NEPI_CONFIG=1
 if [[ -v $1 ]]; then
     if [[ $1 -eq 0 ]]; then
         LOAD_NEPI_CONFIG=0
-        #echo "Skipping NEPI System Config load"
+        echo "Skipping NEPI System Config load"
     fi
 fi
 
-if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
+echo "Loading NEPI SYSTEM CONFIG ${ETC_FOLDER}/load_system_config.sh"
+if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     # Load System Config File
-    #echo "Loading NEPI SYSTEM CONFIG"
+    
     source ${ETC_FOLDER}/load_system_config.sh
     if [ $? -eq 1 ]; then
         echo "Failed to load ${ETC_FOLDER}/load_system_config.sh"
@@ -63,18 +64,19 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
     fi
 fi
 
+
+
 ################################
 echo ""
 echo "UPDATING ETC SSH KEYS"
 
-
+echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
+if nepisetkey $NEPI_SSH_KEY; then
+    echo "NEPI SSH key set to ${NEPI_SSH_KEY}"
+    
+fi
 if [[ "$NEPI_MANAGES_SSH" -eq 1 || ${CONFIG_USER} == ${NEPI_USER} ]]; then
     if [[ ${NEPI_SSH_KEY_FILE} != ${NEPI_SSH_KEY} ]]; then
-        echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
-        if nepisetkey $NEPI_SSH_KEY; then
-            echo "NEPI SSH key set to ${NEPI_SSH_KEY}"
-            
-        fi
         echo "Authorizing NEPI SSH key ${NEPI_SSH_KEY}"
         nepiauthadd $NEPI_SSH_KEY
     fi

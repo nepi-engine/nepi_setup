@@ -62,7 +62,7 @@ if [[ -v $2 ]]; then
     fi
 fi
 
-if [[ $LOAD_NEPI_CONFIG -eq 1 || ! -v NEPI_USER ]]; then
+if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     # Load System Config File
     #echo "Loading NEPI SYSTEM CONFIG"
     source ${ETC_FOLDER}/load_system_config.sh
