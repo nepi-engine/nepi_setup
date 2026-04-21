@@ -217,7 +217,7 @@ else
     sudo apt update
     sudo apt install libboost-all-dev libboost-doc libboost-dev libgtk2.0-dev pkg-config libavcodec-dev \
         libavformat-dev libswscale-dev python3-dev python3-numpy libtbb2 libtbb-dev \
-        libjpeg-dev libpng-dev libtiff-dev libdc1394-22-devlibgstreamer1.0-dev \
+        libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev libgstreamer1.0-dev \
         libgstreamer-plugins-base1.0-dev python3.8-dev python-dev python-numpy python3-numpy \
         libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
         libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev \
