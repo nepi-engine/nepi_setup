@@ -1,7 +1,7 @@
 1. LOG IN TO DOCKER HUB
 
    sudo su (Run this as sudo)
-   docker login -u numurusinc -p <password-or-token>
+   docker login -u numurusinc -p #<password-or-token>
 
    If you have a Personal Access Token, use that instead of the password — it's safer and can be revoked without changing the account password. You can generate one at hub.docker.com → Account Settings → Personal Access Tokens (set scope to Read & Write).
 
@@ -18,7 +18,8 @@
 
 
 3. UPDATE INFO
-
+   nepistart
+   sleep 5
    nepiupdate
    source ${DCFG}/load_docker_config.sh
 
@@ -47,8 +48,9 @@ fi
 4. PUSH
    nepiupdate
    source ${DCFG}/load_docker_config.sh
+   nepistop
    sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} numurusinc/nepi:${hub_tag}
-   echo "Pushing docker tag ${docker_tag}"
+   echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${hub_tag}"
    docker push numurusinc/nepi:${hub_tag}
    sudo docker rmi numurusinc/nepi:${hub_tag}
    #cd $TMP
