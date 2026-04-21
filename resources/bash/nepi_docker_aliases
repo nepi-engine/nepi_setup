@@ -59,6 +59,15 @@ function nepipull(){
 export -f nepipull
 
 
+function nepipush(){
+  sudo -v
+  account=$1
+  echo "Pushing NEPI Docker Image"
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $account
+}
+export -f nepipull
+
+
 # NEPI stop and start shortcuts
 function nepistop(){
   sudo -v
