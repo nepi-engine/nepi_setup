@@ -76,10 +76,11 @@ if [[ "$NEPI_MANAGES_SSH" -eq 1 || ${CONFIG_USER} == ${NEPI_USER} ]]; then
             
         fi
         echo "Authorizing NEPI SSH key ${NEPI_SSH_KEY}"
-        nepiauthadd $cur_key
+        nepiauthadd $NEPI_SSH_KEY
     fi
 else
-    nepiauthrm $cur_key
+    nepiauthrm $NEPI_SSH_KEY_FILE 2> /dev/null
+    nepiauthrm $NEPI_SSH_KEY 2> /dev/null
 fi
 
 source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
