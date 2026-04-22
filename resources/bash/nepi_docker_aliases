@@ -116,11 +116,12 @@ function nepicommit(){
   sudo -v
   commit_desc=$1
   restart=$2
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc
-  if [[ -z $restart ]]; then
-    nepistart
-  elif [[ "$restart" -eq 1 ]]; then
-    nepistart
+  if bash ${NEPI_DOCKER_CONFIG}/nepi_docker_commit.sh $commit_desc; then
+    if [[ -z $restart ]]; then
+      nepistart
+    elif [[ "$restart" -eq 1 ]]; then
+      nepistart
+    fi
   fi
 }
 export -f nepicommit

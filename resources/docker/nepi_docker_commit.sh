@@ -70,6 +70,7 @@ else
     date_updated=0
     if (( current_year < target_year )); then
         echo "Your Devices Clock must be updated before commiting,  Sync clock and try again"
+        exit 1
     else
 
         # Create Tag
@@ -118,33 +119,39 @@ else
 
             if [[ -n "$COMMIT_NAME" && -n "$COMMIT_TAG" && -n "$COMMIT_NAME_TAG" ]]; then
                 echo "Commiting running nepi container to Name:Tag - ${COMMIT_NAME_TAG}"
-                sudo docker commit $NEPI_RUNNING_ID $COMMIT_NAME_TAG
-                wait
+                if sudo docker commit $NEPI_RUNNING_ID $COMMIT_NAME_TAG; then
 
-                COMMIT_ID=$(sudo docker images -q $COMMIT_NAME_TAG)
-                echo "Commited running nepi container to ID - ${COMMIT_ID}"
-                if [[ "$NEPI_RUNNING_FS" == 'nepi_fs_a' && -n "$COMMIT_ID" ]]; then
-                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
-                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
-                    update_yaml_value "NEPI_FSA_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
-                    update_yaml_value "NEPI_FSA_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
-                elif [[ "$NEPI_RUNNING_FS" == 'nepi_fs_b' && -n "$COMMIT_ID" ]]; then
-                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
-                    echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
-                    update_yaml_value "NEPI_FSB_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
-                    update_yaml_value "NEPI_FSB_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
+                    COMMIT_ID=$(sudo docker images -q $COMMIT_NAME_TAG)
+                    echo "Commited running nepi container to ID - ${COMMIT_ID}"
+                    if [[ "$NEPI_RUNNING_FS" == 'nepi_fs_a' && -n "$COMMIT_ID" ]]; then
+                        echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
+                        echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
+                        update_yaml_value "NEPI_FSA_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
+                        update_yaml_value "NEPI_FSA_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
+                    elif [[ "$NEPI_RUNNING_FS" == 'nepi_fs_b' && -n "$COMMIT_ID" ]]; then
+                        echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_TAG} in ${DOCKER_CONFIG_FILE}"
+                        echo "Updating ${NEPI_RUNNING_FS} to ${COMMIT_ID} in ${DOCKER_CONFIG_FILE}"
+                        update_yaml_value "NEPI_FSB_TAG" ${COMMIT_TAG} "${DOCKER_CONFIG_FILE}"
+                        update_yaml_value "NEPI_FSB_ID" ${COMMIT_ID} "${DOCKER_CONFIG_FILE}"
+                    fi
+
+                    echo ""
+                    echo "Updating Docker Config File"
+                    bash ${DOCKER_FOLDER}/nepi_docker_update.sh
+                    wait
+                    exit 0
+                else
+                    echo "Failed to Commit"
+                    exit 1
                 fi
-
-                echo ""
-                echo "Updating Docker Config File"
-                bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-                wait
 
             else
                 echo "Can't Commit Containter with Name: ${COMMIT_NAME} and Tag:  ${COMMIT_TAG}.  One or both are empty"
+                exit 1
             fi
         else
             echo "No Running NEPI Container to Commit"
+            exit 1
         fi
     fi
 
