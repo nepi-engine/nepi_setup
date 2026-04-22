@@ -30,7 +30,7 @@ import time
 # Ethernet interface tuning - Primarily based on Genicam needs as described in
 # FLIR Spinnaker SDK README_ARM
 # TODO: Maybe these should be config. file params?
-NEPI_ETH_MTU = '9216'
+NEPI_ETH_MTU = '9000'
 NEPI_UDP_RMEM_MIN = '12288'
 NEPI_NETDEV_MAX_BACKLOG = '4096'
 NEPI_MAX_DGRAM_QLEN = '1024'
