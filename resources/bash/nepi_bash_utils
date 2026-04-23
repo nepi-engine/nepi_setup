@@ -2404,31 +2404,51 @@ function nepistorage() {
   sudo -v
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
     if pingn; then
+      shfolder=nepi_storage
       shdrive=/mnt/nepi_share_storage
+
+      #echo "Checking for mountpoint at: ${shdrive}"
+      sudo umount -l $shdrive >/dev/null
+      # timeout 1 mountpoint -q $shdrive
+      # if [[ $? -eq 0 ]]; then
+      #   echo "Unmounting mountpoint at: ${shdrive}"
+      #   timeout 1 sudo umount $shdrivelib
+      # fi
+
+      echo "Checking for mount folder at: ${shdrive}"
       if [[ ! -d $shdrive ]]; then
+          echo "Creating mount folder: ${shdrive}"
           sudo mkdir $shdrive
       fi
+      
+
+      echo "Setting mount folder permissions: ${shdrive}"
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
-      if ! mountpoint -q $shdrive; then
-        sudo mount.cifs //${NEPI_IP}/nepi_storage $shdrive -o user=$NEPI_USER
-      fi
-      if mountpoint -q $shdrive; then
+      echo "Mounting shared drive at: //${NEPI_IP}/${shfolder} to ${shdrive}"
+      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_ADMIN_USER
+    
+      if timeout 1 mountpoint -q $shdrive; then
         cd $shdrive
+        echo $shdrive
         return 0
       else
         echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+        echo ''
         return 1
       fi
     else
+        echo ''
         return 1
     fi
   else
-    shdrive=/mnt/nepi_config
+    shdrive=/mnt/${shfolder}
     if [[ -d $shdrive ]]; then
       cd $shdrive
+      echo $shdrive
       return 0
     else
       echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+      echo ''
       return 1
     fi
   fi
@@ -2438,7 +2458,7 @@ export -f nepistorage
 
 function nepistorageopen() {
   sudo -v
-  if nepistorage; then
+  if shdrive=$(nepistorage); then
       xdg-open $shdrive
   fi
 }
@@ -2451,34 +2471,52 @@ function nepiconfig() {
 
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
     if pingn; then
+      shfolder=nepi_config
       shdrive=/mnt/nepi_share_config
+
+
+      #echo "Checking for mountpoint at: ${shdrive}"
+      sudo umount -l $shdrive >/dev/null
+      # timeout 1 mountpoint -q $shdrive
+      # if [[ $? -eq 0 ]]; then
+      #   echo "Unmounting mountpoint at: ${shdrive}"
+      #   timeout 1 sudo umount $shdrivelib
+      # fi
+
+      echo "Checking for mount folder at: ${shdrive}"
       if [[ ! -d $shdrive ]]; then
+          echo "Creating mount folder: ${shdrive}"
           sudo mkdir $shdrive
       fi
+      
+
+      echo "Setting mount folder permissions: ${shdrive}"
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
-      if mountpoint -q $shdrive; then
-        sudo umount $shdrive
-      fi
-      if ! mountpoint -q $shdrive; then
-        sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_ADMIN_USER
-      fi
-      if mountpoint -q $shdrive; then
+      echo "Mounting shared drive at: //${NEPI_IP}/${shfolder} to ${shdrive}"
+      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_ADMIN_USER
+    
+      if timeout 1 mountpoint -q $shdrive; then
         cd $shdrive
+        echo $shdrive
         return 0
       else
         echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+        echo ''
         return 1
       fi
     else
+        echo ''
         return 1
     fi
   else
-    shdrive=/mnt/nepi_config
+    shdrive=/mnt/${shfolder}
     if [[ -d $shdrive ]]; then
       cd $shdrive
+      echo $shdrive
       return 0
     else
       echo "Failed to mount and connect nepi shared folder: ${shdrive}"
+      echo ''
       return 1
     fi
   fi
@@ -2488,7 +2526,7 @@ export -f nepiconfig
 
 function nepiconfigopen() {
   sudo -v
-  if nepiconfig; then
+  if shdrive=$(nepiconfig); then
       xdg-open $shdrive
   fi
 }
@@ -2502,20 +2540,6 @@ function nepisync {
     echo ""
     echo "Syncing NEPI System Config Files"
     cur_folder=$(pwd)
-    if nepiconfig 2> /dev/null ; then
-        NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
-        NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
-        echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
-        if [ -f $NEPI_CONFIG_SOURCE ]; then
-            sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
-            source $(pwd)/system_cfg/etc/load_system_config.sh
-        else
-          echo "NEPI SYSTEM CONFIG file not found at: ${NEPI_CONFIG_SOURCE} "
-        fi
-    else
-      echo "Failed to connect to NEPI CONFIG"
-    fi
-
 
     # Sync SSH Keys
     echo ""
@@ -2536,8 +2560,20 @@ function nepisync {
         echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SOURCE} to ${NEPI_SSH_KEYS_DEST}"
         sudo cp -p ${NEPI_SSH_KEYS_SOURCE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
     fi
- 
-    if nepiconfig 2> /dev/null; then
+
+
+    if nepiconfig 2> /dev/null ; then
+        NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
+        NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
+        echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
+        if [[ -f $NEPI_CONFIG_SOURCE ]]; then
+            sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
+            echo "Loading synced NEPI config file"
+            source $(pwd)/system_cfg/etc/load_system_config.sh
+        else
+          echo "NEPI SYSTEM CONFIG file not found at: ${NEPI_CONFIG_SOURCE} "
+        fi
+
         NEPI_SSH_KEYS_SHARE="$(pwd)/system_cfg/ssh_keys"
         if [[ ! -d $NEPI_SSH_KEYS_SHARE ]]; then
           sudo mkdir -p $NEPI_SSH_KEYS_SHARE
@@ -2558,9 +2594,12 @@ function nepisync {
         else
           echo "NEPI SYSTEM SSH folder not found at: ${NEPI_SSH_KEYS_SHARE} "
         fi
+
+
     else
       echo "Failed to connect to NEPI CONFIG"
     fi
+
 
 
     sudo chmod 0700 $NEPI_SSH_KEYS_DEST
