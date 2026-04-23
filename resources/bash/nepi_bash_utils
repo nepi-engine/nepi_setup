@@ -2456,6 +2456,9 @@ function nepiconfig() {
           sudo mkdir $shdrive
       fi
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+      if mountpoint -q $shdrive; then
+        sudo umount $shdrive
+      fi
       if ! mountpoint -q $shdrive; then
         sudo mount.cifs //${NEPI_IP}/nepi_config $shdrive -o user=$NEPI_ADMIN_USER
       fi
