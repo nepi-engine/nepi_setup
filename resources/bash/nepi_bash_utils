@@ -2402,9 +2402,10 @@ export -f nepirui
 
 function nepistorage() {
   sudo -v
+  shfolder=nepi_storage
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
     if pingn; then
-      shfolder=nepi_storage
+      
       shdrive=/mnt/nepi_share_storage
 
       #echo "Checking for mountpoint at: ${shdrive}"
@@ -2468,10 +2469,10 @@ export -f nepistorageopen
 
 function nepiconfig() {
   sudo -v
-
+  shfolder=nepi_config
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
     if pingn; then
-      shfolder=nepi_config
+
       shdrive=/mnt/nepi_share_config
 
 
@@ -2562,12 +2563,14 @@ function nepisync {
     fi
 
 
-    if nepiconfig 2> /dev/null ; then
+    if nepiconfig > /dev/null 2>&1 ; then
         NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
         NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
         echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
         if [[ -f $NEPI_CONFIG_SOURCE ]]; then
-            sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
+            if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+              sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
+            fi
             echo "Loading synced NEPI config file"
             source $(pwd)/system_cfg/etc/load_system_config.sh
         else
