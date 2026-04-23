@@ -204,27 +204,20 @@ else
         # If needed remove old packages if installed
         #sudo apt remove ros-noetic-cv-bridge -y
         #sudo apt remove ros-noetic-web-video-server -y
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< rosbridge-server "
-        sudo apt install -y ros-${ros_version}-rosbridge-server 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< pcl-ros"
-        sudo apt install -y ros-${ros_version}-pcl-ros 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< cv-bridge"
-        sudo apt install -y ros-${ros_version}-cv-bridge 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< web-video-server"
-        sudo apt install -y ros-${ros_version}-web-video-server 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< camera-info-manager"
-        sudo apt install -y ros-${ros_version}-camera-info-manager 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< tf2-geometry-msgs"
-        sudo apt install -y ros-${ros_version}-tf2-geometry-msgs 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< mavros"
-        sudo apt install -y ros-${ros_version}-mavros 
-        sudo apt install -y ros-${ros_version}-mavros ros-${ros_version}-mavros-extras ros-${ros_version}-mavros-msgs
+        sudo apt install -y \
+            ros-${ros_version}-rosbridge-server \
+            ros-${ros_version}-pcl-ros \
+            ros-${ros_version}-cv-bridge \
+            ros-${ros_version}-web-video-server \
+            ros-${ros_version}-camera-info-manager \
+            ros-${ros_version}-tf2-geometry-msgs \
+            ros-${ros_version}-mavros \
+            ros-${ros_version}-mavros-extras \
+            ros-${ros_version}-mavros-msgs \
+            ros-${ros_version}-serial
+
         wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
         sudo bash ./install_geographiclib_datasets.sh
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< mavros-extras"
-        sudo apt install -y ros-${ros_version}-mavros-extras 
-        echo "<<<<<<<<<<<<<<<<<<<<<<<<< serial"
-        sudo apt install -y ros-${ros_version}-serial 
 
         sudo -H python${NEPI_PYTHON} -m pip install --no-input rospy_message_converter
         # Deprecated ROS packages?
