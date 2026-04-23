@@ -143,7 +143,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
         echo "NEPI_DEVICE_IP: ${NEPI_IP%%/*}"
         echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo "NEPI_HOST_USER: ${NEPI_HOST_USER}"
-        echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY_FILE}"
+        echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY}"
         echo ""
     }
 
@@ -155,8 +155,8 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
         export NEPI_DEVICE_ID=$NEPI_DEVICE_ID
         update_text_value $config_file "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
         export NEPI_HOST_USER=$NEPI_HOST_USER
-        update_text_value $config_file "export NEPI_SSH_KEY=" "export NEPI_SSH_KEY=${NEPI_SSH_KEY}"
-        export NEPI_SSH_KEY=$NEPI_SSH_KEY
+        # update_text_value $config_file "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY}"
+        # export NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
 
     }
     
