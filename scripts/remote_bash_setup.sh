@@ -57,6 +57,8 @@ NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
 if [[ -f $USER_UTILS_SOURCE ]]; then
     source $USER_UTILS_SOURCE
+else
+    source $NEPI_UTILS_SOURCE
 fi
 
 
@@ -92,7 +94,7 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
-NEPI_IP=${NEPI_STATIC_IP%%/*}
+#NEPI_IP=${NEPI_STATIC_IP%%/*}
 
 if [[ -n $remote_ip ]]; then
     export REMOTE_IP=$remote_ip
@@ -256,8 +258,8 @@ fi
     sudo cp $file $tfile 
 
 
-    if [[ -n ${NEPI_STATIC_IP} ]]; then
-        nepi_ip="${NEPI_STATIC_IP%%/*}"
+    if [[ -n ${NEPI_IP} ]]; then
+        nepi_ip="${NEPI_IP%%/*}"
     else
         nepi_ip=192.168.170.103
     fi

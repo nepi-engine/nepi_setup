@@ -663,13 +663,17 @@ export -f netliststatic
 
 function netsetstatic() {
     new_ip_netmask="$1"
+    if [[ -z $new_ip_netmask ]]; then
+      new_ip_netmask=$REMOTE_IP
+    fi
 
     if ! systemctl is-active --quiet NetworkManager; then
       echo "NetworkManager not running"
       return 1
     fi
 
-    if [[ -n $new_ip ]]; then
+    if [[ -n $new_ip_netmask ]]; then
+      echo "Updating static ip to ${new_ip_netmask}"
       if [[ ${new_ip_netmask} != 'auto' ]]; then
         new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
         if ! is_valid_ipv4_netmask $new_ip_netmask; then

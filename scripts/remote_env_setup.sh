@@ -46,12 +46,15 @@ RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
-# USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
-# if [[ -f $USER_UTILS_SOURCE ]]; then
-#     source $USER_UTILS_SOURCE
-# else
-#     source $NEPI_UTILS_SOURCE
-# fi
+USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+if [[ -f $USER_UTILS_SOURCE ]]; then
+    source $USER_UTILS_SOURCE
+else
+    source $NEPI_UTILS_SOURCE
+    sudo cp $NEPI_UTILS_SOURCE $USER_UTILS_SOURCE
+    sudo chmod +x $USER_UTILS_SOURCE
+    suod chmod ${CONFIG_USER}:${CONFIG_USER} $USER_UTILS_SOURCE
+fi
 
 
 # Load System Config File
@@ -84,7 +87,7 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
-NEPI_IP_START=${NEPI_STATIC_IP%%/*}
+NEPI_IP_START=${NEPI_IP%%/*}
 echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
 
@@ -127,7 +130,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     NEPI_USER_CONFIGS=(
     NEPI_DEVICE_ID \
-    NEPI_STATIC_IP \
+    NEPI_IP \
     NEPI_IN_CONAINTER \
     NEPI_HOST_USER \
     NEPI_SSH_KEY_FILE \
@@ -137,7 +140,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
         echo ""
         echo "Current Settings"
         echo "---------------------"
-        echo "NEPI_DEVICE_IP: ${NEPI_STATIC_IP%%/*}"
+        echo "NEPI_DEVICE_IP: ${NEPI_IP%%/*}"
         echo "NEPI_DEVICE_ID: ${NEPI_DEVICE_ID}"
         echo "NEPI_HOST_USER: ${NEPI_HOST_USER}"
         echo "NEPI_SSH_KEY_FILE: ${NEPI_SSH_KEY_FILE}"
@@ -146,14 +149,15 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
 
     function udpate_config_file(){
         config_file=$1
-        update_yaml_value "NEPI_STATIC_IP" "${NEPI_STATIC_IP}" $config_file
-        export NEPI_STATIC_IP="${NEPI_STATIC_IP}"
-        update_yaml_value "NEPI_DEVICE_ID" $NEPI_DEVICE_ID $config_file
+        update_text_value $config_file "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
+        export NEPI_IP="${NEPI_IP}"
+        update_text_value $config_file "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
         export NEPI_DEVICE_ID=$NEPI_DEVICE_ID
-        update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $config_file
+        update_text_value $config_file "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
         export NEPI_HOST_USER=$NEPI_HOST_USER
-        update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $config_file
+        update_text_value $config_file "export NEPI_SSH_KEY=" "export NEPI_SSH_KEY=${NEPI_SSH_KEY}"
         export NEPI_SSH_KEY=$NEPI_SSH_KEY
+
     }
     
     echo "Bringin Up NEPI Configuration Menu"
@@ -174,7 +178,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
             case $opt in
 
                 "Update Static IP Address")
-                    read -p $'\n'"Enter a new Static IP Address (Current = ${NEPI_STATIC_IP%%/*}): " USER_INPUT
+                    read -p $'\n'"Enter a new Static IP Address (Current = ${NEPI_IP%%/*}): " USER_INPUT
                     echo ""
                     if is_valid_ipv4 "$USER_INPUT"; then
                         export NEPI_STATIC_IP=${USER_INPUT}/24
@@ -237,15 +241,15 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     echo ""
 
 
-    USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
-    echo "Updating NEPI CONFIG File: ${USER_CONFIG_FILE} "
-    if [[ -f "$USER_CONFIG_FILE" ]]; then
-        udpate_config_file $USER_CONFIG_FILE
+    echo "Updating NEPI CONFIG File: ${USER_UTILS_SOURCE} "
+    if [[ -f "$USER_UTILS_SOURCE" ]]; then
+        udpate_config_file $USER_UTILS_SOURCE
     fi
 
+source $USER_UTILS_SOURCE
 
-nepi_ip=${NEPI_STATIC_IP%%/*}
-echo ""
+nepi_ip=${NEPI_IP%%/*}
+echo "Updating with NEPI_IP ${NEPI_IP}"
 network_id="$(echo "$nepi_ip" | cut -d'.' -f1-3)"
 nepi_id=$(echo "$nepi_ip" | cut -d '.' -f 4-)
 
