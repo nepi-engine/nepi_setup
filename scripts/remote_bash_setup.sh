@@ -111,6 +111,9 @@ fi
     echo "################################# "
     echo "Updating Bash Files"
     echo ""
+
+    nepi_mode=REMOTE
+    export NEPI_MODE=$nepi_mode
     
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
@@ -132,8 +135,7 @@ fi
     sudo chmod 775 $NEPI_UTILS_FILE_SOURCE
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
-    nepi_mode=REMOTE
-    export NEPI_MODE=$nepi_mode
+
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"

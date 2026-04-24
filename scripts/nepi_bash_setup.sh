@@ -83,6 +83,8 @@ echo "########################"
 echo "NEPI BASH SETUP"
 echo "########################"
 
+    nepi_mode=SYSTEM
+    export NEPI_MODE=$nepi_mode
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
@@ -139,8 +141,7 @@ echo "########################"
     sudo cp -p $NEPI_UTILS_FILE_SOURCE $NEPI_UTILS_FILE_DEST
 
 
-    nepi_mode=SYSTEM
-    export NEPI_MODE=$nepi_mode
+
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_MODE=" "export NEPI_MODE=${nepi_mode}"
 
     nepi_ip=${NEPI_STATIC_IP%%/*}
