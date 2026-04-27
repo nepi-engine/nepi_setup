@@ -2540,7 +2540,7 @@ export -f nepiconfigopen
 
 
 function nepisync {
-
+    sudo -v
     # Sync SSH Keys
     echo ""
     echo "Syncing NEPI System Config Files"
@@ -2568,7 +2568,7 @@ function nepisync {
 
 
     if nepiconfig > /dev/null 2>&1 ; then
-        if [[ $"NEPI_MODE" == 'REMOTE' ]]; then
+        if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
           NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
           NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
           echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
