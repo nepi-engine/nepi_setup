@@ -252,14 +252,14 @@ else
 
     #
     python${NEPI_PYTHON} -m pip uninstall numpy
-    sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+    sudo -H python${NEPI_PYTHON} -m pip install --force-reinstall --no-input numpy==1.23.5
 
     sudo -H python${NEPI_PYTHON} -m pip install --no-input python-debian \
         virtualenv wheel  scikit-build ninja cmake cryptography \
         python-dotenv cffi netifaces pyserial websockets \
         geographiclib PyGeodesy harvesters WSDiscovery python-gnupg \
         lxml onvif_zeep PyUSB usb PyYAML declxml licenseheaders \
-        yapf python-gnupg Flask supervisor  colormath panda scipy \
+        yapf python-gnupg Flask supervisor  colormath pandas scipy \
         empty
     
     sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing -y
@@ -363,7 +363,7 @@ else
         python${NEPI_PYTHON} -m pip uninstall numpy
         sudo -H python${NEPI_PYTHON} -m pip uninstall numpy
         sudo rm -r /usr/lib/python3/dist-packages/numpy
-        sudo -H python${NEPI_PYTHON} -m pip install --no-input numpy==1.23.5
+        sudo -H python${NEPI_PYTHON} -m pip install --force-reinstall --no-input numpy==${np_required}
         python -c "import numpy; print(numpy.__version__)"
         sudo dpkg --configure -a
     fi
