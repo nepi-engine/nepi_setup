@@ -370,15 +370,15 @@ if [[ "$?" -eq 0 ]]; then
         # https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
 
         ## Update docker file
-        echo "Setting Docker File Path to ${NEPI_DOCKER}"
-        echo "Updating docker file /etc/default/docker"
-        FILE=/etc/default/docker
-        UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
-        echo $UPDATE
-        KEY=DOCKER_OPTS
-        sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-        KEY='#DOCKER_OPTS'
-        sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+        # echo "Setting Docker File Path to ${NEPI_DOCKER}"
+        # echo "Updating docker file /etc/default/docker"
+        # FILE=/etc/default/docker
+        # UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
+        # echo $UPDATE
+        # KEY=DOCKER_OPTS
+        # sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+        # KEY='#DOCKER_OPTS'
+        # sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
 
 
         ## Update docker service file
