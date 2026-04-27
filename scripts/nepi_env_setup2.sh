@@ -259,7 +259,7 @@ else
         python-dotenv cffi netifaces pyserial websockets \
         geographiclib PyGeodesy harvesters WSDiscovery python-gnupg \
         lxml onvif_zeep PyUSB usb PyYAML declxml licenseheaders \
-        yapf python-gnupg Flask supervisor  colormath pandas scipy \
+        yapf python-gnupg Flask supervisor  colormath panda scipy \
         empty
     
     sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing -y

@@ -799,7 +799,7 @@ export -f netsetnepi
 
 # ping internet
 function pingi(){
-    if ! ping -c 1 -W 1 google.com > /dev/null 2>&1; then
+    if ! timeout 1 ping -c 1 -W 1 google.com > /dev/null 2>&1; then
         echo "No Internet Connection"
         return 1
     else
@@ -815,7 +815,7 @@ function pings(){
     else
       ip="${NEPI_IP%%/*}"
     fi
-    if ! ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
+    if ! timeout 1 ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
         echo "No Connection at ${ip}"
         return 1
     else
@@ -829,7 +829,7 @@ export -f pings
 # ping nepi
 function pingn(){
     ip="${NEPI_IP%%/*}"
-    if ! ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
+    if ! timeout 1 ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
         echo "No NEPI Connection at ${ip}"
         return 1
     else
@@ -2568,17 +2568,19 @@ function nepisync {
 
 
     if nepiconfig > /dev/null 2>&1 ; then
-        NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
-        NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
-        echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
-        if [[ -f $NEPI_CONFIG_SOURCE ]]; then
-            if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
-              sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
-            fi
-            echo "Loading synced NEPI config file"
-            source $(pwd)/system_cfg/etc/load_system_config.sh
-        else
-          echo "NEPI SYSTEM CONFIG file not found at: ${NEPI_CONFIG_SOURCE} "
+        if [[ $"NEPI_MODE" == 'REMOTE' ]]; then
+          NEPI_CONFIG_SOURCE="$(pwd)/system_cfg/etc/nepi_system_config.yaml"
+          NEPI_CONFIG_DEST=/home/${CONFIG_USER}/nepi_system_config.yaml
+          echo "Copying NEPI SYSTEM CONFIG from: ${NEPI_CONFIG_SOURCE}  to ${NEPI_CONFIG_DEST}"
+          if [[ -f $NEPI_CONFIG_SOURCE ]]; then
+              if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+                sudo cp -p ${NEPI_CONFIG_SOURCE} ${NEPI_CONFIG_DEST}
+              fi
+              echo "Loading synced NEPI config file"
+              source $(pwd)/system_cfg/etc/load_system_config.sh
+          else
+            echo "NEPI SYSTEM CONFIG file not found at: ${NEPI_CONFIG_SOURCE} "
+          fi
         fi
 
         NEPI_SSH_KEYS_SHARE="$(pwd)/system_cfg/ssh_keys"

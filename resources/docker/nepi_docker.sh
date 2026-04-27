@@ -559,6 +559,7 @@ fi
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
         #echo "Calling: ninet"
         #echo "Updating Network and Clock"
+        if 
         ninet > /dev/null 2>&1
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
