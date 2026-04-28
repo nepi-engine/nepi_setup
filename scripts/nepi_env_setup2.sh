@@ -337,8 +337,9 @@ else
     # Uninstall Problem Packages
     sudo python${NEPI_PYTHON} -m pip uninstall typing
 
-    sudo python${NEPI_PYTHON} -m pip install ultralytics
-
+    if ! is_valid_rpi; then
+        sudo python${NEPI_PYTHON} -m pip install ultralytics
+    fi
 
 
     #https://github.com/ultralytics/ultralytics/issues/21015
