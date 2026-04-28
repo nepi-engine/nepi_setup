@@ -77,16 +77,25 @@ else
 
 
         echo "Logged into docker hub account ${docker_hub_account}"
-        nepistart
         nepiupdate
+        source $DOCKER_CONFIG_UPDATE_FILE
+        if [[ "$?" -eq 1 ]]; then
+            echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
+            exit 0
+        fi
 
+        if [[ ${NEPI_RUNNING_FS} == 'unknown' ]]; then
+            nepistart
+            nepiupdate
             source $DOCKER_CONFIG_UPDATE_FILE
             if [[ "$?" -eq 1 ]]; then
                 echo "Failed update Docker Config File: ${DOCKER_CONFIG_FILE}"
                 exit 0
             fi
+        fi
 
 
+        if [[ ${NEPI_RUNNING_FS} != 'unknown' ]]; then
 
             ########################
             if is_valid_amd64; then
@@ -107,16 +116,20 @@ else
                 platform=linux/arm64
             fi
 
-        sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ${docker_hub_account}/nepi:${hub_tag}
-        echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${hub_tag}"
-        docker push ${docker_hub_account}/nepi:${hub_tag}
-        sudo docker rmi ${docker_hub_account}/nepi:${hub_tag}
-        #cd $TMP
-        #docker_file=$(pwd)/Dockerfile
-        #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
-        #touch $docker_file
-        #echo "FROM nepi:${hub_tag}" >> $docker_file
-        #docker buildx build --platform  "${platform}" --tag ${docker_hub_account}/nepi:${hub_tag} --push .
-        #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
+            nepistop
+            sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ${docker_hub_account}/nepi:${hub_tag}
+            echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${hub_tag}"
+            docker push ${docker_hub_account}/nepi:${hub_tag}
+            sudo docker rmi ${docker_hub_account}/nepi:${hub_tag}
+            #cd $TMP
+            #docker_file=$(pwd)/Dockerfile
+            #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
+            #touch $docker_file
+            #echo "FROM nepi:${hub_tag}" >> $docker_file
+            #docker buildx build --platform  "${platform}" --tag ${docker_hub_account}/nepi:${hub_tag} --push .
+            #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi
+        else
+            echo "No Running NEPI Container to Push"
+        fi
 
 fi
