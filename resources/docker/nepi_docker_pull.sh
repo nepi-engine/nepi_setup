@@ -141,42 +141,50 @@ else
                 echo "Pulling docker image this process can take several minutes..."
                 sudo docker pull $HUB_IMAGE
                 wait
-
+                
+                success=0
                 PULL_ID=$(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}" | head -1)
                 PULL_ID=${PULL_ID:0:12}
 
+
                 if [[ -n "$PULL_ID" ]]; then
-                    echo "Docker pull succeeded with ID: $PULL_ID"
-
-                    # Stop and remove any running containers using the target slot
-                    run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
-                    for run_name in "${run_names[@]}"; do
-                        if [[ -n "$run_name" ]]; then
-                            run_id=$(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
-                            if [[ -n "$run_id" ]]; then
-                                echo "Removing running container ${run_id}"
-                                sudo docker stop $run_id
-                                wait
-                                sudo docker rm -f $run_id
-                            fi
-                        fi
-                    done
-
-                    # Remove existing images in the target slot
-                    exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
+                    exist_ids=($(sudo docker images --filter "reference=${STAGING_NAME}" --format "{{.ID}}"))
                     if [[ -n "${exist_ids[*]}" ]]; then
-                        echo "Removing existing images for ${NEPI_IMPORT_FS}"
-                        for id in "${exist_ids[@]}"; do
-                            sudo docker rmi -f $id
+                        echo "Docker pull succeeded with ID: $PULL_ID"
+                        success=1
+                        # Stop and remove any running containers using the target slot
+                        run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
+                        for run_name in "${run_names[@]}"; do
+                            if [[ -n "$run_name" ]]; then
+                                run_id=$(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
+                                if [[ -n "$run_id" ]]; then
+                                    echo "Removing running container ${run_id}"
+                                    sudo docker stop $run_id $run_id 2> /dev/null
+                                    wait
+                                    sudo docker rm -f $run_id 2> /dev/null
+                                    wait
+                                fi
+                            fi
                         done
-                    fi
 
-                    # Tag pulled image into the NEPI slot
-                    echo "Tagging ${HUB_IMAGE} → ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
-                    sudo docker tag "${HUB_IMAGE}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
-                    wait
-                    sudo docker rmi "${HUB_IMAGE}"
+                        # Remove existing images in the target slot
+                        exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
+                        if [[ -n "${exist_ids[*]}" ]]; then
+                            echo "Removing existing images for ${NEPI_IMPORT_FS}"
+                            for id in "${exist_ids[@]}"; do
+                                sudo docker rmi -f $id
+                                wait
+                            done
+                        fi
 
+                        # Tag pulled image into the NEPI slot
+                        echo "Tagging ${HUB_IMAGE} → ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        sudo docker tag "${HUB_IMAGE}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        wait
+                        sudo docker rmi "${HUB_IMAGE}"
+                fi
+
+                if [[ $success -eq 1 ]]; then
                     echo ""
                     echo "--------------------------"
                     echo "NEPI Image Pull Complete"
