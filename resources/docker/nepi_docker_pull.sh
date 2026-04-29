@@ -119,13 +119,36 @@ else
             update_yaml_value "NEPI_IMPORT_FS" $NEPI_IMPORT_FS "$DOCKER_CONFIG_FILE"
             update_yaml_value "NEPI_IMPORT_TAG" $NEPI_IMPORT_TAG "$DOCKER_CONFIG_FILE"
 
+
+
+
+
+
+
             #########################
             # Check available space
-            NEPI_DOCKER_ROOT=$(sudo docker info --format '{{ .DockerRootDir }}')
-            # Estimate: hub images are typically 10+ GB; use a conservative 12 GB floor
-            NEEDED_GB=12
-            if ! is_space_avail_gb $NEPI_DOCKER_ROOT $NEEDED_GB; then
-                echo "Not enough free space in ${NEPI_DOCKER_ROOT} to pull image (need ~${NEEDED_GB} GB)"
+            NEPI_DOCKER=$(sudo docker info --format '{{ .DockerRootDir }}')
+            NEPI_DOCKER_SPACE=$(path_space_gb $NEPI_DOCKER)
+            echo "Checking avail space in ${NEPI_DOCKER}"
+
+
+            check_drive=$NEPI_DOCKER
+            check_space=20
+            if ! is_space_avail_gb $NEPI_DOCKER $check_space; then
+                exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
+                if [[ -n "$exist_ids" ]]; then
+                    nepistop
+                    wait
+                    echo "Removing existing images ${NEPI_IMPORT_FS}"
+                    for id in "${exist_ids[@]}"; do
+                        echo "Removing ${id}"
+                        sudo docker rmi -f $id
+                    done
+                fi
+            fi
+
+            if ! is_space_avail_gb $NEPI_DOCKER $check_space; then
+                echo "Not enough free space in ${NEPI_DOCKER_ROOT} to pull image (need ${check_space} GB)"
             else
                 STAGING_NAME=nepi_staging
 
@@ -152,21 +175,9 @@ else
                     if [[ -n "${exist_ids[*]}" ]]; then
                         echo "Docker pull succeeded with ID: $PULL_ID"
                         success=1
-                        # Stop and remove any running containers using the target slot
-                        run_names=($(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_IMPORT_FS}" | awk '{print $2}'))
-                        for run_name in "${run_names[@]}"; do
-                            if [[ -n "$run_name" ]]; then
-                                run_id=$(sudo docker ps -a --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${run_name}" | awk '{print $1}')
-                                if [[ -n "$run_id" ]]; then
-                                    echo "Removing running container ${run_id}"
-                                    sudo docker stop $run_id $run_id 2> /dev/null
-                                    wait
-                                    sudo docker rm -f $run_id 2> /dev/null
-                                    wait
-                                fi
-                            fi
-                        done
-
+   
+                        nepistop
+                        wait
                         # Remove existing images in the target slot
                         exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
                         if [[ -n "${exist_ids[*]}" ]]; then
@@ -178,10 +189,12 @@ else
                         fi
 
                         # Tag pulled image into the NEPI slot
-                        echo "Tagging ${HUB_IMAGE} → ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
+                        echo "Tagging ${HUB_IMAGE} to ${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
                         sudo docker tag "${HUB_IMAGE}" "${NEPI_IMPORT_FS}:${NEPI_IMPORT_TAG}"
                         wait
                         sudo docker rmi "${HUB_IMAGE}"
+                        nepistart
+                    fi
                 fi
 
                 if [[ $success -eq 1 ]]; then
@@ -210,5 +223,4 @@ else
 
         fi
     fi
-
 fi
