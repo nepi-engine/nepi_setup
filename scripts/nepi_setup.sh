@@ -364,45 +364,45 @@ if [[ "$?" -eq 0 ]]; then
 
     fi
 
-    if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" != "nepi" ]]; then
-        # Set docker service root location
-        #https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
-        # https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
+    # if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" != "nepi" ]]; then
+    #     Set docker service root location
+    #     https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
+    #     https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
 
-        ## Update docker file
-        # echo "Setting Docker File Path to ${NEPI_DOCKER}"
-        # echo "Updating docker file /etc/default/docker"
-        # FILE=/etc/default/docker
-        # UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
-        # echo $UPDATE
-        # KEY=DOCKER_OPTS
-        # sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-        # KEY='#DOCKER_OPTS'
-        # sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-
-
-        ## Update docker service file
-        echo "Updating docker file /usr/lib/systemd/system/docker.service"
-        FILE=/usr/lib/systemd/system/docker.service
+    #     # Update docker file
+    #     echo "Setting Docker File Path to ${NEPI_DOCKER}"
+    #     echo "Updating docker file /etc/default/docker"
+    #     FILE=/etc/default/docker
+    #     UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
+    #     echo $UPDATE
+    #     KEY=DOCKER_OPTS
+    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    #     KEY='#DOCKER_OPTS'
+    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
 
 
-        KEY=RequiresMountsFor
-        UPDATE="RequiresMountsFor=${NEPI_DOCKER}"
+    #     ## Update docker service file
+    #     echo "Updating docker file /usr/lib/systemd/system/docker.service"
+    #     FILE=/usr/lib/systemd/system/docker.service
 
-        if grep -q "${KEY}" $FILE; then
-            echo "Updating Docker Required Mounts with ${UPDATE}"
-            sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-        else
-            echo "Adding Docker Required Mounts with ${UPDATE}"
-            sudo sed -i '/Requires=docker.socket/a\'${UPDATE} $FILE
-        fi
 
-        KEY=ExecStart
-        UPDATE="ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=${NEPI_DOCKER}"
-        echo $UPDATE
-        sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    #     KEY=RequiresMountsFor
+    #     UPDATE="RequiresMountsFor=${NEPI_DOCKER}"
+
+    #     if grep -q "${KEY}" $FILE; then
+    #         echo "Updating Docker Required Mounts with ${UPDATE}"
+    #         sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+    #     else
+    #         echo "Adding Docker Required Mounts with ${UPDATE}"
+    #         sudo sed -i '/Requires=docker.socket/a\'${UPDATE} $FILE
+    #     fi
+
+    #     KEY=ExecStart
+    #     UPDATE="ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=${NEPI_DOCKER}"
+    #     echo $UPDATE
+    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
     
-    fi
+    # fi
 
     if [[ "$CONFIG_USER" != "nepi" ]]; then
 

@@ -35,7 +35,11 @@ if [[ ! -n $CONFIG_USER ]]; then
     fi
 fi
 if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+    if [[ -d "/home/nepihost" ]]; then
+        CONFIG_USER=nepihost
+    else
+        CONFIG_USER=$(id -nu 1000)
+    fi
 fi
 export CONFIG_USER=$CONFIG_USER
 
@@ -645,8 +649,8 @@ fi
 
         ########################
         # Load NEPI DOCKER CONFIG Updates
-        bash ${DOCKER_FOLDER}/nepi_docker_sync.sh > /dev/null 2>&1
-        source ${DOCKER_FOLDER}/load_docker_config.sh > /dev/null 2>&1
+        bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
+        source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
     fi
     #echo "NEPI DOCKER SERVICE MONITOR LOOP COMPLETE"
     sleep 1

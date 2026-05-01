@@ -21,13 +21,7 @@
 # This script loads the nepi_system_config.yaml values
 
 if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -un)
-    if [[ ${CONFIG_USER} == 'root' ]]; then
-        CONFIG_USER=$SUDO_USER
-    fi
-fi
-if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+    CONFIG_USER=nepihost
 fi
 export CONFIG_USER=$CONFIG_USER
 

@@ -21,7 +21,6 @@
 # First from /opt/nepi to /mnt/nepi_config
 # Then back from /mnt/nepi_config to /opt/nepi
 
-sudo -v
 
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
@@ -54,12 +53,12 @@ fi
 ################## 
 # Fix Folder Owners
 echo "Fixing NEPI Foder Owners to Config User: ${CONFIG_USER}"
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
-sudo chmod 0775 /opt/nepi
-sudo chown 1000:1000 /mnt/nepi_config
-sudo chmod 0750 /mnt/nepi_config
-sudo chown 1000:1000 /mnt/nepi_storage
-sudo chmod 0750 /mnt/nepi_storage
+chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+chmod 0775 /opt/nepi
+chown 1000:1000 /mnt/nepi_config
+chmod 0750 /mnt/nepi_config
+chown 1000:1000 /mnt/nepi_storage
+chmod 0750 /mnt/nepi_storage
 
 
 
@@ -84,21 +83,21 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -f $SOURCE_FILE ]]; then
-    sudo cp $UPDATE_FILE $SOURCE_FILE 
+    cp $UPDATE_FILE $SOURCE_FILE 
 fi
 
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}" 
-sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
+rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
 
-sudo chown 1000:1000 ${SOURCE_PATH}
-sudo chmod 775 ${SOURCE_PATH}
+chown 1000:1000 ${SOURCE_PATH}
+chmod 775 ${SOURCE_PATH}
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 775 ${UPDATE_PATH}
+chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+chmod 775 ${UPDATE_PATH}
 
 
 
@@ -117,21 +116,21 @@ UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -f $SOURCE_FILE ]]; then
-    sudo cp $UPDATE_FILE $SOURCE_FILE 
+    cp $UPDATE_FILE $SOURCE_FILE 
 fi
 
 sync_yaml_files $SOURCE_FILE $UPDATE_PATH 
 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${SOURCE_PATH}/ ${UPDATE_PATH}/
+rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
-sudo rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
+rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 775 ${SOURCE_PATH}
+chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+chmod 775 ${SOURCE_PATH}
 
-sudo chown 1000:1000 ${UPDATE_PATH}
-sudo chmod 775 ${UPDATE_PATH}
+chown 1000:1000 ${UPDATE_PATH}
+chmod 775 ${UPDATE_PATH}
 
 
 
@@ -143,20 +142,20 @@ sudo chmod 775 ${UPDATE_PATH}
 
 # echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 # if [[ -d "${SOURCE_PATH}" ]]; then
-#     sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+#     rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 # fi
 
 # echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 # if [[ -d "${UPDATE_PATH}" ]]; then
-#     sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+#     rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
 # fi
 
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 775 ${SOURCE_PATH}
+# chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+# chmod 775 ${SOURCE_PATH}
 
-# sudo chown 1000:1000 ${UPDATE_PATH}
-# sudo chmod 775 ${UPDATE_PATH}
+# chown 1000:1000 ${UPDATE_PATH}
+# chmod 775 ${UPDATE_PATH}
 
 
 ######################################
@@ -167,29 +166,29 @@ UPDATE_PATH=/opt/nepi/bash/${CONFIG_USER}
 
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ -d "${SOURCE_PATH}" ]]; then
-    sudo rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
+    rsync -arh --exclude='*/' ${SOURCE_PATH}/ ${UPDATE_PATH}/
 fi
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 if [[ -d "${UPDATE_PATH}" ]]; then
-    sudo rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
+    rsync -arh --exclude='*/' ${UPDATE_PATH}/ ${SOURCE_PATH}/
 fi
 
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-sudo chmod 755 ${SOURCE_PATH}
+chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+chmod 755 ${SOURCE_PATH}
 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod 755 ${UPDATE_PATH}
+chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+chmod 755 ${UPDATE_PATH}
 
 
 
 
 ################## 
 # Fix Folder Owners
-sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
-sudo chmod 0775 /opt/nepi
-sudo chown 1000:1000 /mnt/nepi_config
-sudo chmod 0775 /mnt/nepi_config
-sudo chown 1000:1000 /mnt/nepi_storage
-sudo chmod 0775 /mnt/nepi_storage
+chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
+chmod 0775 /opt/nepi
+chown 1000:1000 /mnt/nepi_config
+chmod 0775 /mnt/nepi_config
+chown 1000:1000 /mnt/nepi_storage
+chmod 0775 /mnt/nepi_storage

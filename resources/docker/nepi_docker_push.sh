@@ -33,9 +33,12 @@ if [[ ! -n $CONFIG_USER ]]; then
         CONFIG_USER=$SUDO_USER
     fi
 fi
-
 if [[ ! -n $CONFIG_USER ]]; then
-    CONFIG_USER=$(id -nu 1000)
+    if [[ -d "/home/nepihost" ]]; then
+        CONFIG_USER=nepihost
+    else
+        CONFIG_USER=$(id -nu 1000)
+    fi
 fi
 export CONFIG_USER=$CONFIG_USER
 

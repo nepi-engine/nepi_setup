@@ -20,7 +20,6 @@
 
 # This NEPI_CONFIG_LOAD_FILE creates updates the NEPI Docker Config AB FS Info
 
-sudo -v
 
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
@@ -83,11 +82,11 @@ else
     # Update FSA
         
         NEW_FS=nepi_fs_a
-        NEW_ID=($(sudo docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
+        NEW_ID=($(docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
         NEW_ID="${NEW_ID[0]}"
 
     if  [[ -n "$NEW_ID" ]]; then
-        NEW_TAG=($(sudo docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
+        NEW_TAG=($(docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
         NEW_TAG=${NEW_TAG[0]}
 
 
@@ -155,7 +154,7 @@ else
         update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${DOCKER_CONFIG_FILE}"
 
 
-        NEW_SIZE=$(sudo docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
+        NEW_SIZE=$(docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
 
         if [[ -n $NEW_SIZE ]]; then 
             NEW_SIZE="${NEW_SIZE%??}"
@@ -191,10 +190,10 @@ else
     # Update FSB
 
     NEW_FS=nepi_fs_b
-    NEW_ID=($(sudo docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
+    NEW_ID=($(docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
     NEW_ID="${NEW_ID[0]}"
     if [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
-        NEW_TAG=($(sudo docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
+        NEW_TAG=($(docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
         NEW_TAG=${NEW_TAG[0]}
 
             IFS='-' read -ra TAG_ARRAY <<< "$NEW_TAG"
@@ -247,7 +246,7 @@ else
         update_yaml_value "NEPI_FSA_DESCRIPTION" "$NEW_DESC" "${DOCKER_CONFIG_FILE}"
 
 
-        NEW_SIZE=$(sudo docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
+        NEW_SIZE=$(docker images --format "{{.Size}}" ${NEW_FS}:${NEW_TAG})
         
         if [[ -n $NEW_SIZE ]]; then 
             NEW_SIZE="${NEW_SIZE%??}"
@@ -269,7 +268,7 @@ else
         update_yaml_value "NEPI_FSB_DESCRIPTION" "unknown" "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_FSB_SIZE_MB" 0.0 "${DOCKER_CONFIG_FILE}"
         #echo "Removing NEPI NEPI_FSB Image ${NEW_ID}"
-        sudo docker rmi $NEW_ID
+        docker rmi $NEW_ID
         NEW_TAG=unknown
         NEW_ID=unknown
 
@@ -299,13 +298,13 @@ else
     # Update Running NEPI Image
 
     RUN_FS=''
-    RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSA}" | awk '{print $2}'))
+    RUN_NAME=($(docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSA}" | awk '{print $2}'))
     RUN_NAME=${RUN_NAME[0]}
     if [[ -n "$RUN_NAME" ]]; then
         RUN_FS=$NEPI_FSA
         RUN_TAG=$NEPI_FSA_TAG
     else
-        RUN_NAME=($(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
+        RUN_NAME=($(docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${NEPI_FSB}" | awk '{print $2}'))
         RUN_NAME=${RUN_NAME[0]}
         if [[ -n "$RUN_NAME" ]]; then
             RUN_FS=$NEPI_FSB
@@ -314,17 +313,17 @@ else
     fi
 
     if [[ -n "$RUN_FS" ]]; then
-        RUN_ID=$(sudo docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_FS}" | awk '{print $1}')
+        RUN_ID=$(docker ps --format "{{.ID}}\t{{.Image}}\t{{.Names}}" | grep "${RUN_FS}" | awk '{print $1}')
         #RUN_TAG="${RUN_FS#*:}"
-        started_at_str=$(sudo docker inspect --format='{{.State.StartedAt}}' "$RUN_ID")
+        started_at_str=$(docker inspect --format='{{.State.StartedAt}}' "$RUN_ID")
         
         started_at_human=$(echo "$started_at_str" | sed 's/\..*Z/ /; s/T/ /')
         start_epoch=$(date --date="$started_at_human" "+%s")
         now_epoch=$(date "+%s")
         uptime_seconds=$((now_epoch - START_EPOCH))
         RUN_TIME=$(printf '%02d:%02d:%02d\n' $(($uptime_seconds/3600)) $(($uptime_seconds%3600/60)) $(($uptime_seconds%60)))
-        # size_gb=${(sudo docker ps --size --filter "id=$RUN_ID" | tail -n1 | tail -n1) && size_gb="${size_gb##* }" && size_gb="${size_gb%%'.'*}" && size_gb=$((size_gb + 1))::-2}  
-        size_gb=$(sudo docker ps --size --filter id="${RUN_ID}" --format "{{.Size}}" | awk '{print $NF}')
+        # size_gb=${(docker ps --size --filter "id=$RUN_ID" | tail -n1 | tail -n1) && size_gb="${size_gb##* }" && size_gb="${size_gb%%'.'*}" && size_gb=$((size_gb + 1))::-2}  
+        size_gb=$(docker ps --size --filter id="${RUN_ID}" --format "{{.Size}}" | awk '{print $NF}')
         RUN_SIZE_GB=${size_gb%???}
         #echo "Got Running FSA Check Name Tag ID: ${NEPI_FSA} ${NEPI_FSA_TAG} ${CONTAINER_ID}"
         #echo "Updating NEPI Docker Config Runnning Values"
@@ -394,7 +393,7 @@ else
         export_file=${NEPI_EXPORT_PATH}/nepi_export_staging
         if [[ -f "$export_file" ]]; then
             echo "Cleaning up left over nepi_export_staging file"
-            sudo rm $export_file
+            rm $export_file
         fi
         update_yaml_value "NEPI_EXPORT_PATH" 'unknown' "${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_EXPORTING" 0 "${DOCKER_CONFIG_FILE}"

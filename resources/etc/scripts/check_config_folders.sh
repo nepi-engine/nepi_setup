@@ -85,13 +85,13 @@ done
 # echo "Checking NEPI Docker Folders"
 # echo "---------------------------"
 
-NEPI_DOCKER=/mnt/nepi_docker
+# NEPI_DOCKER=/mnt/nepi_docker
 
-if [[ ! -d "${NEPI_DOCKER}" ]]; then
-    echo "Creating NEPI Docker: ${NEPI_DOCKER}"
-    sudo mkdir -p $NEPI_DOCKER
-fi
-sudo chown root:root $NEPI_DOCKER
+# if [[ ! -d "${NEPI_DOCKER}" ]]; then
+#     echo "Creating NEPI Docker: ${NEPI_DOCKER}"
+#     sudo mkdir -p $NEPI_DOCKER
+# fi
+# sudo chown root:root $NEPI_DOCKER
 
 
 ##############################
