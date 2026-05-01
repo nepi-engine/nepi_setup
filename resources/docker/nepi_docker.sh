@@ -558,15 +558,22 @@ fi
     DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
     DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
+    #echo "Calling: ninet"
+    #echo "Updating Network and Clock"
+    if [[ "$enable_dhcp" -eq 1 ]]; then
+        echo "Running ninet"
+        ninet  >/dev/null 2>&1
+        wait
+        sleep 2
+    else
+        echo "Running nnet"
+        nnet  >/dev/null 2>&1
+        wait
+    fi
+
 
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
-        #echo "Calling: ninet"
-        #echo "Updating Network and Clock"
-        if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
-            ninet > /dev/null 2>&1
-        else
-            nnet > /dev/null 2>&1
-        fi
+
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"
