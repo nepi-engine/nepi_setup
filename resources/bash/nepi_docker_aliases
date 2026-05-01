@@ -55,6 +55,7 @@ function nepipull(){
   docker_link=$1
   echo "Pulling NEPI Docker Image ${docker_link}"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepipull
 
@@ -64,6 +65,7 @@ function nepipush(){
   account=$1
   echo "Pushing NEPI Docker Image"
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $account
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepipull
 

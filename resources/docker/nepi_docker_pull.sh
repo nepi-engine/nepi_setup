@@ -154,10 +154,9 @@ else
             if ! is_space_avail_gb $NEPI_DOCKER $check_space; then
                 echo "Not enough free space in ${NEPI_DOCKER_ROOT} to pull image (need ${check_space} GB)"
             else
-                STAGING_NAME=nepi_staging
 
                 # Remove stale staging images
-                exist_ids=($(sudo docker images --filter "reference=${STAGING_NAME}" --format "{{.ID}}"))
+                exist_ids=($(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}"))
                 if [[ -n "${exist_ids[*]}" ]]; then
                     echo "Removing existing staging images"
                     for id in "${exist_ids[@]}"; do
@@ -173,9 +172,8 @@ else
                 PULL_ID=$(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}" | head -1)
                 PULL_ID=${PULL_ID:0:12}
 
-
-                if [[ -n "$PULL_ID" ]]; then
-                    exist_ids=($(sudo docker images --filter "reference=${STAGING_NAME}" --format "{{.ID}}"))
+                if [[ -n $PULL_ID ]]; then
+                    exist_ids=($(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}"))
                     if [[ -n "${exist_ids[*]}" ]]; then
                         echo "Docker pull succeeded with ID: $PULL_ID"
                         success=1
