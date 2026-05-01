@@ -90,16 +90,11 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 UPDATE_PATH=/opt/nepi/etc
 CONFIG_FILENAME=nepi_system_config.yaml
-BACKUP_FILENAME=nepi_system_config.yaml.bak
 
-SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
-UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
-BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 find $UPDATE_PATH -mindepth 1 -maxdepth 1 -type d -exec sudo rm -rf {} +
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
-sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -108,14 +103,12 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
+SOURCE_PATH=/opt/nepi/etc
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
 CONFIG_FILENAME=nepi_system_config.yaml
-BACKUP_FILENAME=nepi_system_config.yaml.bak
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
-BACKUP_FILE=${UPDATE_PATH}/${BACKUP_FILENAME}
 
 
 find $UPDATE_PATH -mindepth 1 -maxdepth 1 -type d -exec sudo rm -rf {} +
@@ -124,7 +117,8 @@ if [[ ! -f $UPDATE_FILE ]]; then
     sudo cp $SOURCE_FILE $UPDATE_FILE 
 fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
-sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+sudo cp $UPDATE_FILE $SOURCE_FILE 
+sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -155,7 +149,7 @@ sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/docker
+SOURCE_PATH=/opt/nepi/docker_cfg
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 

@@ -167,7 +167,7 @@ fi
 echo "Emptying Trash for NEPI Folder: ${nfolder}"
 sudo rm -r ${nfolder}/.Trash* 2>/dev/null
 sudo chown 1000:1000 $nfolder
-sudo find $nfolder -type d -exec chown 1000:1000 {} \;
+#sudo find $nfolder -type d -exec chown 1000:1000 {} \;
 sudo chmod 0775 $nfolder
 
 declare -a rfolders=(  

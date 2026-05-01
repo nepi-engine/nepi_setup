@@ -228,21 +228,19 @@ export function ninet
 
 
 function netupdate(){
+    nnet  >/dev/null 2>&1
+    wait
+
     enable_dhcp=0
     if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
         enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
     fi
-
 
     if [[ "$enable_dhcp" -eq 1 ]]; then
         #echo "Running ninet"
         ninet  >/dev/null 2>&1
         wait
         sleep 2
-    else
-        #echo "Running nnet"
-        nnet  >/dev/null 2>&1
-        wait
     fi
 }
 
