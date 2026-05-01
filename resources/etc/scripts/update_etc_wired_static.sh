@@ -62,6 +62,11 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     fi
 fi
 
+passed_ip=$2
+if [[ -n $passed_ip ]]; then
+NEPI_STATIC_IP=$passed_ip
+fi
+
 ###############################
 echo ""
 echo "UPDATING ETC WIRED STATIC IP"
