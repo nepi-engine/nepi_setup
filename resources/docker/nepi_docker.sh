@@ -64,7 +64,9 @@ DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 # Redefine any nepi_bash_util functions that require without sudo
 ######################
 
+
 function nipa(){
+  
   file=/etc/network/interfaces.d/nepi_static_ip
   if [ ! -f "$file" ]; then
       return 2
@@ -82,6 +84,7 @@ export -f nipa
 
 
 function naipa(){
+  
   file=/etc/network/interfaces.d/nepi_user_ip_aliases
   if [ ! -f "$file" ]; then
       return 2
@@ -98,6 +101,7 @@ function naipa(){
 export -f naipa
 
 function nnipa(){
+  
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
       return 1
@@ -113,7 +117,6 @@ function nnipa(){
 }
 export -f nnipa
 
-
 function nnet(){
     
     nepi_ip=$(nipa)
@@ -125,7 +128,7 @@ function nnet(){
         echo "Can't ping NEPI IP address: ${nepi_ip}"
 
         echo "Restarting Network"
-         systemctl restart networking
+        systemctl restart networking
         wait
         ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -153,9 +156,9 @@ function ndhcp(){
 
       echo "Enabling DHCP internet connection"
       echo "Killing existing DHCP clients"
-       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+      kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
-       dhclient -nw
+      dhclient -nw
       sleep 2
       nnet # Restart network
       wait
@@ -163,15 +166,14 @@ function ndhcp(){
         return 1
       fi
     fi
-     kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+    kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
   fi
 }
 export -f ndhcp
 
 
-
 function nclock(){
-
+      
       # This file sets up nepi bash aliases and util functions
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
@@ -185,6 +187,8 @@ function nclock(){
         fi
       fi
 
+      
+     
       if [[ "$(date +%Y)" -lt 2025 ]]; then
         echo "NTP Server connection detected. Will try to sync clocks"
         echo "Restarting chrony time service"
@@ -192,12 +196,12 @@ function nclock(){
         sleep 1
         chronyc -a makestep > /dev/null 2>&1
       fi
-      # sudo chronyc -a makestep > /dev/null 2>&1
+      #chronyc waitsync 1
+      # chronyc -a makestep > /dev/null 2>&1
       # echo "Forcing clock sync"
-      #sudo chronyc -a makestep > /dev/null 2>&1
+      #chronyc -a makestep > /dev/null 2>&1
 
-      # echo "Restarting chrony time service"
-      # sudo systemctl restart chronyd
+
     if [[ "$(date +%Y)" -lt 2025 ]]; then
         echo "Clock Not Updated"
         return 1
@@ -209,6 +213,7 @@ export -f nclock
 
 
 function ninet(){
+  
   echo "Running NEPI Internet Update Processes"
   ndhcp # Enable DHCP internet connection if needed
   wait
@@ -218,8 +223,6 @@ function ninet(){
   fi
 }
 export function ninet
-
-
 
 
 ####################################
@@ -559,8 +562,11 @@ fi
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
         #echo "Calling: ninet"
         #echo "Updating Network and Clock"
-        if 
-        ninet > /dev/null 2>&1
+        if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
+            ninet > /dev/null 2>&1
+        else
+            nnet > /dev/null 2>&1
+        fi
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"
