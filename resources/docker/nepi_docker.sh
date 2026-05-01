@@ -225,6 +225,27 @@ function ninet(){
 export function ninet
 
 
+
+
+function netupdate(){
+    enable_dhcp=0
+    if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
+        enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
+    fi
+
+
+    if [[ "$enable_dhcp" -eq 1 ]]; then
+        #echo "Running ninet"
+        ninet  >/dev/null 2>&1
+        wait
+        sleep 2
+    else
+        #echo "Running nnet"
+        nnet  >/dev/null 2>&1
+        wait
+    fi
+}
+
 ####################################
 # Process Functions
 function NEPI_START_FUNCTION(){
@@ -438,23 +459,7 @@ echo "Reseting Network Config"
 echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
 echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
 
-
-enable_dhcp=0
-if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
-    enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
-fi
-
-
-if [[ "$enable_dhcp" -eq 1 ]]; then
-    echo "Running ninet"
-    ninet  >/dev/null 2>&1
-    wait
-    sleep 2
-else
-    echo "Running nnet"
-    nnet  >/dev/null 2>&1
-    wait
-fi
+netupdate
 
 
 
@@ -483,14 +488,15 @@ if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi
     export NEPI_STATIC_IP=nepi_recovery_ip
     LOAD_NEPI_CONFIG=0
     source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-    nnet
+    netupdate
     if [[ "$?" -eq 0 ]]; then
         echo "Sleeping for 10 seconds"
         sleep 10
         export NEPI_STATIC_IP=nepi_static_ip
         LOAD_NEPI_CONFIG=0
         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-        nnet
+        sleep 2
+        netupdate
     else
         echo "Failed to run recovery mode setup"
     fi
@@ -558,18 +564,8 @@ fi
     DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
     DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
-    #echo "Calling: ninet"
-    #echo "Updating Network and Clock"
-    if [[ "$enable_dhcp" -eq 1 ]]; then
-        echo "Running ninet"
-        ninet  >/dev/null 2>&1
-        wait
-        sleep 2
-    else
-        echo "Running nnet"
-        nnet  >/dev/null 2>&1
-        wait
-    fi
+
+    netupdate
 
 
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
