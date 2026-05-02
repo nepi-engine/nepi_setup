@@ -119,6 +119,11 @@ else
                 platform=linux/arm64
             fi
 
+            got_tag=$1
+            if [[ -n $got_tag ]]; then
+                hub_tag=$got_tag
+            fi
+
             nepistop
             sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ${docker_hub_account}/nepi:${hub_tag}
             echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${hub_tag}"
