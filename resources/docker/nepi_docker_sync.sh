@@ -40,7 +40,7 @@ export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+afile=/home/${CONFIG_USER}/.nepi_host_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -107,7 +107,7 @@ sudo chmod 775 ${UPDATE_PATH}
 
 # Synce from /opt/nepi first
 
-SOURCE_PATH=/opt/nepi/docker/docker_cfg
+SOURCE_PATH=/opt/nepi/docker_cfg
 UPDATE_PATH=/mnt/nepi_config/docker_cfg
 CONFIG_FILENAME=nepi_docker_config.yaml
 

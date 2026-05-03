@@ -152,8 +152,8 @@ fi
     ##############
     echo "Installing NEPI Remote Dev Aliases file"
 
-    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_pc_aliases
-    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_pc_aliases
+    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_remote_aliases
+    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_remote_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
 
     if [ -f "$NEPI_ALIASES_DEST" ]; then

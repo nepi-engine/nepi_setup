@@ -36,7 +36,7 @@ export CONFIG_USER=$CONFIG_USER
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+afile=/home/${CONFIG_USER}/.nepi_host_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile

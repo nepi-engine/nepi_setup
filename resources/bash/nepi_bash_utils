@@ -797,6 +797,26 @@ function netsetnepi() {
 
 export -f netsetnepi
 
+
+# ping self
+function pinga(){
+    address=$1
+    if [[ -n $address ]]; then
+        ip="${address%%/*}"
+      if ! timeout 1 ping -c 1 -W 1 ${ip} > /dev/null 2>&1; then
+          echo "No Connection at ${ip}"
+          return 1
+      else
+          echo "Connected at ${ip}"
+      fi
+    else
+          echo "No IP Address Provide"
+          return 1
+    fi
+    
+}
+export -f pinga
+
 # ping internet
 function pingi(){
     if ! timeout 1 ping -c 1 -W 1 google.com > /dev/null 2>&1; then
@@ -1171,6 +1191,7 @@ netsetstatic = Select network adapter and set static_ip with provided IP like '1
 netsetauto = Select network adapter and set static_ip to auto'
 netsetcustom = Select network adapter and enter a custom static IP address'
 netsetnepi = Select network adapter and set static_ip to current NEPI_IP value'
+pinga = Check connection to provided IP address
 pingi = Check connection to internet
 pings = Check connection to Self IP address
 pingn = Check connection to NEPI IP

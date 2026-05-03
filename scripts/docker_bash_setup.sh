@@ -221,8 +221,8 @@ echo ""
     ##############
     echo "Installing NEPI PC Aliases file"
 
-    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_docker_aliases
-    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_docker_aliases
+    NEPI_ALIASES_SOURCE=${RESOURCES_FOLDER}/bash/nepi_host_aliases
+    NEPI_ALIASES_DEST=/home/${CONFIG_USER}/.nepi_host_aliases
     echo "Installing NEPI aliases file from ${NEPI_ALIASES_SOURCE} to ${NEPI_ALIASES_DEST} "
 
     if [ -f "$NEPI_ALIASES_DEST" ]; then

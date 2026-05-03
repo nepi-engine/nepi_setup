@@ -69,6 +69,25 @@ fi
 ################################
 echo ""
 echo "UPDATING ETC SSH KEYS"
+nepisync
+
+NEPI_SSH_FOLDER=/home/${CONFIG_USER}/.ssh
+nepi_ssh_key_path="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY}"
+nepi_ssh_key_default=nepi_default_ssh_key
+#echo "Looking for ssh key file ${NEPI_SSH_KEY}"
+if [[ ! -f $nepi_ssh_key_path ]]; then
+    echo "SSH key file ${NEPI_SSH_KEY} not found in ${NEPI_SSH_FOLDER}"
+    echo "Resetting NEPI SSH key file to ${nepi_ssh_key_default}"
+    export NEPI_SSH_KEY=$nepi_ssh_key_default
+    nepi_ssh_key_path="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY}"
+    if [[ ! -f $nepi_ssh_key_path ]]; then
+        nepi_default_ssh_key_path="${ETC_SCRIPTS_FOLDER}/ssh/ssh_keys"
+        if [[ -f $nepi_default_ssh_key_path ]]; then
+            sudo cp ${nepi_ssh_key_path}/* ${nepi_default_ssh_key_path}/
+        fi
+    fi
+    update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
+fi
 
 echo "Calling nepisetkey and nepiauthadd with key file ${NEPI_SSH_KEY}"
 if nepisetkey $NEPI_SSH_KEY; then

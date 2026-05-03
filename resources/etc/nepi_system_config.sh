@@ -153,13 +153,6 @@ fi
 NEPI_STATIC_IP_START=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
-nepi_ssh_key_path="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY}"
-echo "Looking for ssh key file ${NEPI_SSH_KEY}"
-if [[ ! -f $nepi_ssh_key_path ]]; then
-    echo "ssh key file ${NEPI_SSH_KEY}"
-    export NEPI_SSH_KEY=nepi_default_ssh_key
-    update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
-fi
 ###################
 #  Upated NEPI Config Settings
 
@@ -301,7 +294,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_3" $CURRENT_NEPI_ALIAS_IP_3 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
-    update_yaml_value "NEPI_ROS_IP" $CURRENT_NEPI_ROS_IP $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ROS_IP" ${CURRENT_NEPI_STATIC_IP%%/*} $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_IMPORT_PATH" $CURRENT_NEPI_IMPORT_PATH $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_EXPORT_PATH" $CURRENT_NEPI_EXPORT_PATH $SYSTEM_SYS_CONFIG_FILE

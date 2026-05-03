@@ -20,7 +20,7 @@
 # This script is the NEPI Docker Container Management Service
 if ! [ $(id -u) = 0 ]; then
    echo 'This scripts must be run as root user. Type "su" and retry'
-   exit 1
+   exit 0
 fi
 
 
@@ -47,13 +47,13 @@ echo "NEPI_DOCKER Service starting with CONFIG_USER=${CONFIG_USER}"
 
 bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_docker_aliases
+afile=/home/${CONFIG_USER}/.nepi_host_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
 else
     echo "NEPI Utils bash file not found at: ${ufile}"
-    exit 1
+    exit 0
 fi
 
 NEPI_CONFIG=/mnt/nepi_config
@@ -229,6 +229,20 @@ function ninet(){
 export function ninet
 
 
+
+function nepiload(){
+    NEPI_CONFIG_LOAD_FILE=${SETC_FOLDER}/load_system_config.sh
+    if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+        echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
+        source $NEPI_CONFIG_LOAD_FILE
+        if [ $? -eq 1 ]; then
+            echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
+        fi
+    else
+        echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
+    fi
+
+}
 
 
 function netupdate(){
@@ -433,34 +447,50 @@ echo "##########################"
 echo ""
 
 
-# ###############################
-# # Load NEPI Config File
-# # Rebuild NEPI Docker File System From Source If available
-# echo ""
-# echo "---------------------------------"
-# echo "Updating NEPI Docker File System"
-# nepibld
+
+
 
 
 ###############################
-# Load NEPI Config File
-NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
-    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
-    source $NEPI_CONFIG_LOAD_FILE
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
+# Check for NEPI Config Changes
+
+echo ""
+echo "---------------------------------"
+NEPI_CONFIG_FILE=${SETC_FOLDER}/nepi_system_config.yaml
+NEPI_CONFIG_BACKUP_FILE=${NEPI_CONFIG_FILE}.bak
+NEPI_CONFIG_SETUP_FILE=${SETC_FOLDER}/nepi_system_config.sh
+echo "Checking for NEPI System Config Changes ${NEPI_CONFIG_FILE}"
+if [[ -f "$NEPI_CONFIG_FILE" ]]; then
+    if [[ ! -f "$NEPI_CONFIG_BACKUP_FILE" ]]; then
+        cp $NEPI_CONFIG_FILE $NEPI_CONFIG_BACKUP_FILE
+    fi
+
+    if cmp -s $NEPI_CONFIG_FILE $NEPI_CONFIG_BACKUP_FILE; then
+        echo "NEPI System Config Files Match"
+        nepiload
+        ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
+        echo "Calling NEPI SSH KEY uppdate script ${ssh_key_script}"
+        source $ssh_key_script
+    else
+        echo "NEPI System Config File Has Updated"
+        nepiload
+        if [[ -f "$NEPI_CONFIG_SETUP_FILE" ]]; then
+            source $NEPI_CONFIG_SETUP_FILE
+        else
+            echo "Failed to find ${NEPI_CONFIG_SETUP_FILE}"
+        fi        
     fi
 else
-    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
+    echo "Failed to find ${NEPI_CONFIG_FILE}"
 fi
 
+
+###############################
 echo ""
 echo "---------------------------------"
 echo "Reseting Network Config"
 echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
 echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
-
 netupdate
 
 

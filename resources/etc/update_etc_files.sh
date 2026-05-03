@@ -118,10 +118,6 @@ source ${ETC_FOLDER}/scripts/update_etc_hostname.sh $LOAD_NEPI_CONFIG
 # CHRONY TIME UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_time_ntps.sh $LOAD_NEPI_CONFIG
 
-###########################################
-# WIRED DHCP UPDATES
-source ${ETC_FOLDER}/scripts/update_etc_wired_dhcp.sh $LOAD_NEPI_CONFIG
-
 #############################
 # WIRED NETWORK STATIC IP UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
@@ -129,6 +125,10 @@ source ${ETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
 #############################
 # WIRED NETWORK ALIAS IP UPDATES
 source ${ETC_FOLDER}/scripts/update_etc_wired_aliases.sh $LOAD_NEPI_CONFIG
+
+###########################################
+# WIRED DHCP UPDATES
+source ${ETC_FOLDER}/scripts/update_etc_wired_dhcp.sh $LOAD_NEPI_CONFIG
 
 ###########################################
 # WIFI CLIENT UPDATES

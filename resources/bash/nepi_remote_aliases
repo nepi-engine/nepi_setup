@@ -105,7 +105,9 @@ function sshnhc(){
 function sshnh(){
   ssh -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH -t ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s); exec bash -l"
 }
-
+function sshnhv(){
+  ssh -vvv -o StrictHostKeyChecking=no -p 22 -i $NEPI_SSH_KEY_PATH -t ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s); exec bash -l"
+}
 
 alias scpnh="scp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost"
 alias sftpnh="sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@nepihost"
@@ -121,7 +123,9 @@ HELPN="${HELPN}
 ### NEPI SSH UTIL FUNCTIONS
 ################################
 sshn = SSH into NEPI Software System
+sshnv = SSH into NEPI Software System Verbose
 sshnh = SSH into NEPI Host System
+sshnhv = SSH into NEPI Host System Verbose
 sshnhc = Sync NEPI Host System Clock
 scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
