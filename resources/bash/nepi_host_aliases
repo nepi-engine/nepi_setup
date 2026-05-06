@@ -526,9 +526,7 @@ export DRIVE="${NEPI_STORAGE}"
 # Function to open sftp to location on nepi device
 # Example call: sftpnl '${NEPI_STORAGE}'
 
-function ai(){
-	sftpnl $AI
-}	
+
 function aifs(){
 	sftpnl $AIFS
 }	
@@ -538,18 +536,11 @@ function api(){
 function apps(){
 	sftpnl $APPS
 }
-function auto(){
-	sftpnl $AUTO
-}
-function data(){
-	sftpnl $DATA
-}	
+
 function dist(){
 	sftpnl $DIST
 }	
-function drive(){
-	sftpnl $DRIVE
-}
+
 function drivers(){
 	sftpnl $DRIVERS
 }	
@@ -559,9 +550,7 @@ function engine(){
 function etc(){
 	sftpnl $ETC
 }	
-function intstall(){
-	sftpnl $INSTALL
-}	
+
 function lib(){
 	sftpnl $LIB
 }	
@@ -571,15 +560,7 @@ function libsdk(){
 function managers(){
 	sftpnl $MANAGERS
 }	
-function nepi(){
-	sftpnl $NEPI
-}	
-function nfi(){
-	sftpnl $NFI
-}	
-function nfia(){
-	sftpnl $NFIA
-}	
+
 function rui(){
 	sftpnl $RUI
 }
@@ -592,15 +573,7 @@ function sdk(){
 function share(){
 	sftpnl $SHARE
 }	
-function src(){
-	sftpnl $SRC
-}	
-function srcrui(){
-	sftpnl $SRCRUI
-}
-function tmp(){
-	sftpnl $TMP
-}	
+
 
 
 
@@ -608,32 +581,23 @@ HELPN="${HELPN}
 ################################
 ## NEPI sftp folder shortcuts ##
 ################################
-ai = ${NEPI_STORAGE}/ai_models
+
 aifs = ${NEPI_BASE}/nepi_engine/share/nepi_aifs
 api = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api
 apps = ${NEPI_BASE}/nepi_engine/share/nepi_apps
-auto = ${NEPI_STORAGE}/automation_scripts
-data = ${NEPI_STORAGE}/data
 dist = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/
-drive = ${NEPI_STORAGE}
+
 drivers = ${NEPI_BASE}/nepi_engine/lib/nepi_drivers
 engine = ${NEPI_BASE}/nepi_engine
 etc = ${NEPI_BASE}/nepi_engine/etc
-intstall = ${NEPI_STORAGE}/intstall
 lib = ${NEPI_BASE}/nepi_engine/lib
 libsdk = ${NEPI_BASE}/nepi_engine/lib/sdk
 managers = ${NEPI_BASE}/nepi_engine/lib/nepi_managers
 nepi = ${NEPI_BASE}
-nfi = ${NEPI_STORAGE}/nepi_full_img
-nfia = ${NEPI_STORAGE}/nepi_full_img_archive
-nimg = ${NEPI_STORAGE}/nepi_images
 rui = ${NEPI_BASE}/rui/src/rui_webserver/rui-app/src
 rui_env = ${NEPI_BASE}/rui
 sdk = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk
-share = ${NEPI_BASE}/nepi_engine/share
-src = ${NEPI_BUILD_REPO_FOLDER}/src
-srcrui = ${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
-tmp = ${NEPI_STORAGE}/tmp"
+share = ${NEPI_BASE}/nepi_engine/share"
 
 
 
@@ -653,9 +617,20 @@ export UCFG="${NEPI_STORAGE}/user_cfg"
 # NEPI navigation shortcuts
 
 alias nimg="cd $NIMG"
+alias nssh="cd $NEPI_SSH_FOLDER"
 
-alias ndrive="cd $NDRIVE"
-
+alias ai="cd $AI"
+alias auto="cd $AUTO"
+alias data="cd $DATA"
+alias drive="cd $DRIVE"
+alias intstall="cd $INSTALL"
+alias nepi="cd $NEPI"
+alias nfi="cd $NFI"
+alias nfia="cd $NFIA"
+alias src="cd $SRC"
+alias srcrui="cd $SRCRUI"
+alias tmp="cd $TMP"
+	
 alias dcfg="cd $DCFG"
 alias fcfg="cd $FCFG"
 alias scfg="cd $SCFG"
@@ -673,7 +648,19 @@ HELPN="${HELPN}
 ################################
 
 nimg = ${NEPI_STORAGE}/nepi_images
-ndrive = ${NEPI_STORAGE}
+nssh = ${NEPI_SSH_FOLDER}
+
+ai = ${NEPI_STORAGE}/ai_models
+auto = ${NEPI_STORAGE}/automation_scripts
+data = ${NEPI_STORAGE}/data
+drive = ${NEPI_STORAGE}
+intstall = ${NEPI_STORAGE}/intstall
+nfi = ${NEPI_STORAGE}/nepi_full_img
+nfia = ${NEPI_STORAGE}/nepi_full_img_archive
+nimg = ${NEPI_STORAGE}/nepi_images
+src = ${NEPI_BUILD_REPO_FOLDER}/src
+srcrui = ${NEPI_BUILD_REPO_FOLDER}/src/nepi_rui/src/rui_webserver/rui-app/src
+tmp = ${NEPI_STORAGE}/tmp
 
 dcfg = ${NEPI_DOCKER_CONFIG}
 fcfg = ${NEPI_FACTORY_CONFIG}
