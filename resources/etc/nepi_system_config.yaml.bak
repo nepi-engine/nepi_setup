@@ -187,7 +187,8 @@ NEPI_STORAGE_DEVICE: CONTAINER
 ### NEPI REQUIRED FOLDERS
 ####################################################
 # NEPI_DOCKER folder is where Docker Images will be stored if NEPI_MANAGES_DOCKER=1
-NEPI_DOCKER: /mnt/nepi_docker
+NEPI_DOCKER: /var/lib/docker/
+#NEPI_DOCKER: /mnt/nepi_docker
 # NEPI_CONFIG folder is where NEPI stores it's configuration files
 NEPI_CONFIG: /mnt/nepi_config
 # NEPI_STORAGE folder is where NEPI user data and files are stored

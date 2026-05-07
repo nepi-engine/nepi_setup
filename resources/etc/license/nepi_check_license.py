@@ -48,6 +48,7 @@ def read_dict_from_file(file_path):
 
 
 def get_network_mac():
+    print("Checking for Network and Wireless Adapter")
     mac_address = None
     interfaces = ["eth0","wpl0"]
     devices = netifaces.interfaces()
@@ -63,12 +64,14 @@ def get_network_mac():
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', bytes(adapter, 'utf-8')[:15]))
             mac_address = ''.join('%02x' % b for b in info[18:24])
+            mac_address = mac_address.replace(':','').lower()
             print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(adapter))
             break
 
     return mac_address
 
 def get_bluetooth_mac():
+    print("Checking for Bluetooth Adapter")
     interface="hci0"
     mac_address = None
     try:
@@ -81,6 +84,7 @@ def get_bluetooth_mac():
             if 'BD Address:' in line:
                 # Extract the MAC address part
                 mac_address = line.split('BD Address:')[1].split()[0].strip()
+                mac_address = mac_address.replace(':','').lower()
                 print("Got Hardware ID: " + str(mac_address) + " for network adapter id: " + str(interface))
                 break
     except:
