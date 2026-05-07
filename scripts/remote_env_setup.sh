@@ -97,16 +97,16 @@ echo "########################"
 echo "NEPI REMOTE DEV SETUP"
 echo "########################"
 
-if [[ $skip_software -eq 0 ]]; then
+if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     echo " "
     echo "################################# "
     echo "Installing System Required Software"
     echo ""
-
+    #sudo apt update
     sudo add-apt-repository ppa:rmescandon/yq -y
-
     sudo apt update
-
+    sudo apt install yq -y
+    sudo apt install jq -y
     sudo apt install ncdu -y
 
     if command -v mount.cifs --help &>/dev/null; then
@@ -121,7 +121,7 @@ if [[ $skip_software -eq 0 ]]; then
     echo "Installing Required Python Software"
     echo ""
 
-    python3 -m pip install yaml
+    python3 -m pip install PyYAML
 fi
 
 echo "Starting NEPI Configuration for user ${CONFIG_USER}"
@@ -376,7 +376,7 @@ source  $NEPI_USER_CONFIG_SCRIPT
     # fi
     # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
 
-if [[ $skip_software -eq 0 ]]; then
+if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     if [[ -n $DISPLAY ]]; then
         #####################################
         echo "########################"
@@ -428,14 +428,51 @@ if [[ $skip_software -eq 0 ]]; then
         fi
 
 
-       echo "Configuring default code editor"
-        CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
-        if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+
+    #    echo "Configuring default code editor"
+    #     CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
+    #     if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+    #         echo "VS Code is already the default code editor"
+    #     else
+    #         read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+    #         if [[ "$response" =~ ^[Yy]$ ]]; then
+    #             sudo cp -r /home/${CONFIG_USER}/.config/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list.org
+    #             sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+    #             echo "VS Code set as default code editor"
+    #         else
+    #             echo "Skipping VS Code default setup"
+    #         fi
+    #     fi
+
+    #     echo "Adding config and storage folders to files sidebar"
+    #     sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+
+    #     CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+    #     if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+    #         echo "Adding Chromium to favourites"
+    #         NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+    #         gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+    #     else
+    #         echo "Chromium already in favourites"
+    #     fi
+        echo "Configuring default code editor"
+        MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
+        if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
             echo "VS Code is already the default code editor"
         else
             read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
             if [[ "$response" =~ ^[Yy]$ ]]; then
-                sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+                sudo mkdir -p /home/${CONFIG_USER}/.config
+                if ! sudo grep -q "\[Default Applications\]" "${MIMEAPPS}" 2>/dev/null; then
+                    echo "[Default Applications]" | sudo tee -a "${MIMEAPPS}" > /dev/null
+                fi
+                for mime in text/x-python text/plain text/x-shellscript application/x-shellscript text/x-csrc text/x-c++src text/x-yaml text/x-json; do
+                    if ! sudo grep -q "^${mime}=" "${MIMEAPPS}" 2>/dev/null; then
+                        sudo sed -i "/\[Default Applications\]/a ${mime}=code.desktop" "${MIMEAPPS}"
+                    fi
+                done
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} "${MIMEAPPS}"
                 echo "VS Code set as default code editor"
             else
                 echo "Skipping VS Code default setup"
@@ -443,7 +480,11 @@ if [[ $skip_software -eq 0 ]]; then
         fi
 
         echo "Adding config and storage folders to files sidebar"
-        sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+        sudo mkdir -p /home/${CONFIG_USER}/.config/gtk-3.0
+        sudo touch /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+        while IFS= read -r bm; do
+            sudo grep -qxF "$bm" /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks || echo "$bm" | sudo tee -a /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks > /dev/null
+        done < ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks
 
 
         CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
@@ -455,6 +496,44 @@ if [[ $skip_software -eq 0 ]]; then
             echo "Chromium already in favourites"
         fi
 
+        #########################
+
+        function add_chromium_bookmark() {
+            local NAME="$1"
+            local URL="$2"
+            local BOOKMARKS_FILE="$3"
+            
+            # Check if jq is installed
+            if ! command -v jq &> /dev/null; then
+                echo "Error: 'jq' is not installed. Please install it first."
+                return 1
+            fi
+
+            # Check if file exists
+            if [ ! -f "$BOOKMARKS_FILE" ]; then
+                echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
+                return 1
+            fi
+
+            # Create a temporary file to work on
+            local TEMP_FILE=$(mktemp)
+
+            # Use jq to append the new bookmark to the 'bookmark_bar' children array
+            jq --arg name "$NAME" --arg url "$URL" \
+            '.roots.bookmark_bar.children += [{
+                "date_added": (now * 1000000 | floor | tostring),
+                "id": (([.roots.bookmark_bar.children[].id | tonumber] | max + 1) | tostring),
+                "name": $name,
+                "type": "url",
+                "url": $url
+            }]' "$BOOKMARKS_FILE" > "$TEMP_FILE"
+
+            # Overwrite original file (keeping a backup is recommended)
+            cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
+            mv "$TEMP_FILE" "$BOOKMARKS_FILE"
+            
+            echo "Successfully added '$NAME' to Chromium bookmarks."
+        }
 
         echo "Locating Chromium profile"
         if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
@@ -469,16 +548,24 @@ if [[ $skip_software -eq 0 ]]; then
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
 
             if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
                 sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
-                sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+                #sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
 
+                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
+                #sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
                 CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
                 # Copy only the Bookmarks file
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                # Add NEPI Aliases
+                if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
+                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
+                fi
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
                 rui_ip=$nepi_ip
                 sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE

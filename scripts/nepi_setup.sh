@@ -212,6 +212,10 @@ echo "NEPI MANAGES SERVICES ${SERVICES_MANAGED}"
 
     echo "Updating NEPI Config File"
 
+    NEPI_MANAGES_USERS=$(( SERVICES_MANAGED & NEPI_MANAGES_USERS ))
+    export NEPI_MANAGES_USERS=$NEPI_MANAGES_USERS
+    update_yaml_value "NEPI_MANAGES_USERS" $NEPI_MANAGES_USERS $NEPI_SYS_CONFIG_FILE
+
     NEPI_MANAGES_HOSTNAME=$(( SERVICES_MANAGED & NEPI_MANAGES_HOSTNAME ))
     export NEPI_MANAGES_HOSTNAME=$NEPI_MANAGES_HOSTNAME
     update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
@@ -234,13 +238,14 @@ echo "NEPI MANAGES SERVICES ${SERVICES_MANAGED}"
 
     NEPI_MANAGES_HOSTNAME=$(( SERVICES_MANAGED & NEPI_MANAGES_SOFTWARE ))
     export NEPI_MANAGES_SOFTWARE=$NEPI_MANAGES_SOFTWARE
-    update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NENEPI_MANAGES_USERSPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
 
     NEPI_MANAGES_HOSTNAME=$(( SERVICES_MANAGED & NEPI_MANAGES_DOCKER ))
     export NEPI_MANAGES_DOCKER=$NEPI_MANAGES_DOCKER
     update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
 
 echo ""
+echo "NEPI_MANAGES_USERS ${NEPI_MANAGES_USERS}"
 echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
 echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
 echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
@@ -794,8 +799,9 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         echo "########"
         echo "Updating Desktop settings for user ${CONFIG_USER}"
         echo ""
-        echo "Configuring default code editor"
 
+
+        echo "Configuring default code editor"
         MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
         if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
             echo "VS Code is already the default code editor"
@@ -835,6 +841,44 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             echo "Chromium already in favourites"
         fi
 
+        #########################
+
+        function add_chromium_bookmark() {
+            local NAME="$1"
+            local URL="$2"
+            local BOOKMARKS_FILE="$3"
+            
+            # Check if jq is installed
+            if ! command -v jq &> /dev/null; then
+                echo "Error: 'jq' is not installed. Please install it first."
+                return 1
+            fi
+
+            # Check if file exists
+            if [ ! -f "$BOOKMARKS_FILE" ]; then
+                echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
+                return 1
+            fi
+
+            # Create a temporary file to work on
+            local TEMP_FILE=$(mktemp)
+
+            # Use jq to append the new bookmark to the 'bookmark_bar' children array
+            jq --arg name "$NAME" --arg url "$URL" \
+            '.roots.bookmark_bar.children += [{
+                "date_added": (now * 1000000 | floor | tostring),
+                "id": (([.roots.bookmark_bar.children[].id | tonumber] | max + 1) | tostring),
+                "name": $name,
+                "type": "url",
+                "url": $url
+            }]' "$BOOKMARKS_FILE" > "$TEMP_FILE"
+
+            # Overwrite original file (keeping a backup is recommended)
+            cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
+            mv "$TEMP_FILE" "$BOOKMARKS_FILE"
+            
+            echo "Successfully added '$NAME' to Chromium bookmarks."
+        }
 
         echo "Locating Chromium profile"
         if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
@@ -849,22 +893,26 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
 
             if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
                 sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
-                sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+                #sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
 
+                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
+                #sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
                 CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
                 # Copy only the Bookmarks file
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                nepi_id=$(echo "$NEPI_IP" | cut -d '.' -f 4-)
-                rui_ip="127.0.0.${nepi_id}"
-                if is_valid_ipv4 $rui_ip; then
-                    sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
+                #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
+                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
                 fi
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
+                rui_ip=$nepi_ip
+                sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
 
                 # Enable the Home button in Preferences without overwriting the whole file
                 PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"

@@ -176,20 +176,13 @@ else
 
     # Hide Prompts
     #DEBIAN_FRONTEND=noninteractive apt-get install -y <package_name>
-
+    sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install build-essential cmake cmake-doc ninja-build lsb-release vim \
         nano git trash-cli onboard setools ubuntu-advantage-tools scons dos2unix \
         libffi-dev libv4l-dev v4l-utils curl v4l-utils psmisc scapy minicom dconf-editor \
         gparted socat protobuf-compiler gnupg kgpg snapd xz-utils rsync  trash-cli \
-        dialog ncdu usbutils -y
-
-
-    sudo add-apt-repository ppa:rmescandon/yq -y
-    sudo apt update
-    sudo apt install yq -y
-    
-   
+        dialog ncdu usbutils yq jq  -y
 
 
 

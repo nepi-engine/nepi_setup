@@ -35,6 +35,8 @@ Clone the NEPI setup repo:
 
 Run the NEPI  System Setup script:
 
+**NOTE:** If asked for nepiadmin password use 'nepiadmin'
+
     bash /home/${USER}/nepi_setup/scripts/remote_env_setup.sh
     source ~/.bashrc
 
