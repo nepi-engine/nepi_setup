@@ -134,7 +134,7 @@ function change_password() {
         fi
 }
 
-if [[ "$NEPI_MANAGES_USERS" -eq 1 ]]; then
+if [[ "$NEPI_MANAGES_USERS" -eq 1 || ${NEPI_USER} == 'nepi' ]]; then
 
     if [[ -d /home/${NEPI_USER} ]]; then
         #echo "Checking password for ${NEPI_USER} ${NEPI_USER_PW}"

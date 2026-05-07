@@ -137,7 +137,7 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=ho
 -p 139:139/tcp \
 -p 445:445/tcp "
 
-DOCKER_RUN_COMMAND_BACKUP=$DOCKER_RUN_COMMAND
+DOCKER_RUN_COMMAND_FALLBACK=$DOCKER_RUN_COMMAND
 # Set cuda support if needed
 
 if is_valid_cuda; then
@@ -169,7 +169,7 @@ echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 ${nepi_fs}:${nepi_fs_tag} /bin/bash"
 
-DOCKER_RUN_COMMAND_FALLBACK=="${DOCKER_RUN_COMMAND_BACKUP} \
+DOCKER_RUN_COMMAND_FALLBACK=="${DOCKER_RUN_COMMAND_FALLBACK} \
 ${nepi_fs}:${nepi_fs_tag} /bin/bash"
 
 #-c '/nepi_start_all'"
