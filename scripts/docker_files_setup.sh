@@ -117,6 +117,8 @@ if [[ ! -f $UPDATE_FILE ]]; then
     sudo cp $SOURCE_FILE $UPDATE_FILE 
 fi
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
+
+
 sudo cp $UPDATE_FILE $SOURCE_FILE 
 sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
@@ -126,6 +128,15 @@ sudo chmod 775 ${SOURCE_PATH}
 sudo chown -R 1000:1000 ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
+NEPI_SYSTEM_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/etc/load_system_config.sh
+update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_SYS_CONFIG_FILE
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
+source $LICENSE_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 #############################
 echo ""
