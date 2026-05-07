@@ -102,7 +102,7 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     echo "################################# "
     echo "Installing System Required Software"
     echo ""
-    sudo apt update
+    #sudo apt update
     sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install yq -y
