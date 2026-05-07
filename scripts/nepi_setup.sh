@@ -794,8 +794,9 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         echo "########"
         echo "Updating Desktop settings for user ${CONFIG_USER}"
         echo ""
-        echo "Configuring default code editor"
 
+
+        echo "Configuring default code editor"
         MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
         if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
             echo "VS Code is already the default code editor"
@@ -851,6 +852,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             if [[ -d ${CHROMIUM_PROFILE} ]]; then
                 sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
                 sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
+                sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
                 echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
 
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE

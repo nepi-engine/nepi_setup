@@ -175,7 +175,11 @@ fi
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
+
+sudo -H python3 -m pip install PyYAML
 sudo -H python3 -m pip install --no-input cryptography python-dotenv
+
+
 
 if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "######################################"
