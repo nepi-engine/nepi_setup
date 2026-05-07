@@ -106,7 +106,7 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     sudo add-apt-repository ppa:rmescandon/yq -y
     sudo apt update
     sudo apt install yq -y
-
+    sudo apt install jq -y
     sudo apt install ncdu -y
 
     if command -v mount.cifs --help &>/dev/null; then
@@ -498,6 +498,42 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
 
         #########################
 
+        function add_chromium_bookmark() {
+            local NAME="$1"
+            local URL="$2"
+            local BOOKMARKS_FILE="$3"
+            
+            # Check if jq is installed
+            if ! command -v jq &> /dev/null; then
+                echo "Error: 'jq' is not installed. Please install it first."
+                return 1
+            fi
+
+            # Check if file exists
+            if [ ! -f "$BOOKMARKS_FILE" ]; then
+                echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
+                return 1
+            fi
+
+            # Create a temporary file to work on
+            local TEMP_FILE=$(mktemp)
+
+            # Use jq to append the new bookmark to the 'bookmark_bar' children array
+            jq --arg name "$NAME" --arg url "$URL" \
+            '.roots.bookmark_bar.children += [{
+                "date_added": (now * 1000000 | floor | tostring),
+                "id": (([.roots.bookmark_bar.children[].id | tonumber] | max + 1) | tostring),
+                "name": $name,
+                "type": "url",
+                "url": $url
+            }]' "$BOOKMARKS_FILE" > "$TEMP_FILE"
+
+            # Overwrite original file (keeping a backup is recommended)
+            cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
+            mv "$TEMP_FILE" "$BOOKMARKS_FILE"
+            
+            echo "Successfully added '$NAME' to Chromium bookmarks."
+        }
 
         echo "Locating Chromium profile"
         if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
@@ -512,17 +548,24 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
 
             if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
                 sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
-                sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-                sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
-                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+                #sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
 
+                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
+                #sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
                 CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
                 # Copy only the Bookmarks file
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                # Add NEPI Aliases
+                if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
+                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
+                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
+                fi
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
                 rui_ip=$nepi_ip
                 sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE

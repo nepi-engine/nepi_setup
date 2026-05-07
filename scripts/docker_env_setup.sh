@@ -153,7 +153,7 @@ sudo add-apt-repository ppa:rmescandon/yq -y
 
 sudo apt update
 
-sudo apt install apt-utils  yq  git gitk htop  ncdu curl gparted \
+sudo apt install apt-utils  yq  jq git gitk htop  ncdu curl gparted \
     python-is-python3 python3-venv python3-pip nmap trash-cli nano \
     rsync usbutils -y
 
