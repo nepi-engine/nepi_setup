@@ -53,15 +53,7 @@ NEPI_MAX_FAIL_COUNT: 1
 NEPI_FAIL_COUNT: 0
 NEPI_RETRY_COUNT: 10
 NEPI_RESTARTING: 0
-#If NEPI_AB_FS is enabled, the NEPI docker service will manage an Active NEPI container image,
-#   and an Inactive Image used for backup and recovery purposes. If NEPI_AB_FS is enabled, 
-#   you can switch between the current Active and Inactive A B containers
-#   with the terminal command "nepiswitch".
-# NOTE: If NEPI_AB_FS is enabled, and your Docker containe folder does not have the required
-#   free hard drive space available, NEPI_AB_FS will be set back to disabled.
 NEPI_AB_FS: 0
-# IF NEPI_RM_PS is disabled, NEPI containers that start successfully will not be removed,
-#   unless new images are commited or installed, or nepistop command is called.
 NEPI_RM_PS: 1
 NEPI_IMPORT_ID: unknown
 NEPI_EXPORT_PATH: unknown
