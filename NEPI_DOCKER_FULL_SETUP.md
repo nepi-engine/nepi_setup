@@ -304,10 +304,10 @@ See the documentation, tuturials, videos, and community forum available at NEPI.
 ################################################################
 ### NEPI Software Customization
 
-You can update or custimize the NEPI software running in a NEPI Docker Container from source code,
+You can update or custimize the NEPI software running in a NEPI Docker Container from source-code,
 then export it as a new sharable NEPI Docker Container:
 
-See NEPI Container Customization instructions at [here](NEPI__CUSTOMIZE.md)
+See NEPI Software Build and Customize instructions at [NEPI_SOFTWARE_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_SOFTWARE_BUILD.md)
 
 ################################################################
 ### NEPI Container Build
@@ -315,7 +315,7 @@ See NEPI Container Customization instructions at [here](NEPI__CUSTOMIZE.md)
 If you need to build a NEPI Docker Container from scratch for a particular installation environment,
 you can do so starting with a sutable Ubuntu container for the device's environment:
 
-See NEPI Container Build instructions at [here](NEPI_BUILD_CUSTOMIZE.md)
+See NEPI Container Build instructions at [NEPI_CONTAINER_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_CONTAINER_BUILD.md)
 
 
 ################################################################

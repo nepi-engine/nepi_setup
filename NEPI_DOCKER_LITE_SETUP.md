@@ -198,37 +198,6 @@ For production environments, you can just replace this file with a production re
 by typing nepisetup_remote and nepisetup_host respectfully.
 
 ################################################################
-### NEPI GitHub Setup
-
-**OPTIONAL** If you want to get, update, and build NEPI Software from source-code
-this section will walk you through the process.
-
-Check or Setup an SSH Key for your GitHub Account by typing the following
-
-    nepigithub
-
-**NOTE:**  If successful, the nepi_engine_ws repo will be cloned to your home folder at ~/nepi_engine_ws.
-
-Aditional command line NEPI Github commands are available
-
-nepiclone = Clone the latest NEPI source-code repo
-nepiclonedev = Clone the latest NEPI Development branch source-code repo
-nepipull = Update to the latest NEPI source-code repo
-nepimain = Switch to the NEPI source-code main repo branch
-nepidev = Switch to the NEPI source-code develop repo branch
-nepidpl = Deploy nepi source-code to nepi device
-nepipush = Push current repo (or submodule repo) if you have push permisions
-
-Other useful NEPI development command line shortcuts.
-
-sshn = SSH into the running NEPI Software Container
-sshnh = SSH into the NEPI Software Host System
-
-**NOTE** For instructions on deploying and building NEPI Software from source-code,
-see the NEPI Software Build instructions at [here](NEPI_SOFTWARE_BUILD.md)
-
-
-################################################################
 ### NEPI Software Tutorials
 
 Learn more about using and configuring the NEPI software, as well as building and deploying 
@@ -237,6 +206,21 @@ custom AI Models at nepi.com.
 See the documentation, tuturials, videos, and community forum available at NEPI.com:
 [NEPI Website](https://www.nepi.com)
 
+################################################################
+### NEPI Software Customization
+
+You can update or custimize the NEPI software running in a NEPI Docker Container from source-code,
+then export it as a new sharable NEPI Docker Container:
+
+See NEPI Software Build and Customize instructions at [NEPI_SOFTWARE_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_SOFTWARE_BUILD.md)
+
+################################################################
+### NEPI Container Build
+
+If you need to build a NEPI Docker Container from scratch for a particular installation environment,
+you can do so starting with a sutable Ubuntu container for the device's environment:
+
+See NEPI Container Build instructions at [NEPI_CONTAINER_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_CONTAINER_BUILD.md)
 
 ################################################################
 ### NEPI DOCKER INSTALLATION COMPLETE
