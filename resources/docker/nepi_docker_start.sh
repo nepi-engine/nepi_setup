@@ -49,6 +49,14 @@ fi
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
+
+echo "Resetting NEPI Docker Config File"
+blank_config=${DOCKER_FOLDER}/nepi_docker_config.blank
+if [[ -d $blank_config ]]; then
+    cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml
+    cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml.bak
+fi
+
 echo "Calling NEPI Docker Stop Process"
 source ${DOCKER_FOLDER}/nepi_docker_stop.sh
 wait
