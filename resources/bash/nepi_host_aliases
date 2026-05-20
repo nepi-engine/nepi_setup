@@ -53,9 +53,14 @@ HELPN="${UTILSN}"
 function nepipull(){
   sudo -v
   docker_link=$1
-  echo "Pulling NEPI Docker Image ${docker_link}"
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+  if pingi; then
+    start_ids=$(echo $(sudo docker images -q))
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
+    end_ids=$(echo $(sudo docker images -q))
+    if [[ ${start_ids} != ${end_ids} ]]; then
+      bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+    fi
+  fi
 }
 export -f nepipull
 
