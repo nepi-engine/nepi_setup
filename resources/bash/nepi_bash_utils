@@ -2025,14 +2025,16 @@ function create_ssh_key {
         fi     
 
 
-        if [[ -d $key_folder ]]; then          
+        if [[ -d $key_folder && -n $key_folder ]]; then          
 
               key_file=${key_name}
               key_path=${key_folder}/${key_file}
 
-              sudo chmod 0700 $key_folder
-              sudo chmod  0600 $key_folder/*
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+             if [[ -d $key_folder && -n $key_folder ]]; then   
+                      sudo chmod 0700 $key_folder
+                      sudo chmod  0600 $key_folder/*
+                      sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+              fi
 
               if [[ -f $key_path ]]; then
                   echo "Key already exists ${key_path}"
@@ -2052,10 +2054,11 @@ function create_ssh_key {
               config_file=${key_folder}/config
               touch ${config_file}
 
-              sudo chmod 0700 $key_folder
-              sudo chmod  0600 $key_folder/*
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
+              if [[ -d $key_folder && -n $key_folder ]]; then   
+                sudo chmod 0700 $key_folder
+                sudo chmod  0600 $key_folder/*
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+              fi
 
 
               if [[ -f $key_path ]]; then
@@ -2093,10 +2096,12 @@ function add_ssh_key {
             echo "Failed to add SSH key: ${key_path}"
             return 3
           fi
-
-          sudo chmod 0700 $key_path
-          sudo chmod  0600 $key_folder/*
-          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            key_folder=$(dirname ${key_path})
+            if [[ -d $key_folder && -n $key_folder ]]; then   
+              sudo chmod 0700 $key_folder
+              sudo chmod  0600 $key_folder/*
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            fi
 
           return 0
       else
@@ -2128,9 +2133,12 @@ function select_ssh_key {
                 ###############
                 #echo "Checking for available key options"
                 # Change to the specified directory
-                sudo chmod 0700 $key_folder
-                sudo chmod  0600 $key_folder/*
-                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+           
+            if [[ -d $key_folder && -n $key_folder ]]; then   
+              sudo chmod 0700 $key_folder
+              sudo chmod  0600 $key_folder/*
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            fi
 
                 pushd "$key_folder" > /dev/null || return 1
 
@@ -2147,9 +2155,12 @@ function select_ssh_key {
                         fi
                     fi
                 done
-                sudo chmod 0700 $key_folder
-                sudo chmod  0600 $key_folder/*
-                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+            if [[ -d $key_folder && -n $key_folder ]]; then   
+              sudo chmod 0700 $key_folder
+              sudo chmod  0600 $key_folder/*
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            fi
                 
 
                 # Check if there are any files
@@ -2635,12 +2646,11 @@ function nepisync {
       echo "Failed to connect to NEPI CONFIG"
     fi
 
-
-
+if [[ -d $NEPI_SSH_KEYS_DEST && -n $NEPI_SSH_KEYS_DEST ]]; then   
     sudo chmod 0700 $NEPI_SSH_KEYS_DEST
-    sudo chmod  0600 $key_folder/*
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-
+    sudo chmod  0600 $NEPI_SSH_KEYS_DEST/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEYS_DEST
+fi
     cd $cur_folder
 
 }
@@ -2670,9 +2680,12 @@ function nepisetkey {
       return 2
     fi
 
-    sudo chmod 0700 $key_folder
-    sudo chmod  0600 $key_folder/*
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+    key_folder=$(dirname ${key_path})
+    if [[ -d $key_folder && -n $key_folder ]]; then   
+      sudo chmod 0700 $key_folder
+      sudo chmod  0600 $key_folder/*
+      sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+    fi
     eval "$(ssh-agent -s)"
     if ssh-add ${key_path} > /dev/null; then
       echo "Added key: ${key_file}"
@@ -2812,9 +2825,12 @@ function nepiauthrm {
 
         if [[ -f $key_path ]]; then
 
-          sudo chmod 0700 $key_folder
-          sudo chmod  0600 $key_folder/*
-          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            key_folder=$(dirname ${key_path})
+            if [[ -d $key_folder && -n $key_folder ]]; then   
+              sudo chmod 0700 $key_folder
+              sudo chmod  0600 $key_folder/*
+              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+            fi
 
           authorized_keys_path="${key_folder}/authorized_keys"
           touch ${authorized_keys_path}
@@ -2862,9 +2878,11 @@ function nepiauthadd {
 
         if [[ -f $key_path ]]; then
 
+        if [[ -d $key_folder && -n $key_folder ]]; then   
           sudo chmod 0700 $key_folder
           sudo chmod  0600 $key_folder/*
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+        fi
 
           authorized_keys_path="${key_folder}/authorized_keys"
           if [[ -f $authorized_keys_path ]]; then
@@ -2885,10 +2903,11 @@ function nepiauthadd {
           sudo echo $(cat ${key_path}.pub) >> $authorized_keys_path
           echo "Autherized Key file Updated"
 
+        if [[ -d $key_folder && -n $key_folder ]]; then   
           sudo chmod 0700 $key_folder
           sudo chmod  0600 $key_folder/*
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+        fi
           echo "Key folder permissions set"
           if sudo systemctl status >/dev/null 2>&1;  then
             echo "Restarting systemctl SSH agent"
@@ -3040,9 +3059,11 @@ function nepigithub {
 
                     if [[ -n $key_path ]]; then
 
-                        sudo chmod 0700 $key_folder
-                        sudo chmod  0600 $key_folder/*
-                        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                    if [[ -d $key_folder && -n $key_folder ]]; then   
+                      sudo chmod 0700 $key_folder
+                      sudo chmod  0600 $key_folder/*
+                      sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                    fi
 
                         config_file=/home/${CONFIG_USER}/.ssh/config
                         touch ${config_file}
@@ -3060,9 +3081,11 @@ function nepigithub {
 
                         fi
 
-                        sudo chmod 0700 $key_folder
-                        sudo chmod  0600 $key_folder/*
-                        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                    if [[ -d $key_folder && -n $key_folder ]]; then   
+                      sudo chmod 0700 $key_folder
+                      sudo chmod  0600 $key_folder/*
+                      sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                    fi
                         needs_key='no'
                         add_key='yes'
 
