@@ -2031,6 +2031,7 @@ function create_ssh_key {
               key_path=${key_folder}/${key_file}
 
               sudo chmod 0700 $key_folder
+              sudo chmod  0600 $key_folder/*
               sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
               if [[ -f $key_path ]]; then
@@ -2052,7 +2053,7 @@ function create_ssh_key {
               touch ${config_file}
 
               sudo chmod 0700 $key_folder
-              sudo chmod 0600 $key_path
+              sudo chmod  0600 $key_folder/*
               sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
 
@@ -2094,7 +2095,8 @@ function add_ssh_key {
           fi
 
           sudo chmod 0700 $key_path
-          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_path
+          sudo chmod  0600 $key_folder/*
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
           return 0
       else
@@ -2127,6 +2129,7 @@ function select_ssh_key {
                 #echo "Checking for available key options"
                 # Change to the specified directory
                 sudo chmod 0700 $key_folder
+                sudo chmod  0600 $key_folder/*
                 sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
                 pushd "$key_folder" > /dev/null || return 1
@@ -2145,6 +2148,8 @@ function select_ssh_key {
                     fi
                 done
                 sudo chmod 0700 $key_folder
+                sudo chmod  0600 $key_folder/*
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
                 
 
                 # Check if there are any files
@@ -2633,8 +2638,8 @@ function nepisync {
 
 
     sudo chmod 0700 $NEPI_SSH_KEYS_DEST
-    sudo chmod 0600 $NEPI_SSH_KEYS_DEST/*
-    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEYS_DEST/*
+    sudo chmod  0600 $key_folder/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
     cd $cur_folder
 
@@ -2666,7 +2671,7 @@ function nepisetkey {
     fi
 
     sudo chmod 0700 $key_folder
-    sudo chmod 0600 $key_path
+    sudo chmod  0600 $key_folder/*
     sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
     eval "$(ssh-agent -s)"
     if ssh-add ${key_path} > /dev/null; then
@@ -2808,6 +2813,7 @@ function nepiauthrm {
         if [[ -f $key_path ]]; then
 
           sudo chmod 0700 $key_folder
+          sudo chmod  0600 $key_folder/*
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
           authorized_keys_path="${key_folder}/authorized_keys"
@@ -2857,6 +2863,7 @@ function nepiauthadd {
         if [[ -f $key_path ]]; then
 
           sudo chmod 0700 $key_folder
+          sudo chmod  0600 $key_folder/*
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
           authorized_keys_path="${key_folder}/authorized_keys"
@@ -2879,9 +2886,8 @@ function nepiauthadd {
           echo "Autherized Key file Updated"
 
           sudo chmod 0700 $key_folder
-          sudo chmod 0600 $authorized_keys_path
-          sudo chmod 0600 $key_path
-          sudo chmod 0600 ${key_path}.pub
+          sudo chmod  0600 $key_folder/*
+          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
           sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
           echo "Key folder permissions set"
           if sudo systemctl status >/dev/null 2>&1;  then
@@ -3035,6 +3041,7 @@ function nepigithub {
                     if [[ -n $key_path ]]; then
 
                         sudo chmod 0700 $key_folder
+                        sudo chmod  0600 $key_folder/*
                         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
 
                         config_file=/home/${CONFIG_USER}/.ssh/config
@@ -3054,7 +3061,7 @@ function nepigithub {
                         fi
 
                         sudo chmod 0700 $key_folder
-                        sudo chmod 0600 $key_path
+                        sudo chmod  0600 $key_folder/*
                         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
                         needs_key='no'
                         add_key='yes'

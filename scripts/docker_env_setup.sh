@@ -155,7 +155,7 @@ sudo apt update
 
 sudo apt install apt-utils  yq  jq git gitk htop  ncdu curl gparted \
     python-is-python3 python3-venv python3-pip nmap trash-cli nano \
-    rsync usbutils -y
+    rsync usbutils fswebcam -y
 
 sudo apt install snap -y  2>/dev/null 
 if is_valid_jetson; then
