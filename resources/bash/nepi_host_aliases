@@ -450,7 +450,7 @@ HELPN="${HELPN}
 ################################
 sshn = SSH into NEPI Software System
 scpn = SCPN into NEPI
-sftpn = SFTP into NEPI
+sftpn = SFTP into NEPI"
 
 
 
@@ -553,22 +553,22 @@ HELPN="${HELPN}
 ## NEPI sftp folder shortcuts ##
 ################################
 
-aifs = ${NEPI_BASE}/nepi_engine/share/nepi_aifs
-api = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api
-apps = ${NEPI_BASE}/nepi_engine/share/nepi_apps
-dist = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/
+aifs=${NEPI_BASE}/nepi_engine/share/nepi_aifs
+api=${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api
+apps=${NEPI_BASE}/nepi_engine/share/nepi_apps
+dist=${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/
 
-drivers = ${NEPI_BASE}/nepi_engine/lib/nepi_drivers
-engine = ${NEPI_BASE}/nepi_engine
-etc = ${NEPI_BASE}/nepi_engine/etc
-lib = ${NEPI_BASE}/nepi_engine/lib
-libsdk = ${NEPI_BASE}/nepi_engine/lib/sdk
-managers = ${NEPI_BASE}/nepi_engine/lib/nepi_managers
-nepi = ${NEPI_BASE}
-rui = ${NEPI_BASE}/rui/src/rui_webserver/rui-app/src
-rui_env = ${NEPI_BASE}/rui
-sdk = ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk
-share = ${NEPI_BASE}/nepi_engine/share"
+drivers=${NEPI_BASE}/nepi_engine/lib/nepi_drivers
+engine=${NEPI_BASE}/nepi_engine
+etc=${NEPI_BASE}/nepi_engine/etc
+lib=${NEPI_BASE}/nepi_engine/lib
+libsdk=${NEPI_BASE}/nepi_engine/lib/sdk
+managers=${NEPI_BASE}/nepi_engine/lib/nepi_managers
+nepi=${NEPI_BASE}
+rui=${NEPI_BASE}/rui/src/rui_webserver/rui-app/src
+rui_env=${NEPI_BASE}/rui
+sdk=${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_sdk
+share=${NEPI_BASE}/nepi_engine/share"
 
 
 
