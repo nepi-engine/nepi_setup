@@ -915,8 +915,10 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
                 # Copy only the Bookmarks file
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
+                if [[ ! -f $BOOKMARK_FILE ]]; then
+                    sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                fi
                 if [[ -f $BOOKMARK_FILE ]]; then
-                    #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
                     if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
                         add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
                         add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
@@ -929,6 +931,9 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
                 # Enable the Home button in Preferences without overwriting the whole file
                 PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"
+                if [[ ! -f $PREFS_FILE ]]; then
+                    sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Preferences" $PREFS_FILE
+                fi
                 if [[ -f $BOOKMARK_FILE ]]; then
                     update_json_value "$PREFS_FILE" browser.show_home_button true
                     update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
