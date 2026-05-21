@@ -419,14 +419,7 @@ nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
 
 
 
-# Clear Known Host Keys
-function ckeys(){
-  kh_file=/home/${CONFIG_USER}/.ssh/known_hosts
-  if [[ -f "$kh_file" ]]; then
-    rm $kh_file
-  fi
-}
-export -f ckeys
+
 
 
 
@@ -451,8 +444,6 @@ sftp -o StrictHostKeyChecking=no -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER
 }
 
 
-
-
 HELPN="${HELPN}
 ################################
 ### NEPI SSH UTIL FUNCTIONS
@@ -460,36 +451,11 @@ HELPN="${HELPN}
 sshn = SSH into NEPI Software System
 scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
-ckeys = Clear known host keys"
 
 
 
 
-SSH_ENV="$HOME/.ssh/environment"
 
-function run_ssh_env {
-  . "${SSH_ENV}" > /dev/null
-}
-
-function start_ssh_agent {
-  echo "Initializing new SSH agent..."
-  ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-  echo "succeeded"
-  chmod 600 "${SSH_ENV}"
-
-  run_ssh_env;
-
-  ssh-add ~/.ssh/id_rsa;
-}
-
-if [ -f "${SSH_ENV}" ]; then
-  run_ssh_env;
-  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-    start_ssh_agent;
-  }
-else
-  : # Do Nothing
-fi
 
 
 ###################################

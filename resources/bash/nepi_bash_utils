@@ -73,8 +73,19 @@ export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/system_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
 export NEPI_SSH_FOLDER="/home/${CONFIG_USER}/.ssh"
+export NEPI_SSH_ENV="${NEPI_SSH_FOLDER}/environment"
 export NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"
+export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"#SSH_ENV="$HOME/.ssh/environment"
+
+if [ -f "${NEPI_SSH_ENV}" ]; then
+  run_ssh_env;
+  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+    start_ssh_agent;
+  }
+else
+  : # Do Nothing
+fi
+
 
 export NEPI_TARGET_IP=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
@@ -90,6 +101,9 @@ export NEPI_BUILD_REPO_FOLDER="${NEPI_STORAGE}/nepi_src/${NEPI_BUILD_REPO_NAME}"
 
 export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
+
+
+
 
 
 alias nepimode="
@@ -1280,10 +1294,12 @@ function fix_folder(){
         sudo chmod 0664 ${target_path} > /dev/null 2>&1
       elif is_nepi_path $target_path; then
         echo "Fixing permissions for path: ${target_path}"
-        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${target_path} > /dev/null 2>&1
-        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
-          sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
-        fi
+         if [[ -d $target_path && -n $target_path ]]; then  
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${target_path} > /dev/null 2>&1
+            if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+              sudo chmod -R ${2} ${target_path} > /dev/null 2>&1
+            fi
+         fi
       else
           echo "NEPI Folder not found at ${target_path}"
           return 1
@@ -2212,6 +2228,36 @@ export -f select_ssh_key
 
 
 
+
+function run_ssh_env {
+  . "${NEPI_SSH_ENV}" > /dev/null
+}
+
+function start_ssh_agent {
+  echo "Initializing new SSH agent..."
+  ssh-agent | sed 's/^echo/#echo/' > "${NEPI_SSH_ENV}"
+  echo "succeeded"
+  if [[ -n $NEPI_SSH_ENV ]]; then 
+    chmod 600 "${NEPI_SSH_ENV}"
+  fi
+
+  run_ssh_env;
+
+  ssh-add ~/.ssh/id_rsa;
+}
+
+
+
+# Clear Known Host Keys
+function clear_known_hosts(){
+  kh_file=/home/${CONFIG_USER}/.ssh/known_hosts
+  if [[ -f "$kh_file" ]]; then
+    rm $kh_file
+  fi
+}
+export -f clear_known_hosts
+
+
 #### Update Help Test
 utilsn="${utilsn}
 ################################
@@ -2254,7 +2300,10 @@ get_openvpn_version = Echos OpenVPN version number if openvpn installed or 0
 get_sw_desc = Echos NEPI formated software vesion tag
 add_ssh_key = Add the ssh key in the provided full path ssh_key file
 create_ssh_key = Create a new SSH key key pair in provided key_folder
-select_ssh_key = Select SSH key from available keys in provided key_folder"
+select_ssh_key = Select SSH key from available keys in provided key_folder
+run_ssh_env = Run ssh environment
+start_ssh_agent = Start the system ssh agent process
+clear_known_hosts = Clear ssh known hosts file"
 
 
 
@@ -2878,11 +2927,11 @@ function nepiauthadd {
 
         if [[ -f $key_path ]]; then
 
-        if [[ -d $key_folder && -n $key_folder ]]; then   
-          sudo chmod 0700 $key_folder
-          sudo chmod  0600 $key_folder/*
-          sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-        fi
+          if [[ -d $key_folder && -n $key_folder ]]; then   
+            sudo chmod 0700 $key_folder
+            sudo chmod  0600 $key_folder/*
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+          fi
 
           authorized_keys_path="${key_folder}/authorized_keys"
           if [[ -f $authorized_keys_path ]]; then

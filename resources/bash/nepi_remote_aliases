@@ -45,19 +45,7 @@ HELPN="${UTILSN}"
 # NEPI SSH Agent Config
 ###################################
 
-
-# Clear Known Host Keys
-function ckeys(){
-  kh_file=/home/${CONFIG_USER}/.ssh/known_hosts
-  if [[ -f "$kh_file" ]]; then
-    rm $kh_file
-  fi
-}
-export -f ckeys
-
-
-
-  
+ 
 
 
 ssh_key_path=/home/${CONFIG_USER}/.ssh/nepi_default_ssh_key
@@ -118,6 +106,8 @@ sftp -o StrictHostKeyChecking=no -P 22 -i $NEPI_SSH_KEY_PATH ${NEPI_HOST_USER}@n
 }
 
 
+
+
 HELPN="${HELPN}
 ################################
 ### NEPI SSH UTIL FUNCTIONS
@@ -131,37 +121,9 @@ scpn = SCPN into NEPI
 sftpn = SFTP into NEPI
 sshnh = SSH into NEPI HOST
 scpnh = SCPN into NEPI HOST
-sftpnh = SFTP into NEPI HOST
-ckeys = Clear known host keys"
+sftpnh = SFTP into NEPI HOST"
 
 
-
-
-SSH_ENV="$HOME/.ssh/environment"
-
-function run_ssh_env {
-  . "${SSH_ENV}" > /dev/null
-}
-
-function start_ssh_agent {
-  echo "Initializing new SSH agent..."
-  ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-  echo "succeeded"
-  chmod 600 "${SSH_ENV}"
-
-  run_ssh_env;
-
-  ssh-add ~/.ssh/id_rsa;
-}
-
-if [ -f "${SSH_ENV}" ]; then
-  run_ssh_env;
-  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-    start_ssh_agent;
-  }
-else
-  : # Do Nothing
-fi
 
 
 ###################################
