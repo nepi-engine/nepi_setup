@@ -402,12 +402,12 @@ if [[ -n "$DISPLAY" ]]; then
 
     #######
     echo ""
-    if command -v mdview &>/dev/null; then
-        echo "mdview is installed."
-    else
-        echo "Installing mdview"
-        sudo snap install mdview
-    fi
+    # if command -v mdview &>/dev/null; then
+    #     echo "mdview is installed."
+    # else
+    #     echo "Installing mdview"
+    #     sudo snap install mdview
+    # fi
 
     if command -v chromium-browser &>/dev/null; then
         echo "Chromium is installed."

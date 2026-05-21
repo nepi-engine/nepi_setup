@@ -822,7 +822,8 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
             return 1
         fi
-
+        sudo chmod 0700 $BOOKMARKS_FILE
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
         # Create a temporary file to work on
         local TEMP_FILE=$(mktemp)
 
@@ -839,6 +840,8 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         # Overwrite original file (keeping a backup is recommended)
         cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
         mv "$TEMP_FILE" "$BOOKMARKS_FILE"
+        sudo chmod 0700 $BOOKMARKS_FILE
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
         
         echo "Successfully added '$NAME' to Chromium bookmarks."
     }
@@ -872,25 +875,23 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
             # Copy only the Bookmarks file
-            BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-            if [[ ! -f $BOOKMARK_FILE ]]; then
-                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+            BOOKMARKS_FILE=${CHROMIUM_DEFAULT}/Bookmarks
+            if [[ ! -f $BOOKMARKS_FILE ]]; then
+                sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARKS_FILE
             fi
-            if [[ -f $BOOKMARK_FILE ]]; then
-                sudo chmod 0700 $BOOKMARK_FILE
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
-                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
-                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
+            if [[ -f $BOOKMARKS_FILE ]]; then
+                sudo chmod 0700 $BOOKMARKS_FILE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
+                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
+                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
+                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                 fi
-                sudo chmod 0700 $BOOKMARK_FILE
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
                 rui_ip=$nepi_ip
-                sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
-                sudo chmod 0700 $BOOKMARK_FILE
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                echo "Updated Chromiun Bookmarks in ${BOOKMARK_FILE}"
+                sed -i "s/localhost/$rui_ip/g" $BOOKMARKS_FILE
+                sudo chmod 0700 $BOOKMARKS_FILE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"
             fi
 
             # Enable the Home button in Preferences without overwriting the whole file
@@ -898,7 +899,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             if [[ ! -f $PREFS_FILE ]]; then
                 sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Preferences" $PREFS_FILE
             fi
-            if [[ -f $BOOKMARK_FILE ]]; then
+            if [[ -f $BOOKMARKS_FILE ]]; then
                 sudo chmod 0700 $PREFS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
                 update_json_value "$PREFS_FILE" browser.show_home_button true
