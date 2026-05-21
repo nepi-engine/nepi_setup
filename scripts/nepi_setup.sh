@@ -890,6 +890,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
                 sudo chmod 0700 $BOOKMARK_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
+                echo "Updated Chromiun Bookmarks in ${BOOKMARK_FILE}"
             fi
 
             # Enable the Home button in Preferences without overwriting the whole file
@@ -904,6 +905,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
                 sudo chmod 0700 $PREFS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+                echo "Updated Chromiun Preferences in ${PREFS_FILE}"
             fi
         fi
     fi
