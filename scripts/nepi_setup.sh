@@ -752,8 +752,13 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
             CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
         else
-            echo "Chromium profile directory not found"
-            return 1
+            CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+            if [[ ! -d CHROMIUM_FOLDER ]]; then
+                sudo mkdir -p ${CHROMIUM_FOLDER}/Default
+            fi
+            if [[ -d CHROMIUM_FOLDER ]]; then
+                CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
+            fi
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
@@ -886,8 +891,14 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
             CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
         else
-            echo "Chromium profile directory not found"
-            return 1
+            CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+            if [[ ! -d CHROMIUM_FOLDER ]]; then
+                sudo mkdir -p ${CHROMIUM_FOLDER}/Default
+            fi
+            if [[ -d CHROMIUM_FOLDER ]]; then
+                CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
+            fi
+            
         fi
 
         if [[ -n "$CHROMIUM_PROFILE" ]]; then
@@ -904,21 +915,25 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
                 # Copy only the Bookmarks file
                 BOOKMARK_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-                #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
-                if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
-                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
-                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
+                if [[ -f $BOOKMARK_FILE ]]; then
+                    #sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARK_FILE
+                    if ! grep -qnw $BOOKMARK_FILE -e "RUI-App" ; then
+                        add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARK_FILE
+                        add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARK_FILE
+                        add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARK_FILE
+                    fi
+                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
+                    rui_ip=$nepi_ip
+                    sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
                 fi
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARK_FILE
-                rui_ip=$nepi_ip
-                sed -i "s/localhost/$rui_ip/g" $BOOKMARK_FILE
 
                 # Enable the Home button in Preferences without overwriting the whole file
                 PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"
-                update_json_value "$PREFS_FILE" browser.show_home_button true
-                update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+                if [[ -f $BOOKMARK_FILE ]]; then
+                    update_json_value "$PREFS_FILE" browser.show_home_button true
+                    update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
+                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+                fi
             fi
         fi
 
