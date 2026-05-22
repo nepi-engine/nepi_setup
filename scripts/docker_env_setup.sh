@@ -188,9 +188,13 @@ echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
 
-sudo -H python3 -m pip install PyYAML
-
-sudo -H python3 -m pip install --no-input cryptography python-dotenv
+if is_valid_rpi; then
+    sudo apt install python3-PyYAML
+    sudo apt install python3-cryptography
+else
+    sudo -H python3 -m pip install PyYAML
+    sudo -H python3 -m pip install --no-input cryptography python-dotenv
+fi
 
 
 
