@@ -165,7 +165,7 @@ tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
 
 sudo apt update
 
-sudo apt install apt-utils  jq git gitk htop  ncdu curl gparted \
+sudo apt install apt-utils jq git gitk htop  ncdu curl gparted \
     python-is-python3 python3-venv python3-pip nmap trash-cli nano \
     rsync usbutils fswebcam -y
 
