@@ -127,7 +127,9 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
         PLATFORM=linux_amd64
     fi
     wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
-        tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
+        tar xz && sudo mv yq_${PLATFORM} /usr/bin/yq
+
+    
     
     sudo apt update
 
