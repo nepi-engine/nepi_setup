@@ -282,8 +282,13 @@ if [[ "$?" -eq 0 ]]; then
         echo "Updating Network Services"
 
         echo "Disabling NetworkManager Service" 
-        sudo systemctl disable NetworkManager >/dev/null 2>&1
-        sudo systemctl stop NetworkManager >/dev/null 2>&1
+        if is_valid_rpi; then
+            sudo systemctl disable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+            sudo systemctl stop NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+        else
+            sudo systemctl disable NetworkManager >/dev/null 2>&1
+            sudo systemctl stop NetworkManager >/dev/null 2>&1
+        fi
 
         echo "Disabling netplan Service" 
         sudo systemctl disable netplan >/dev/null 2>&1
