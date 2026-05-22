@@ -121,7 +121,7 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
 
     VERSION=v4.16.2
     if [[ "$NEPI_ARCH" == 'arm64' ]];
-        PLATFORM=linux_amd64
+        PLATFORM=linux_arm64
     fi
     if [[ "$NEPI_ARCH" == 'amd64' ]];
         PLATFORM=linux_amd64
