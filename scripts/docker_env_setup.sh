@@ -130,7 +130,7 @@ fi
 
 #################################
 # Disable Apport Error Messaging
-
+F
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
     SYSTEMD_SERVICE_PATH=/etc/systemd/system
@@ -302,27 +302,31 @@ else
 
         if [[ "$NEPI_ARCH" == 'arm64' ]]; then
 
-            # https://docs.docker.com/engine/install/ubuntu/
             echo ""
             echo "######################################"
             echo "Installing Docker"
             echo "######################################"
             echo ""
 
-            # Update Package Lists and Install Prerequisites.
-            sudo apt update
-            sudo 
-            echo 1
-            sudo apt install -y apt-transport-https ca-certificates curl software-properties-common 
-            echo 2
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            echo 3
-            sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
-            sudo apt update
-            echo 4
-            sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-            sudo docker info
-            docker compose version
+            if is_valid_rpi; then
+                # Raspberry Pi OS is Debian-based; use the official convenience script
+                curl -fsSL https://get.docker.com -o get-docker.sh
+                sudo sh get-docker.sh
+                rm -f get-docker.sh
+                sudo docker info
+                docker compose version
+            else
+                # https://docs.docker.com/engine/install/ubuntu/
+                # Update Package Lists and Install Prerequisites.
+                sudo apt update
+                sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+                curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+                sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu focal stable"
+                sudo apt update
+                sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+                sudo docker info
+                docker compose version
+            fi
         elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
             echo ""
             echo "######################################"
