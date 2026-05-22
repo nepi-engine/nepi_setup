@@ -1355,7 +1355,7 @@ function update_yaml_value(){
     export UPDATE_YAML_FILE=$3
     #echo $UPDATE_YAML_FILE
 
-    if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    #if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
       eval_cmd="success=$(python3 ${BASH_FOLDER}/nepi_utils/update_yaml_value.py $UPDATE_YAML_KEY $UPDATE_YAML_VAL $UPDATE_YAML_FILE)"  #2>/dev/null"
       eval "$eval_cmd" 
       success=$(echo ${success})
@@ -1363,9 +1363,9 @@ function update_yaml_value(){
           echo "Success = ${success}"
           return 1
       fi
-    else
-      yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
-    fi
+    # else
+    #   yq e -i '.'"$UPDATE_YAML_KEY"' = env(UPDATE_YAML_VAL)' $UPDATE_YAML_FILE
+    # fi
     eval "export $UPDATE_YAML_KEY=\"$UPDATE_YAML_VAL\""
 }
 export -f update_yaml_value
