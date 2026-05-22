@@ -217,7 +217,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
         echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
 
         if is_valid_rpi && [ -f "/etc/lightdm/lightdm.conf" ]; then
-            update_text_value "autologin-user=" "autologin-user=nepihost" "/etc/lightdm/lightdm.conf"
+            update_text_value "/etc/lightdm/lightdm.conf" "autologin-user=" "autologin-user=nepihost" 
         fi
     fi
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
