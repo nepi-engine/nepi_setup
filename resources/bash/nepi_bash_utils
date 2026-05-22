@@ -73,9 +73,10 @@ export NEPI_SYSTEM_CONFIG='/mnt/nepi_config/system_cfg'
 export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 
 export NEPI_SSH_FOLDER="/home/${CONFIG_USER}/.ssh"
+export SSH_ENV="$HOME/.ssh/environment"
 export NEPI_SSH_ENV="${NEPI_SSH_FOLDER}/environment"
 export NEPI_SSH_KEY_FILE=nepi_default_ssh_key
-export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"#SSH_ENV="$HOME/.ssh/environment"
+export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"
 
 if [ -f "${NEPI_SSH_ENV}" ]; then
   run_ssh_env;
