@@ -17,7 +17,7 @@ Step 2 - Configure the M.2 Dual HAT
     https://wiki.seeedstudio.com/raspberry_pi_5_uses_pcie_hat_dual_hat/
 
  ####################
- # Flash SSD Card with RPI Image
+ # Flash SSD Card with using 'Raspberry Pi Imager'
  # Power Off RPI and Install SSD drive
  # Power On
 
