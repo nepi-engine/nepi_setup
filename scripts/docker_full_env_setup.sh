@@ -36,7 +36,6 @@ script_path=${SCRIPT_FOLDER}/${script_file}
 if ! source_script $script_path $LITE_INSTALL; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
-    return 
 fi
 
 

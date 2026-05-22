@@ -153,10 +153,10 @@ echo "######################################"
 sudo apt remove yq -y  2>/dev/null 
 
 VERSION=v4.16.2
-if [[ "$NEPI_ARCH" == 'arm64' ]];
+if [[ "$NEPI_ARCH" == 'arm64' ]]; then
     PLATFORM=linux_arm64
 fi
-if [[ "$NEPI_ARCH" == 'amd64' ]];
+if [[ "$NEPI_ARCH" == 'amd64' ]]; then
     PLATFORM=linux_amd64
 fi
 wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
