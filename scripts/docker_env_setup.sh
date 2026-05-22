@@ -151,19 +151,17 @@ echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
 sudo apt remove yq -y  2>/dev/null 
-if sudo add-apt-repository ppa:rmescandon/yq -y 2>/dev/null ; then
-    sudo apt install yq -y
-else
-    VERSION=v4.16.2
-    if [[ "$NEPI_ARCH" == 'arm64' ]];
-        PLATFORM=linux_amd64
-    fi
-    if [[ "$NEPI_ARCH" == 'amd64' ]];
-        PLATFORM=linux_amd64
-    fi
-    wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
-    tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
+
+VERSION=v4.16.2
+if [[ "$NEPI_ARCH" == 'arm64' ]];
+    PLATFORM=linux_amd64
 fi
+if [[ "$NEPI_ARCH" == 'amd64' ]];
+    PLATFORM=linux_amd64
+fi
+wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
+tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
+
 
 sudo apt update
 
@@ -191,6 +189,7 @@ echo "Installing NEPI python packages"
 echo "######################################"
 
 sudo -H python3 -m pip install PyYAML
+
 sudo -H python3 -m pip install --no-input cryptography python-dotenv
 
 

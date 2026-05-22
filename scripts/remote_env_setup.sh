@@ -90,7 +90,21 @@ fi
 NEPI_IP_START=${NEPI_IP%%/*}
 echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
-
+##########################
+NEPI_ARCH=unknown
+if is_valid_jetson; then
+    NEPI_ARCH=arm64
+elif is_valid_rpi; then
+    NEPI_ARCH=arm64
+elif is_valid_arm64; then
+    NEPI_ARCH=arm64
+elif is_valid_amd64; then
+    NEPI_ARCH=amd64
+else
+    arch_val=$(uname -m)
+    echo "Arch ${arch_val} not supported yet"
+    return 
+fi
 
 # This file sets up nepi bash aliases and util functions
 echo "########################"
@@ -102,11 +116,21 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     echo "################################# "
     echo "Installing System Required Software"
     echo ""
-    #sudo apt update
-    sudo pip uninstall yq 2>/dev/null
-    sudo add-apt-repository ppa:rmescandon/yq -y
+
+    sudo apt remove yq -y  2>/dev/null 
+
+    VERSION=v4.16.2
+    if [[ "$NEPI_ARCH" == 'arm64' ]];
+        PLATFORM=linux_amd64
+    fi
+    if [[ "$NEPI_ARCH" == 'amd64' ]];
+        PLATFORM=linux_amd64
+    fi
+    wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
+        tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
+    
     sudo apt update
-    sudo apt install yq -y
+
     sudo apt install jq -y
     sudo apt install ncdu -y
 
