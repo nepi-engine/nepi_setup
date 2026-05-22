@@ -1,0 +1,80 @@
+RPi5 M.2 Dual HAT Setup
+=======================
+
+Step 1 - Flash Storage Media
+
+  Use Raspberry Pi Imager to flash both the SSD and SD card with:
+
+    Device:           Raspberry Pi 5
+    Operating System: Raspberry Pi OS (64-bit)
+
+
+Step 2 - Configure the M.2 Dual HAT
+
+  Follow the setup instructions from Seeed Studio for connecting and
+  configuring the M.2 Dual HAT with your Raspberry Pi:
+
+    https://wiki.seeedstudio.com/raspberry_pi_5_uses_pcie_hat_dual_hat/
+
+ ####################
+ # Flash SSD Card with RPI Image
+ # Power Off RPI and Install SSD drive
+ # Power On
+
+###################
+# With the SSD drive removed
+ sudo apt update && sudo apt upgrade -y
+ sudo apt update && sudo apt fix broken -y
+ sudo apt install gparted dosfstools mtools -y
+ sudo rpi-eeprom-update
+ sudo raspi-config
+ #1) Select Advanced Options
+ #2) Enable PCIe Gen 3
+ #3) Set Boot Loader to Latest Version
+    **** Select 'No' when asked to reset to default version
+ #4) Select Finish and Reboot
+ 
+####################
+# After Reboot
+sudo rpi-eeprom-config --edit
+# CHANGE: BOOT_ORDER=0xf461
+# ADD: PCIE_PROBE=1
+# Ctrl-X to save
+ 
+####################
+ # Power Off RPI and Install SSD drive
+ # Power On
+ 
+df -h
+# Check for SSD nvme0n1 exists
+
+sudo rpi-eeprom-config --edit
+# CHANGE: BOOT_ORDER=0xf461
+# ADD: PCIE_PROBE=1
+# Ctrl-X to save
+ 
+ ####################
+ # Power OFF
+ # Remove SD card
+ # Power On
+ 
+ sudo apt update && sudo apt upgrade -y
+ sudo apt update && sudo apt fix broken -y
+ sudo apt install gparted dosfstools mtools -y
+ sudo rpi-eeprom-update
+ sudo raspi-config
+ #1) Select Advanced Options
+ #2) Enable PCIe Gen 3
+ 
+
+
+Step 3 (Optional) - Create ISO Image
+
+  On your host system, attach the SD card and create an ISO image.
+
+  1. Install GNOME Disks:
+
+       sudo apt install gnome-disk-utility
+
+  2. Open Disks, select the SD card, click the three-dot menu, choose
+     a filename, and create the ISO image.
