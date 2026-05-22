@@ -86,7 +86,6 @@ echo ""
 ############
 echo ""
 echo "Updating NEPI Config Folders"
-
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
 UPDATE_PATH=/opt/nepi/etc
@@ -97,11 +96,11 @@ find $UPDATE_PATH -mindepth 1 -maxdepth 1 -type d -exec sudo rm -rf {} +
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 775 ${SOURCE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=/opt/nepi/etc
@@ -123,11 +122,11 @@ sync_yaml_files $SOURCE_FILE $UPDATE_FILE
 sudo cp $UPDATE_FILE $SOURCE_FILE 
 sudo rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 775 ${SOURCE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown -R 1000:1000 ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 NEPI_SYSTEM_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/etc/load_system_config.sh
 update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_SYS_CONFIG_FILE
@@ -154,11 +153,11 @@ fi
 sudo rsync -ar --delete ${SOURCE_PATH}/ ${UPDATE_PATH}/
 sudo cp ${SOURCE_PATH}/nepi_docker_config.yaml ${UPDATE_PATH}/nepi_docker_config.blank
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 775 ${SOURCE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=/opt/nepi/docker_cfg
@@ -172,11 +171,11 @@ fi
 sudo rsync -ar --delete ${SOURCE_PATH}/ ${UPDATE_PATH}/
 sudo cp ${SOURCE_PATH}/nepi_docker_config.yaml ${UPDATE_PATH}/nepi_docker_config.blank
 
-# sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
-# sudo chmod 775 ${SOURCE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
-sudo chown -R ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 
@@ -215,11 +214,11 @@ echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 sync_yaml_files $SOURCE_FILE $UPDATE_FILE 
 sudo rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
-sudo chown -R 1000:1000 ${SOURCE_PATH}
-sudo chmod -R 775 ${SOURCE_PATH}
+sudo chown 1000:1000 ${SOURCE_PATH}
+sudo chmod 775 ${SOURCE_PATH}
 
 sudo chown -R 1000:1000 ${UPDATE_PATH}
-sudo chmod -R 775 ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 
 echo ""
