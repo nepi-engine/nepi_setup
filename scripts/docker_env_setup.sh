@@ -115,6 +115,8 @@ fi
 NEPI_ARCH=unknown
 if is_valid_jetson; then
     NEPI_ARCH=arm64
+elif is_valid_rpi; then
+    NEPI_ARCH=arm64
 elif is_valid_arm64; then
     NEPI_ARCH=arm64
 elif is_valid_amd64; then
@@ -136,8 +138,8 @@ if [[ "$?" -eq 0 ]]; then
     echo ""
     echo "########"
     echo "Disable apport to avoid crash reports on a display"
-    sudo systemctl disable apport
-    sudo systemctl stop apport
+    sudo systemctl disable apport   2>/dev/null 
+    sudo systemctl stop apport  2>/dev/null 
 fi
 
 
@@ -148,12 +150,24 @@ echo ""
 echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
-
-sudo add-apt-repository ppa:rmescandon/yq -y
+sudo apt remove yq -y  2>/dev/null 
+if sudo add-apt-repository ppa:rmescandon/yq -y 2>/dev/null ; then
+    sudo apt install yq -y
+else
+    VERSION=v4.16.2
+    if [[ "$NEPI_ARCH" == 'arm64' ]];
+        PLATFORM=linux_amd64
+    fi
+    if [[ "$NEPI_ARCH" == 'amd64' ]];
+        PLATFORM=linux_amd64
+    fi
+    wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
+    tar xz && sudo mv yq_${PLATFORM} /usr/local/bin/yq
+fi
 
 sudo apt update
 
-sudo apt install apt-utils  yq  jq git gitk htop  ncdu curl gparted \
+sudo apt install apt-utils  jq git gitk htop  ncdu curl gparted \
     python-is-python3 python3-venv python3-pip nmap trash-cli nano \
     rsync usbutils fswebcam -y
 
