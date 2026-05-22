@@ -79,47 +79,47 @@ echo "########################"
 
 
 ######################################
-echo ""
-echo "########################"
-echo "Backing Up Original System Folders If Needed"
-echo "########################"
+# echo ""
+# echo "########################"
+# echo "Backing Up Original System Folders If Needed"
+# echo "########################"
 
-# First Backup original if needed
+# # First Backup original if needed
 
-back_ext=org
-overwrite=0
+# back_ext=org
+# overwrite=0
 
-### Backup ETC folder if needed
-folder=/etc
-folder_back=${folder}.${back_ext}
-if [[ -d "$folder" ]]; then
-    #echo "Backing up ${folder} to ${folder_back}"
-    path_backup $folder $folder_back $overwrite
-fi
+# ### Backup ETC folder if needed
+# folder=/etc
+# folder_back=${folder}.${back_ext}
+# if [[ -d "$folder" ]]; then
+#     #echo "Backing up ${folder} to ${folder_back}"
+#     path_backup $folder $folder_back $overwrite
+# fi
 
-### Backup USR LIB SYSTEMD folder if needed
-folder=/usr/lib/systemd/system
-folder_back=${folder}.${back_ext}
-if [[ -d "$folder" ]]; then
-    #echo "Backing up ${folder} to ${folder_back}"
-    path_backup $folder $folder_back $overwrite
-fi
+# ### Backup USR LIB SYSTEMD folder if needed
+# folder=/usr/lib/systemd/system
+# folder_back=${folder}.${back_ext}
+# if [[ -d "$folder" ]]; then
+#     #echo "Backing up ${folder} to ${folder_back}"
+#     path_backup $folder $folder_back $overwrite
+# fi
 
-### Backup RUN SYSTEMD folder if needed
-folder=/run/systemd/system
-folder_back=${folder}.${back_ext}
-if [[ -d "$folder" ]]; then
-    #echo "Backing up ${folder} to ${folder_back}"
-    path_backup $folder $folder_back $overwrite
-fi
+# ### Backup RUN SYSTEMD folder if needed
+# folder=/run/systemd/system
+# folder_back=${folder}.${back_ext}
+# if [[ -d "$folder" ]]; then
+#     #echo "Backing up ${folder} to ${folder_back}"
+#     path_backup $folder $folder_back $overwrite
+# fi
 
-### Backup USR LIB SYSTEMD USER folder if needed
-folder=/usr/lib/systemd/user
-folder_back=${folder}.${back_ext}
-if [[ -d "$folder" ]]; then
-    #echo "Backing up ${folder} to ${folder_back}"
-    path_backup $folder $folder_back $overwrite
-fi
+# ### Backup USR LIB SYSTEMD USER folder if needed
+# folder=/usr/lib/systemd/user
+# folder_back=${folder}.${back_ext}
+# if [[ -d "$folder" ]]; then
+#     #echo "Backing up ${folder} to ${folder_back}"
+#     path_backup $folder $folder_back $overwrite
+# fi
 
 
 
