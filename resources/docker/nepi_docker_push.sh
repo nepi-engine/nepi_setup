@@ -109,9 +109,12 @@ else
                         hub_tag="latest-amd64"
                         platform=linux/amd64
                 fi
-            
             elif is_valid_jetson; then
                 hub_tag="latest-jetson"
+                platform=linux/arm64
+
+            elif is_valid_rpi; then
+                hub_tag="latest-rpi"
                 platform=linux/arm64
 
             elif is_valid_arm64; then

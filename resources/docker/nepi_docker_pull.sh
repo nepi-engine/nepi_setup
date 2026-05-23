@@ -77,7 +77,7 @@ else
     elif is_valid_jetson; then
         HUB_IMAGE="numurusinc/nepi:latest-jetson"
     elif is_valid_rpi; then
-        HUB_IMAGE="numurusinc/nepi:latest-arm64-rpi4"
+        HUB_IMAGE="numurusinc/nepi:latest-rpi"
     fi
 
     if [[ -n "$PASSED_IMAGE" ]]; then
