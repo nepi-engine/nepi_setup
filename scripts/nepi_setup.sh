@@ -492,6 +492,7 @@ if [[ "$?" -eq 0 ]]; then
             samba_pw=$default_pw
         fi
         echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+        if [[ ${samba_pw} != 'encrypted' ]]; then
             echo "Updating Samba User ${samba_user}"
             echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
         # else
@@ -506,6 +507,7 @@ if [[ "$?" -eq 0 ]]; then
             samba_pw=$default_pw
         fi
         echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+        if [[ ${samba_pw} != 'encrypted' ]]; then
             echo "Updating Samba User ${samba_user}"
             echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
         # else
