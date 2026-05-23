@@ -464,34 +464,53 @@ if [[ "$?" -eq 0 ]]; then
         SYSTEMD_SERVICE_PATH=/etc/systemd/system
 
 
-        echo "Restarting Samba Service"
-
         sudo systemctl enable smbd
         sudo systemctl restart smbd
         
 
-        echo "Updating Samba Users"
-        if [[ ${NEPI_USER_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_USER_PW\n$NEPI_USER_PW" | sudo smbpasswd -a -s "$NEPI_USER" > /dev/null
+        echo "Updating Samba Passwords"
+        samba_user=$NEPI_USER
+        samba_pw=$NEPI_USER_PW
+        default_pw='nepi'
+        if check_password $samba_user $default_pw; then
+            samba_pw=$default_pw
+        fi
+        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+        if [[ ${samba_pw} != 'encrypted' ]]; then
+            echo "Updating Samba User ${samba_user}"
+            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
         # else
         #     sudo smbpasswd -a "$NEPI_USER"
         fi
         sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
 
 
-        if [[ ${NEPI_HOST_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_HOST_PW\n$NEPI_HOST_PW" | sudo smbpasswd -a -s "$NEPI_HOST_USER" > /dev/null
+        samba_user=$NEPI_HOST_USER
+        samba_pw=$NEPI_HOST_PW
+        default_pw='nepi'
+        if check_password $samba_user $default_pw; then
+            samba_pw=$default_pw
+        fi
+        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+            echo "Updating Samba User ${samba_user}"
+            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
         # else
-        #     sudo smbpasswd -a "$NEPI_HOST_USER"
+        #     sudo smbpasswd -a "$NEPI_USER"
         fi
         sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
 
-
-        if [[ ${NEPI_ADMIN_PW} != 'encrypted' ]]; then
-            echo -e "$NEPI_ADMIN_PW\n$NEPI_ADMIN_PW" | sudo smbpasswd -a -s "$NEPI_ADMIN_USER" > /dev/null
+        samba_user=$NEPI_ADMIN_USER
+        samba_pw=$NEPI_ADMIN_PW
+        default_pw='nepiadmin'
+        if check_password $samba_user $default_pw; then
+            samba_pw=$default_pw
+        fi
+        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+            echo "Updating Samba User ${samba_user}"
+            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
         # else
-        #     sudo smbpasswd -a "$NEPI_ADMIN_USER"
-        fi        
+        #     sudo smbpasswd -a "$NEPI_USER"
+        fi
         sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
 
         sudo ufw allow 445 >/dev/null 2>&1
