@@ -298,48 +298,51 @@ else
         sudo python${NEPI_PYTHON} -m pip install --no-input opencv-python
     fi
 
-    sudo python3 -c "import torch; print('torch is installed, version:', torch.__version__)" > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Python torch is installed."
-        # Optionally, print the version:
-        sudo python3 -c "import torch; print('Version:', torch.__version__)"
-    else
-        echo "Python torch is NOT installed. Will install"
-        sudo python${NEPI_PYTHON} -m pip install --no-input torch
-    fi
 
 
-    sudo python3 -c "import torchvision; print('torchvision is installed, version:', torchvision.__version__)" > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Python torchvision is installed."
-        # Optionally, print the version:
-        python3 -c "import torchvision; print('Version:', torchvision.__version__)"
-    else
-        echo "Python torchvision is NOT installed. Will install"
-        sudo python${NEPI_PYTHON} -m pip install --no-input torchvision
-    fi
 
-    sudo python3 -c "import open3d; print('open3d is installed, version:', open3d.__version__)" > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "Python open3d is installed."
-        # Optionally, print the version:
-        sudo python3 -c "import open3d; print('Version:', open3d.__version__)"
-    else
-        echo "Python open3d is NOT installed. Will install"
-        sudo python${NEPI_PYTHON} -m pip install --upgrade traitlets
-        sudo python${NEPI_PYTHON} -m pip install --upgrade packaging
-        sudo python${NEPI_PYTHON} -m pip install --upgrade ipython
-        sudo pip install jupyter-client==6.1.7
-        sudo python${NEPI_PYTHON} -m pip install --no-input open3d --ignore-installed
-    fi
 
 
     # Uninstall Problem Packages
     sudo python${NEPI_PYTHON} -m pip uninstall typing
 
-    if ! is_valid_rpi; then
-        sudo python${NEPI_PYTHON} -m pip install ultralytics
-    fi
+    sudo python3 -m pip uninstall --upgrade torch
+    sudo python3 -m pip uninstall --upgrade torchvision
+    sudo python3 -m pip install --upgrade pip
+    sudo python3 -m pip install --ignore-installed ultralytics
+
+    # if ! is_valid_rpi; then
+
+    #     sudo python3 -c "import torch; print('torch is installed, version:', torch.__version__)" > /dev/null 2>&1
+    #     if [ $? -eq 0 ]; then
+    #         echo "Python torch is installed."
+    #         # Optionally, print the version:
+    #         sudo python3 -c "import torch; print('Version:', torch.__version__)"
+    #     else
+    #         echo "Python torch is NOT installed. Will install"
+    #         sudo python${NEPI_PYTHON} -m pip install --no-input torch
+    #     fi
+
+
+    #     sudo python3 -c "import torchvision; print('torchvision is installed, version:', torchvision.__version__)" > /dev/null 2>&1
+    #     if [ $? -eq 0 ]; then
+    #         echo "Python torchvision is installed."
+    #         # Optionally, print the version:
+    #         python3 -c "import torchvision; print('Version:', torchvision.__version__)"
+    #     else
+    #         echo "Python torchvision is NOT installed. Will install"
+    #         sudo python${NEPI_PYTHON} -m pip install --no-input torchvision
+    #     fi
+
+
+    #     sudo python${NEPI_PYTHON} -m pip install ultralytics
+    # else
+    #     sudo python3 -m pip uninstall --upgrade torch
+    #     sudo python3 -m pip uninstall --upgrade torchvision
+    #     sudo python3 -m pip install --upgrade pip
+    #     sudo python3 -m pip install --ignore-installed ultralytics
+
+    # fi
 
 
     #https://github.com/ultralytics/ultralytics/issues/21015
@@ -355,7 +358,19 @@ else
     # sudo cp ${NEPI_REQ_SOURCE}/nepi_requirements.txt ./
     # cat nepi_requirements.txt | sed -e '/^\s*#.*$/d' -e '/^\s*$/d' | xargs -n 1 sudo python${NEPI_PYTHON} -m pip install
 
-
+    sudo python3 -c "import open3d; print('open3d is installed, version:', open3d.__version__)" > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Python open3d is installed."
+        # Optionally, print the version:
+        sudo python3 -c "import open3d; print('Version:', open3d.__version__)"
+    else
+        echo "Python open3d is NOT installed. Will install"
+        sudo python${NEPI_PYTHON} -m pip install --upgrade traitlets
+        sudo python${NEPI_PYTHON} -m pip install --upgrade packaging
+        sudo python${NEPI_PYTHON} -m pip install --upgrade ipython
+        sudo pip install jupyter-client==6.1.7
+        sudo python${NEPI_PYTHON} -m pip install --no-input open3d --ignore-installed
+    fi
 
     #################
     np_required=1.23.5
