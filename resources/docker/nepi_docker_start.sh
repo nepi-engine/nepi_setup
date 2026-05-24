@@ -149,7 +149,7 @@ DOCKER_RUN_COMMAND_FALLBACK=$DOCKER_RUN_COMMAND
 # Set cuda support if needed
 
 if is_valid_cuda; then
-    echo "Enabling CUDA GPU Support TRUE"
+    echo "Enabling CUDA GPU Support"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 --gpus all \
 --runtime nvidia \
@@ -161,13 +161,24 @@ fi
 # Set jetson support if needed
 
 if is_valid_jetson; then
-    echo "Enabling Jetson GPU Support TRUE"
+    echo "Enabling Jetson GPU Support"
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /tmp:/tmp \
 -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon "
 fi 
 
+
+if is_valid_hailo; then
+  if [[ ! -d "/lib/firmware/hailo" ]]; then
+    echo "Hailo Toolkit Not Detected"
+  else
+    echo "Enabling Hailo Accelerator Support"
+DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+  --device=/dev/hailo0 \
+  -v /lib/firmware/hailo:/lib/firmware/hailo "
+  fi
+fi 
 
 
 # Finish Run Command

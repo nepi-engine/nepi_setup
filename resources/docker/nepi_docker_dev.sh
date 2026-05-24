@@ -125,6 +125,13 @@ DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 fi 
 
 
+if is_valid_hailo; then
+    echo "Enabling Hailo Accelerator Support"
+DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+  --device=/dev/hailo0 \
+  -v /lib/firmware/hailo:/lib/firmware/hailo "
+fi 
+
 
 # Finish Run Command
 

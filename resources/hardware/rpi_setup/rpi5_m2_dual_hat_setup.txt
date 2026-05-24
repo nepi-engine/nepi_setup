@@ -67,6 +67,15 @@ sudo rpi-eeprom-config --edit
  #2) Enable PCIe Gen 3
  
 
+## Install Toolkit
+sudo apt install hailo-all
+
+## Get the apps
+git clone https://github.com/hailo-ai/hailo-apps.git
+cd hailo-apps
+sudo ./install.sh
+
+
 
 Step 3 (Optional) - Create ISO Image
 

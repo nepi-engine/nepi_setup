@@ -414,6 +414,15 @@ function is_valid_amd64(){
 }
 export -f is_valid_amd64
 
+function is_valid_rpi(){
+  if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+    return 0
+  else
+    return 1
+  fi
+}
+export -f is_valid_rpi
+
 
 function is_valid_cuda(){
     no_cuda=1
@@ -430,15 +439,17 @@ function is_valid_cuda(){
 }
 export -f is_valid_cuda
 
-
-function is_valid_rpi(){
-  if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
-    return 0
-  else
-    return 1
-  fi
+function is_valid_hailo(){
+    is_valid=1
+    if lspci -k 2>/dev/null | grep -iq "hailo"; then
+      is_valid=0
+    elif [[ -d "/lib/firmware/hailo" ]]; then
+      is_valid=0
+    fi
+    return $is_valid
 }
-export -f is_valid_rpi
+export -f is_valid_hailo
+
 
 
 function is_space_avail_mb(){
@@ -546,10 +557,11 @@ is_valid_file = Check for file
 is_valid_bool = Check for valid bash bool - 0 or 1
 is_valid_internet = Check for internet connection
 is_valid_jetson = Check if device is an NVIDIA Jetson system
+is_valid_rpi = Check if system is on a Raspberry Pi
 is_valid_arm64 = Check if device is arm64 arch
 is_valid_amd64 = Check if device is amd64 arch
 is_valid_cuda = Check if system has CUDA
-is_valid_rpi = Check if system is on a Raspberry Pi
+is_valid_hailo = Check if system has Halio Module
 is_space_avail_mb = Check folder for REQ_SPACE in MB
 is_space_avail_gb = Check folder for REQ_SPACE in GB
 is_nepi_path = Check if path in either a nepi managed folder
@@ -1888,6 +1900,7 @@ export -f process_count
 function clean_tag_string(){
   cstring=$1
   cstring="${cstring// /_}"
+  cstring="${cstring//\//_}"
   cstring="${cstring//-/_}"
   cstring="${cstring//./p}"
   cstring="${cstring,,}"
@@ -1998,6 +2011,10 @@ function get_sw_desc() {
   if [[ "$cuda_ver" != '0' ]]; then
     sw_desc="${sw_desc}_CUDA${cuda_ver}"
   fi
+  if is_valid_hailo; then
+    sw_desc="${sw_desc}_Hailo"
+  fi
+  sw_desc=$(clean_tag_string "$sw_desc")
   echo "${sw_desc}"
 }
 export -f get_sw_desc

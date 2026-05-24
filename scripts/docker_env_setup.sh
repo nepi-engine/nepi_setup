@@ -150,8 +150,14 @@ echo ""
 echo "######################################"
 echo "Installing NEPI required software packages"
 echo "######################################"
-sudo apt remove yq -y  2>/dev/null 
 
+if is_valid_rpi; then
+    sudo apt update && sudo apt full-upgrade
+fi
+
+
+
+sudo apt remove yq -y  2>/dev/null 
 VERSION=v4.16.2
 if [[ "$NEPI_ARCH" == 'arm64' ]]; then
     PLATFORM=linux_arm64
@@ -399,6 +405,23 @@ if is_valid_cuda; then
             nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+    fi
+fi
+
+
+
+
+if is_valid_halio; then
+    echo ""
+    echo "######################################"
+    echo "Installing HAILO Toolkit "
+    echo "######################################"
+    echo ""
+    if ! command -v hailortcli &> /dev/null; then
+        if is_valid_rpi; then
+            sudo apt install hailo-all -y
+
+        fi
     fi
 fi
 

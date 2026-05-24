@@ -128,20 +128,26 @@ else
             echo ""
 
             ###################################
-            # Download Storage Extras
+            
             NEPI_STORAGE=/mnt/nepi_storage
+            if [[ ! -d $NEPI_STORAGE ]]; then
+                sudo mkdir $NEPI_STORAGE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_STORAGE
+            fi
             sudo find $NEPI_STORAGE -type d -exec chown ${CONFIG_USER}:${CONFIG_USER} {} +
 
-
-            success_storage=0
             cd $NEPI_STORAGE
             sudo rm ARCHIVE > /dev/null 2>&1
 
-
+            ##############################
+            ### GET STORAGE LATEST FOLDERS
+            success_storage=0
             storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=hj0yewy3&dl=0'
             storage_latest_zip=nepi_storage-latest.zip
 
-
+            if [[ -f ${storage_latest_zip} ]]; then
+                sudo rm -r $storage_latest_zip
+            fi
             if [[ ! -f ${storage_latest_zip} ]]; then
                 sudo wget ${storage_latest_link} -O ${storage_latest_zip}
                 if [[ "$?" -ne 0 ]]; then
@@ -178,9 +184,58 @@ else
                 sudo rm ${storage_latest_zip} > /dev/null 2>&1
             fi
 
-            if [[ -f ${storage_latest_zip} ]]; then
-                sudo rm ${storage_latest_zip} > /dev/null 2>&1
+
+
+            ##############################
+            ### GET DATABASES LATEST FOLDER
+            success_databases=0
+            databases_latest_link='https://www.dropbox.com/scl/fi/ev39v337vawtuxvkl061y/nepi_databases-latest.zip?rlkey=urohkkln0u3xd0fwg87zetsyp&st=pos0zu5f&dl=0'
+            databases_latest_zip=nepi_databases-latest.zip
+
+            if [[ -f ${databases_latest_zip} ]]; then
+                sudo rm -r $databases_latest_zip
             fi
+            if [[ ! -f ${databases_latest_zip} ]]; then
+                sudo wget ${databases_latest_link} -O ${databases_latest_zip}
+                if [[ "$?" -ne 0 ]]; then
+                    echo ""
+                    echo "Failed to download NEPI Databases from link: ${databases_latest_link}"
+                    echo ""
+                    sudo rm ${databases_latest_zip}
+                fi
+            else
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $databases_latest_zip
+            fi
+
+            if [[ -f ${databases_latest_zip} ]]; then
+                echo ""
+                echo "Unzipping databases folders from ${databases_latest_zip}"
+                echo ""
+                sudo unzip -o -q $databases_latest_zip
+                if [ $? -eq 0 ]; then
+                    #sudo rm ${databases_latest_zip} > /dev/null 2>&1
+                    success_databases=1
+                else
+                    echo ""
+                    echo "Failed to unzip NEPI Databases file: ${databases_latest_zip}"
+                    echo ""
+                    #sudo rm ${databases_latest_zip} > /dev/null 2>&1
+                fi
+            else
+                echo ""
+                echo "Failed to find NEPI Databases file: ${databases_latest_zip}"
+                echo ""
+            fi
+
+            if [[ -f ${databases_latest_zip} ]]; then
+                sudo rm ${databases_latest_zip} > /dev/null 2>&1
+            fi
+
+
+
+
+            ####################################
+            # Cleanup
 
             #sudo find $NEPI_STORAGE -type d -exec chown ${NEPI_USER_ID}:${NEPI_USER_ID} {} +
             sudo chown -R 1000:1000 ${NEPI_STORAGE}
@@ -189,20 +244,7 @@ else
 
 
 
-
-            ####################################
-            # Cleanup
-
-            if [[ "$success_storage" -eq 0 ]]; then
-                echo "NEPI Storage Setup Failed"
-                echo ""
-            else
-                echo ""
-                echo "NEPI Storage Setup Succeeded"
-            fi
-
-
-            if [[ "$success_storage" -eq 1 && "$success_image" -eq 1 ]]; then
+            if [[ "$success_storage" -eq 1 && "$success_databases" -eq 1 ]]; then
                 echo ""
                 echo "########################"
                 echo "NEPI Docker Storage Init Complete"
