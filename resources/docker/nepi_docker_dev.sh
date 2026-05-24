@@ -147,13 +147,14 @@ ${nepi_fs}:${nepi_fs_tag} /bin/bash ${run_cmd} "
 
 DOCKER_RUN_COMMAND_FALLBACK="${DOCKER_RUN_COMMAND_FALLBACK} \
 ${nepi_fs}:${nepi_fs_tag} /bin/bash ${run_cmd} "
-# ${nepi_fs}:${nepi_fs_tag} /bin/bash \
-# -c 'service supervisor start'"
+
+
+
+
 
 ########################
 # Run NEPI Docker
 ########################
-
 
 function dcheck() {
     dname=$1
@@ -166,7 +167,7 @@ function dcheck() {
     return 0
 }
 
-################## 
+
 # Fix Folder Owners Pre Run
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /opt/nepi
 sudo chmod 0775 /opt/nepi
@@ -176,21 +177,10 @@ sudo chown 1000:1000 /mnt/nepi_storage
 sudo chmod 0775 /mnt/nepi_storage
 
 
-
-###############################
 echo ""
 echo "Launching NEPI Docker Container ${nepi_fs}:${nepi_fs_tag} with Command"
-
-RUN_COMMAND="${DOCKER_RUN_COMMAND} \
--c '/nepi_start_all'"
-
-RUN_COMMAND_FALLBACK="${DOCKER_RUN_COMMAND_BACKUP} \
--c '/nepi_start_all'"
-
-
-echo "${RUN_COMMAND}"
-
-eval "$RUN_COMMAND"
+echo "${DOCKER_RUN_COMMAND}"
+eval "$DOCKER_RUN_COMMAND"
 
 sleep 4
 
@@ -198,21 +188,21 @@ CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
 CONTAINER_ID=${CONTAINER_ID[0]}
 ###############################
 
-
-if [[ -z "$CONTAINER_ID" ]]; then
+RETRY_COUNT=0
+while [[ -z "$CONTAINER_ID" && "$RETRY_COUNT" -lt "$NEPI_RETRY_COUNT" ]]; do
     ###############################
     RETRY_COUNT=$((RETRY_COUNT + 1))
     echo ""
-    echo "Retrying with Fallback Run NEPI Docker Container ${nepi_fs}:${nepi_fs_tag}"
-
-    eval "$RUN_COMMAND_FALLBACK"
+    echo "Retrying with Fallback Run Command ${nepi_fs}:${nepi_fs_tag}"
+    echo "${DOCKER_RUN_COMMAND_FALLBACK}"
+    eval "$DOCKER_RUN_COMMAND_FALLBACK"
 
     sleep 2
 
     CONTAINER_ID=($(sudo docker ps -qf "ancestor=${nepi_fs}:${nepi_fs_tag}"))
     CONTAINER_ID=${CONTAINER_ID[0]}
     ###############################
-fi
+done
 
 if [[ -z "$CONTAINER_ID" ]]; then
 
