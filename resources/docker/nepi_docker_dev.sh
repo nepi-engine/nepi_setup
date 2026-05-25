@@ -133,7 +133,7 @@ if is_valid_hailo; then
     elif [[ ! -S $hailo_sock ]]; then
         echo "Hailo Sock Not Found at ${hailo_sock}"
     else
-        hailo_version=$(get_hailo_version)
+        hailo_version=$(get_hailo_hw_version)
         echo $hailo_version
         if [[ ${hailo_version} == "0" ]]; then
             echo "Failed to get Hailo Version"

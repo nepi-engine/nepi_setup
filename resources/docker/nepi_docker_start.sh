@@ -176,12 +176,15 @@ if is_valid_hailo; then
     elif [[ ! -S $hailo_sock ]]; then
         echo "Hailo Sock Not Found at ${hailo_sock}"
     else
-        hailo_version=$(get_hailo_version)
-        echo $hailo_version
-        if [[ ${hailo_version} == "0" ]]; then
-            echo "Failed to get Hailo Version"
+        hailo_hw_version=$(get_hailo_hw_version)
+        hailo_sw_version=$(get_hailo_sw_version)
+        if [[ ${hailo_hw_version} == "0" ]]; then
+            echo "Failed to get Hailo Hardware Version"
+        elif [[ ${hailo_sw_version} == "0" ]]; then
+            echo "Failed to get Hailo Software Version"
         else
-            echo "Found Hailo Device ${hailo_version}"
+            echo "Found Hailo Device ${hailo_hw_version}"
+            echo "Found Hailo Software ${hailo_sw_version}"
             echo "Enabling Hailo Accelerator Support"
         DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
         --device=/dev/hailo0 \

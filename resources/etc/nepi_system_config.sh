@@ -623,25 +623,29 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     if [[ "$NEPI_MODE" == 'HOST' ]]; then
         NEPI_HAS_HAILO=0
-        NEPI_HAILO_VERSION=0
+        NEPI_HAILO_HW_VERSION=0
         if is_valid_hailo; then
             NEPI_HAS_HAILO=1
-            NEPI_HAILO_VERSION=$(get_hailo_version)
+            NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
         fi
         export NEPI_HAS_HAILO=$NEPI_HAS_HAILO
         update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
-        export NEPI_HAILO_VERSION=$NEPI_HAILO_VERSION
-        update_yaml_value "NEPI_HAILO_VERSION" $NEPI_HAILO_VERSION $SYSTEM_SYS_CONFIG_FILE
+        export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
+        update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $SYSTEM_SYS_CONFIG_FILE
     fi
 
-    # if [[ $NEPI_HAS_HAILO -eq 1 ]]; then
-    #     NEPI_HAILO_VERSION=0
-    #     if is_valid_hailo; then
-    #         NEPI_HAILO_VERSION=$(get_hailo_version)
-    #     fi
-    #     update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
-    #     update_yaml_value "NEPI_HAILO_VERSION" $NEPI_HAILO_VERSION $SYSTEM_SYS_CONFIG_FILE
-    # fi
+    if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
+        NEPI_HAS_HAILO=0
+        NEPI_HAILO_SW_VERSION=0
+        if is_valid_hailo; then
+            NEPI_HAS_HAILO=1
+            NEPI_HAILO_SW_VERSION=$(get_hailo_sw_version)
+        fi
+        export NEPI_HAS_HAILO=$NEPI_HAS_HAILO
+        update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
+        export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
+        update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $SYSTEM_SYS_CONFIG_FILE
+    fi
 
 
     systemctl &> /dev/null
