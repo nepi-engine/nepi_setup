@@ -89,14 +89,20 @@ NEPI_WIFI_ACCESS_POINT_PW: nepi_device_ap
 # NEPI SOFTWARE Config
 ####################################################
 NEPI_INSTALL: unknown
-NEPI_PYTHON: X.X
+NEPI_PYTHON: 0
 
 NEPI_HAS_CUDA: 0
-NEPI_CUDA_VERSION: X.X
+NEPI_CUDA_VERSION: 0
+
 NEPI_HAS_XPU: 0
+
+NEPI_HAS_HAILO: 0
+NEPI_HAILO_VERSION: 0
+
 NEPI_FS_AB: 0
 NEPI_VPN_ENABLED: 0
 NEPI_VPN_VERSION: 0
+
 
 ####################################################
 # NEPI ROS SOFTWARE Config

@@ -153,21 +153,6 @@ fi
 NEPI_STATIC_IP_START=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
-###################
-#  Upated NEPI Config Settings
-
-
-# # This is updated by NEPI Container process
-# if is_valid_cuda; then
-#     export NEPI_HAS_CUDA=1
-#     export NEPI_CUDA_VERSION=$(get_cuda_version)
-# else
-#     export NEPI_HAS_CUDA=0
-#     export NEPI_CUDA_VERSION=0
-# fi
-# update_yaml_value "NEPI_HAS_CUDA" $NEPI_HAS_CUDA $SYSTEM_SYS_CONFIG_FILE
-# update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $SYSTEM_SYS_CONFIG_FILE
-
 
 
 # ########################################
@@ -301,17 +286,6 @@ function udpate_config_file(){
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_VPN_ENABLED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
-
-
-    systemctl &> /dev/null
-    if [[ "$?" -eq 0 ]]; then
-    vpn_version=$(get_openvpn_version)
-        if [[ -z $vpn_version ]]; then
-            vpn_version=0
-        fi
-        export NEPI_VPN_VERSION=$vpn_version
-        update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
-    fi
 
 }
 
@@ -647,6 +621,38 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     udpate_config_file
 
+    if [[ "$NEPI_MODE" == 'HOST' ]]; then
+        NEPI_HAS_HAILO=0
+        NEPI_HAILO_VERSION=0
+        if is_valid_hailo; then
+            NEPI_HAS_HAILO=1
+            NEPI_HAILO_VERSION=$(get_hailo_version)
+        fi
+        export NEPI_HAS_HAILO=$NEPI_HAS_HAILO
+        update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
+        export NEPI_HAILO_VERSION=$NEPI_HAILO_VERSION
+        update_yaml_value "NEPI_HAILO_VERSION" $NEPI_HAILO_VERSION $SYSTEM_SYS_CONFIG_FILE
+    fi
+
+    # if [[ $NEPI_HAS_HAILO -eq 1 ]]; then
+    #     NEPI_HAILO_VERSION=0
+    #     if is_valid_hailo; then
+    #         NEPI_HAILO_VERSION=$(get_hailo_version)
+    #     fi
+    #     update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
+    #     update_yaml_value "NEPI_HAILO_VERSION" $NEPI_HAILO_VERSION $SYSTEM_SYS_CONFIG_FILE
+    # fi
+
+
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+    vpn_version=$(get_openvpn_version)
+        if [[ -z $vpn_version ]]; then
+            vpn_version=0
+        fi
+        export NEPI_VPN_VERSION=$vpn_version
+        update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
+    fi
 
     print_yaml_file $SYSTEM_SYS_CONFIG_FILE
 

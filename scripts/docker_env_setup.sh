@@ -190,6 +190,8 @@ else
     sudo apt install cifs-utils
 fi
 
+sudo update-pciids
+
 echo "######################################"
 echo "Installing NEPI python packages"
 echo "######################################"
@@ -411,17 +413,34 @@ fi
 
 
 
-if is_valid_halio; then
+if is_valid_halio_hw; then
     echo ""
     echo "######################################"
     echo "Installing HAILO Toolkit "
     echo "######################################"
     echo ""
-    if ! command -v hailortcli &> /dev/null; then
-        if is_valid_rpi; then
-            sudo apt install hailo-all -y
+
+
+    sudo apt remove hailo-all hailort -y
+    sudo apt install -f dkms -y
+    sudo apt install -f hailo-all -y
+    sudo apt install -f hailort -y
+    #sudo apt update && sudo apt update --fix-missing
+
+    if is_valid_halio_sw; then
+        echo ""
+        echo "######################################"
+        echo "Installing HAILO Apps "
+        echo "######################################"
+        echo ""
+        cur_dir=$(pwd)
+        nepihome
+        if [[ -d 'hailo-rpi5-examples' ]]; then
+            git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
+            cd hailo-rpi5-examples
 
         fi
+        cd $cur_dir
     fi
 fi
 

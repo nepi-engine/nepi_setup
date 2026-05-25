@@ -16,34 +16,38 @@ Step 2 - Configure the M.2 Dual HAT
 
     https://wiki.seeedstudio.com/raspberry_pi_5_uses_pcie_hat_dual_hat/
 
+
+####################
+#### HAILO CHIP Setup
+####################
+
  ####################
- # Flash SSD Card with using 'Raspberry Pi Imager'
+ # Flash SD Card with using 'Raspberry Pi Imager'
  # Power Off RPI and Install SSD drive
  # Power On
 
 ###################
 # With the SSD drive removed
  sudo apt update && sudo apt upgrade -y
- sudo apt update && sudo apt fix broken -y
  sudo apt install gparted dosfstools mtools -y
  sudo rpi-eeprom-update
+ #sudo apt update && sudo apt update --fix-missing
+
+ sudo nano /boot/firmware/config.txt
+ # ADD THE FOLLOWING IN UNDER [all] 
+ dtparam=pciex1_gen=3
+
  sudo raspi-config
  #1) Select Advanced Options
- #2) Enable PCIe Gen 3
- #3) Set Boot Loader to Latest Version
+ #2) Set Boot Loader to Latest Version
     **** Select 'No' when asked to reset to default version
- #4) Select Finish and Reboot
+ #3) Select Finish and Reboot
  
-####################
-# After Reboot
-sudo rpi-eeprom-config --edit
-# CHANGE: BOOT_ORDER=0xf461
-# ADD: PCIE_PROBE=1
-# Ctrl-X to save
- 
-####################
+ ####################
+ # Flash SSD Card with using 'Raspberry Pi Imager'
  # Power Off RPI and Install SSD drive
  # Power On
+ 
  
 df -h
 # Check for SSD nvme0n1 exists
@@ -53,24 +57,100 @@ sudo rpi-eeprom-config --edit
 # ADD: PCIE_PROBE=1
 # Ctrl-X to save
  
+
+
  ####################
  # Power OFF
  # Remove SD card
+
+
+
+#########################################################################
  # Power On
  
  sudo apt update && sudo apt upgrade -y
- sudo apt update && sudo apt fix broken -y
+ sudo apt update && sudo apt 
  sudo apt install gparted dosfstools mtools -y
  sudo rpi-eeprom-update
  sudo raspi-config
- #1) Select Advanced Options
- #2) Enable PCIe Gen 3
- 
 
-## Install Toolkit
-sudo apt install hailo-all
+#2) Update Config.txt
+ sudo nano /boot/firmware/config.txt
+ # ADD THE FOLLOWING IN UNDER [all] if not there
+  dtparam=pciex1
+  dtparam=pciex1_gen=3
+
+ #3) REBOOT
+
+
+
+ 
+####################
+#### HAILO CHIP Setup
+####################
+##############
+# After Reboot 
+
+#1) Write and read speed command
+
+# FOR SINGLE M2 HAT
+sudo dd if=/dev/zero of=/mnt/nvme/testfile bs=1M count=1024 oflag=direct
+sudo dd if=/mnt/nvme/testfile of=/dev/null bs=1M iflag=direc
+
+# FOR DUAL M2 HAT
+sudo dd if=/dev/zero of=tempfile bs=1M count=1024 oflag=direct
+sudo dd if=/dev/zero of=tempfile bs=1M count=1024 
+
+# M.2 dual Hat	Read & Read	Write & Write	Read & Write
+# PCIe 3.0	822MB/s	716MB/s
+# PCIe 2.0	431 MB/s	389MB/s
+
+
+#2) Update Config.txt
+ sudo nano /boot/firmware/config.txt
+ADD THE FOLLOWING IN UNDER [all]  if not there
+dtparam=pciex1
+dtparam=pciex1_gen=3
+dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
+
+
+
+##############
+ # Power OFF
+ # INSTALL HAILO CHIP
+ # Power On
+
+
+1) # CHECK FOR HAILO DEVICE
+lspci
+
+
+## Install Toolkit (Both HOST and NEPI)
+sudo apt remove hailo-all hailort -y
+#sudo apt update && sudo apt update --fix-missing
+sudo apt install -f dkms -y
+sudo apt install -f hailo-all -y
+#MAYBE sudo apt install -f hailort -y
+#sudo apt update && sudo apt update --fix-missing
+
+# CHECK THAT HAILO FIRMWARE SEES HAILO HARDWARE
+
+hailortcli fw-control identify
+
+# IF YOU DON"T SEE A PRINT OUT WITH DEVICE INFO
+# try
+# sudo lspci -vvv -s 06:00.0
+# Find your device's BDF (Bus/Device/Function) using lspci (e.g., 0001:01:00.0).
+# hailortcli fw-control identify --bdf 0000:XX:00.0
+# (Replace XX with your actual device bus number). 
+# hailortcli fw-control identify --bdf 0001:06:00.0
+
+
+##############
+ # Do this from the RPI Desktop
 
 ## Get the apps
+nepihome
 git clone https://github.com/hailo-ai/hailo-apps.git
 cd hailo-apps
 sudo ./install.sh

@@ -299,7 +299,7 @@ else
     fi
 
 
-
+   
 
 
 
@@ -311,38 +311,115 @@ else
     sudo python3 -m pip install --upgrade pip
     sudo python3 -m pip install --ignore-installed ultralytics
 
-    # if ! is_valid_rpi; then
 
-    #     sudo python3 -c "import torch; print('torch is installed, version:', torch.__version__)" > /dev/null 2>&1
-    #     if [ $? -eq 0 ]; then
-    #         echo "Python torch is installed."
-    #         # Optionally, print the version:
-    #         sudo python3 -c "import torch; print('Version:', torch.__version__)"
-    #     else
-    #         echo "Python torch is NOT installed. Will install"
-    #         sudo python${NEPI_PYTHON} -m pip install --no-input torch
-    #     fi
+    if is_valid_rpi; then
+        if [[ "$NEPI_HAILO_VERSION" != '0' ]]; then
+            HAILO_VERSION=$NEPI_HAILO_VERSION
+            echo ""
+            echo "######################################"
+            echo "Installing HAILO Toolkit Version ${HAILO_VERSION} "
+            echo "######################################"
+            echo ""
+
+            sudo apt install  dkms libglib2.0-0 ffmpeg x11-utils bison flex libelf-dev \
+            libgstreamer-plugins-base1.0-dev python-gi-dev libgirepository1.0-dev libzmq3-dev gcc-9 g++-9 \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x \
+            gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio \
+            python3-gi python3-gi-cairo gir1.2-gtk-3.0 -y
+
+            cur_folder=$(pwd)
+            if [[ ! -d "${NEPI_STORAGE}/tmp" ]]; then
+                sudo mkdir - p "${NEPI_STORAGE}/tmp"
+                
+            fi
+            if [[ -d "${NEPI_STORAGE}/tmp" ]]; then
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} "${NEPI_STORAGE}/tmp"
+                cd "${NEPI_STORAGE}/tmp"
+            else
+                nepihome
+            fi
+            
+            if [[ "$HAILO_VERSION" == "8" ]]; then
+                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v4.21.0.zip"
+                hailo_folder="hailort-4.23.0"
+            elif [[ "$HAILO_VERSION" == "10" ]]; then
+                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v5.2.0.zip"
+                hailo_folder="hailort-5.2.0"
+            fi
+            hailo_zip="hailort.zip"
+
+            if [[ -f ${hailo_zip} ]]; then
+                sudo rm -r $hailo_zip
+            fi
+            if [[ ! -f ${hailo_zip} ]]; then
+                sudo wget ${hailo_link} -O ${hailo_zip}
+                if [[ "$?" -ne 0 ]]; then
+                    echo ""
+                    echo "Failed to download from link: ${hailo_link}"
+                    echo ""
+                    sudo rm ${hailo_zip}
+                fi
+            else
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $hailo_zip
+            fi
+
+            if [[ -f ${hailo_zip} ]]; then
+                echo ""
+                echo "Unzipping file ${hailo_zip}"
+                echo ""
+                sudo unzip -o -q $hailo_zip
+                if [ $? -eq 0 ]; then
+                    #sudo rm ${hailo_zip} > /dev/null 2>&1
+                    success_storage=1
+                else
+                    echo ""
+                    echo "Failed to unzip file: ${hailo_zip}"
+                    echo ""
+                    #sudo rm ${hailo_zip} > /dev/null 2>&1
+                fi
+            else
+                echo ""
+                echo "Failed to find file: ${hailo_zip}"
+                echo ""
+            fi
+
+            if [[ -f ${hailo_zip} ]]; then
+                sudo rm ${hailo_zip} > /dev/null 2>&1
+            fi
+
+            if [[ -d $hailo_folder && -n $hailo_folder ]]; then
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $hailo_folder
+                cd $hailo_folder
+                mkdir build
+                cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_EXAMPLES=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5  && sudo cmake --build build --config release --target install
+            fi
+            
+            if hailortcli fw-control identify; then
 
 
-    #     sudo python3 -c "import torchvision; print('torchvision is installed, version:', torchvision.__version__)" > /dev/null 2>&1
-    #     if [ $? -eq 0 ]; then
-    #         echo "Python torchvision is installed."
-    #         # Optionally, print the version:
-    #         python3 -c "import torchvision; print('Version:', torchvision.__version__)"
-    #     else
-    #         echo "Python torchvision is NOT installed. Will install"
-    #         sudo python${NEPI_PYTHON} -m pip install --no-input torchvision
-    #     fi
 
 
-    #     sudo python${NEPI_PYTHON} -m pip install ultralytics
-    # else
-    #     sudo python3 -m pip uninstall --upgrade torch
-    #     sudo python3 -m pip uninstall --upgrade torchvision
-    #     sudo python3 -m pip install --upgrade pip
-    #     sudo python3 -m pip install --ignore-installed ultralytics
+                    if is_valid_halio_sw; then
+                        echo ""
+                        echo "######################################"
+                        echo "Installing HAILO Apps "
+                        echo "######################################"
+                        echo ""
+                        cur_dir=$(pwd)
+                        nepihome
+                        if [[ -d 'hailo-rpi5-examples' ]]; then
+                            git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
+                            cd hailo-rpi5-examples
 
-    # fi
+                        fi
+                        cd $cur_dir
+                    fi
+            fi
+        fi
+    fi
+
 
 
     #https://github.com/ultralytics/ultralytics/issues/21015
