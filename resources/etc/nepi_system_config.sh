@@ -294,7 +294,7 @@ function udpate_config_file(){
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     update_current_config
     
-    if [[ "$SHOW_CONFIG_MENU" -eq 1 && $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$SHOW_CONFIG_MENU" -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
         echo "Configuring Setup Menu"
 
         echo ""
@@ -598,7 +598,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     done
             done
             echo ""
-    elif [[ ${NEPI_MODE} == 'HOST' && $LITE_INSTALL -eq 1 && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
+    elif [[ ${NEPI_MODE} == 'HOST' && "$NEPI_INSTALL" == 'LITE' && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
         echo "Creating a Custom NEPI SSH KEY"
         sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
         ret=$(create_ssh_key)

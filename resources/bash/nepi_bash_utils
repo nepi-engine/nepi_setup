@@ -2391,6 +2391,50 @@ function clear_known_hosts(){
 }
 export -f clear_known_hosts
 
+function get_path_type() {
+    check_path="${1}"
+    if [[ -n $check_path ]]; then
+      local target_path=$check_path
+    else
+      local target_path=$(pwd)
+    fi
+    
+    # Get the parent block device name (e.g., sda, nvme0n1, mmcblk0)
+    local dev_name
+    dev_name=$(lsblk -no PKNAME "$(findmnt -nvo SOURCE -T "$target_path")")
+    if [[ -z $dev_name ]]; then
+        dev_info=$(lsblk "$(findmnt -nvo SOURCE -T "$target_path")" | sed -n '2p')
+        dev_name=$(echo "$dev_info" | cut -d' ' -f1)
+    fi
+    #echo "dev_name at ${target_path} is ${dev_name}"
+    if [[ -z "$dev_name" ]]; then
+        echo "unknown"
+        return 1
+    fi
+
+    # Check Transport (USB/NVMe/SATA) and Rotational status
+    local transport rotational
+    transport=$(lsblk -no TRAN "/dev/$dev_name" | xargs)
+    tran=$(echo "$transport" | cut -d' ' -f1)
+    rotational=$(lsblk -no ROTA "/dev/$dev_name" | xargs)
+    rot=$(echo "$rotational" | cut -d' ' -f1)
+
+    #echo "transport at ${dev_name} is ${transport}"
+    #echo "rotational at ${dev_name} is ${rotational}"
+    # Logic to distinguish media type
+    if [[ "$tran" == "usb" ]]; then
+        echo "usb"
+    elif [[ "$dev_name" == mmcblk* ]]; then
+        echo "sd"
+    elif [[ "$rot" == "0" ]]; then
+        echo "ssd"
+    elif [[ "$rot" == "1" ]]; then
+        echo "hdd"
+    else
+        echo "unknown"
+    fi
+}
+export function get_path_type
 
 #### Update Help Test
 utilsn="${utilsn}
@@ -2412,6 +2456,7 @@ select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echo
 fix_path = Update file or folder owner to 1000 at provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_folder = Update or Make folder and contents with owner to 1000 for provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_scripts = Update files in provided FIX_PATH (or current path if not provided) with owner 1000 and +x access permissions.
+get_path_type = Return type of media at provided path or defaults to current path
 path_delete = Deletes TARGET_PATH with safe checks
 path_usage = Analyze provided path for usage
 path_space_mb = Echos available MB space for SOURCE_PATH. Echos 0 if path not vald folder
