@@ -836,6 +836,7 @@ function netsetstatic() {
 
 export -f netsetstatic
 
+
 function netsetauto() {
   netsetstatic 'auto'
   return $?
@@ -861,6 +862,175 @@ function netsetnepi() {
 }
 
 export -f netsetnepi
+
+
+
+function netlistwifi() {
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    nlist=$(ip -4 -o addr show | awk '{
+        # $netlist2 is the interface name, $4 is the IP address in CIDR format
+        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
+        printf "%-9s  %s |\n", $2, a[1] ;
+    }')
+    if is_not_blank $nlist; then
+      #echo "netlist = ${nlist}"
+      counter=0
+      new_n=1
+      last_n='lo'
+      skip=0
+      for word in $nlist; do
+        #echo "got ${word}"
+        if [[ ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
+          #echo "skipping ${word}"
+          skip=1
+        fi
+        if [[ $skip -eq 0 ]]; then
+          if [[ $counter -eq 0 ]]; then
+            aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
+            if [[ $? -eq 0 && -n $aname ]]; then
+              printf "%s " "$aname"
+            else
+              skip=1
+            fi
+          elif [[ $counter -eq 1 ]]; then
+              printf "%s " "| ${word}"
+          fi
+        fi
+        if [[ $new_n -eq 1 ]]; then
+          last_n=$word
+          new_n=0
+        fi
+        ((counter++))
+        if [[ $((counter % 3)) == 0 ]]; then
+          counter=0
+          new_n=1
+          skip=0
+          printf "\\n"
+        fi
+      done
+      # Add a final newline if the total count isn't a multiple of 3,
+      # ensuring the last line is processed.
+      if [[ $((counter % 3)) != 0 ]]; then
+        printf "\\n"
+      fi
+    else
+      echo ''
+    fi
+
+
+}
+export -f netlistwifi
+
+function netconnectwifi() {
+    new_ip_netmask="$1"
+    if [[ -z $new_ip_netmask ]]; then
+      new_ip_netmask=$REMOTE_IP
+    fi
+
+    if ! systemctl is-active --quiet NetworkManager; then
+      echo "NetworkManager not running"
+      return 1
+    fi
+
+    if [[ -n $new_ip_netmask ]]; then
+      echo "Updating wifi ip to ${new_ip_netmask}"
+      if [[ ${new_ip_netmask} != 'auto' ]]; then
+        new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
+        if ! is_valid_ipv4_netmask $new_ip_netmask; then
+          echo "Invalid Address/Netmask Combination ${net_ip}"
+          return 1
+        fi
+      fi
+    fi
+
+    selected_adapter=''
+
+    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+    # 'awk' is then used to parse the output and format it
+    nslist=$(netlistwifi) 
+    
+    if ! is_not_blank $nslist; then
+        echo "No Network Adapters Found"
+        return 1
+    fi
+    echo $nslist
+    # Set IFS to | and read into an array
+    readarray -t adapters <<< "$nslist"
+    adapters=("${adapters[@]:1}")
+ 
+    # Check if there are any files
+    if [[ ${#adapters[@]} -eq 0 ]]; then
+        echo "No Network Adapters Found"
+        return 1
+    fi
+
+    # Check if there are any adapters
+    if [[ ${#adapters[@]} -eq 1 ]]; then
+        line=${adapters[0]}
+        delimiter=" |"
+        selected_adapter=${adapter%%$delimiter*}
+    fi
+
+    if [[ -z $selected_adapter ]]; then
+      echo ""
+      echo "Select a Network Adapter to Update"
+      echo "--------------------"
+      echo ""
+      select adapter in "${adapters[@]}"; do
+          if [[ -n "$adapter" ]]; then
+              delimiter=" |"
+              selected_adapter=${adapter%%$delimiter*}
+              break
+          else
+              echo "Invalid selection. Please try again."
+          fi
+      done
+    fi
+      
+    if [[ ! -n $new_ip_netmask ]]; then
+        echo ''
+
+    fi
+    
+    # # Output the full path of the selected file
+    # if [[ -n "$selected_adapter" ]]; then
+    #     echo "Updating Network Adapter ${selected_adapter} with IP Address ${new_ip_netmask}"
+    #     if systemctl is-active --quiet NetworkManager; then
+    #       if [[ ${new_ip_netmask} == 'auto' ]]; then
+    #         cmd='sudo nmcli con mod "'${selected_adapter}'" ipv4.method auto '
+    #         echo $cmd
+    #         eval "$cmd"     
+
+    #         cmd='sudo nmcli con mod "'${selected_adapter}'" connection.autoconnect yes '
+    #         echo $cmd
+    #         eval "$cmd" 
+
+    #         cmd='sudo nmcli connection up "'${selected_adapter}'"'
+    #         #echo $cmd
+    #         eval "$cmd"     
+    #         echo ""
+    #       else
+    #         cmd='sudo nmcli connection modify "'${selected_adapter}'" \
+    #             ipv4.addresses '${new_ip_netmask}' \
+    #             ipv4.dns 8.8.8.8,8.8.4.4 \
+    #             ipv4.method manual '
+    #         echo $cmd
+    #         eval "$cmd"     
+
+    #         cmd='sudo nmcli connection up "'${selected_adapter}'"'
+    #         #echo $cmd
+    #         eval "$cmd"     
+    #         echo ""
+    #       fi
+    #     fi
+
+        return 0
+        
+    fi   
+}
+
+export -f netconnectwifi
 
 
 # ping self
@@ -1277,6 +1447,9 @@ netsetstatic = Select network adapter and set static_ip with provided IP like '1
 netsetauto = Select network adapter and set static_ip to auto'
 netsetcustom = Select network adapter and enter a custom static IP address'
 netsetnepi = Select network adapter and set static_ip to current NEPI_IP value'
+netlistwifi = list network adapters and static IP addresses
+netconnectwifi = Select wifi adapter and try to connect to the provided network and provided password
+netaccesswifi = Select wifi adapter and try to configure access point with provided name and provided password
 pinga = Check connection to provided IP address
 pingi = Check connection to internet
 pings = Check connection to Self IP address
@@ -2436,6 +2609,16 @@ function get_path_type() {
 }
 export function get_path_type
 
+function get_dfi(){
+  df -h  -x squashfs -x tmpfs -x devtmpfs -x cifs | grep -v "/boot*"
+}
+export function get_dfi
+
+function get_dfbi(){
+  df -h | grep 'boot'
+}
+export function get_dfbi
+
 #### Update Help Test
 utilsn="${utilsn}
 ################################
@@ -2456,6 +2639,8 @@ select_file_from_folder = Selection menu of files in provided SOURCE_PATH.  Echo
 fix_path = Update file or folder owner to 1000 at provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_folder = Update or Make folder and contents with owner to 1000 for provided FIX_PATH, and update access permissions with PERM_NUMBER if provided.
 fix_scripts = Update files in provided FIX_PATH (or current path if not provided) with owner 1000 and +x access permissions.
+get_dfi = Return filtered list of not boot drive info
+get_dfbi = return filterd list of boot drive info
 get_path_type = Return type of media at provided path or defaults to current path
 path_delete = Deletes TARGET_PATH with safe checks
 path_usage = Analyze provided path for usage
