@@ -170,14 +170,29 @@ fi
 
 
 if is_valid_hailo; then
-  if [[ ! -d "/lib/firmware/hailo" ]]; then
-    echo "Hailo Toolkit Not Detected"
-  else
-    echo "Enabling Hailo Accelerator Support"
-DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
-  --device=/dev/hailo0 \
-  -v /lib/firmware/hailo:/lib/firmware/hailo "
-  fi
+    hailo_sock="/tmp/hailort_uds.sock"
+    if ! is_valid_hailo_sw; then
+        echo "Hailo Toolkit Not Detected"
+    elif [[ ! -S $hailo_sock ]]; then
+        echo "Hailo Sock Not Found at ${hailo_sock}"
+    else
+        hailo_hw_version=$(get_hailo_hw_version)
+        hailo_sw_version=$(get_hailo_sw_version)
+        if [[ ${hailo_hw_version} == "0" ]]; then
+            echo "Failed to get Hailo Hardware Version"
+        elif [[ ${hailo_sw_version} == "0" ]]; then
+            echo "Failed to get Hailo Software Version"
+        else
+            echo "Found Hailo Device ${hailo_hw_version}"
+            echo "Found Hailo Software ${hailo_sw_version}"
+            echo "Enabling Hailo Accelerator Support"
+        DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
+        --device=/dev/hailo0 \
+        -v /lib/firmware/hailo:/lib/firmware/hailo \
+        -v /tmp/hailort_uds.sock:/tmp/hailort_uds.sock"
+
+        fi
+    fi
 fi 
 
 

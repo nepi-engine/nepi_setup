@@ -20,16 +20,19 @@
 
 
 
-LITE_INSTALL=$1
+
+show_menu=$1
+echo "GOT SHOW_CONFIG_MENU ${show_menu}"
+SHOW_CONFIG_MENU=0
+if [[ -n $show_menu ]]; then
+    if [[ $show_menu -eq 1 ]]; then
+        SHOW_CONFIG_MENU=1
+    elif [[ $show_menu -eq 0 ]]; then
+        SHOW_CONFIG_MENU=0
+    fi
+fi
 
 sudo -v
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $LITE_INSTALL
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -81,7 +84,7 @@ fi
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_bash_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
@@ -96,7 +99,7 @@ source /home/${CONFIG_USER}/.bashrc
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_folders_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
@@ -107,19 +110,35 @@ fi
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_files_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
 fi
 
+echo "Running Docker Cofnig in ${LITE_INSTALL},${NEPI_INSTALL}"
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh 
+source $INSTALL_CHECK_FILE $LITE_INSTALL
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
+
+echo "Running Docker Config in ${LITE_INSTALL},${NEPI_INSTALL}"
 
 ####################################
 # Run NEPI Config Setup Script
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+
+SHOW_CONFIG_MENU=0
+if [[ $LITE_INSTALL -eq 0 ]]; then
+    SHOW_CONFIG_MENU=1
+fi
+if ! source_script $script_path $SHOW_CONFIG_MENU; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 

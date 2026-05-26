@@ -19,16 +19,8 @@
 ##
 
 
-LITE_INSTALL=$1
-
 sudo -v
 
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $LITE_INSTALL
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -114,7 +106,7 @@ echo ""
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
     nepisetkey $NEPI_SSH_KEY_FILE
-    if [[ $LITE_INSTALL -eq 0 ]]; then
+    if [[ "$NEPI_HOST_USER" == 'nepihost' ]]; then
         nepiauthadd $NEPI_SSH_KEY_FILE
     fi
 

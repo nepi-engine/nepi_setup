@@ -104,6 +104,7 @@ export NEPI_SETUP_REPO_NAME='nepi_setup'
 export NEPI_SETUP_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_SETUP_REPO_NAME}"
 
 
+export HAILO_LOGGER_LEVEL=NONE
 
 
 
@@ -326,6 +327,15 @@ function is_valid_ipv4_netmask() {
 export -f is_valid_ipv4_netmask
 
 
+is_valid_net() {
+    if [[ -d "/sys/class/net/$1" ]]; then
+        return 0  # True: interface exists
+    else
+        return 1  # False: interface does not exist
+    fi
+}
+
+
 function is_valid_path() {
     local input=$1
     if [[ ! -e "$input" ]]; then
@@ -439,18 +449,43 @@ function is_valid_cuda(){
 }
 export -f is_valid_cuda
 
-function is_valid_hailo(){
-    is_valid=1
-    if lspci -k 2>/dev/null | grep -iq "hailo"; then
-      is_valid=0
-    elif [[ -d "/lib/firmware/hailo" ]]; then
-      is_valid=0
+function is_valid_hailo_hw(){
+    if ! lspci -k 2>/dev/null | grep -iq "hailo"; then
+      echo "Hailo Device Not Found"
+      return 1
     fi
-    return $is_valid
+    echo "Hailo Device Found"
+}
+export -f is_valid_hailo_hw
+
+function is_valid_hailo_sw(){
+    if hailortcli fw-control identify >/dev/null 2>&1; then
+      echo "Hailo Software Found"
+      return 0
+    else
+      echo "Hailo Software Not Found"
+      return 1
+    fi
+}
+export -f is_valid_hailo_sw
+
+function is_valid_hailo(){
+    if ! is_valid_hailo_hw; then
+      return 1
+    fi
+    if ! is_valid_hailo_sw; then
+      retun 1
+    fi
+    hailo_info=$(hailortcli fw-control identify | tr -d '\0' 2>/dev/null)
+    if [[ $? -eq 0 && -n $hailo_info ]]; then
+      echo "Hailo Softwar Found Hailo Device"
+      return 0
+    else
+      echo "Hailo Software Failed to Find Hailo Device"
+      return 1
+    fi
 }
 export -f is_valid_hailo
-
-
 
 function is_space_avail_mb(){
     local check_path=$1
@@ -551,6 +586,7 @@ is_valid_sn = Check for valid nepi serial number
 is_valid_ipv4 = Check for valid ip address
 is_valid_netmask = Check for valid ip netmask
 is_valid_ipv4_netmask = Check for valid ip and netmask
+is_valid_net = Check if passed network adapter id exists
 is_valid_path = Check for path
 is_valid_folder = Check for folder
 is_valid_file = Check for file
@@ -561,7 +597,9 @@ is_valid_rpi = Check if system is on a Raspberry Pi
 is_valid_arm64 = Check if device is arm64 arch
 is_valid_amd64 = Check if device is amd64 arch
 is_valid_cuda = Check if system has CUDA
-is_valid_hailo = Check if system has Halio Module
+is_valid_hailo_hw = Check if system has Halio Module
+is_valid_hailo_sw = Check if system has Halio Software
+is_valid_hailo = Check if Hailo software found Hailo module
 is_space_avail_mb = Check folder for REQ_SPACE in MB
 is_space_avail_gb = Check folder for REQ_SPACE in GB
 is_nepi_path = Check if path in either a nepi managed folder
@@ -1016,6 +1054,27 @@ function nnet(){
 }
 export -f nnet
 
+function nnet_release(){
+        echo "Stopping ifupdown Networking Service"
+        #sudo systemctl disable networking >/dev/null 2>&1
+        sudo systemctl stop networking >/dev/null 2>&1
+
+        echo "Restarting NetworkManager Service" 
+        if is_valid_rpi; then
+            #sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+            sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+        else
+            #sudo systemctl enable NetworkManager >/dev/null 2>&1
+            sudo systemctl restart NetworkManager >/dev/null 2>&1
+        fi
+
+        echo "Restarting netplan Service" 
+        #sudo systemctl enable netplan >/dev/null 2>&1
+        sudo systemctl restart netplan >/dev/null 2>&1
+
+}
+export -f nnet_release
+
 function ndhcp(){
   sudo -v
   if nnet; then
@@ -1227,6 +1286,7 @@ nipa= Echo NEPI set IP address
 naipa= Echo NEPI set IP alias addresses
 nnipa= Echo NEPI set NTP IP addresses
 nnet = Restart the network
+nnet_release = Stop NEPI network management until next reboot
 ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
@@ -1993,6 +2053,61 @@ function get_cuda_version(){
 export -f get_cuda_version
 
 
+function get_hailo_hw_version(){
+        hailo_version=0
+        if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
+          hailo_version=$NEPI_HAILO_VERSION
+        else
+          if is_valid_hailo  >/dev/null 2>&1; then
+            hailo_info=$(hailortcli fw-control identify 2> /dev/null | tr -d '\0' 2>/dev/null)
+            hailo_arch=$(grep -m 1 -o '.*HAILO.*' <<< "$hailo_info")
+            hailo_device="${hailo_arch#*: }"
+            if [[ -n hailo_name ]]; then
+              hailo_version="${hailo_device#*HAILO}"
+            fi
+          fi
+        fi
+        echo $hailo_version
+}
+export -f get_hailo_hw_version
+
+
+function get_hailo_sw_version(){
+        hailo_version=0
+        if is_valid_hailo  >/dev/null 2>&1; then
+          hailo_info=$(hailortcli fw-control identify  2> /dev/null | tr -d '\0' 2>/dev/null)
+          hailo_sw=$(echo $hailo_info | grep -oP 'Firmware Version: \K[0-9]+\.[0-9]+\.[0-9]+')
+          if [[ -n hailo_sw ]]; then
+            hailo_version=$hailo_sw
+          fi
+        fi
+      
+        echo $hailo_version
+}
+export -f get_hailo_sw_version
+
+function get_hailo_installed_version(){
+        hailo_version=0
+        hailo_folder="/lib/firmware/hailo"
+        if [[ -d $hailo_folder ]]; then
+          if [[ -L "${hailo_folder}/hailo8_fw.bin" ]]; then
+            hailo_path=$(readlink "${hailo_folder}/hailo8_fw.bin")
+          elif [[ -L "${hailo_folder}/hailo10_fw.bin" ]]; then
+            hailo_path=$(readlink "${hailo_folder}/hailo10_fw.bin")
+          fi
+          if [[ -n $hailo_path ]]; then
+            hailo_file="${hailo_path#*fw.}"
+            version="${hailo_file%.bin*}"
+            if [[ -n $version ]]; then
+              hailo_version=$version
+            fi
+          fi
+        fi
+        echo $hailo_version
+}
+export -f get_hailo_installed_version
+
+
 function get_openvpn_version(){
         if openvpn --version >/dev/null 2>&1; then
           value=$(openvpn --version 2>&1 | head -1 | awk '{print $2}')
@@ -2008,11 +2123,12 @@ function get_sw_desc() {
   os_desc=$(get_os_info)
   sw_desc=${os_desc}
   cuda_ver=$(get_cuda_version)
-  if [[ "$cuda_ver" != '0' ]]; then
-    sw_desc="${sw_desc}_CUDA${cuda_ver}"
+  if [[ -n $cuda_ver && "$cuda_ver" != '0' ]]; then
+    sw_desc="${sw_desc}_cuda${cuda_ver}"
   fi
-  if is_valid_hailo; then
-    sw_desc="${sw_desc}_Hailo"
+  hailo_ver=$(get_hailo_sw_version)
+  if [[ -n $hailo_ver && "$hailo_ver" != '0' ]]; then
+    sw_desc="${sw_desc}_hailo${hailo_ver}"
   fi
   sw_desc=$(clean_tag_string "$sw_desc")
   echo "${sw_desc}"
@@ -2315,6 +2431,8 @@ get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname
 get_os_info = Echos the current OS NameVersion
 get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
 get_openvpn_version = Echos OpenVPN version number if openvpn installed or 0
+get_hailo_hw_version = Echos Hailo hardware version if software finds Hailo Device or 0
+get_hailo_sw_version = Echos Hailo software version if software finds Hailo Device or 0
 get_sw_desc = Echos NEPI formated software vesion tag
 add_ssh_key = Add the ssh key in the provided full path ssh_key file
 create_ssh_key = Create a new SSH key key pair in provided key_folder

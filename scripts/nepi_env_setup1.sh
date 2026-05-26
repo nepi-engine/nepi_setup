@@ -214,7 +214,9 @@ else
         libgstreamer-plugins-base1.0-dev python3.8-dev python-dev python-numpy python3-numpy \
         libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev \
         libv4l-dev v4l-utils qv4l2 libopenblas-base libopenmpi-dev libomp-dev \
-        libopenblas-dev libxml2-dev libxslt1-dev libgpiod2 -y
+        libopenblas-dev libxml2-dev libxslt1-dev libgpiod2 pciutils libfuse2 graphviz libgraphviz-dev -y
+
+    sudo update-pciids
 
     sudo apt update
     sudo apt-get install --fix-broken -y 

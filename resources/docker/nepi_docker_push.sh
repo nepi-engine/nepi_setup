@@ -116,6 +116,9 @@ else
             elif is_valid_rpi; then
                 hub_tag="latest-rpi"
                 platform=linux/arm64
+                # if [[ $NEPI_HAS_HAILO -eq 1 ]]; then
+                #     hub_tag="latest-rpi-hailo"
+                # fi
 
             elif is_valid_arm64; then
                 hub_tag="latest-arm64"

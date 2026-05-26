@@ -62,8 +62,6 @@ if [ $? -eq 1 ]; then
     
 fi
 
-NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
 USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
 if [[ -f $USER_UTILS_SOURCE ]]; then
     source $USER_UTILS_SOURCE
@@ -152,21 +150,6 @@ fi
 
 NEPI_STATIC_IP_START=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
-
-###################
-#  Upated NEPI Config Settings
-
-
-# # This is updated by NEPI Container process
-# if is_valid_cuda; then
-#     export NEPI_HAS_CUDA=1
-#     export NEPI_CUDA_VERSION=$(get_cuda_version)
-# else
-#     export NEPI_HAS_CUDA=0
-#     export NEPI_CUDA_VERSION=0
-# fi
-# update_yaml_value "NEPI_HAS_CUDA" $NEPI_HAS_CUDA $SYSTEM_SYS_CONFIG_FILE
-# update_yaml_value "NEPI_CUDA_VERSION" $NEPI_CUDA_VERSION $SYSTEM_SYS_CONFIG_FILE
 
 
 
@@ -301,17 +284,6 @@ function udpate_config_file(){
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_VPN_ENABLED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
-
-
-    systemctl &> /dev/null
-    if [[ "$?" -eq 0 ]]; then
-    vpn_version=$(get_openvpn_version)
-        if [[ -z $vpn_version ]]; then
-            vpn_version=0
-        fi
-        export NEPI_VPN_VERSION=$vpn_version
-        update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
-    fi
 
 }
 
@@ -647,6 +619,16 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     udpate_config_file
 
+      
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+    vpn_version=$(get_openvpn_version)
+        if [[ -z $vpn_version ]]; then
+            vpn_version=0
+        fi
+        export NEPI_VPN_VERSION=$vpn_version
+        update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
+    fi
 
     print_yaml_file $SYSTEM_SYS_CONFIG_FILE
 
