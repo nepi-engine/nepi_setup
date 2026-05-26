@@ -17,24 +17,20 @@ Step 2 - Configure the M.2 Dual HAT
     https://wiki.seeedstudio.com/raspberry_pi_5_uses_pcie_hat_dual_hat/
 
 
-####################
-#### HAILO CHIP Setup
-####################
-
- ####################
- # Flash SD Card with using 'Raspberry Pi Imager'
- # Power Off RPI and Install SSD drive
- # Power On
 
 ###################
-# With the SSD drive removed
+ (OPTIONAL) Configure Boot from SSD Card
+
  sudo apt update && sudo apt upgrade -y
  sudo apt install gparted dosfstools mtools -y
  sudo rpi-eeprom-update
  #sudo apt update && sudo apt update --fix-missing
 
+
+
  sudo nano /boot/firmware/config.txt
  # ADD THE FOLLOWING IN UNDER [all] 
+ dtparam=pciex1
  dtparam=pciex1_gen=3
 
  sudo raspi-config
@@ -42,88 +38,86 @@ Step 2 - Configure the M.2 Dual HAT
  #2) Set Boot Loader to Latest Version
     **** Select 'No' when asked to reset to default version
  #3) Select Finish and Reboot
- 
- ####################
- # Flash SSD Card with using 'Raspberry Pi Imager'
- # Power Off RPI and Install SSD drive
+
+######
+ # Power OFF
+ # Flash SSD Card with using 'Raspberry Pi Imager' on Laptop
+ # Install SSD drive
  # Power On
  
- 
-df -h
-# Check for SSD nvme0n1 exists
-
 sudo rpi-eeprom-config --edit
-# CHANGE: BOOT_ORDER=0xf461
+# CHANGE: BOOT_ORDER=0xf416
 # ADD: PCIE_PROBE=1
 # Ctrl-X to save
- 
 
 
- ####################
- # Power OFF
+ # Power Off
  # Remove SD card
-
-
-
-#########################################################################
  # Power On
- 
- sudo apt update && sudo apt upgrade -y
- sudo apt update && sudo apt 
- sudo apt install gparted dosfstools mtools -y
- sudo rpi-eeprom-update
- sudo raspi-config
-
-#2) Update Config.txt
- sudo nano /boot/firmware/config.txt
- # ADD THE FOLLOWING IN UNDER [all] if not there
-  dtparam=pciex1
-  dtparam=pciex1_gen=3
-
- #3) REBOOT
 
 
-
- 
 ####################
-#### HAILO CHIP Setup
+# NEPI AUTOMATED RPI SETUP
 ####################
-##############
-# After Reboot 
 
-#1) Write and read speed command
-
-# FOR SINGLE M2 HAT
-sudo dd if=/dev/zero of=/mnt/nvme/testfile bs=1M count=1024 oflag=direct
-sudo dd if=/mnt/nvme/testfile of=/dev/null bs=1M iflag=direc
-
-# FOR DUAL M2 HAT
-sudo dd if=/dev/zero of=tempfile bs=1M count=1024 oflag=direct
-sudo dd if=/dev/zero of=tempfile bs=1M count=1024 
-
-# M.2 dual Hat	Read & Read	Write & Write	Read & Write
-# PCIe 3.0	822MB/s	716MB/s
-# PCIe 2.0	431 MB/s	389MB/s
+if is_valid_rpi; then
+    sudo apt update && sudo apt upgrade -y
+    sudo apt update && sudo apt 
+    sudo apt install gparted dosfstools mtools -y
+    sudo rpi-eeprom-update
 
 
-#2) Update Config.txt
- sudo nano /boot/firmware/config.txt
+    NEPI_IS_SSD=$(nepi_is_ssd)
+    NEPI_HAILO_HW=$(get_hailo_hw_version)
+
+
+  #***NEEDS TO BE AUTOMATED****#
+
+    sudo nano /boot/firmware/config.txt
+    ADD THE FOLLOWING IN UNDER [all]  if not there
+    dtparam=pciex1
+    dtparam=pciex1_gen=3
+    if [[ "$NEPI_HAILO_HW" != "0" ]];
+      dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
+    fi
+  #****************************#
+    
+    if [[ "$NEPI_HAILO_HW" != "0" ]];
+      sudo update-pciids
+      sudo apt remove hailo-all hailort -y
+      sudo apt install -f dkms -y
+      sudo apt install -f hailo-all -y
+      sudo apt install -f hailoort -y
+      #sudo apt update && sudo apt update --fix-missing
+    fi
+fi
+
+
+
+
+
+
+
+
+###########
+MISC TESTING
+######################################################
+#Hailo Setup
+sudo nano /boot/firmware/config.txt
 ADD THE FOLLOWING IN UNDER [all]  if not there
 dtparam=pciex1
 dtparam=pciex1_gen=3
 dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
 
-
-
-##############
- # Power OFF
- # INSTALL HAILO CHIP
- # Power On
-
+###
+# Power OFF
+# Install Hailo Module
+# Power On
 
 1) # CHECK FOR HAILO DEVICE
-lspci
 
+hailo_hw_version=$(get_hailo_hw_version)
+if 
 
 ## Install Toolkit (Both HOST and NEPI)
 sudo apt remove hailo-all hailort -y
@@ -136,15 +130,6 @@ sudo apt install -f hailo-all -y
 # CHECK THAT HAILO FIRMWARE SEES HAILO HARDWARE
 
 hailortcli fw-control identify
-
-# IF YOU DON"T SEE A PRINT OUT WITH DEVICE INFO
-# try
-# sudo lspci -vvv -s 06:00.0
-# Find your device's BDF (Bus/Device/Function) using lspci (e.g., 0001:01:00.0).
-# hailortcli fw-control identify --bdf 0000:XX:00.0
-# (Replace XX with your actual device bus number). 
-# hailortcli fw-control identify --bdf 0001:06:00.0
-
 
 ##############
  # Do this from the RPI Desktop

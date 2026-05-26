@@ -20,24 +20,8 @@
 
 
 # NEPI Docker Lite Installation script
-export LITE_INSTALL=1
 
 sudo -v
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $LITE_INSTALL
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
-
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
-source $LICENSE_CHECK_FILE 
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
 
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -134,22 +118,22 @@ fi
 ###########################################################################
 
 
-# echo ""
-# echo "########################"
-# echo "NEPI LITE Folders SETUP"
-# echo "########################"
-# echo ""
+echo ""
+echo "########################"
+echo "NEPI LITE Folders SETUP"
+echo "########################"
+echo ""
 
-# ####################################
-# # Run NEPI Files Setup Script
-# SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-# script_file=docker_folders_setup.sh
-# script_path=${SCRIPT_FOLDER}/${script_file}
-# if ! source_script $script_path $LITE_INSTALL; then
-#     script_error=$?
-#     echo "Script ${script_path} failed with error ${script_error}"
-#     return 
-# fi
+####################################
+# Run NEPI Files Setup Script
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=docker_folders_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
 
 echo ""
 echo "########################"
@@ -159,11 +143,10 @@ echo ""
 
 ####################################
 # Run NEPI Files Setup Script
-export LITE_INSTALL=1
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_files_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+if ! source_script $script_path; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 
@@ -193,9 +176,17 @@ echo ""
 # Run NEPI Config Setup Script
 export LITE_INSTALL=1
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
+source $INSTALL_CHECK_FILE $LITE_INSTALL
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
-if ! source_script $script_path $LITE_INSTALL; then
+SHOW_CONFIG_MENU=0
+if ! source_script $script_path $SHOW_CONFIG_MENU; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"
     return 

@@ -62,8 +62,6 @@ if [ $? -eq 1 ]; then
     
 fi
 
-NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
-source $NEPI_UTILS_SOURCE
 USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
 if [[ -f $USER_UTILS_SOURCE ]]; then
     source $USER_UTILS_SOURCE
@@ -621,33 +619,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     udpate_config_file
 
-    if [[ "$NEPI_MODE" == 'HOST' ]]; then
-        NEPI_HAS_HAILO=0
-        NEPI_HAILO_HW_VERSION=0
-        if is_valid_hailo; then
-            NEPI_HAS_HAILO=1
-            NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
-        fi
-        export NEPI_HAS_HAILO=$NEPI_HAS_HAILO
-        update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
-        export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
-        update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $SYSTEM_SYS_CONFIG_FILE
-    fi
-
-    if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
-        NEPI_HAS_HAILO=0
-        NEPI_HAILO_SW_VERSION=0
-        if is_valid_hailo; then
-            NEPI_HAS_HAILO=1
-            NEPI_HAILO_SW_VERSION=$(get_hailo_sw_version)
-        fi
-        export NEPI_HAS_HAILO=$NEPI_HAS_HAILO
-        update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $SYSTEM_SYS_CONFIG_FILE
-        export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
-        update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $SYSTEM_SYS_CONFIG_FILE
-    fi
-
-
+      
     systemctl &> /dev/null
     if [[ "$?" -eq 0 ]]; then
     vpn_version=$(get_openvpn_version)

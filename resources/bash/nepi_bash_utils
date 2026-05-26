@@ -1054,6 +1054,27 @@ function nnet(){
 }
 export -f nnet
 
+function nnet_release(){
+        echo "Stopping ifupdown Networking Service"
+        #sudo systemctl disable networking >/dev/null 2>&1
+        sudo systemctl stop networking >/dev/null 2>&1
+
+        echo "Restarting NetworkManager Service" 
+        if is_valid_rpi; then
+            #sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+            sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+        else
+            #sudo systemctl enable NetworkManager >/dev/null 2>&1
+            sudo systemctl restart NetworkManager >/dev/null 2>&1
+        fi
+
+        echo "Restarting netplan Service" 
+        #sudo systemctl enable netplan >/dev/null 2>&1
+        sudo systemctl restart netplan >/dev/null 2>&1
+
+}
+export -f nnet_release
+
 function ndhcp(){
   sudo -v
   if nnet; then
@@ -1265,6 +1286,7 @@ nipa= Echo NEPI set IP address
 naipa= Echo NEPI set IP alias addresses
 nnipa= Echo NEPI set NTP IP addresses
 nnet = Restart the network
+nnet_release = Stop NEPI network management until next reboot
 ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
 ninet = Restart network, connect to internet, and sync clock
@@ -2022,7 +2044,7 @@ function get_cuda_version(){
           declare -a files
           for file in "$cuda_path"/*; do
               if [[ -d "$file" && "$file" == *cuda-* ]]; then # Check if the item is a regular file
-                  cuda_version="CUDA"${file##*-}
+                  cuda_version=${file##*-}
               fi
           done
           echo $cuda_version
@@ -2039,9 +2061,9 @@ function get_hailo_hw_version(){
           if is_valid_hailo  >/dev/null 2>&1; then
             hailo_info=$(hailortcli fw-control identify 2> /dev/null | tr -d '\0' 2>/dev/null)
             hailo_arch=$(grep -m 1 -o '.*HAILO.*' <<< "$hailo_info")
-            hailo_name="${hailo_arch#*: }"
+            hailo_device="${hailo_arch#*: }"
             if [[ -n hailo_name ]]; then
-              hailo_version=$hailo_name
+              hailo_version="${hailo_device#*HAILO}"
             fi
           fi
         fi
@@ -2052,20 +2074,38 @@ export -f get_hailo_hw_version
 
 function get_hailo_sw_version(){
         hailo_version=0
-        if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
-          hailo_version=$NEPI_HAILO_VERSION
-        else
-          if is_valid_hailo  >/dev/null 2>&1; then
-            hailo_info=$(hailortcli fw-control identify  2> /dev/null | tr -d '\0' 2>/dev/null)
-            hailo_sw=$(echo $hailo_info | grep -oP 'Firmware Version: \K[0-9]+\.[0-9]+\.[0-9]+')
-            if [[ -n hailo_sw ]]; then
-              hailo_version=$hailo_sw
+        if is_valid_hailo  >/dev/null 2>&1; then
+          hailo_info=$(hailortcli fw-control identify  2> /dev/null | tr -d '\0' 2>/dev/null)
+          hailo_sw=$(echo $hailo_info | grep -oP 'Firmware Version: \K[0-9]+\.[0-9]+\.[0-9]+')
+          if [[ -n hailo_sw ]]; then
+            hailo_version=$hailo_sw
+          fi
+        fi
+      
+        echo $hailo_version
+}
+export -f get_hailo_sw_version
+
+function get_hailo_installed_version(){
+        hailo_version=0
+        hailo_folder="/lib/firmware/hailo"
+        if [[ -d $hailo_folder ]]; then
+          if [[ -L "${hailo_folder}/hailo8_fw.bin" ]]; then
+            hailo_path=$(readlink "${hailo_folder}/hailo8_fw.bin")
+          elif [[ -L "${hailo_folder}/hailo10_fw.bin" ]]; then
+            hailo_path=$(readlink "${hailo_folder}/hailo10_fw.bin")
+          fi
+          if [[ -n $hailo_path ]]; then
+            hailo_file="${hailo_path#*fw.}"
+            version="${hailo_file%.bin*}"
+            if [[ -n $version ]]; then
+              hailo_version=$version
             fi
           fi
         fi
         echo $hailo_version
 }
-export -f get_hailo_sw_version
+export -f get_hailo_installed_version
 
 
 function get_openvpn_version(){
@@ -2084,11 +2124,11 @@ function get_sw_desc() {
   sw_desc=${os_desc}
   cuda_ver=$(get_cuda_version)
   if [[ -n $cuda_ver && "$cuda_ver" != '0' ]]; then
-    sw_desc="${sw_desc}_${cuda_ver}"
+    sw_desc="${sw_desc}_cuda${cuda_ver}"
   fi
   hailo_ver=$(get_hailo_sw_version)
   if [[ -n $hailo_ver && "$hailo_ver" != '0' ]]; then
-    sw_desc="${sw_desc}_${hailo_ver}"
+    sw_desc="${sw_desc}_hailo${hailo_ver}"
   fi
   sw_desc=$(clean_tag_string "$sw_desc")
   echo "${sw_desc}"

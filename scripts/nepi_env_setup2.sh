@@ -313,11 +313,12 @@ else
 
 
     if is_valid_rpi; then
-        if [[ "$NEPI_HAILO_VERSION" != '0' ]]; then
-            HAILO_VERSION=$NEPI_HAILO_VERSION
+        sudo update-pciids
+        HAILO_SW_VERION=$(get_hailo_installed_version)
+        if [[ "$HAILO_SW_VERION" != '0' ]]; then
             echo ""
             echo "######################################"
-            echo "Installing HAILO Toolkit Version ${HAILO_VERSION} "
+            echo "Installing hailort Version ${HAILO_SW_VERION} "
             echo "######################################"
             echo ""
 
@@ -341,13 +342,9 @@ else
                 nepihome
             fi
             
-            if [[ "$HAILO_VERSION" == "8" ]]; then
-                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v4.21.0.zip"
-                hailo_folder="hailort-4.23.0"
-            elif [[ "$HAILO_VERSION" == "10" ]]; then
-                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v5.2.0.zip"
-                hailo_folder="hailort-5.2.0"
-            fi
+            hailo_version=
+            hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${HAILO_SW_VERION}.zip"
+            hailo_folder="hailort-${HAILO_SW_VERION}"
             hailo_zip="hailort.zip"
 
             if [[ -f ${hailo_zip} ]]; then

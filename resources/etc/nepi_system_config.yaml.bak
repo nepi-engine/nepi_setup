@@ -89,14 +89,21 @@ NEPI_WIFI_ACCESS_POINT_PW: nepi_device_ap
 # NEPI SOFTWARE Config
 ####################################################
 NEPI_INSTALL: unknown
-NEPI_PYTHON: X.X
+NEPI_PYTHON: 0
 
 NEPI_HAS_CUDA: 0
-NEPI_CUDA_VERSION: X.X
+NEPI_CUDA_VERSION: 0
+
 NEPI_HAS_XPU: 0
+
+NEPI_HAS_HAILO: 0
+NEPI_HAILO_HW_VERSION: 0
+NEPI_HAILO_SW_VERSION: 0
+
 NEPI_FS_AB: 0
 NEPI_VPN_ENABLED: 0
 NEPI_VPN_VERSION: 0
+
 
 ####################################################
 # NEPI ROS SOFTWARE Config
@@ -150,6 +157,8 @@ NEPI_BOOT_TIME: 60
 ####################################################
 # NEPI MANAGED SERVICES 
 ####################################################
+NEPI_MANAGES_SERVICES: unknown
+# NEPI_MANAGES options are unknown(not set),0(disabled),1(enabled) and used during NEPI Host Build process.
 # Set NEPI_MANAGES_XXX service values beow to 0 or 1 to turn off or on NEPI management of that service
 # Note, if disabled:
 #    that system service configuration must be done manually.

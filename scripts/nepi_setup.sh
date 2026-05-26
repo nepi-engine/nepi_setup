@@ -18,20 +18,20 @@
 ## - mailto:nepi@numurus.com
 ##
 
-LITE_INSTALL=$1
+show_menu=$1
+echo "GOT SHOW_CONFIG_MENU ${show_menu}"
+SHOW_CONFIG_MENU=0
+if [[ -n $show_menu ]]; then
+    if [[ $show_menu -eq 1 ]]; then
+        SHOW_CONFIG_MENU=1
+    elif [[ $show_menu -eq 0 ]]; then
+        SHOW_CONFIG_MENU=0
+    fi
+fi
 
 
 sudo -v
 
-
-SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
-source $INSTALL_CHECK_FILE $LITE_INSTALL
-if [[ "$?" -ne 0 ]]; then
-    return 
-fi
-
-echo "Running NEPI Setup in ${LITE_INSTALL},${NEPI_INSTALL}"
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -73,10 +73,6 @@ elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
         echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
     fi
 fi
-
-
-
-
 
 
 #######################################################################################
@@ -182,9 +178,15 @@ NEPI_SYS_CONFIG_LOAD=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
 if ! source_script $NEPI_SYS_CONFIG_LOAD; then
     script_error=$?
     echo "Script ${NEPI_SYS_CONFIG_LOAD} failed with error ${script_error}"
+    return
 fi
 
-
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+INSTALL_CHECK_FILE=${SCRIPT_FOLDER}/nepi_install_check.sh
+source $INSTALL_CHECK_FILE
+if [[ "$?" -ne 0 ]]; then
+    return 
+fi
 
 
 echo ""
@@ -195,351 +197,629 @@ echo "########################"
 ################################
 # Update ETC files if systemd is running (Not in Container)
 
-
-
-
-if [[ $LITE_INSTALL -eq 1 && "$NEPI_HOST_USER" == 'nepihost' ]]; then
-    NEPI_INSTALL=LITE
-    SERVICES_MANAGED=0
+# echo "Running NEPI Setup in ${LITE_INSTALL},${NEPI_INSTALL}"
+echo "Got NEPI_MANAGES_SERVICES ${NEPI_MANAGES_SERVICES},${CONFIG_USER}"
+if [[ "$NEPI_INSTALL" == 'FULL' && "$CONFIG_USER" == 'nepihost' ]]; then
+    echo "Configuring settings for ${NEPI_INSTALL} Mode"
+    if [[ "$NEPI_MANAGES_SERVICES" == "unknown" ]]; then
+        echo "Configuring default service settings"
+        SHOW_CONFIG_MENU=1
+        NEPI_MANAGES_USERS=1
+        NEPI_MANAGES_HOSTNAME=1
+        NEPI_MANAGES_NETWORK=1
+        NEPI_MANAGES_TIME=1
+        NEPI_MANAGES_SSH=1
+        NEPI_MANAGES_SHARE=1
+        NEPI_MANAGES_SOFTWARE=1
+        NEPI_MANAGES_DOCKER=1
+    fi
+    NEPI_MANAGES_SERVICES=1
 else
-    NEPI_INSTALL=FULL
-    SERVICES_MANAGED=1
+    NEPI_INSTALL=LITE
+    echo "Configuring settings for ${NEPI_INSTALL} Mode"
+    NEPI_MANAGES_SERVICES=0
+    NEPI_MANAGES_USERS=0
+    NEPI_MANAGES_HOSTNAME=0
+    NEPI_MANAGES_NETWORK=0
+    NEPI_MANAGES_TIME=0
+    NEPI_MANAGES_SSH=0
+    NEPI_MANAGES_SHARE=0
+    NEPI_MANAGES_SOFTWARE=0
+    NEPI_MANAGES_DOCKER=0
 fi
-echo ""
-echo "Running setup in ${NEPI_INSTALL} mode"
-echo "NEPI MANAGES SERVICES ${SERVICES_MANAGED}"
+
+# echo ""
+# echo "Starting Config Settings for ${NEPI_INSTALL} Mode"
+# echo "NEPI_MANAGES_USERS: ${NEPI_MANAGES_USERS}"
+# echo "NEPI_MANAGES_HOSTNAME: ${NEPI_MANAGES_HOSTNAME}"
+# echo "NEPI_MANAGES_NETWORK: ${NEPI_MANAGES_NETWORK}"
+# echo "NEPI_MANAGES_TIME: ${NEPI_MANAGES_TIME}"
+# echo "NEPI_MANAGES_SSH: ${NEPI_MANAGES_SSH}"
+# echo "NEPI_MANAGES_SHARE: ${NEPI_MANAGES_SHARE}"
+# echo "NEPI_MANAGES_SOFTWARE: ${NEPI_MANAGES_SOFTWARE}"
+# echo "NEPI_MANAGES_DOCKER: ${NEPI_MANAGES_DOCKER}" 
+
+NEPI_SERVICE_CONFIGS=(
+CURRENT_NEPI_MANAGES_USERS \
+NEPI_MANAGES_HOSTNAME \
+NEPI_MANAGES_NETWORK \
+NEPI_MANAGES_TIME \
+NEPI_MANAGES_SSH \
+NEPI_MANAGES_SHARE \
+NEPI_MANAGES_SOFTWARE \
+NEPI_MANAGES_DOCKER 
+
+)
+
+function update_current_config() {
+    CURRENT_NEPI_MANAGES_USERS="$NEPI_MANAGES_USERS"
+    CURRENT_NEPI_MANAGES_HOSTNAME="$NEPI_MANAGES_HOSTNAME"
+    CURRENT_NEPI_MANAGES_NETWORK="$NEPI_MANAGES_NETWORK"
+    CURRENT_NEPI_MANAGES_TIME="$NEPI_MANAGES_TIME"
+    CURRENT_NEPI_MANAGES_SSH="$NEPI_MANAGES_SSH"
+    CURRENT_NEPI_MANAGES_SHARE="$NEPI_MANAGES_SHARE"
+    CURRENT_NEPI_MANAGES_SOFTWARE="$NEPI_MANAGES_SOFTWARE"
+    CURRENT_NEPI_MANAGES_DOCKER="$NEPI_MANAGES_DOCKER"
+}     
+
+function print_user_config(){
+    config_file=${SYSTEM_SYS_CONFIG_FILE}
+    if [ -f "$config_file" ]; then
+        CONFIGN="#############################
+        ## NEPI Config Settings ##
+        #############################
+        FILE=${config_file}"
+
+        keys=($(yq e 'keys | .[]' ${config_file}))
+        for key in "${keys[@]}"; do
+
+            IF key in NEPI_SERVICE_CONFIGS then
+
+                value=$(yq e '.'"$key"'' $config_file)
+                echo "${key}=${value}"
+                CONFIGN="${CONFIGN}
+                ${key}=${!key}"
+        done
+        echo $CONFIG
+    else
+        echo "Config file not found ${config_file}"
+    fi
+}
+
+function print_current_config(){
+    echo ""
+    echo "######################"
+    echo "Current Settings"
+    echo "######################"
+    echo "NEPI_MANAGES_USERS: ${CURRENT_NEPI_MANAGES_USERS}"
+    echo "NEPI_MANAGES_HOSTNAME: ${CURRENT_NEPI_MANAGES_HOSTNAME}"
+    echo "NEPI_MANAGES_NETWORK: ${CURRENT_NEPI_MANAGES_NETWORK}"
+    echo "NEPI_MANAGES_TIME: ${CURRENT_NEPI_MANAGES_TIME}"
+    echo "NEPI_MANAGES_SSH: ${CURRENT_NEPI_MANAGES_SSH}"
+    echo "NEPI_MANAGES_SHARE: ${CURRENT_NEPI_MANAGES_SHARE}"
+    echo "NEPI_MANAGES_SOFTWARE: ${CURRENT_NEPI_MANAGES_SOFTWARE}"
+    echo "NEPI_MANAGES_DOCKER: ${CURRENT_NEPI_MANAGES_DOCKER}" 
+    echo ""
+}
 
 
-    echo "Updating NEPI Config File"
+function udpate_config_file(){
+    echo "Updating nepi system config values in file ${SYSTEM_SYS_CONFIG_FILE}"
 
-    NEPI_MANAGES_USERS=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_USERS ))
+
+    NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
+    export NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
+    update_yaml_value "NEPI_MANAGES_SERVICES" $NEPI_MANAGES_SERVICES $NEPI_SYS_CONFIG_FILE
+
+    NEPI_MANAGES_USERS=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_USERS ))
     export NEPI_MANAGES_USERS=$NEPI_MANAGES_USERS
     update_yaml_value "NEPI_MANAGES_USERS" $NEPI_MANAGES_USERS $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_HOSTNAME=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_HOSTNAME ))
+    NEPI_MANAGES_HOSTNAME=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_HOSTNAME ))
     export NEPI_MANAGES_HOSTNAME=$NEPI_MANAGES_HOSTNAME
     update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_NETWORK=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_NETWORK ))
+    NEPI_MANAGES_NETWORK=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_NETWORK ))
     export NEPI_MANAGES_NETWORK=$NEPI_MANAGES_NETWORK
     update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_TIME=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_TIME ))
+    NEPI_MANAGES_TIME=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_TIME ))
     export NEPI_MANAGES_TIME=$NEPI_MANAGES_TIME
     update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_SSH=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_SSH ))
+    NEPI_MANAGES_SSH=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SSH ))
     export NEPI_MANAGES_SSH=$NEPI_MANAGES_SSH
     update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_SHARE=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_SHARE ))
+    NEPI_MANAGES_SHARE=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SHARE ))
     export NEPI_MANAGES_SHARE=$NEPI_MANAGES_SHARE
     update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_SOFTWARE=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_SOFTWARE ))
+    NEPI_MANAGES_SOFTWARE=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SOFTWARE ))
     export NEPI_MANAGES_SOFTWARE=$NEPI_MANAGES_SOFTWARE
-    update_yaml_value "NENEPI_MANAGES_USERSPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
 
-    NEPI_MANAGES_DOCKER=$SERVICES_MANAGED #$(( SERVICES_MANAGED & NEPI_MANAGES_DOCKER ))
+    NEPI_MANAGES_DOCKER=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_DOCKER ))
     export NEPI_MANAGES_DOCKER=$NEPI_MANAGES_DOCKER
     update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
 
+}
+
+#####################################
+# Update NEPI System Config if needed
+#####################################
+
 echo ""
-echo "NEPI_MANAGES_USERS ${NEPI_MANAGES_USERS}"
-echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
-echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
-echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
-echo "NEPI_MANAGES_SSH ${NEPI_MANAGES_SSH}"
-echo "NEPI_MANAGES_SHARE ${NEPI_MANAGES_SHARE}"
-echo "NEPI_MANAGES_SOFTWARE ${NEPI_MANAGES_SOFTWARE}"
-echo "NEPI_MANAGES_DOCKER ${NEPI_MANAGES_DOCKER}"
+echo "Running setup in ${NEPI_INSTALL} mode"
+echo "NEPI MANAGES SERVICES ${NEPI_MANAGES_SERVICES}"
+
+update_current_config
+
+if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
+    echo "Configuring Managed Services Menu"
+
+    echo ""
+    PS3=$'\n'"Please enter your choice by NUMBER: "
+    options=(   "Update NEPI_MANAGES_USERS" "Update NEPI_MANAGES_HOSTNAME" "Update NEPI_MANAGES_NETWORK" "Update NEPI_MANAGES_TIME"\
+                "Update NEPI_MANAGES_SSH" "Update NEPI_MANAGES_SHARE" "Update NEPI_MANAGES_SOFTWARE" "Update NEPI_MANAGES_DOCKER"\
+                "ENABLE_ALL" "DISABLE_ALL" "APPLY SETTINGS" )
+
+
+    while true; do
+        #clear # Optional: Clear the screen before displaying the menu
+
+        print_current_config
+        COLUMNS=1
+        select opt in "${options[@]}" ; do
+            case $opt in
+
+
+                        "Update NEPI_MANAGES_USERS")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_USERS=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_HOSTNAME")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_HOSTNAME=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_NETWORK")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_NETWORK=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_TIME")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_TIME=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_SSH")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_SSH=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_SHARE")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_SHARE=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_SOFTWARE")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_SOFTWARE=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Update NEPI_MANAGES_DOCKER")
+                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                CURRENT_NEPI_MANAGES_DOCKER=$USER_INPUT
+                                echo ""
+                                break # Exit the select statement, re-display menu
+                            
+                            else
+                                echo "Not A Valid Input"
+                            fi           
+                        ;;
+                        "Enable All")
+                            CURRENT_NEPI_MANAGES_USERS=1
+                            CURRENT_NEPI_MANAGES_HOSTNAME=1
+                            CURRENT_NEPI_MANAGES_NETWORK=1
+                            CURRENT_NEPI_MANAGES_TIME=1
+                            CURRENT_NEPI_MANAGES_SSH=1
+                            CURRENT_NEPI_MANAGES_SHARE=1
+                            CURRENT_NEPI_MANAGES_SOFTWARE=1
+                            CURRENT_NEPI_MANAGES_DOCKER=1
+                            break # Exit the select statement, re-display menu   
+                        ;;
+                        "Disable All")
+                            CURRENT_NEPI_MANAGES_USERS=0
+                            CURRENT_NEPI_MANAGES_HOSTNAME=0
+                            CURRENT_NEPI_MANAGES_NETWORK=0
+                            CURRENT_NEPI_MANAGES_TIME=0
+                            CURRENT_NEPI_MANAGES_SSH=0
+                            CURRENT_NEPI_MANAGES_SHARE=0
+                            CURRENT_NEPI_MANAGES_SOFTWARE=0
+                            CURRENT_NEPI_MANAGES_DOCKER=0
+                            break # Exit the select statement, re-display menu   
+                        ;;
+
+
+                        "APPLY SETTINGS")
+                            break 2 # Exit both the select and the while loop
+                            ;;
+                        *)
+                            echo "Invalid option, please try again."
+                            ;;
+                    esac
+                done
+        done
+        echo ""
+
+fi
+
+udpate_config_file
+
+print_current_config
+
+
+# echo ""
+# echo "NEPI_MANAGES_USERS ${NEPI_MANAGES_USERS}"
+# echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
+# echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
+# echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
+# echo "NEPI_MANAGES_SSH ${NEPI_MANAGES_SSH}"
+# echo "NEPI_MANAGES_SHARE ${NEPI_MANAGES_SHARE}"
+# echo "NEPI_MANAGES_SOFTWARE ${NEPI_MANAGES_SOFTWARE}"
+# echo "NEPI_MANAGES_DOCKER ${NEPI_MANAGES_DOCKER}"
 
 
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
 
-    if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
-        echo ""
-        echo "########"
-        echo "Updating Time Management service config"
-        echo "Disable systemd-timesyncd time management"
-        sudo systemctl disable systemd-timesyncd  >/dev/null 2>&1
-        sudo systemctl stop systemd-timesyncd  >/dev/null 2>&1
+    if [[ $NEPI_MANAGES_SERVICES -eq 1 ]]; then
+            if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
+                echo ""
+                echo "########"
+                echo "Updating Time Management service config"
+                echo "Disable systemd-timesyncd time management"
+                sudo systemctl disable systemd-timesyncd  >/dev/null 2>&1
+                sudo systemctl stop systemd-timesyncd  >/dev/null 2>&1
 
-        echo "Enabling Chrony Time Services"
-        sudo systemctl enable chrony
-        sudo systemctl start chrony
+                echo "Enabling Chrony Time Services"
+                sudo systemctl enable chrony
+                sudo systemctl start chrony
 
-        sudo ufw allow 123 >/dev/null 2>&1
+                sudo ufw allow 123 >/dev/null 2>&1
 
+            fi
+
+
+            if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+                echo ""
+                echo "########"
+                echo "Updating Network Services"
+
+                echo "Disabling NetworkManager Service" 
+                if is_valid_rpi; then
+                    sudo systemctl disable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+                    sudo systemctl stop NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+                else
+                    sudo systemctl disable NetworkManager >/dev/null 2>&1
+                    sudo systemctl stop NetworkManager >/dev/null 2>&1
+                fi
+
+                echo "Disabling netplan Service" 
+                sudo systemctl disable netplan >/dev/null 2>&1
+                sudo systemctl stop netplan >/dev/null 2>&1
+                
+                echo "Enabling ifupdown Networking Service"
+                sudo systemctl enable networking
+                wait
+                sleep 2
+
+                # echo "Updating Wired Static IP Addresses"
+                # source /opt/nepi/etc/scripts/update_etc_wired_static.sh
+
+                # echo "Updating Wired Alias IP Addresses"
+                # source /opt/nepi/etc/scripts/update_etc_wired_aliases.sh
+
+                echo "Restarting networking service"
+                sudo systemctl restart networking
+            else
+
+                echo "Disabling ifupdown Networking Service"
+                sudo systemctl disable networking >/dev/null 2>&1
+                sudo systemctl stop networking >/dev/null 2>&1
+
+                echo "Enabling NetworkManager Service" 
+                if is_valid_rpi; then
+                    sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+                    sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+                else
+                    sudo systemctl enable NetworkManager >/dev/null 2>&1
+                    sudo systemctl restart NetworkManager >/dev/null 2>&1
+                fi
+
+                echo "Enabling netplan Service" 
+                sudo systemctl enable netplan >/dev/null 2>&1
+                sudo systemctl restart netplan >/dev/null 2>&1
+
+            fi
+
+
+            if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
+                echo ""
+                echo "########"
+                echo "Updating SSH Service Config"
+                echo ""
+
+
+                
+                if [[ "$CONFIG_USER" != "nepi" ]]; then
+                    source_file=${SOURCE_ETC_PATH}/docker/ssh/sshd_config 
+                else
+                    source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
+                fi
+                dest_file=/etc/ssh/sshd_config
+                if [[ -f "$source_file" ]]; then
+                    sudo cp $source_file $dest_file
+                fi
+
+                if [[ ! -f "/run/sshd" ]]; then
+                    sudo mkdir "/run/sshd" >/dev/null 2>&1
+                fi
+                sudo chmod 0755 /run/sshd >/dev/null 2>&1
+                sudo chown root:root /run/sshd >/dev/null 2>&1
+                if [[ ! -f "/var/run/sshd" ]]; then
+                    sudo mkdir "/var/run/sshd" >/dev/null 2>&1
+                fi
+                sudo chmod 0755 /var/run/sshd >/dev/null 2>&1
+                sudo chown root:root /var/run/sshd >/dev/null 2>&1
+
+                echo "Enabling ssh service"
+                sudo systemctl enable sshd >/dev/null 2>&1        
+                sudo systemctl start sshd
+
+                sudo ufw allow 22 >/dev/null 2>&1
+                sudo ufw allow 2222 >/dev/null 2>&1
+
+            fi
+
+
+            if [[ "$CONFIG_USER" != "nepi" ]]; then
+
+                echo ""
+                echo "########"
+                echo "Updating Docker Service Config"
+                echo ""
+
+
+                echo "Stopping Docker Service"
+                sudo systemctl stop docker
+                sudo systemctl stop docker.socket       
+
+
+
+                if [[ ! -f "/etc/docker/daemon.json.org" && -f "/etc/docker/daemon.json" ]]; then
+                    sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
+                fi
+
+                
+                if is_valid_cuda; then
+                    sudo nvidia-ctk runtime configure --runtime=docker
+                fi
+
+            fi
+
+            # if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" != "nepi" ]]; then
+            #     Set docker service root location
+            #     https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
+            #     https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
+
+            #     # Update docker file
+            #     echo "Setting Docker File Path to ${NEPI_DOCKER}"
+            #     echo "Updating docker file /etc/default/docker"
+            #     FILE=/etc/default/docker
+            #     UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
+            #     echo $UPDATE
+            #     KEY=DOCKER_OPTS
+            #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+            #     KEY='#DOCKER_OPTS'
+            #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+
+
+            #     ## Update docker service file
+            #     echo "Updating docker file /usr/lib/systemd/system/docker.service"
+            #     FILE=/usr/lib/systemd/system/docker.service
+
+
+            #     KEY=RequiresMountsFor
+            #     UPDATE="RequiresMountsFor=${NEPI_DOCKER}"
+
+            #     if grep -q "${KEY}" $FILE; then
+            #         echo "Updating Docker Required Mounts with ${UPDATE}"
+            #         sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+            #     else
+            #         echo "Adding Docker Required Mounts with ${UPDATE}"
+            #         sudo sed -i '/Requires=docker.socket/a\'${UPDATE} $FILE
+            #     fi
+
+            #     KEY=ExecStart
+            #     UPDATE="ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=${NEPI_DOCKER}"
+            #     echo $UPDATE
+            #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
+            
+            # fi
+
+            if [[ "$CONFIG_USER" != "nepi" ]]; then
+
+                echo ""
+                echo "Enabling Docker Service"
+                sudo systemctl daemon-reload
+                sudo systemctl start docker.socket
+                sudo systemctl start docker
+                
+
+                #########Test Docker install###########
+                #sudo systemctl status docker
+                # sudo docker pull hello-world
+                # sudo docker container run hello-world
+
+                # #Some Debug Commands
+                # sudo dockerd --debug
+                # sudo cat /etc/docker/daemon.json
+
+                # sudo systemctl stop docker
+                # sudo systemctl stop docker.socket
+                # sudo systemctl daemon-reload
+                # sudo systemctl start docker.socket
+                # sudo systemctl start docker
+                # sudo systemctl status docker
+                # sudo docker info
+            fi
+
+            if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
+
+                echo ""
+                echo "########"
+                echo "Configuring Samba Service"
+
+
+                echo "Updating Samba ETC config file"
+                if [[ "$CONFIG_USER" == "nepi" ]]; then
+                    source_file=${SOURCE_ETC_PATH}/samba/smb.conf
+                else
+                    source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
+                fi
+
+                dest_file=/etc/samba/smb.conf
+                if [[ -f "$source_file" ]]; then
+                    sudo cp -d $source_file $dest_file
+                fi
+
+
+                SYSTEMD_SERVICE_PATH=/etc/systemd/system
+
+
+                sudo systemctl enable smbd
+                sudo systemctl restart smbd
+                
+
+                echo "Updating Samba Passwords"
+                samba_user=$NEPI_USER
+                samba_pw=$NEPI_USER_PW
+                default_pw='nepi'
+                if check_password $samba_user $default_pw; then
+                    samba_pw=$default_pw
+                fi
+                echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+                if [[ ${samba_pw} != 'encrypted' ]]; then
+                    echo "Updating Samba User ${samba_user}"
+                    echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
+                # else
+                #     sudo smbpasswd -a "$NEPI_USER"
+                fi
+                sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
+
+
+                samba_user=$NEPI_HOST_USER
+                samba_pw=$NEPI_HOST_PW
+                default_pw='nepi'
+                if check_password $samba_user $default_pw; then
+                    samba_pw=$default_pw
+                fi
+                echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+                if [[ ${samba_pw} != 'encrypted' ]]; then
+                    echo "Updating Samba User ${samba_user}"
+                    echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
+                # else
+                #     sudo smbpasswd -a "$NEPI_USER"
+                fi
+                sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
+
+                samba_user=$NEPI_ADMIN_USER
+                samba_pw=$NEPI_ADMIN_PW
+                default_pw='nepiadmin'
+                if check_password $samba_user $default_pw; then
+                    samba_pw=$default_pw
+                fi
+                echo "Updating Samba User ${samba_user} Password ${samba_pw}"
+                if [[ ${samba_pw} != 'encrypted' ]]; then
+                    echo "Updating Samba User ${samba_user}"
+                    echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
+                # else
+                #     sudo smbpasswd -a "$NEPI_USER"
+                fi
+                sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
+
+                sudo ufw allow 445 >/dev/null 2>&1
+                sudo systemctl restart sshd
+
+            fi
+
+            #Open other required ports
+            sudo ufw allow 137 >/dev/null 2>&1
+            sudo ufw allow 138 >/dev/null 2>&1
+            sudo ufw allow 139 >/dev/null 2>&1
+
+            # Open ROS Ports
+            sudo ufw allow 11311 >/dev/null 2>&1
+
+            # Open RUI Ports
+            sudo ufw allow 5003 >/dev/null 2>&1
+            sudo ufw allow 9090 >/dev/null 2>&1
+            sudo ufw allow 9091 >/dev/null 2>&1
+            sudo ufw allow 9092 >/dev/null 2>&1
+
+
+            # Enable Firewall
+            # sudo ufw --force enable
+            # echo "Enabled network firewall with ports"
+            # echo $(sudo ufw status)
     fi
-
-
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
-        echo ""
-        echo "########"
-        echo "Updating Network Services"
-
-        echo "Disabling NetworkManager Service" 
-        if is_valid_rpi; then
-            sudo systemctl disable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-            sudo systemctl stop NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-        else
-            sudo systemctl disable NetworkManager >/dev/null 2>&1
-            sudo systemctl stop NetworkManager >/dev/null 2>&1
-        fi
-
-        echo "Disabling netplan Service" 
-        sudo systemctl disable netplan >/dev/null 2>&1
-        sudo systemctl stop netplan >/dev/null 2>&1
-           
-        echo "Enabling ifupdown Networking Service"
-        sudo systemctl enable networking
-        wait
-        sleep 2
-
-        # echo "Updating Wired Static IP Addresses"
-        # source /opt/nepi/etc/scripts/update_etc_wired_static.sh
-
-        # echo "Updating Wired Alias IP Addresses"
-        # source /opt/nepi/etc/scripts/update_etc_wired_aliases.sh
-
-        echo "Restarting networking service"
-        sudo systemctl restart networking
-
-    fi
-
-    if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
-        echo ""
-        echo "########"
-        echo "Updating SSH Service Config"
-        echo ""
-
-
-        
-        if [[ "$CONFIG_USER" != "nepi" ]]; then
-            source_file=${SOURCE_ETC_PATH}/docker/ssh/sshd_config 
-        else
-            source_file=${SOURCE_ETC_PATH}/ssh/sshd_config
-        fi
-        dest_file=/etc/ssh/sshd_config
-        if [[ -f "$source_file" ]]; then
-            sudo cp $source_file $dest_file
-        fi
-
-        if [[ ! -f "/run/sshd" ]]; then
-            sudo mkdir "/run/sshd"
-        fi
-        sudo chmod 0755 /run/sshd
-        sudo chown root:root /run/sshd
-        if [[ ! -f "/var/run/sshd" ]]; then
-            sudo mkdir "/var/run/sshd"
-        fi
-        sudo chmod 0755 /var/run/sshd
-        sudo chown root:root /var/run/sshd
-
-        echo "Enabling ssh service"
-        sudo systemctl enable sshd >/dev/null 2>&1        
-        sudo systemctl start sshd
-
-        sudo ufw allow 22 >/dev/null 2>&1
-        sudo ufw allow 2222 >/dev/null 2>&1
-
-    fi
-
-
-    if [[ "$CONFIG_USER" != "nepi" ]]; then
-
-        echo ""
-        echo "########"
-        echo "Updating Docker Service Config"
-        echo ""
-
-
-        echo "Stopping Docker Service"
-        sudo systemctl stop docker
-        sudo systemctl stop docker.socket       
-
-
-
-        if [[ ! -f "/etc/docker/daemon.json.org" && -f "/etc/docker/daemon.json" ]]; then
-            sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
-        fi
-
-        
-        if is_valid_cuda; then
-            sudo nvidia-ctk runtime configure --runtime=docker
-        fi
-
-    fi
-
-    # if [[   "$NEPI_MANAGES_DOCKER" -eq 1 && "$CONFIG_USER" != "nepi" ]]; then
-    #     Set docker service root location
-    #     https://stackoverflow.com/questions/44010124/where-does-docker-store-its-temp-files-during-extraction
-    #     https://forums.docker.com/t/how-do-i-change-the-docker-image-installation-directory/1169
-
-    #     # Update docker file
-    #     echo "Setting Docker File Path to ${NEPI_DOCKER}"
-    #     echo "Updating docker file /etc/default/docker"
-    #     FILE=/etc/default/docker
-    #     UPDATE="DOCKER_OPTS=\"--dns 8.8.8.8 --dns 8.8.4.4  -g ${NEPI_DOCKER}\""
-    #     echo $UPDATE
-    #     KEY=DOCKER_OPTS
-    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-    #     KEY='#DOCKER_OPTS'
-    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-
-
-    #     ## Update docker service file
-    #     echo "Updating docker file /usr/lib/systemd/system/docker.service"
-    #     FILE=/usr/lib/systemd/system/docker.service
-
-
-    #     KEY=RequiresMountsFor
-    #     UPDATE="RequiresMountsFor=${NEPI_DOCKER}"
-
-    #     if grep -q "${KEY}" $FILE; then
-    #         echo "Updating Docker Required Mounts with ${UPDATE}"
-    #         sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-    #     else
-    #         echo "Adding Docker Required Mounts with ${UPDATE}"
-    #         sudo sed -i '/Requires=docker.socket/a\'${UPDATE} $FILE
-    #     fi
-
-    #     KEY=ExecStart
-    #     UPDATE="ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --data-root=${NEPI_DOCKER}"
-    #     echo $UPDATE
-    #     sudo sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-    
-    # fi
-
-    if [[ "$CONFIG_USER" != "nepi" ]]; then
-
-        echo ""
-        echo "Enabling Docker Service"
-        sudo systemctl daemon-reload
-        sudo systemctl start docker.socket
-        sudo systemctl start docker
-        
-
-        #########Test Docker install###########
-        #sudo systemctl status docker
-        # sudo docker pull hello-world
-        # sudo docker container run hello-world
-
-        # #Some Debug Commands
-        # sudo dockerd --debug
-        # sudo cat /etc/docker/daemon.json
-
-        # sudo systemctl stop docker
-        # sudo systemctl stop docker.socket
-        # sudo systemctl daemon-reload
-        # sudo systemctl start docker.socket
-        # sudo systemctl start docker
-        # sudo systemctl status docker
-        # sudo docker info
-    fi
-
-    if [[ "$NEPI_MANAGES_SHARE" -eq 1 ]]; then
-
-        echo ""
-        echo "########"
-        echo "Configuring Samba Service"
-
-
-        echo "Updating Samba ETC config file"
-        if [[ "$CONFIG_USER" == "nepi" ]]; then
-            source_file=${SOURCE_ETC_PATH}/samba/smb.conf
-        else
-            source_file=${SOURCE_ETC_PATH}/docker/samba/smb.conf
-        fi
-
-        dest_file=/etc/samba/smb.conf
-        if [[ -f "$source_file" ]]; then
-            sudo cp -d $source_file $dest_file
-        fi
-
-
-        SYSTEMD_SERVICE_PATH=/etc/systemd/system
-
-
-        sudo systemctl enable smbd
-        sudo systemctl restart smbd
-        
-
-        echo "Updating Samba Passwords"
-        samba_user=$NEPI_USER
-        samba_pw=$NEPI_USER_PW
-        default_pw='nepi'
-        if check_password $samba_user $default_pw; then
-            samba_pw=$default_pw
-        fi
-        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
-        if [[ ${samba_pw} != 'encrypted' ]]; then
-            echo "Updating Samba User ${samba_user}"
-            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_USER"
-        fi
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
-
-
-        samba_user=$NEPI_HOST_USER
-        samba_pw=$NEPI_HOST_PW
-        default_pw='nepi'
-        if check_password $samba_user $default_pw; then
-            samba_pw=$default_pw
-        fi
-        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
-        if [[ ${samba_pw} != 'encrypted' ]]; then
-            echo "Updating Samba User ${samba_user}"
-            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_USER"
-        fi
-        sudo usermod -a -G $NEPI_USER $NEPI_HOST_USER > /dev/null
-
-        samba_user=$NEPI_ADMIN_USER
-        samba_pw=$NEPI_ADMIN_PW
-        default_pw='nepiadmin'
-        if check_password $samba_user $default_pw; then
-            samba_pw=$default_pw
-        fi
-        echo "Updating Samba User ${samba_user} Password ${samba_pw}"
-        if [[ ${samba_pw} != 'encrypted' ]]; then
-            echo "Updating Samba User ${samba_user}"
-            echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
-        # else
-        #     sudo smbpasswd -a "$NEPI_USER"
-        fi
-        sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
-
-        sudo ufw allow 445 >/dev/null 2>&1
-        sudo systemctl restart sshd
-
-    fi
-
-    #Open other required ports
-    sudo ufw allow 137 >/dev/null 2>&1
-    sudo ufw allow 138 >/dev/null 2>&1
-    sudo ufw allow 139 >/dev/null 2>&1
-
-    # Open ROS Ports
-    sudo ufw allow 11311 >/dev/null 2>&1
-
-    # Open RUI Ports
-    sudo ufw allow 5003 >/dev/null 2>&1
-    sudo ufw allow 9090 >/dev/null 2>&1
-    sudo ufw allow 9091 >/dev/null 2>&1
-    sudo ufw allow 9092 >/dev/null 2>&1
-
-
-    # Enable Firewall
-    # sudo ufw --force enable
-    # echo "Enabled network firewall with ports"
-    # echo $(sudo ufw status)
-
 
 
 
@@ -555,15 +835,15 @@ else
     sudo cp $source_file $dest_file
 
     if [[ ! -f "/run/sshd" ]]; then
-        sudo mkdir "/run/sshd"
+        sudo mkdir "/run/sshd" >/dev/null 2>&1
     fi
-    sudo chmod 0755 /run/sshd
-    sudo chown root:root /run/sshd
+    sudo chmod 0755 /run/sshd >/dev/null 2>&1
+    sudo chown root:root /run/sshd >/dev/null 2>&1
     if [[ ! -f "/var/run/sshd" ]]; then
-        sudo mkdir "/var/run/sshd"
+        sudo mkdir "/var/run/sshd" >/dev/null 2>&1
     fi
-    sudo chmod 0755 /var/run/sshd
-    sudo chown root:root /var/run/sshd
+    sudo chmod 0755 /var/run/sshd >/dev/null 2>&1
+    sudo chown root:root /var/run/sshd >/dev/null 2>&1
 
     ###################
     echo ""
@@ -601,7 +881,6 @@ sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/docker_cfg/
 sudo chown -R $CONFIG_USER:$CONFIG_USER /mnt/nepi_config/system_cfg/
 
 config_update_file=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
-SHOW_CONFIG_MENU=0
 echo "Running System Config Update Script: ${config_update_file}"
 bash $config_update_file $SHOW_CONFIG_MENU
 

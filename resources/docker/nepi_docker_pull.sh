@@ -78,6 +78,10 @@ else
         HUB_IMAGE="numurusinc/nepi:latest-jetson"
     elif is_valid_rpi; then
         HUB_IMAGE="numurusinc/nepi:latest-rpi"
+        if is_valid_hailo; then
+            HUB_IMAGE="numurusinc/nepi:latest-rpi-hailo"
+        fi
+        
     fi
 
     if [[ -n "$PASSED_IMAGE" ]]; then

@@ -157,6 +157,8 @@ NEPI_BOOT_TIME: 60
 ####################################################
 # NEPI MANAGED SERVICES 
 ####################################################
+NEPI_MANAGES_SERVICES: unknown
+# NEPI_MANAGES options are unknown(not set),0(disabled),1(enabled) and used during NEPI Host Build process.
 # Set NEPI_MANAGES_XXX service values beow to 0 or 1 to turn off or on NEPI management of that service
 # Note, if disabled:
 #    that system service configuration must be done manually.
