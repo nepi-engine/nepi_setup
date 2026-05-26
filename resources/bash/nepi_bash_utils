@@ -865,133 +865,133 @@ export -f netsetnepi
 
 
 
-function netlistwifi() {
-    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
-    # 'awk' is then used to parse the output and format it
-    nlist=$(ip -4 -o addr show | awk '{
-        # $netlist2 is the interface name, $4 is the IP address in CIDR format
-        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
-        printf "%-9s  %s |\n", $2, a[1] ;
-    }')
-    if is_not_blank $nlist; then
-      #echo "netlist = ${nlist}"
-      counter=0
-      new_n=1
-      last_n='lo'
-      skip=0
-      for word in $nlist; do
-        #echo "got ${word}"
-        if [[ ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
-          #echo "skipping ${word}"
-          skip=1
-        fi
-        if [[ $skip -eq 0 ]]; then
-          if [[ $counter -eq 0 ]]; then
-            aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
-            if [[ $? -eq 0 && -n $aname ]]; then
-              printf "%s " "$aname"
-            else
-              skip=1
-            fi
-          elif [[ $counter -eq 1 ]]; then
-              printf "%s " "| ${word}"
-          fi
-        fi
-        if [[ $new_n -eq 1 ]]; then
-          last_n=$word
-          new_n=0
-        fi
-        ((counter++))
-        if [[ $((counter % 3)) == 0 ]]; then
-          counter=0
-          new_n=1
-          skip=0
-          printf "\\n"
-        fi
-      done
-      # Add a final newline if the total count isn't a multiple of 3,
-      # ensuring the last line is processed.
-      if [[ $((counter % 3)) != 0 ]]; then
-        printf "\\n"
-      fi
-    else
-      echo ''
-    fi
+# function netlistwifi() {
+#     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+#     # 'awk' is then used to parse the output and format it
+#     nlist=$(ip -4 -o addr show | awk '{
+#         # $netlist2 is the interface name, $4 is the IP address in CIDR format
+#         split($4, a, "/"); # Split the IP/CIDR to get just the IP address
+#         printf "%-9s  %s |\n", $2, a[1] ;
+#     }')
+#     if is_not_blank $nlist; then
+#       #echo "netlist = ${nlist}"
+#       counter=0
+#       new_n=1
+#       last_n='lo'
+#       skip=0
+#       for word in $nlist; do
+#         #echo "got ${word}"
+#         if [[ ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
+#           #echo "skipping ${word}"
+#           skip=1
+#         fi
+#         if [[ $skip -eq 0 ]]; then
+#           if [[ $counter -eq 0 ]]; then
+#             aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
+#             if [[ $? -eq 0 && -n $aname ]]; then
+#               printf "%s " "$aname"
+#             else
+#               skip=1
+#             fi
+#           elif [[ $counter -eq 1 ]]; then
+#               printf "%s " "| ${word}"
+#           fi
+#         fi
+#         if [[ $new_n -eq 1 ]]; then
+#           last_n=$word
+#           new_n=0
+#         fi
+#         ((counter++))
+#         if [[ $((counter % 3)) == 0 ]]; then
+#           counter=0
+#           new_n=1
+#           skip=0
+#           printf "\\n"
+#         fi
+#       done
+#       # Add a final newline if the total count isn't a multiple of 3,
+#       # ensuring the last line is processed.
+#       if [[ $((counter % 3)) != 0 ]]; then
+#         printf "\\n"
+#       fi
+#     else
+#       echo ''
+#     fi
 
 
-}
-export -f netlistwifi
+# }
+# export -f netlistwifi
 
-function netconnectwifi() {
-    new_ip_netmask="$1"
-    if [[ -z $new_ip_netmask ]]; then
-      new_ip_netmask=$REMOTE_IP
-    fi
+# function netconnectwifi() {
+#     new_ip_netmask="$1"
+#     if [[ -z $new_ip_netmask ]]; then
+#       new_ip_netmask=$REMOTE_IP
+#     fi
 
-    if ! systemctl is-active --quiet NetworkManager; then
-      echo "NetworkManager not running"
-      return 1
-    fi
+#     if ! systemctl is-active --quiet NetworkManager; then
+#       echo "NetworkManager not running"
+#       return 1
+#     fi
 
-    if [[ -n $new_ip_netmask ]]; then
-      echo "Updating wifi ip to ${new_ip_netmask}"
-      if [[ ${new_ip_netmask} != 'auto' ]]; then
-        new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
-        if ! is_valid_ipv4_netmask $new_ip_netmask; then
-          echo "Invalid Address/Netmask Combination ${net_ip}"
-          return 1
-        fi
-      fi
-    fi
+#     if [[ -n $new_ip_netmask ]]; then
+#       echo "Updating wifi ip to ${new_ip_netmask}"
+#       if [[ ${new_ip_netmask} != 'auto' ]]; then
+#         new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
+#         if ! is_valid_ipv4_netmask $new_ip_netmask; then
+#           echo "Invalid Address/Netmask Combination ${net_ip}"
+#           return 1
+#         fi
+#       fi
+#     fi
 
-    selected_adapter=''
+#     selected_adapter=''
 
-    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
-    # 'awk' is then used to parse the output and format it
-    nslist=$(netlistwifi) 
+#     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+#     # 'awk' is then used to parse the output and format it
+#     nslist=$(netlistwifi) 
     
-    if ! is_not_blank $nslist; then
-        echo "No Network Adapters Found"
-        return 1
-    fi
-    echo $nslist
-    # Set IFS to | and read into an array
-    readarray -t adapters <<< "$nslist"
-    adapters=("${adapters[@]:1}")
+#     if ! is_not_blank $nslist; then
+#         echo "No Network Adapters Found"
+#         return 1
+#     fi
+#     echo $nslist
+#     # Set IFS to | and read into an array
+#     readarray -t adapters <<< "$nslist"
+#     adapters=("${adapters[@]:1}")
  
-    # Check if there are any files
-    if [[ ${#adapters[@]} -eq 0 ]]; then
-        echo "No Network Adapters Found"
-        return 1
-    fi
+#     # Check if there are any files
+#     if [[ ${#adapters[@]} -eq 0 ]]; then
+#         echo "No Network Adapters Found"
+#         return 1
+#     fi
 
-    # Check if there are any adapters
-    if [[ ${#adapters[@]} -eq 1 ]]; then
-        line=${adapters[0]}
-        delimiter=" |"
-        selected_adapter=${adapter%%$delimiter*}
-    fi
+#     # Check if there are any adapters
+#     if [[ ${#adapters[@]} -eq 1 ]]; then
+#         line=${adapters[0]}
+#         delimiter=" |"
+#         selected_adapter=${adapter%%$delimiter*}
+#     fi
 
-    if [[ -z $selected_adapter ]]; then
-      echo ""
-      echo "Select a Network Adapter to Update"
-      echo "--------------------"
-      echo ""
-      select adapter in "${adapters[@]}"; do
-          if [[ -n "$adapter" ]]; then
-              delimiter=" |"
-              selected_adapter=${adapter%%$delimiter*}
-              break
-          else
-              echo "Invalid selection. Please try again."
-          fi
-      done
-    fi
+#     if [[ -z $selected_adapter ]]; then
+#       echo ""
+#       echo "Select a Network Adapter to Update"
+#       echo "--------------------"
+#       echo ""
+#       select adapter in "${adapters[@]}"; do
+#           if [[ -n "$adapter" ]]; then
+#               delimiter=" |"
+#               selected_adapter=${adapter%%$delimiter*}
+#               break
+#           else
+#               echo "Invalid selection. Please try again."
+#           fi
+#       done
+#     fi
       
-    if [[ ! -n $new_ip_netmask ]]; then
-        echo ''
+#     if [[ ! -n $new_ip_netmask ]]; then
+#         echo ''
 
-    fi
+#     fi
     
     # # Output the full path of the selected file
     # if [[ -n "$selected_adapter" ]]; then
@@ -1025,12 +1025,12 @@ function netconnectwifi() {
     #       fi
     #     fi
 
-        return 0
+#         return 0
         
-    fi   
-}
+#     fi   
+# }
 
-export -f netconnectwifi
+# export -f netconnectwifi
 
 
 # ping self
