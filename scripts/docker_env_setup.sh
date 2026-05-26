@@ -389,7 +389,7 @@ if is_valid_cuda; then
     fi
 
 
-    if dpkg --get-selections | grep nvidia-container-toolkit; then
+    if ! dpkg --get-selections | grep nvidia-container-toolkit; then
         # Install nvidia toolkit
         #https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
         curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
@@ -406,6 +406,7 @@ if is_valid_cuda; then
             libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
     fi
+
 fi
 
 
