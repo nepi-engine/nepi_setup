@@ -366,7 +366,6 @@ if [[ "$?" -eq 0 ]]; then
         if [[ ! -f "/etc/docker/daemon.json.org" && -f "/etc/docker/daemon.json" ]]; then
             sudo cp /etc/docker/daemon.json /etc/docker/daemon.json.org
         fi
-
         
         if is_valid_cuda; then
             sudo nvidia-ctk runtime configure --runtime=docker
