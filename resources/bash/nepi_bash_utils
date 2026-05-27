@@ -1024,7 +1024,6 @@ export -f netsetnepi
 #             echo ""
 #           fi
 #         fi
-
 #         return 0
         
 #     fi   
