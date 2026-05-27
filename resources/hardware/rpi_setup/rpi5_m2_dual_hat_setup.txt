@@ -17,6 +17,15 @@ Step 2 - Configure the M.2 Dual HAT
     https://wiki.seeedstudio.com/raspberry_pi_5_uses_pcie_hat_dual_hat/
 
 
+###################
+# RPI SETUP SCIPTS
+###################
+
+## Options
+# Setup Boot Device
+# Setup Hailo Module
+# Apply Settings and Reboot
+
 
 ###################
 ## (OPTIONAL) Configure Boot from SSD Card

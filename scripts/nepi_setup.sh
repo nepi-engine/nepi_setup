@@ -362,7 +362,7 @@ if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
     PS3=$'\n'"Please enter your choice by NUMBER: "
     options=(   "Update NEPI_MANAGES_USERS" "Update NEPI_MANAGES_HOSTNAME" "Update NEPI_MANAGES_NETWORK" "Update NEPI_MANAGES_TIME"\
                 "Update NEPI_MANAGES_SSH" "Update NEPI_MANAGES_SHARE" "Update NEPI_MANAGES_SOFTWARE" "Update NEPI_MANAGES_DOCKER"\
-                "ENABLE_ALL" "DISABLE_ALL" "APPLY SETTINGS" )
+                "ENABLE_ALL" "DISABLE_ALL" "CONTINUE" )
 
 
     while true; do
@@ -486,7 +486,7 @@ if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
                         ;;
 
 
-                        "APPLY SETTINGS")
+                        "CONTINUE")
                             break 2 # Exit both the select and the while loop
                             ;;
                         *)
