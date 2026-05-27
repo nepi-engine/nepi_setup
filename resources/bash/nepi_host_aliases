@@ -370,12 +370,14 @@ export -f nepicreate
 
 ## NEPI build shortcuts
 function nepibld(){
-  sudo -v
   SHOW_CONFIG_MENU=$1
+  echo "SHOW MENU SET TO: ${SHOW_CONFIG_MENU}"
+  sudo -v
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
   ninet
 }
+export -f nepibld
 
 
 

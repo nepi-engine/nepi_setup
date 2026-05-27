@@ -22,17 +22,15 @@
 
 
 show_menu=$1
-echo "GOT SHOW_CONFIG_MENU ${show_menu}"
 SHOW_CONFIG_MENU=0
 if [[ -n $show_menu ]]; then
     if [[ $show_menu -eq 1 ]]; then
         SHOW_CONFIG_MENU=1
+        echo "Running System Config with Menu Enabled"
     elif [[ $show_menu -eq 0 ]]; then
         SHOW_CONFIG_MENU=0
     fi
 fi
-
-echo "RUNNING SYSTEM CONFIG with SHOW_CONFIG_MENU: ${SHOW_CONFIG_MENU}"
 
 sudo -v
 
@@ -294,7 +292,7 @@ function udpate_config_file(){
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     update_current_config
     
-    if [[ "$SHOW_CONFIG_MENU" -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
+    if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
         echo "Configuring Setup Menu"
 
         echo ""

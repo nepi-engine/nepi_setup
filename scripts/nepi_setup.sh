@@ -19,11 +19,11 @@
 ##
 
 show_menu=$1
-echo "GOT SHOW_CONFIG_MENU ${show_menu}"
 SHOW_CONFIG_MENU=0
 if [[ -n $show_menu ]]; then
     if [[ $show_menu -eq 1 ]]; then
         SHOW_CONFIG_MENU=1
+        echo "Running NEPI Setup with Menu Enabled"
     elif [[ $show_menu -eq 0 ]]; then
         SHOW_CONFIG_MENU=0
     fi
@@ -193,7 +193,6 @@ echo ""
 echo "########################"
 echo "Updating NEPI Managed Services"
 echo "########################"
-
 ################################
 # Update ETC files if systemd is running (Not in Container)
 
@@ -352,6 +351,8 @@ function udpate_config_file(){
 echo ""
 echo "Running setup in ${NEPI_INSTALL} mode"
 echo "NEPI MANAGES SERVICES ${NEPI_MANAGES_SERVICES}"
+echo "SHOW MENU SET TO: ${SHOW_CONFIG_MENU}"
+
 
 update_current_config
 

@@ -22,11 +22,11 @@
 
 
 show_menu=$1
-echo "GOT SHOW_CONFIG_MENU ${show_menu}"
 SHOW_CONFIG_MENU=0
 if [[ -n $show_menu ]]; then
     if [[ $show_menu -eq 1 ]]; then
         SHOW_CONFIG_MENU=1
+        echo "Running Docker Config with Menu Enabled"
     elif [[ $show_menu -eq 0 ]]; then
         SHOW_CONFIG_MENU=0
     fi
@@ -134,10 +134,6 @@ SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 script_file=nepi_setup.sh
 script_path=${SCRIPT_FOLDER}/${script_file}
 
-SHOW_CONFIG_MENU=0
-if [[ $LITE_INSTALL -eq 0 ]]; then
-    SHOW_CONFIG_MENU=1
-fi
 if ! source_script $script_path $SHOW_CONFIG_MENU; then
     script_error=$?
     echo "Script ${script_path} failed with error ${script_error}"

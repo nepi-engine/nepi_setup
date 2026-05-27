@@ -24,6 +24,7 @@
 SHOW_CONFIG_MENU=0
 if [[ "$1" -eq 1 ]]; then
     SHOW_CONFIG_MENU=1
+    echo "Running Config with Menu Enabled"
 fi
 
 sudo -v
