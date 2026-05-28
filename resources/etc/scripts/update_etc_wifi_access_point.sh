@@ -80,7 +80,11 @@ if [[ "$?" -eq 0 ]]; then
                 sudo ${file} --stop ${NEPI_WIFI_INTERFACE}
 
                 if [[ "$NEPI_WIFI_ACCESS_POINT_ENABLED" -eq 1 ]]; then
-                    if [[ "$NEPI_WIFI_ACCESS_POINT_ID" != '' && "$NEPI_WIFI_ACCESS_POINT_ID" != 'NONE' ]]; then
+                    if [[ "$NEPI_WIFI_ACCESS_POINT_ID" != '' ]]; then
+                        if [[ ${NEPI_WIFI_ACCESS_POINT_ID} == 'NONE' ]]; then
+                            NEPI_WIFI_ACCESS_POINT_ID="nepi_"${NEPI_DEVICE_SN}
+                        fi
+
                         if [[ "$NEPI_WIFI_ACCESS_POINT_PW" != '' && "$NEPI_WIFI_ACCESS_POINT_PW" != 'NONE' ]]; then
                             echo "Updating WiFi Access Point Settings Files with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID}"
                             sudo ${file}  -n --redirect-to-localhost --isolate-clients --daemon \
