@@ -74,103 +74,105 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-        if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
+        if is_valid_rpi; then
+            if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
 
-               echo "Updating WiFi Client Settings Files"
-
-                source_path=${NEPI_CONFIG}/system_cfg/etc/wpa_supplicant
-                update_path=/etc/wpa_supplicant
-
-                if [ -d "$source_path" ]; then
-
-                    if [[ "$NEPI_WIFI_CLIENT_ENABLED" -eq 1 ]]; then
+                echo "Updating WiFi Client Settings Files"
 
 
+                    source_path=${NEPI_CONFIG}/system_cfg/etc/wpa_supplicant
+                    update_path=/etc/wpa_supplicant
 
-                        # WiFi Client Connect Update
-                        # NEPI_WIFI_INTERFACE=wlan0
-                        # NEPI_WIFI_CLIENT_ID=Plutarski_Lab
-                        # NEPI_WIFI_CLIENT_PW=2065255002
+                    if [ -d "$source_path" ]; then
 
-                        # echo "Checking Client Network Availability"
-                        # sudo iw dev ${NEPI_WIFI_INTERFACE} scan
+                        if [[ "$NEPI_WIFI_CLIENT_ENABLED" -eq 1 ]]; then
 
-                        WPA_SUPPLICANT_CONF_PATH=/etc/wpa_supplicant/wpa_supplicant.conf
+                            
 
+                            # WiFi Client Connect Update
+                            # NEPI_WIFI_INTERFACE=wlan0
+                            # NEPI_WIFI_CLIENT_ID=Plutarski_Lab
+                            # NEPI_WIFI_CLIENT_PW=2065255002
 
-                        echo "Killing existing DHCP clients"
-                        sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+                            # echo "Checking Client Network Availability"
+                            # sudo iw dev ${NEPI_WIFI_INTERFACE} scan
 
-                        echo "Disabling WiFi Connection"
-                        sudo ip link set ${NEPI_WIFI_INTERFACE} down        
-                        wait
+                            WPA_SUPPLICANT_CONF_PATH=/etc/wpa_supplicant/wpa_supplicant.conf
 
 
-                        echo "Updating Client Connection Credetials file ${WPA_SUPPLICANT_CONF_PATH}"
-                        sudo chmod +x -R /etc/network/interfaces.d
-                        sudo bash -c "cat /dev/null > $WPA_SUPPLICANT_CONF_PATH"
+                            echo "Killing existing DHCP clients"
+                            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
 
-                        if [[ "$NEPI_WIFI_CLIENT_ID" == "None" || "$NEPI_WIFI_CLIENT_ID" == "" ]]; then
-                            NEPI_WIFI_CLIENT_ID="NONE"
-                            NEPI_WIFI_CLIENT_PW="NONE"
-                        fi
+                            echo "Disabling WiFi Connection"
+                            sudo ip link set ${NEPI_WIFI_INTERFACE} down        
+                            wait
 
-                        if [[ "$NEPI_WIFI_CLIENT_PW" == "None" || "$NEPI_WIFI_CLIENT_PW" == "" ]]; then
-                            NEPI_WIFI_CLIENT_PW="NONE"
-                        fi
 
-                        if [[ "$NEPI_WIFI_CLIENT_ID" != "NONE" ]]; then
-                            if [[ "$NEPI_WIFI_CLIENT_PW" == "NONE" ]]; then
-                                sudo "network={ \n\tssid=${NEPI_WIFI_CLIENT_ID} \n\tkey_mgmt=NONE \n}" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
-                            else
-                                sudo wpa_passphrase "$NEPI_WIFI_CLIENT_ID" "$NEPI_WIFI_CLIENT_PW" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
+                            echo "Updating Client Connection Credetials file ${WPA_SUPPLICANT_CONF_PATH}"
+                            sudo chmod +x -R /etc/network/interfaces.d
+                            sudo bash -c "cat /dev/null > $WPA_SUPPLICANT_CONF_PATH"
+
+                            if [[ "$NEPI_WIFI_CLIENT_ID" == "None" || "$NEPI_WIFI_CLIENT_ID" == "" ]]; then
+                                NEPI_WIFI_CLIENT_ID="NONE"
+                                NEPI_WIFI_CLIENT_PW="NONE"
                             fi
+
+                            if [[ "$NEPI_WIFI_CLIENT_PW" == "None" || "$NEPI_WIFI_CLIENT_PW" == "" ]]; then
+                                NEPI_WIFI_CLIENT_PW="NONE"
+                            fi
+
+                            if [[ "$NEPI_WIFI_CLIENT_ID" != "NONE" ]]; then
+                                if [[ "$NEPI_WIFI_CLIENT_PW" == "NONE" ]]; then
+                                    sudo "network={ \n\tssid=${NEPI_WIFI_CLIENT_ID} \n\tkey_mgmt=NONE \n}" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
+                                else
+                                    sudo wpa_passphrase "$NEPI_WIFI_CLIENT_ID" "$NEPI_WIFI_CLIENT_PW" | sudo tee -a $WPA_SUPPLICANT_CONF_PATH
+                                fi
+                            fi
+
+                            echo "Updated Client Connection Credetials"
+                            sudo bash -c "cat $WPA_SUPPLICANT_CONF_PATH"
+
+
+                            echo "Enabling WiFi Client"
+                            sudo ip link set ${NEPI_WIFI_INTERFACE} up 
+                            wait
+
+                            echo "Killing Existing Client Connections"
+                            sudo killall wpa_supplicant
+                            wait
+                            sleep 1
+
+                            echo "Updatig WPA Supplicant Settings"
+                            sudo wpa_supplicant -B -i ${NEPI_WIFI_INTERFACE} -c $WPA_SUPPLICANT_CONF_PATH #>/dev/null 2>&1
+                            wait
+                            sleep 1
+
+                            echo "Reseting WiFi Service"
+                            sudo systemctl restart wpa_supplicant.service
+                            #wait
+                            #sudo systemctl status wpa_supplicant.service
+
+                            # echo "Checking Client Connection Status"
+                            # sudo iw ${NEPI_WIFI_INTERFACE} link
+
+                            # echo "Reseting WiFi DHCP Client"
+                            # sudo dhclient ${NEPI_WIFI_INTERFACE}
+                            # wait
+                            echo "Renewiung WiFi DHCP Client"
+                            sudo dhclient -nw ${NEPI_WIFI_INTERFACE} 
+
+                            echo "WiFi Client Updated"
+                        else
+                            echo "WiFi Client Disabled"
                         fi
-
-                        echo "Updated Client Connection Credetials"
-                        sudo bash -c "cat $WPA_SUPPLICANT_CONF_PATH"
-
-
-                        echo "Enabling WiFi Client"
-                        sudo ip link set ${NEPI_WIFI_INTERFACE} up 
-                        wait
-
-                        echo "Killing Existing Client Connections"
-                        sudo killall wpa_supplicant
-                        wait
-                        sleep 1
-
-                        echo "Updatig WPA Supplicant Settings"
-                        sudo wpa_supplicant -B -i ${NEPI_WIFI_INTERFACE} -c $WPA_SUPPLICANT_CONF_PATH #>/dev/null 2>&1
-                        wait
-                        sleep 1
-
-                        echo "Reseting WiFi Service"
-                        sudo systemctl restart wpa_supplicant.service
-                        #wait
-                        #sudo systemctl status wpa_supplicant.service
-
-                        # echo "Checking Client Connection Status"
-                        # sudo iw ${NEPI_WIFI_INTERFACE} link
-
-                        # echo "Reseting WiFi DHCP Client"
-                        # sudo dhclient ${NEPI_WIFI_INTERFACE}
-                        # wait
-                        echo "Renewiung WiFi DHCP Client"
-                        sudo dhclient -nw ${NEPI_WIFI_INTERFACE} 
-
-                        echo "WiFi Client Updated"
                     else
-                        echo "WiFi Client Disabled"
+                        echo "FAILED TO FIND SOURCE ${source_path}"
                     fi
-                else
-                    echo "FAILED TO FIND SOURCE ${source_path}"
-                fi
 
-        else
-            echo "NEPI Wifi not enabled"
-        fi
-        
+            else
+                echo "NEPI Wifi not enabled"
+            fi
+        fi 
     fi
 
 fi

@@ -217,7 +217,7 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "############"
     echo "Installing Hostname Apps"
     echo ""
-    sudo apt install hostapd -y # WiFi access point setup
+
 
     echo "############"
     echo "Installing Time Apps"
@@ -252,7 +252,10 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
 
     #sudo apt install netplan.io -y
     sudo apt install ifupdown net-tools iproute2 isc-dhcp-client wpasupplicant -y
-
+    sudo apt install util-linux procps hostapd iw haveged dnsmasq -y
+    if [[ ! -f /etc/hostapd/hostapd.conf ]]; then
+    sudo cp /usr/share/doc/hostapd/examples/hostapd.conf /etc/hostapd/
+    fi
 
     echo "############"
     echo "Installing Shared Drive Apps"

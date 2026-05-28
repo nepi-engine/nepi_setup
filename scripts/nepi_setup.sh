@@ -205,7 +205,11 @@ if [[ "$NEPI_INSTALL" == 'FULL' && "$CONFIG_USER" == 'nepihost' ]]; then
         SHOW_CONFIG_MENU=1
         NEPI_MANAGES_USERS=1
         NEPI_MANAGES_HOSTNAME=1
-        NEPI_MANAGES_NETWORK=1
+        if is_valid_rpi; then
+            NEPI_MANAGES_NETWORK=0
+        else
+            NEPI_MANAGES_NETWORK=1
+        fi
         NEPI_MANAGES_TIME=1
         NEPI_MANAGES_SSH=1
         NEPI_MANAGES_SHARE=1
@@ -537,8 +541,11 @@ if [[ "$?" -eq 0 ]]; then
 
             fi
 
-
-            if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+            config_network_sw=$NEPI_MANAGES_NETWORK
+            if is_valid_rpi; then
+                config_network_sw=0
+            fi
+            if [[ "$config_network_sw" -eq 1 ]]; then
                 echo ""
                 echo "########"
                 echo "Updating Network Services"
@@ -569,11 +576,20 @@ if [[ "$?" -eq 0 ]]; then
 
                 echo "Restarting networking service"
                 sudo systemctl restart networking
+
+                ehco "Enable hostapd access point service"
+                sudo systemctl unmask hostapd  >/dev/null 2>&1
+                sudo systemctl enable hostapd
+                sudo systemctl restart hostapd
             else
 
                 echo "Disabling ifupdown Networking Service"
                 sudo systemctl disable networking >/dev/null 2>&1
                 sudo systemctl stop networking >/dev/null 2>&1
+
+                ehco "Disabling hostapd access point service"
+                sudo systemctl disable hostapd >/dev/null 2>&1
+                sudo systemctl stop hostapd >/dev/null 2>&1
 
                 echo "Enabling NetworkManager Service" 
                 if is_valid_rpi; then
