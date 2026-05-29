@@ -1334,6 +1334,7 @@ function ninet(){
       # Non-zero indicates failure (no internet connection)
       if [ $? -ne 0 ]; then
           echo "No internet connection detected. Will try and connect"
+      fi
       
   fi
   #ndhcp # Enable DHCP internet connection if needed
