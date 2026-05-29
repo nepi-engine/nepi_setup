@@ -424,6 +424,19 @@ function is_valid_amd64(){
 }
 export -f is_valid_amd64
 
+
+function is_valid_ubuntu() {
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        if [[ "$ID" == "ubuntu" || "$ID_LIKE" == *"ubuntu"* ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+export -f is_valid_ubuntu
+
 function is_valid_rpi(){
   if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
     return 0
@@ -593,6 +606,7 @@ is_valid_file = Check for file
 is_valid_bool = Check for valid bash bool - 0 or 1
 is_valid_internet = Check for internet connection
 is_valid_jetson = Check if device is an NVIDIA Jetson system
+is_valid_ubuntu = Check if system is on a Ubuntu OS
 is_valid_rpi = Check if system is on a Raspberry Pi
 is_valid_arm64 = Check if device is arm64 arch
 is_valid_amd64 = Check if device is amd64 arch
@@ -619,57 +633,20 @@ function echovar(){
 export -f echovar
 
 
-function netlist() {
-    # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
-    # 'awk' is then used to parse the output and format it
-    nlist=$(ip -4 -o addr show | awk '{
-        # $netlist2 is the interface name, $4 is the IP address in CIDR format
-        split($4, a, "/"); # Split the IP/CIDR to get just the IP address
-        printf "%-9s  %s |\n", $2, a[1] ;
-    }')
-    if is_not_blank $nlist; then
-        #echo "netlist = ${nlist}"
-        counter=0
-        new_n=1
-        for word in $nlist; do
-          #echo "got ${word}"
-          if [[ $counter -eq 0 ]]; then
-            aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
-            if [[ $? -eq 0 && -n $aname ]]; then
-              printf "%s " "$aname"
-            else
-              printf "%s " "$word"
-            fi
-          elif [[ $counter -eq 1 ]]; then
-              printf "%s " "| ${word}"
-          fi
-          if [[ $new_n -eq 1 ]]; then
-            last_n=$word
-            new_n=0
-          fi
-          ((counter++))
-          if [[ $((counter % 3)) == 0 ]]; then
-            counter=0
-            new_n=1
-            skip=0
-            printf "\\n"
-          fi
-        done
-        # Add a final newline if the total count isn't a multiple of 3,
-        # ensuring the last line is processed.
-        if [[ $((counter % 3)) != 0 ]]; then
-          printf "\\n"
-        fi
-    else
-      echo ''
+function get_router_ipn(){
+    # Get the default gateway IP address
+    local router_ip=$(ip route | awk '/default/ {print $3; exit}')
+    if [[ "$router_ip" == *"192.168"* ]]; then
+      router_ip=''
     fi
-
+    echo $router_ip
 }
-export -f netlist
+
+export get_router_ipn
 
 
 
-function netliststatic() {
+function netlist() {
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
     nlist=$(ip -4 -o addr show | awk '{
@@ -683,22 +660,25 @@ function netliststatic() {
       new_n=1
       last_n='lo'
       skip=0
+      name=''
+      ipaddr=''
       for word in $nlist; do
         #echo "got ${word}"
-        if [[ ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
+        if [[ -z "${word// }" || ${word} == ${last_n} || "$word" == *"l4tbr"* || "$word" == *"rndis"* || "$word" == *"wlan"* || "$word" == *"docker"* ]]; then
           #echo "skipping ${word}"
           skip=1
         fi
+
         if [[ $skip -eq 0 ]]; then
           if [[ $counter -eq 0 ]]; then
             aname=$(nmcli -g GENERAL.CONNECTION device show ${word})
             if [[ $? -eq 0 && -n $aname ]]; then
-              printf "%s " "$aname"
+              name=$(printf "%s " "$aname")
             else
               skip=1
             fi
           elif [[ $counter -eq 1 ]]; then
-              printf "%s " "| ${word}"
+              ipaddr=$(printf "%s " "${word}")
           fi
         fi
         if [[ $new_n -eq 1 ]]; then
@@ -710,7 +690,11 @@ function netliststatic() {
           counter=0
           new_n=1
           skip=0
-          printf "\\n"
+          if [[ -n $name && -n $ipaddr ]]; then
+            echo "${name} | ${ipaddr}"
+          fi
+          name=''
+          ipaddr=''
         fi
       done
       # Add a final newline if the total count isn't a multiple of 3,
@@ -724,13 +708,15 @@ function netliststatic() {
 
 
 }
-export -f netliststatic
+export -f netlist
 
 function netsetstatic() {
     new_ip_netmask="$1"
     if [[ -z $new_ip_netmask ]]; then
       new_ip_netmask=$REMOTE_IP
     fi
+
+    new_gateway="$2"
 
     if ! systemctl is-active --quiet NetworkManager; then
       echo "NetworkManager not running"
@@ -752,7 +738,7 @@ function netsetstatic() {
 
     # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
     # 'awk' is then used to parse the output and format it
-    nslist=$(netliststatic) 
+    nslist=$(netlist) 
     
     if ! is_not_blank $nslist; then
         echo "No Network Adapters Found"
@@ -815,10 +801,19 @@ function netsetstatic() {
             eval "$cmd"     
             echo ""
           else
-            cmd='sudo nmcli connection modify "'${selected_adapter}'" \
-                ipv4.addresses '${new_ip_netmask}' \
-                ipv4.dns 8.8.8.8,8.8.4.4 \
-                ipv4.method manual '
+            if is_valid_ip $new_gateway; then
+              cmd='sudo nmcli connection modify "'${selected_adapter}'" \
+                  ipv4.addresses '${new_ip_netmask}' \
+                  ipv4.dns 8.8.8.8,8.8.4.4 \
+                  ipv4.method manual \
+                  ipv4.gateway '${new_gateway}
+            else
+              cmd='sudo nmcli connection modify "'${selected_adapter}'" \
+                  ipv4.addresses '${new_ip_netmask}' \
+                  ipv4.dns 8.8.8.8,8.8.4.4 \
+                  ipv4.method manual '
+            fi
+
             echo $cmd
             eval "$cmd"     
 
@@ -1211,8 +1206,11 @@ function nnet(){
       if [ $? -ne 0 ]; then
         echo "Can't ping NEPI IP address: ${nepi_ip}"
 
-        echo "Restarting Network"
-        sudo systemctl restart networking
+        echo "Restarting NetworkManager"
+        sudo systemctl restart NetworkManager
+
+        # echo "Restarting Network"
+        # sudo systemctl restart networking
         wait
         ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -1223,58 +1221,58 @@ function nnet(){
 }
 export -f nnet
 
-function nnet_release(){
-        echo "Stopping ifupdown Networking Service"
-        #sudo systemctl disable networking >/dev/null 2>&1
-        sudo systemctl stop networking >/dev/null 2>&1
+# function nnet_release(){
+#         echo "Stopping ifupdown Networking Service"
+#         #sudo systemctl disable networking >/dev/null 2>&1
+#         sudo systemctl stop networking >/dev/null 2>&1
 
-        echo "Restarting NetworkManager Service" 
-        if is_valid_rpi; then
-            #sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-            sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-        else
-            #sudo systemctl enable NetworkManager >/dev/null 2>&1
-            sudo systemctl restart NetworkManager >/dev/null 2>&1
-        fi
+#         echo "Restarting NetworkManager Service" 
+#         if is_valid_rpi; then
+#             #sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+#             sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
+#         else
+#             #sudo systemctl enable NetworkManager >/dev/null 2>&1
+#             sudo systemctl restart NetworkManager >/dev/null 2>&1
+#         fi
 
-        echo "Restarting netplan Service" 
-        #sudo systemctl enable netplan >/dev/null 2>&1
-        sudo systemctl restart netplan >/dev/null 2>&1
+#         echo "Restarting netplan Service" 
+#         #sudo systemctl enable netplan >/dev/null 2>&1
+#         sudo systemctl restart netplan >/dev/null 2>&1
 
-}
-export -f nnet_release
+# }
+# export -f nnet_release
 
-function ndhcp(){
-  sudo -v
-  if nnet; then
-    # This file sets up nepi bash aliases and util functions
-    # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-    # -c 1: Send only one ping packet
-    # -W 1: Wait for 1 second for a response
-    ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+# function ndhcp(){
+#   sudo -v
+#   if nnet; then
+#     # This file sets up nepi bash aliases and util functions
+#     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+#     # -c 1: Send only one ping packet
+#     # -W 1: Wait for 1 second for a response
+#     ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
 
-    # Check the exit status of the ping command
-    # 0 indicates success (internet connection)
-    # Non-zero indicates failure (no internet connection)
-    if [ $? -ne 0 ]; then
-      echo "No internet connection detected. Will try and connect"
+#     # Check the exit status of the ping command
+#     # 0 indicates success (internet connection)
+#     # Non-zero indicates failure (no internet connection)
+#     if [ $? -ne 0 ]; then
+#       echo "No internet connection detected. Will try and connect"
 
-      echo "Enabling DHCP internet connection"
-      echo "Killing existing DHCP clients"
-      sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-      echo "Renewing dhclient"
-      sudo dhclient -nw
-      sleep 2
-      nnet # Restart network
-      wait
-      if ! pingi; then
-        return 1
-      fi
-    fi
-    sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-  fi
-}
-export -f ndhcp
+#       echo "Enabling DHCP internet connection"
+#       echo "Killing existing DHCP clients"
+#       sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+#       echo "Renewing dhclient"
+#       sudo dhclient -nw
+#       sleep 2
+#       nnet # Restart network
+#       wait
+#       if ! pingi; then
+#         return 1
+#       fi
+#     fi
+#     sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+#   fi
+# }
+# export -f ndhcp
 
 
 function nclock(){
@@ -1317,10 +1315,28 @@ function nclock(){
 export -f nclock
 
 
+
+
+
+
 function ninet(){
   sudo -v
   echo "Running NEPI Internet Update Processes"
-  ndhcp # Enable DHCP internet connection if needed
+  if nnet; then
+      # This file sets up nepi bash aliases and util functions
+      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+      # -c 1: Send only one ping packet
+      # -W 1: Wait for 1 second for a response
+      ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+
+      # Check the exit status of the ping command
+      # 0 indicates success (internet connection)
+      # Non-zero indicates failure (no internet connection)
+      if [ $? -ne 0 ]; then
+          echo "No internet connection detected. Will try and connect"
+      
+  fi
+  #ndhcp # Enable DHCP internet connection if needed
   wait
   sleep 1
   if ! nclock; then # Connect to NTP server
@@ -1440,8 +1456,8 @@ utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
+get_router_ipn = Echos router_ip if found
 netlist = list network adapters and IP addresses
-netliststatic = list network adapters and static IP addresses
 netsetstatic = Select network adapter and set static_ip with provided IP like '192.168.179.103' or 'auto'
 netsetauto = Select network adapter and set static_ip to auto'
 netsetcustom = Select network adapter and enter a custom static IP address'
@@ -1458,10 +1474,8 @@ nipa= Echo NEPI set IP address
 naipa= Echo NEPI set IP alias addresses
 nnipa= Echo NEPI set NTP IP addresses
 nnet = Restart the network
-nnet_release = Stop NEPI network management until next reboot
-ndhcp = Enable DHCP Internet Client
 nclock = Sync clock
-ninet = Restart network, connect to internet, and sync clock
+ninet = check connection and sync clock
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues
@@ -2618,6 +2632,18 @@ function get_dfbi(){
 }
 export function get_dfbi
 
+function service_running() {
+    local service_name="$1"
+    
+    if systemctl is-active --quiet "$service_name"; then
+        return 0 # Running
+    else
+        return 1 # Not running
+    fi
+}
+
+export service_running
+
 #### Update Help Test
 utilsn="${utilsn}
 ################################
@@ -2668,7 +2694,8 @@ create_ssh_key = Create a new SSH key key pair in provided key_folder
 select_ssh_key = Select SSH key from available keys in provided key_folder
 run_ssh_env = Run ssh environment
 start_ssh_agent = Start the system ssh agent process
-clear_known_hosts = Clear ssh known hosts file"
+clear_known_hosts = Clear ssh known hosts file
+service_running = Returns error 0 if service is running"
 
 
 

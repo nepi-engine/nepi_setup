@@ -131,8 +131,11 @@ function nnet(){
       if [ $? -ne 0 ]; then
         echo "Can't ping NEPI IP address: ${nepi_ip}"
 
-        echo "Restarting Network"
-        systemctl restart networking
+        echo "Restarting NetworkManager"
+        systemctl restart NetworkManager
+
+        # echo "Restarting Network"
+        # systemctl restart networking
         wait
         ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -143,37 +146,37 @@ function nnet(){
 }
 export -f nnet
 
-function ndhcp(){
+# function ndhcp(){
   
-  if nnet; then
-    # This file sets up nepi bash aliases and util functions
-    # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-    # -c 1: Send only one ping packet
-    # -W 1: Wait for 1 second for a response
-    ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+#   if nnet; then
+#     # This file sets up nepi bash aliases and util functions
+#     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+#     # -c 1: Send only one ping packet
+#     # -W 1: Wait for 1 second for a response
+#     ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
 
-    # Check the exit status of the ping command
-    # 0 indicates success (internet connection)
-    # Non-zero indicates failure (no internet connection)
-    if [ $? -ne 0 ]; then
-      echo "No internet connection detected. Will try and connect"
+#     # Check the exit status of the ping command
+#     # 0 indicates success (internet connection)
+#     # Non-zero indicates failure (no internet connection)
+#     if [ $? -ne 0 ]; then
+#       echo "No internet connection detected. Will try and connect"
 
-      echo "Enabling DHCP internet connection"
-      echo "Killing existing DHCP clients"
-      kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-      echo "Renewing dhclient"
-      dhclient -nw
-      sleep 2
-      nnet # Restart network
-      wait
-      if ! pingi; then
-        return 1
-      fi
-    fi
-    kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-  fi
-}
-export -f ndhcp
+#       echo "Enabling DHCP internet connection"
+#       echo "Killing existing DHCP clients"
+#       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+#       echo "Renewing dhclient"
+#       dhclient -nw
+#       sleep 2
+#       nnet # Restart network
+#       wait
+#       if ! pingi; then
+#         return 1
+#       fi
+#     fi
+#     kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+#   fi
+# }
+# export -f ndhcp
 
 
 function nclock(){
@@ -219,7 +222,21 @@ export -f nclock
 function ninet(){
   
   echo "Running NEPI Internet Update Processes"
-  ndhcp # Enable DHCP internet connection if needed
+  if nnet; then
+      # This file sets up nepi bash aliases and util functions
+      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
+      # -c 1: Send only one ping packet
+      # -W 1: Wait for 1 second for a response
+      ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
+
+      # Check the exit status of the ping command
+      # 0 indicates success (internet connection)
+      # Non-zero indicates failure (no internet connection)
+      if [ $? -ne 0 ]; then
+          echo "No internet connection detected. Will try and connect"
+      
+  fi
+  #ndhcp # Enable DHCP internet connection if needed
   wait
   sleep 1
   if ! nclock; then # Connect to NTP server

@@ -253,8 +253,14 @@ else
     echo "Installing Network Apps"
     echo ""
 
-    #sudo apt install netplan.io -y
-    sudo apt install ifupdown net-tools iproute2 isc-dhcp-client wpasupplicant -y
+
+    sudo apt install net-tools iproute2 -y
+    # #sudo apt install netplan.io -y
+    # sudo apt install ifupdown isc-dhcp-client wpasupplicant -y
+    # sudo apt install util-linux procps hostapd iw haveged dnsmasq -y
+    # if [[ ! -f /etc/hostapd/hostapd.conf ]]; then
+    # sudo cp /usr/share/doc/hostapd/examples/hostapd.conf /etc/hostapd/
+    # fi
 
 
     echo "############"

@@ -205,11 +205,7 @@ if [[ "$NEPI_INSTALL" == 'FULL' && "$CONFIG_USER" == 'nepihost' ]]; then
         SHOW_CONFIG_MENU=1
         NEPI_MANAGES_USERS=1
         NEPI_MANAGES_HOSTNAME=1
-        if is_valid_rpi; then
-            NEPI_MANAGES_NETWORK=0
-        else
-            NEPI_MANAGES_NETWORK=1
-        fi
+        NEPI_MANAGES_NETWORK=1
         NEPI_MANAGES_TIME=1
         NEPI_MANAGES_SSH=1
         NEPI_MANAGES_SHARE=1
@@ -541,68 +537,37 @@ if [[ "$?" -eq 0 ]]; then
 
             fi
 
-            config_network_sw=$NEPI_MANAGES_NETWORK
-            if is_valid_rpi; then
-                config_network_sw=0
-            fi
-            if [[ "$config_network_sw" -eq 1 ]]; then
-                echo ""
-                echo "########"
-                echo "Updating Network Services"
 
-                echo "Disabling NetworkManager Service" 
-                if is_valid_rpi; then
-                    sudo systemctl disable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-                    sudo systemctl stop NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-                else
-                    sudo systemctl disable NetworkManager >/dev/null 2>&1
-                    sudo systemctl stop NetworkManager >/dev/null 2>&1
-                fi
+            if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-                echo "Disabling netplan Service" 
-                sudo systemctl disable netplan >/dev/null 2>&1
-                sudo systemctl stop netplan >/dev/null 2>&1
-                
-                echo "Enabling ifupdown Networking Service"
-                sudo systemctl enable networking
-                wait
-                sleep 2
+                    echo ""
+                    echo "########"
+                    echo "Updating Network Services"
 
-                # echo "Updating Wired Static IP Addresses"
-                # source /opt/nepi/etc/scripts/update_etc_wired_static.sh
+                    echo "Disabling ifupdown Networking Service"
+                    sudo systemctl disable networking >/dev/null 2>&1
+                    sudo systemctl stop networking >/dev/null 2>&1
 
-                # echo "Updating Wired Alias IP Addresses"
-                # source /opt/nepi/etc/scripts/update_etc_wired_aliases.sh
+                    ehco "Disabling hostapd access point service"
+                    sudo systemctl disable hostapd >/dev/null 2>&1
+                    sudo systemctl stop hostapd >/dev/null 2>&1
 
-                echo "Restarting networking service"
-                sudo systemctl restart networking
+                    echo "Configuring NetworkManager Service" 
 
-                ehco "Enable hostapd access point service"
-                sudo systemctl unmask hostapd  >/dev/null 2>&1
-                sudo systemctl enable hostapd
-                sudo systemctl restart hostapd
-            else
-
-                echo "Disabling ifupdown Networking Service"
-                sudo systemctl disable networking >/dev/null 2>&1
-                sudo systemctl stop networking >/dev/null 2>&1
-
-                ehco "Disabling hostapd access point service"
-                sudo systemctl disable hostapd >/dev/null 2>&1
-                sudo systemctl stop hostapd >/dev/null 2>&1
-
-                echo "Enabling NetworkManager Service" 
-                if is_valid_rpi; then
-                    sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-                    sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-                else
                     sudo systemctl enable NetworkManager >/dev/null 2>&1
                     sudo systemctl restart NetworkManager >/dev/null 2>&1
-                fi
 
-                echo "Enabling netplan Service" 
-                sudo systemctl enable netplan >/dev/null 2>&1
-                sudo systemctl restart netplan >/dev/null 2>&1
+                    sudo systemctl enable NetworkManager-dispatcher >/dev/null 2>&1
+                    sudo systemctl restart NetworkManager-dispatcher >/dev/null 2>&1
+
+                    sudo systemctl disable NetworkManager-wait-online >/dev/null 2>&1
+                    sudo systemctl stop NetworkManager-wait-online >/dev/null 2>&1
+
+                    if is_valid_ubuntu; then
+                        echo "Enabling netplan Service" 
+                        sudo systemctl enable netplan >/dev/null 2>&1
+                        sudo systemctl restart netplan >/dev/null 2>&1
+                    fi
 
             fi
 
@@ -1230,6 +1195,8 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
                 echo "Updated Chromiun Preferences in ${PREFS_FILE}"
             fi
+
+            fix_chromium
         fi
     fi
 

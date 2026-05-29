@@ -78,16 +78,7 @@ if [[ "$?" -eq 0 ]]; then
         ###########################
         # NEPI_HOST UPDATE PROCESS
 
-        file=/etc/network/interfaces.d/nepi_user_ip_aliases
-        echo "Updating Alias IP file ${file}"
-        if [ ! -f "${file}" ]; then
-            if [ ! -d "/etc/network/interfaces.d" ]; then
-                sudo mkdir -p /etc/network/interfaces.d
-            fi
-            sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
-        fi
-        sudo chmod +x -R /etc/network/interfaces.d
-        sudo bash -c "cat /dev/null > $file"
+
 
 
         pos=0
@@ -111,10 +102,22 @@ if [[ "$?" -eq 0 ]]; then
                 alias_name=${NEPI_WIRED_INTERFACE}":"${position}
 
 
-                sudo echo 'auto '${alias_name} | sudo tee -a $file
-                sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
-                sudo echo '    address '${ip_address} | sudo tee -a $file
-                sudo echo '' | sudo tee -a $file
+                # file=/etc/network/interfaces.d/nepi_user_ip_aliases
+                # echo "Updating Alias IP file ${file}"
+                # if [ ! -f "${file}" ]; then
+                #     if [ ! -d "/etc/network/interfaces.d" ]; then
+                #         sudo mkdir -p /etc/network/interfaces.d
+                #     fi
+                #     sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
+                # fi
+                # sudo chmod +x -R /etc/network/interfaces.d
+                # sudo bash -c "cat /dev/null > $file"
+
+
+                # sudo echo 'auto '${alias_name} | sudo tee -a $file
+                # sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
+                # sudo echo '    address '${ip_address} | sudo tee -a $file
+                # sudo echo '' | sudo tee -a $file
 
                 #echo "Pinging alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
                 if ping -c 1 "${ip_address%%/*}" >/dev/null 2>&1; then
