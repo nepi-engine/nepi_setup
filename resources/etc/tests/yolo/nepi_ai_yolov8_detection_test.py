@@ -42,7 +42,7 @@ script_dir = os.path.dirname(__file__)
 
 
 NUM_TESTS=100
-IMAGES_DIR=os.path.join(script_dir, 'images')
+IMAGES_DIR=os.path.join(script_dir, '..', 'test_ai_detect', 'images')
 WEIGHT_FILE="common_objects_yolov8_640_tiny.pt"
 THRESHOLD=0.3
 
