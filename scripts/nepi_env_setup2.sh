@@ -421,6 +421,7 @@ else
 
                 deactivate
                 sudo cp -R hailo_platform /usr/local/lib/python${NEPI_PYTHON}/dist-packages/
+                pip uninstall typing
             fi
 
             
