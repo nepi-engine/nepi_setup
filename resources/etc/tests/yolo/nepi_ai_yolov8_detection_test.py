@@ -42,7 +42,7 @@ script_dir = os.path.dirname(__file__)
 
 
 NUM_TESTS=100
-IMAGES_DIR=os.path.join(script_dir, '..', 'test_ai_detect', 'images')
+IMAGES_DIR=os.path.join(script_dir, '..', 'images')
 WEIGHT_FILE="common_objects_yolov8_640_tiny.pt"
 THRESHOLD=0.3
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
             ###########################
             # Run Tests
             print('')
-            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Images")
+            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
             elapsed_time=0
             for i in range(1, NUM_TESTS):
 

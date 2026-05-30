@@ -425,27 +425,24 @@ else
             fi
 
             
-            if hailortcli fw-control identify; then
+            # if hailortcli fw-control identify; then
+            #     if is_valid_halio_sw; then
+            #         echo ""
+            #         echo "######################################"
+            #         echo "Installing HAILO Apps "
+            #         echo "######################################"
+            #         echo ""
+            #         sudo apt install meson ninja-build portaudio19-dev python3-gi python3-gi-cairo libbz2-dev liblzma-dev libelf-dev libunwind-dev libdw-dev -y
+            #         if [[ -d 'hailo-apps' ]]; then
+            #             git clone https://github.com/hailo-ai/hailo-apps.git
+            #             cd hailo-apps
+            #             sudo ./install.sh
+            #             source setup_env.sh
+            #         fi    
+            #     fi
+            # fi
 
 
-
-
-                    # if is_valid_halio_sw; then
-                    #     echo ""
-                    #     echo "######################################"
-                    #     echo "Installing HAILO Apps "
-                    #     echo "######################################"
-                    #     echo ""
-                    #     cur_dir=$(pwd)
-                    #     nepihome
-                    #     if [[ -d 'hailo-rpi5-examples' ]]; then
-                    #         git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
-                    #         cd hailo-rpi5-examples
-
-                    #     fi
-                    #     cd $cur_dir
-                    # fi
-            fi
         fi
         cd $cur_dir
     fi

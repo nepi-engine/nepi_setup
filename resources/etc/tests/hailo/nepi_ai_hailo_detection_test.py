@@ -42,7 +42,7 @@ script_dir = os.path.dirname(__file__)
 
 
 NUM_TESTS = 100
-IMAGES_DIR = os.path.join(script_dir, '..', 'test_ai_detect', 'images')
+IMAGES_DIR = os.path.join(script_dir, '..', 'images')
 WEIGHT_FILE = "yolov8m.hef"
 YAML_FILE = "common_objects_yolov8m_hailo_640.yaml"
 THRESHOLD = 0.3
@@ -157,7 +157,7 @@ if __name__ == '__main__':
             ###########################
             # Run Tests
             print('')
-            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Images")
+            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
             elapsed_time = 0
             for i in range(1, NUM_TESTS):
 
@@ -203,6 +203,7 @@ if __name__ == '__main__':
 
                 detect_dict_list = []
                 for det in detections:
+                    print(det)
                     det_prob = float(det[4])
                     if det_prob < THRESHOLD:
                         continue
