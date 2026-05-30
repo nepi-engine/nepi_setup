@@ -1007,23 +1007,45 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         fi
 
         sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-        sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
+        
+        
         sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
 
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
         xdg-user-dirs-update --set DESKTOP "$dfolder"
-        gsettings set org.gnome.desktop.screensaver lock-enabled false
-        gsettings set org.gnome.desktop.session idle-delay 0
-        gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
-        gsettings set org.gnome.nautilus.preferences show-hidden-files true
-        gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
+        if is_valid_ubuntu; then
+            
+            gsettings set org.gnome.desktop.screensaver lock-enabled false
+            gsettings set org.gnome.desktop.session idle-delay 0
+            gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+            gsettings set org.gnome.nautilus.preferences show-hidden-files true
+            
+            sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
+            gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
-        gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
-        'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
-        'gnome-control-center.desktop']"
+            gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
+            'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
+            'gnome-control-center.desktop']"
 
+        elif is_valid_rpi; then
+
+            source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
+            dest_folder="/home/${CONFIG_USER}/.config"
+            sudo cp -R $source_folder/* $dest_folder/
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
+
+            source_folder="${SOURCE_ETC_PATH}/user/rpi/local"
+            dest_folder="/home/${CONFIG_USER}/.local"
+            sudo cp -R $source_folder/* $dest_folder/
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
+
+            sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
+            pcmanfm --set-wallpaper "home/${CONFIG_USER}/nepi_wallpaper.jpg"
+
+            pcmanfm --desktop-off && pcmanfm --desktop &
+        fi
 
         echo "########"
         echo "Updating Chrome settings for user ${CONFIG_USER}"
@@ -1031,6 +1053,8 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         sudo pkill -f chromium
         echo "Setting Chromium as Defualt Browser"
         xdg-settings set default-web-browser chromium-browser.desktop
+
+
 
 
     elif [[ $LITE_INSTALL -eq 1 ]]; then

@@ -1,0 +1,10 @@
+ini[Desktop Entry]
+Type=Action
+Name=Open in Terminal
+Icon=terminal
+Profiles=open_current_dir
+
+[X-Action-Profile open_current_dir]
+Name=Open in Terminal here
+Exec=lxterminal
+Folders=true

@@ -313,6 +313,7 @@ else
 
 
     if is_valid_rpi; then
+        cur_dir=$(pwd)
         sudo update-pciids
         HAILO_SW_VERSION=$(get_hailo_installed_version)
         if [[ "$HAILO_SW_VERSION" != '0' ]]; then
@@ -339,7 +340,9 @@ else
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} "${NEPI_STORAGE}/tmp"
                 cd "${NEPI_STORAGE}/tmp"
             else
-                nepihome
+                cd "/home/${CONFIG_USER}"
+                mkdir tmp
+                cd tmp
             fi
             
             hailo_version=
@@ -403,6 +406,15 @@ else
                 sudo apt update
                 sudo apt install build-essential gcc g++ ccache
 
+                ### Update cmake_args in setup.py line 81 to
+                # cmake_args = [
+                #     f"-B{build_dir}",
+                #     f"-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+                #     f"-DCMAKE_BUILD_TYPE={_build_type}",
+                #     f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={build_dir}",
+                #     f'-DPYBIND11_PYTHON_VERSION="{python_version}"',
+                # ]
+
                 export CC=/usr/bin/gcc
                 export CXX=/usr/bin/g++
                 python3 setup.py bdist_wheel --plat-name=linux_aarch64
@@ -433,6 +445,7 @@ else
                     # fi
             fi
         fi
+        cd $cur_dir
     fi
 
 
