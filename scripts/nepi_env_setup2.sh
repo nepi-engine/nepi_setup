@@ -314,11 +314,11 @@ else
 
     if is_valid_rpi; then
         sudo update-pciids
-        HAILO_SW_VERION=$(get_hailo_installed_version)
-        if [[ "$HAILO_SW_VERION" != '0' ]]; then
+        HAILO_SW_VERSION=$(get_hailo_installed_version)
+        if [[ "$HAILO_SW_VERSION" != '0' ]]; then
             echo ""
             echo "######################################"
-            echo "Installing hailort Version ${HAILO_SW_VERION} "
+            echo "Installing hailort Version ${HAILO_SW_VERSION} "
             echo "######################################"
             echo ""
 
@@ -343,8 +343,8 @@ else
             fi
             
             hailo_version=
-            hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${HAILO_SW_VERION}.zip"
-            hailo_folder="hailort-${HAILO_SW_VERION}"
+            hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${HAILO_SW_VERSION}.zip"
+            hailo_folder="hailort-${HAILO_SW_VERSION}"
             hailo_zip="hailort.zip"
 
             if [[ -f ${hailo_zip} ]]; then
@@ -391,28 +391,44 @@ else
                 cd $hailo_folder
                 mkdir build
                 cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_EXAMPLES=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5  && sudo cmake --build build --config release --target install
+
+                # Build pyHailoRT
+                cd $hailo_folder
+                python3 -m venv hailo_venv
+                source hailo_venv/bin/activate
+
+                pip install --upgrade pip setuptools wheel
+
+                cd hailort/libhailort/bindings/python/platform/
+                sudo apt update
+                sudo apt install build-essential gcc g++ ccache
+
+                export CC=/usr/bin/gcc
+                export CXX=/usr/bin/g++
+                python3 setup.py bdist_wheel --plat-name=linux_aarch64
             fi
+
             
             if hailortcli fw-control identify; then
 
 
 
 
-                    if is_valid_halio_sw; then
-                        echo ""
-                        echo "######################################"
-                        echo "Installing HAILO Apps "
-                        echo "######################################"
-                        echo ""
-                        cur_dir=$(pwd)
-                        nepihome
-                        if [[ -d 'hailo-rpi5-examples' ]]; then
-                            git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
-                            cd hailo-rpi5-examples
+                    # if is_valid_halio_sw; then
+                    #     echo ""
+                    #     echo "######################################"
+                    #     echo "Installing HAILO Apps "
+                    #     echo "######################################"
+                    #     echo ""
+                    #     cur_dir=$(pwd)
+                    #     nepihome
+                    #     if [[ -d 'hailo-rpi5-examples' ]]; then
+                    #         git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
+                    #         cd hailo-rpi5-examples
 
-                        fi
-                        cd $cur_dir
-                    fi
+                    #     fi
+                    #     cd $cur_dir
+                    # fi
             fi
         fi
     fi
