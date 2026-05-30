@@ -3687,6 +3687,20 @@ function nepigithub {
 export -f nepigithub
 
 
+
+
+function pulln {
+  if is_valid_internet ; then
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git pull --recurse-submodules
+      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+    fi
+  fi
+}
+
+export -f pulln
 function nepiclone {
   if is_valid_internet ; then
     cd ~/
@@ -3694,7 +3708,8 @@ function nepiclone {
     if [[ $? -eq 0 ]]; then
       cd ${NEPI_REPO_NAME}
       git checkout main
-      git submodule update --init --recursive
+      #git submodule update --init --recursive
+      pulln
     else
       echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
     fi
@@ -3710,7 +3725,8 @@ function nepiclonedev {
     if [[ $? -eq 0 ]]; then
       cd ${NEPI_REPO_NAME}
       git checkout develop
-      git submodule update --init --recursive 
+      #git submodule update --init --recursive 
+      pulln
     else
       echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
     fi
@@ -3720,18 +3736,6 @@ function nepiclonedev {
 export -f nepiclonedev
 
 
-function pulln {
-  if is_valid_internet ; then
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git pull --recurse-submodules
-      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-    fi
-  fi
-}
-
-export -f pulln
 
 
 
