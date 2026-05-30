@@ -406,6 +406,8 @@ else
                 export CC=/usr/bin/gcc
                 export CXX=/usr/bin/g++
                 python3 setup.py bdist_wheel --plat-name=linux_aarch64
+
+                deactivate
             fi
 
             
