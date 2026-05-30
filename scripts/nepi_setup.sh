@@ -1021,7 +1021,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             gsettings set org.gnome.desktop.session idle-delay 0
             gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
             gsettings set org.gnome.nautilus.preferences show-hidden-files true
-            
+
             sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
             gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
@@ -1041,7 +1041,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             sudo cp -R $source_folder/* $dest_folder/
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
 
-            sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
+            cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
             pcmanfm --set-wallpaper "home/${CONFIG_USER}/nepi_wallpaper.jpg"
 
             pcmanfm --desktop-off && pcmanfm --desktop &

@@ -420,6 +420,7 @@ else
                 python3 setup.py bdist_wheel --plat-name=linux_aarch64
 
                 deactivate
+                sudo cp -R hailo_platform /usr/local/lib/python${NEPI_PYTHON}/dist-packages/
             fi
 
             
