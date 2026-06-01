@@ -190,7 +190,7 @@ else
     sudo apt install cifs-utils
 fi
 
-sudo update-pciids
+
 
 echo "######################################"
 echo "Installing NEPI python packages"
@@ -431,7 +431,7 @@ sudo apt-get install --fix-broken -y
 
 #################################
 # Install Hailo Software
-
+sudo update-pciids
 # sudo apt remove hailo-all -y 2> /dev/null
 sudo apt install hailo-all -y
 

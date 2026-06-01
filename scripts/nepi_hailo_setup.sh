@@ -204,40 +204,6 @@ else
             fi
 
 
-            # if [[ -d $install_dir ]]; then
-            #     #hailortcli fw-control identify
-
-            #     hailo_sw_version=$(get_hailo_sw_version)
-            #     hailo_fw_version=$(get_hailo_fw_version)
-            #     if [[ "$HAILO_FW_VERSION" != $"NEPI_HAILO_SW_VERSION" ]]; then
-
-            #         echo "#########"
-            #         echo "Installing Hailo Firmware Version ${NEPI_HAILO_SW_VERSION} "
-            #             cd $install_dir
-            #             bin_dir="${install_dir}/bin"
-            #             if [[ ! -d $bin_dir ]]; then
-            #                 mkdir $bin_dir
-            #             fi
-            #             cd ${install_dir}/${bin_dir}
-
-            #             hailo_fw_file="hailo${NEPI_HAILO_HW_VERSION}_fw.${NEPI_HAILO_SW_VERSION}.bin"
-            #             hailo_fw_dest_file="hailo${NEPI_HAILO_HW_VERSION}_fw.bin"
-            #             hailo_fw_folder="/lib/firmware/hailo"
-
-            #             curl -o "$hailo_fw_file" https://hailo-hailort.s3.eu-west-2.amazonaws.com/Hailo8/${NEPI_HAILO_SW_VERSION}/FW/hailo8_fw.${NEPI_HAILO_SW_VERSION}.bin
-
-            #             if [[ -f $hailo_fw_file ]]; then
-            #                 if [[ ! -d $hailo_fw_folder ]]; then
-            #                     sudo mkdir -p $hailo_fw_folder
-            #                 fi
-            #                 sudo cp $hailo_fw_file "${hailo_fw_folder}/" 
-            #                 if [[ "$hailo_sw_version" == $"hailo_fw_version" ]]; then
-            #                     hailortcli fw-update ${hailo_fw_folder}/${hailo_fw_file}
-            #                 fi
-            #                 sudo ln -sf ${hailo_fw_folder}/${hailo_fw_file} ${hailo_fw_folder}/${hailo_fw_dest_file}
-            #             fi
-            #     fi
-                
             if [[ -d $install_dir ]]; then
 
                 hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
@@ -337,7 +303,39 @@ else
 
 fi
 
+            # if [[ -d $install_dir ]]; then
+            #     #hailortcli fw-control identify
 
+            #     hailo_sw_version=$(get_hailo_sw_version)
+            #     hailo_fw_version=$(get_hailo_fw_version)
+            #     if [[ "$HAILO_FW_VERSION" != $"NEPI_HAILO_SW_VERSION" ]]; then
+
+            #         echo "#########"
+            #         echo "Installing Hailo Firmware Version ${NEPI_HAILO_SW_VERSION} "
+            #             cd $install_dir
+            #             bin_dir="${install_dir}/bin"
+            #             if [[ ! -d $bin_dir ]]; then
+            #                 mkdir $bin_dir
+            #             fi
+            #             cd ${install_dir}/${bin_dir}
+
+            #             hailo_fw_file="hailo${NEPI_HAILO_HW_VERSION}_fw.${NEPI_HAILO_SW_VERSION}.bin"
+            #             hailo_fw_dest_file="hailo${NEPI_HAILO_HW_VERSION}_fw.bin"
+            #             hailo_fw_folder="/lib/firmware/hailo"
+
+            #             curl -o "$hailo_fw_file" https://hailo-hailort.s3.eu-west-2.amazonaws.com/Hailo8/${NEPI_HAILO_SW_VERSION}/FW/hailo8_fw.${NEPI_HAILO_SW_VERSION}.bin
+
+            #             if [[ -f $hailo_fw_file ]]; then
+            #                 if [[ ! -d $hailo_fw_folder ]]; then
+            #                     sudo mkdir -p $hailo_fw_folder
+            #                 fi
+            #                 sudo cp $hailo_fw_file "${hailo_fw_folder}/" 
+            #                 if [[ "$hailo_sw_version" == $"hailo_fw_version" ]]; then
+            #                     hailortcli fw-update ${hailo_fw_folder}/${hailo_fw_file}
+            #                 fi
+            #                 sudo ln -sf ${hailo_fw_folder}/${hailo_fw_file} ${hailo_fw_folder}/${hailo_fw_dest_file}
+            #             fi
+            #     fi
 
             
                 # if hailortcli fw-control identify; then
