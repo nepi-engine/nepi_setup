@@ -312,142 +312,6 @@ else
     sudo python3 -m pip install --ignore-installed ultralytics
 
 
-    if is_valid_rpi; then
-        cur_dir=$(pwd)
-        sudo update-pciids
-        HAILO_SW_VERSION=$(get_hailo_installed_version)
-        if [[ "$HAILO_SW_VERSION" != '0' ]]; then
-            echo ""
-            echo "######################################"
-            echo "Installing hailort Version ${HAILO_SW_VERSION} "
-            echo "######################################"
-            echo ""
-
-            sudo apt install  dkms libglib2.0-0 ffmpeg x11-utils bison flex libelf-dev \
-            libgstreamer-plugins-base1.0-dev python-gi-dev libgirepository1.0-dev libzmq3-dev gcc-9 g++-9 \
-            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-            gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x \
-            gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio \
-            python3-gi python3-gi-cairo gir1.2-gtk-3.0 -y
-
-            cur_folder=$(pwd)
-            if [[ ! -d "${NEPI_STORAGE}/tmp" ]]; then
-                sudo mkdir - p "${NEPI_STORAGE}/tmp"
-                
-            fi
-            if [[ -d "${NEPI_STORAGE}/tmp" ]]; then
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} "${NEPI_STORAGE}/tmp"
-                cd "${NEPI_STORAGE}/tmp"
-            else
-                cd "/home/${CONFIG_USER}"
-                mkdir tmp
-                cd tmp
-            fi
-            
-            hailo_version=
-            hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${HAILO_SW_VERSION}.zip"
-            hailo_folder="hailort-${HAILO_SW_VERSION}"
-            hailo_zip="hailort.zip"
-
-            if [[ -f ${hailo_zip} ]]; then
-                sudo rm -r $hailo_zip
-            fi
-            if [[ ! -f ${hailo_zip} ]]; then
-                sudo wget ${hailo_link} -O ${hailo_zip}
-                if [[ "$?" -ne 0 ]]; then
-                    echo ""
-                    echo "Failed to download from link: ${hailo_link}"
-                    echo ""
-                    sudo rm ${hailo_zip}
-                fi
-            else
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $hailo_zip
-            fi
-
-            if [[ -f ${hailo_zip} ]]; then
-                echo ""
-                echo "Unzipping file ${hailo_zip}"
-                echo ""
-                sudo unzip -o -q $hailo_zip
-                if [ $? -eq 0 ]; then
-                    #sudo rm ${hailo_zip} > /dev/null 2>&1
-                    success_storage=1
-                else
-                    echo ""
-                    echo "Failed to unzip file: ${hailo_zip}"
-                    echo ""
-                    #sudo rm ${hailo_zip} > /dev/null 2>&1
-                fi
-            else
-                echo ""
-                echo "Failed to find file: ${hailo_zip}"
-                echo ""
-            fi
-
-            if [[ -f ${hailo_zip} ]]; then
-                sudo rm ${hailo_zip} > /dev/null 2>&1
-            fi
-
-            if [[ -d $hailo_folder && -n $hailo_folder ]]; then
-                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $hailo_folder
-                cd $hailo_folder
-                mkdir build
-                cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_EXAMPLES=1 -DCMAKE_POLICY_VERSION_MINIMUM=3.5  && sudo cmake --build build --config release --target install
-
-                # Build pyHailoRT
-                cd $hailo_folder
-                python3 -m venv hailo_venv
-                source hailo_venv/bin/activate
-
-                pip install --upgrade pip setuptools wheel
-
-                cd hailort/libhailort/bindings/python/platform/
-                sudo apt update
-                sudo apt install build-essential gcc g++ ccache
-
-                ### Update cmake_args in setup.py line 81 to
-                # cmake_args = [
-                #     f"-B{build_dir}",
-                #     f"-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
-                #     f"-DCMAKE_BUILD_TYPE={_build_type}",
-                #     f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={build_dir}",
-                #     f'-DPYBIND11_PYTHON_VERSION="{python_version}"',
-                # ]
-
-                export CC=/usr/bin/gcc
-                export CXX=/usr/bin/g++
-                python3 setup.py bdist_wheel --plat-name=linux_aarch64
-
-                deactivate
-                sudo cp -R hailo_platform /usr/local/lib/python${NEPI_PYTHON}/dist-packages/
-                pip uninstall typing
-            fi
-
-            
-            # if hailortcli fw-control identify; then
-            #     if is_valid_halio_sw; then
-            #         echo ""
-            #         echo "######################################"
-            #         echo "Installing HAILO Apps "
-            #         echo "######################################"
-            #         echo ""
-            #         sudo apt install meson ninja-build portaudio19-dev python3-gi python3-gi-cairo libbz2-dev liblzma-dev libelf-dev libunwind-dev libdw-dev -y
-            #         if [[ -d 'hailo-apps' ]]; then
-            #             git clone https://github.com/hailo-ai/hailo-apps.git
-            #             cd hailo-apps
-            #             sudo ./install.sh
-            #             source setup_env.sh
-            #         fi    
-            #     fi
-            # fi
-
-
-        fi
-        cd $cur_dir
-    fi
-
-
 
     #https://github.com/ultralytics/ultralytics/issues/21015
     #sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input ultralytics
@@ -486,6 +350,20 @@ else
         sudo -H python${NEPI_PYTHON} -m pip install --force-reinstall --no-input numpy==${np_required}
         python -c "import numpy; print(numpy.__version__)"
         sudo dpkg --configure -a
+    fi
+
+
+
+    #################################
+    # Install Hailo Software
+
+    SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+    script_file=hailo_env_setup.sh
+    script_path=${SCRIPT_FOLDER}/${script_file}
+    if ! source_script $script_path; then
+        script_error=$?
+        echo "Script ${script_path} failed with error ${script_error}"
+        return 
     fi
 
     # which python # (or where python on Windows) to see the executable path

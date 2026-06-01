@@ -30,11 +30,24 @@ import yaml
 import cv2
 import numpy as np
 import random
+from typing import List, Tuple, Optional, Dict
+from PIL import Image
 
-from hailo_platform import (
-    HEF, VDevice, HailoStreamInterface, InferVStreams,
-    ConfigureParams, InputVStreamParams, OutputVStreamParams, FormatType
-)
+
+
+
+try:
+    from hailo_platform import (HEF, Device, VDevice, HailoStreamInterface, InferVStreams, ConfigureParams,
+    InputVStreamParams, OutputVStreamParams, InputVStreams, OutputVStreams, FormatType)
+    #from hailo_platform import *
+    HAILO_AVAILABLE = True
+    HAILO_IMPORT_ERROR = None
+except ImportError as e:
+    HAILO_AVAILABLE = False
+    HAILO_IMPORT_ERROR = str(e)
+
+print("HAILO_AVAILABLE " + str(HAILO_AVAILABLE))
+print("HAILO_IMPORT_ERROR " + str(HAILO_AVAILABLE))
 
 
 # Get the path of the current script file
@@ -43,15 +56,28 @@ script_dir = os.path.dirname(__file__)
 
 NUM_TESTS = 100
 IMAGES_DIR = os.path.join(script_dir, '..', 'images')
-WEIGHT_FILE = "yolov8m.hef"
-YAML_FILE = "common_objects_yolov8m_hailo_640.yaml"
+#MODEL DOWNLOAD LINKS
+#'https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst'
+#'https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.9.0/yolov8m.hef'
+
+
+
+WEIGHT_FILES = ["yolov8m_old.hef", "yolov8m_mz.hef", "yolov8m_apps.hef"]
 THRESHOLD = 0.3
 
 
 IMAGE_FILE_TYPES = ['jpg','JPG','jpeg','png','PNG']
 
+
+HAILO_INTERFACE = HailoStreamInterface.PCIe
+
 ######################################
 
+#REF: 'https://docs.ultralytics.com/integrations/hailo#step-3-run-inference'
+#REF: 'https://community.hailo.ai/t/detection-and-tracking-in-real-time-using-the-python-api/4863/4'
+#REF: 'https://community.hailo.ai/t/hailort-minimal-working-example-for-python-and-hailo8/7685'
+#REF: 'https://community.hailo.ai/t/looking-for-a-solution-to-yolov8n-yolov8-nms-postprocess-related-errors/6269'
+#REF: 'https://docs.degirum.com/pysdk/release-notes'
 
 def get_files(folder_path):
     img_files = []
@@ -77,163 +103,366 @@ def is_gray(cv2_img):
         return False
 
 
-######################################
-if __name__ == '__main__':
+def check_for_device():
+    device = None
+    try:
+        # Scan for all available Hailo devices
+        discovered_devices = Device.scan()
+        
+        if not discovered_devices:
+            print("❌ No Hailo devices found. Check your hardware connection or PCIe drivers.")
+        else:
+            print(f"✅ Found {len(discovered_devices)} Hailo device(s):")
+            for idx, device_id in enumerate(discovered_devices, start=1):
+                print(f"  [{idx}] Device ID / PCIe Address: {device_id}")
+            device = device_id
+                
+    except HailoRTStatusException as e:
+        print(f"❌ Error communicating with the Hailo interface: {e}")
+    except ModuleNotFoundError:
+        print("❌ The 'hailo_platform' module is not installed. Please install pyHailoRT.")
+    return device
 
-    # Load model config from yaml
-    yaml_path = os.path.join(script_dir, YAML_FILE)
-    print('')
-    print("Loading model config: " + str(yaml_path))
-    with open(yaml_path, 'r') as f:
-        yaml_dict = yaml.safe_load(f)
-    model_info = yaml_dict['ai_model']
-    classes = model_info['classes']['names']
-    proc_img_width = model_info['image_size']['image_width']['value']
-    proc_img_height = model_info['image_size']['image_height']['value']
-    print("Classes: " + str(len(classes)))
-    print("Process size: " + str(proc_img_width) + "x" + str(proc_img_height))
-
-    print('')
-    print("Getting test images from: " + str(IMAGES_DIR))
-
-    image_files = get_files(IMAGES_DIR)
-    num_files = len(image_files)
-
-    if num_files == 0:
-        print("No images found at: " + str(IMAGES_DIR))
-    else:
-        print("Found " + str(num_files) + " images")
-
-        ######################################
-        # Load Model
-        weight_file_path = os.path.join(script_dir, WEIGHT_FILE)
-        print('')
-        print("Loading HEF model: " + str(weight_file_path))
-
-        hef = HEF(weight_file_path)
-        target = VDevice()
-        configure_params = ConfigureParams.create_from_hef(hef, interface=HailoStreamInterface.PCIe)
-        network_groups = target.configure(hef, configure_params)
-        network_group = network_groups[0]
-        network_group_params = network_group.create_params()
-
-        input_info = hef.get_input_vstream_infos()[0]
-        input_name = input_info.name
-        input_height = input_info.shape[0]
-        input_width = input_info.shape[1]
-        print("Model input shape: " + str(input_width) + "x" + str(input_height))
-
-        input_vstream_params = InputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
-        output_vstream_params = OutputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
-
-        ###########################
-        # Prime the Model
-        results = None
-        raw_detections = None
-
-        random_int = random.randint(1, num_files)-1
-        image_file = os.path.join(IMAGES_DIR, image_files[random_int])
-        cv2_img = cv2.imread(image_file)
+def preprocess_image(cv2_img,hef):
+        input_data = None
+        ###################
+        # Preprocess Image Data
         if cv2_img is None:
             print("Failed to import img file " + str(image_file))
         else:
             if is_gray(cv2_img):
-                cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2BGR)
+                img_rgb = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2RGB)
             else:
-                cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+                img_rgb = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
 
-            input_img = cv2.resize(cv2_img, (input_width, input_height)).astype(np.float32) / 255.0
-            input_data = {input_name: np.expand_dims(input_img, axis=0)}
+            h, w, c = img_rgb.shape
 
-            print('')
-            print("Priming the Model")
-            try:
-                with InferVStreams(network_group, input_vstream_params, output_vstream_params) as infer_pipeline:
-                    with network_group.activate(network_group_params):
-                        raw_detections = infer_pipeline.infer(input_data)
-            except Exception as e:
-                print("Failed to process detection with exception: " + str(e))
+            # Get expected model input dimensions
+            input_info = hef.get_input_stream_infos()[0]
+            input_shape = input_info.shape
+            print(input_info)
+            print(input_shape)
+            input_height, input_width = input_shape[0], input_shape[1]
 
-            ###########################
-            # Run Tests
-            print('')
-            print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
-            elapsed_time = 0
-            for i in range(1, NUM_TESTS):
+            # Resize image to match model input and normalize (if required by your pre-processing)
+            cv2_img_shape = cv2_img.shape
+            cv2_img_width = cv2_img_shape[1]
+            cv2_img_height = cv2_img_shape[0]
+            print("Got image to w/h: " + str([cv2_img_width,cv2_img_height]))
+            print("Resizing image to w/h: " + str([input_width,input_height]))
+            resized_image = cv2.resize(img_rgb, (input_width, input_height), interpolation=cv2.INTER_LINEAR)
 
-                random_int = random.randint(1, num_files)-1
-                image_file = os.path.join(IMAGES_DIR, image_files[random_int])
-                cv2_img = cv2.imread(image_file)
-                if cv2_img is None:
-                    print("Failed to import img file " + str(image_file))
-                else:
-                    if is_gray(cv2_img):
-                        cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2BGR)
-                    else:
-                        cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+            # Normalize the image (typically [0, 255] -> [0, 1] or [-1, 1] depending on your HEF model)
 
-                    input_img = cv2.resize(cv2_img, (input_width, input_height)).astype(np.float32) / 255.0
-                    input_data = {input_name: np.expand_dims(input_img, axis=0)}
+            input_data = resized_image.astype(np.float32) / 255.0 
+            input_data = np.expand_dims(input_data, axis=0).astype(np.uint8)
 
-                    start_time = time.time()
-                    try:
-                        # Inference
-                        with InferVStreams(network_group, input_vstream_params, output_vstream_params) as infer_pipeline:
-                            with network_group.activate(network_group_params):
-                                raw_detections = infer_pipeline.infer(input_data)
-                    except Exception as e:
-                        print("Failed to process detection with exception: " + str(e))
-                    end_time = time.time()
+            # input_data = resized_image.astype(np.float32) / 255.0 
+            # input_data = np.expand_dims(input_data, axis=0).astype(np.float32)
 
-                    detect_time = end_time - start_time
-                    elapsed_time = elapsed_time + detect_time
+            #input_data = resized_image.astype(np.float32) / 255.0 
 
-            if raw_detections is None:
-                print("FAIL TO GET RESULTS FROM DETECTION PROCESS")
-            else:
-                ######################
-                # Print Results
-                cv2_img_shape = cv2_img.shape
-                cv2_img_width = cv2_img_shape[1]
-                cv2_img_height = cv2_img_shape[0]
-                cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
+            # Add batch dimension: shape becomes (1, height, width, channels)
+            
 
-                output_name = list(raw_detections.keys())[0]
-                detections = raw_detections[output_name][0]
+        return input_data
 
-                detect_dict_list = []
-                for det in detections:
-                    print(det)
-                    det_prob = float(det[4])
-                    if det_prob < THRESHOLD:
-                        continue
-                    det_id = int(det[5])
-                    if det_id >= len(classes):
-                        continue
-                    det_name = classes[det_id]
-                    xmin = int(det[0] * cv2_img_width / input_width)
-                    ymin = int(det[1] * cv2_img_height / input_height)
-                    xmax = int(det[2] * cv2_img_width / input_width)
-                    ymax = int(det[3] * cv2_img_height / input_height)
-                    det_area = (xmax - xmin) * (ymax - ymin)
-                    detect_dict = {
-                        'name': det_name,
-                        'id': det_id,
-                        'uid': '',
-                        'prob': det_prob,
-                        'xmin': xmin,
-                        'ymin': ymin,
-                        'xmax': xmax,
-                        'ymax': ymax,
-                        'area_pixels': int(det_area),
-                        'area_ratio': det_area / cv2_img_area
-                    }
-                    detect_dict_list.append(detect_dict)
 
-                print("Got detect dict list: " + str(detect_dict_list))
+def process_results(cv2_img, results):
+    ######################
+    cv2_img_shape = cv2_img.shape
+    cv2_img_width = cv2_img_shape[1]
+    cv2_img_height = cv2_img_shape[0]
+    cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
 
-                drate = float(1.0) / elapsed_time * NUM_TESTS
-                print("")
-                print("")
-                print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
-                print(f"Average detection rate: {drate:.2f} hz")
+
+
+    ##'results' is returned by the Hailo infer function
+    print("")
+    print("Got Results")
+    #print(results)
+    print(type(results))
+    keys=list(results.keys())
+    print(keys)
+    print(len(results))
+
+    # last_values = None
+    # for key in results.keys():
+    #     result = results[key]
+    #     print(len(result))
+    #     for entry in result:
+    #         #print(len(result))
+    #         for data in entry:
+    #             #print(len(data))
+    #             for values in data:
+    #                 if (values != 0).all() and (last_values != values).all():
+    #                     print(values)
+    #                     last_values = values
+        
+    result = results[keys[0]][0]
+    print("")
+    print("Got Result")
+    print(type(result))
+    print(len(result))
+    print(result)
+
+    # # Parse the inference results
+    # for key, detections in results.items():
+    #     if "detection_classes" in key:
+    #         classes = detections[0]
+    #     if "detection_boxes" in key:
+    #         boxes = detections[0]
+    #     if "detection_scores" in key:
+    #         scores = detections[0]
+
+    #     # Debug print to verify parsed data
+    #     print("Classes:", classes)
+    #     print("Boxes:", boxes)
+    #     print("Scores:", scores)
+
+
+    #print("Processing result " + str(result))
+
+
+    # # Convert HailoTensor to a numpy array
+    # raw_array = np.array(tensor, copy=False)
+
+    # # Dequantize (if tensor is quantized uint8)
+    # # Scale and zero_point are typically found in tensor.quantization_info
+    # scale = tensor.quantization_info.qp_scale
+    # zp = tensor.quantization_info.qp_zp
+    # detection = (raw_array - zp) * scale
+
+    # # Process float_array (e.g., reshape for YOLO format)
+    # print("Processed detection " + str(detection))
+
+    detect_dict_list = []
+    # for result in results:
+    #     detection = []
+
+
+    #     if len(detection) >= 7:
+    #         # Unpack the detection (assuming the 6th element is the class_id)
+    #         ymin, xmin, ymax, xmax, confidence, class_id = detection[:6]
+            
+    #         # Convert class_id to an integer to use as an index
+    #         class_id = int(class_id)
+
+
+    #         box = float_array
+    #         det_name = output_name
+    #         det_id = det_name
+    #         det_prob = detection['score']
+
+    #         # Unpack Hailo's normalized coordinates [ymin, xmin, ymax, xmax]
+    #         ymin, xmin, ymax, xmax = box
+
+    #         # Convert to pixel coordinates relative to the original image
+    #         abs_ymin = int(ymin * h)
+    #         abs_xmin = int(xmin * w)
+    #         abs_ymax = int(ymax * h)
+    #         abs_xmax = int(xmax * w)
+
+    #         det_area = (xmax - xmin) * (ymax - ymin)
+    #         detect_dict = {
+    #             'name': det_name,
+    #             'id': det_id,
+    #             'uid': '',
+    #             'prob': det_prob,
+    #             'xmin': abs_xmin,
+    #             'ymin': abs_ymin,
+    #             'xmax': abs_ymax,
+    #             'ymax': abs_ymax,
+    #             'area_pixels': int(det_area),
+    #             'area_ratio': det_area / cv2_img_area
+    #         }
+    #         detect_dict_list.append(detect_dict)
+    return detect_dict_list
+
+
+
+
+
+            
+######################################
+if __name__ == '__main__':
+
+
+
+    device = check_for_device()
+    if device is not None:
+        # # Load model config from yaml
+        # yaml_path = os.path.join(script_dir, YAML_FILE)
+        # print('')
+        # print("Loading model config: " + str(yaml_path))
+        # with open(yaml_path, 'r') as f:
+        #     yaml_dict = yaml.safe_load(f)
+        # model_info = yaml_dict['ai_model']
+        # classes = model_info['classes']['names']
+        # proc_img_width = model_info['image_size']['image_width']['value']
+        # proc_img_height = model_info['image_size']['image_height']['value']
+        # print("Classes: " + str(len(classes)))
+        # print("Process size: " + str(proc_img_width) + "x" + str(proc_img_height))
+
+        print('')
+        print("Getting test images from: " + str(IMAGES_DIR))
+
+        image_files = get_files(IMAGES_DIR)
+        num_files = len(image_files)
+
+        if num_files == 0:
+            print("No images found at: " + str(IMAGES_DIR))
+        else:
+            print("Found " + str(num_files) + " images")
+
+            device = VDevice()
+            for weight_file in WEIGHT_FILES:
+                print("########################")
+                print("Testing model file " + str(weight_file))
+                print("########################")
+                ######################################
+                # Load Model
+                weight_file_path = os.path.join(script_dir, weight_file)
+                print('')
+                print("Loading HEF model: " + str(weight_file_path))
+
+                hef = HEF(weight_file_path)
+                input_infos = hef.get_input_vstream_infos()
+                print(f"--- Found {len(input_infos)} Input Stream(s) ---")
+                print(input_infos)
+                # for info in input_infos:
+                #     print(f"Name: {info.name}")
+                #     print(f"Shape (H, W, C): {info.shape}")
+                #     print(f"Data Type: {info.data_type}")
+                #     print(f"Format Type: {info.format_type}\n")
+
+                # 3. Extract output stream parameters 
+                output_infos = hef.get_output_vstream_infos()
+                print(f"--- Found {len(output_infos)} Output Stream(s) ---")
+                print(output_infos)
+                # for info in output_infos:
+                #     print(f"Name: {info.name}")
+                #     print(f"Shape: {info.shape}")
+                #     print(f"Data Type: {info.data_type}")
+                #     print(f"Quantization Info (Scale): {info.quant_info.scale}")
+                #     print(f"Quantization Info (Offset): {info.quant_info.offset}\n")
+
+    
+                
+                # Configure the network group
+                configure_params = None
+                network_groups = None
+                network_group = None
+                network_group_params = None
+                try:
+                    configure_params = ConfigureParams.create_from_hef(hef, interface=HAILO_INTERFACE)
+                    network_groups = device.configure(hef, configure_params)
+                    network_group = network_groups[0]
+                    network_group_params = network_group.create_params()
+                except Exception as e:
+                    print("Device config failed with error: " + str(e))
+                if configure_params is not None and network_group_params is not None:
+                    print("Got network config: " + str(network_group_params))
+                    # Get stream info for input/output naming
+                    input_vstream_info = hef.get_input_vstream_infos()[0]
+                    print("")
+                    print("input_vstream_info " + str(input_vstream_info))
+                    
+                    output_vstream_info = hef.get_output_vstream_infos()[0]
+                    print("")
+                    print("output_vstream_info " + str(output_vstream_info))
+                    print("")
+                    # Build vstream params
+
+
+                    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False)
+                    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=False)
+
+                    # input_vstreams_params = InputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
+                    # output_vstreams_params = OutputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
+
+                    ###########################
+                    # Prime the Model
+                   
+
+                    random_int = random.randint(1, num_files)-1
+                    image_file = os.path.join(IMAGES_DIR, image_files[random_int])
+                    cv2_img = cv2.imread(image_file)
+                    
+
+                    ###################
+                    results = None
+                    input_data=preprocess_image(cv2_img,hef)
+                    if input_data is not None:
+                        print('')
+                        print("Priming the Model")
+                        results = None
+                        try:
+                            with InferVStreams(network_group, input_vstreams_params, output_vstreams_params) as infer_pipeline:
+                                with network_group.activate(network_group_params):
+                                    results = infer_pipeline.infer({input_vstream_info.name: input_data})
+                                    #results = infer_pipeline.infer(input_data)
+
+                        except Exception as e:
+                            print("Failed to process detection with exception: " + str(e))
+
+
+                    detect_dict_list = None
+                    if results is not None:
+                        print("Inference completed successfully!")
+                        # You can now parse `results` using your specific model's post-processing logic
+                        detect_dict_list = process_results(cv2_img, results)
+                        print("Got Detect Dict List")
+                        print(detect_dict_list)
+
+
+
+                    if detect_dict_list is not None:
+
+                        ###########################
+                        # Run Tests
+                        print('')
+                        print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
+                        
+                        # elapsed_time = 0
+                        
+                        # for i in range(1, NUM_TESTS):
+                            
+                        #     random_int = random.randint(1, num_files)-1
+                        #     image_file = os.path.join(IMAGES_DIR, image_files[random_int])
+                        #     cv2_img = cv2.imread(image_file)
+
+                        #     start_time = time.time()
+                        #     input_data=preprocess_image(cv2_img,hef)
+                        #     if input_data is not None:
+                        #         print('')
+                        #         print("Priming the Model")
+                        #         raw_output = None
+                        #         try:
+                        #             # Inference
+                        #             with VDevice() as device:
+                        #                 inferencer = Inferencer(device, network_group)
+                        #                 # Send image to the Hailo device and retrieve output
+                        #                 raw_output = inferencer.infer(input_data)
+                        #                 print("Got Output")
+                        #                 print(raw_output)
+                        #             except Exception as e:
+                        #                 print("Failed to process detection with exception: " + str(e))
+                        #     end_time = time.time()
+
+                        #     detect_time = end_time - start_time
+                        #     elapsed_time = elapsed_time + detect_time
+
+                        # if raw_output is None:
+                        #     print("FAIL TO GET RESULTS FROM DETECTION PROCESS")
+                        # else:
+
+                        #         print("Got detect dict list: " + str(detect_dict_list))
+
+                        #         drate = float(1.0) / elapsed_time * NUM_TESTS
+                        #         print("")
+                        #         print("")
+                        #         print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
+                        #         print(f"Average detection rate: {drate:.2f} hz")
+
+            device.release()

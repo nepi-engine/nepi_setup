@@ -75,6 +75,10 @@ elif [[ -f $NEPI_SETUP_CONFIG_FILE ]]; then
 fi
 
 
+# Run NEPI System Config Load if exists
+NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
+sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
+
 #######################################################################################
 
 
@@ -167,12 +171,32 @@ sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.15 $NEPI_BAUMER_PATH/libbgapi
 
 
 #################################
+# Update System Info
+if [[ "$nepi_mode" == 'HOST' ]]; then
+    echo "Host updating HAILO HW Version"
+    NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
+    export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
+    update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $NEPI_SYS_CONFIG_FILE
+    echo $NEPI_HAILO_HW_VERSION
+fi
+if [[ -z $NEPI_HAILO_HW_VERSION ]]; then
+    NEPI_HAILO_HW_VERSION=0
+fi
+
+
+
+if [[ "$nepi_mode" == 'SYSTEM' ]]; then
+    NEPI_HAILO_SW_VERSION=$(get_hailo_hw_version)
+    export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
+    update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $NEPI_SYS_CONFIG_FILE
+fi
+
+
+#################################
 # Update Managed Service Settings
 
 ####################################
 # Run NEPI System Config Load if exists
-NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
-sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
 
 NEPI_SYS_CONFIG_LOAD=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
 if ! source_script $NEPI_SYS_CONFIG_LOAD; then
@@ -262,7 +286,7 @@ function update_current_config() {
 }     
 
 function print_user_config(){
-    config_file=${SYSTEM_SYS_CONFIG_FILE}
+    config_file=${NEPI_SYS_CONFIG_FILE}
     if [ -f "$config_file" ]; then
         CONFIGN="#############################
         ## NEPI Config Settings ##
@@ -303,7 +327,7 @@ function print_current_config(){
 
 
 function udpate_config_file(){
-    echo "Updating nepi system config values in file ${SYSTEM_SYS_CONFIG_FILE}"
+    echo "Updating nepi system config values in file ${NEPI_SYS_CONFIG_FILE}"
 
 
     NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
@@ -1031,6 +1055,11 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
         elif is_valid_rpi; then
 
+            # Disable Auto Login
+            # /etc/lightdm/lightdm.conf
+            # #autologin-user=pi
+
+            # Add 'Open In Terminal' options to Desktop and File Managers
             source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
             dest_folder="/home/${CONFIG_USER}/.config"
             sudo cp -R $source_folder/* $dest_folder/
@@ -1041,6 +1070,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             sudo cp -R $source_folder/* $dest_folder/
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
 
+            # Change Desktop Wallpaper
             cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
             pcmanfm --set-wallpaper "home/${CONFIG_USER}/nepi_wallpaper.jpg"
 

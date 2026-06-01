@@ -417,38 +417,6 @@ fi
 
 
 
-
-if is_valid_halio_hw; then
-    echo ""
-    echo "######################################"
-    echo "Installing HAILO Toolkit "
-    echo "######################################"
-    echo ""
-
-
-    sudo apt remove hailo-all hailort -y
-    sudo apt install -f dkms -y
-    sudo apt install -f hailo-all -y
-    sudo apt install -f hailort -y
-    #sudo apt update && sudo apt update --fix-missing
-
-    if is_valid_halio_sw; then
-        echo ""
-        echo "######################################"
-        echo "Installing HAILO Apps "
-        echo "######################################"
-        echo ""
-        cur_dir=$(pwd)
-        nepihome
-        if [[ -d 'hailo-rpi5-examples' ]]; then
-            git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
-            cd hailo-rpi5-examples
-
-        fi
-        cd $cur_dir
-    fi
-fi
-
 echo ""
 echo "Enabling Docker Service"
 sudo systemctl daemon-reload
@@ -461,6 +429,21 @@ sudo apt-get install --fix-broken -y
 
 
 
+#################################
+# Install Hailo Software
+
+SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+script_file=hailo_env_setup.sh
+script_path=${SCRIPT_FOLDER}/${script_file}
+if ! source_script $script_path; then
+    script_error=$?
+    echo "Script ${script_path} failed with error ${script_error}"
+    return 
+fi
+
+
+#################################
+# Install Desktop Software
 
 if [[ -n "$DISPLAY" ]]; then
     echo "########################"

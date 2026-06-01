@@ -2218,6 +2218,23 @@ function get_os_info() {
 export -f get_os_info
 
 
+function get_python_version() {
+    # Check if python3 command exists
+    if ! command -v python3 &> /dev/null; then
+        echo "0"
+        return 1
+    fi
+
+    # Extract the version number only
+    pswv_long=$(python3 -V 2>&1 | awk '{print $2}')
+    #echo $pswv_long
+    pswv_short=$(echo "$pswv_long" | awk -F. '{print $1 "." $2}')
+    echo $pswv_short
+}
+
+export -f get_python_version
+
+
 function get_cuda_version(){
 
         if nvcc --version  >/dev/null 2>&1; then
@@ -2243,16 +2260,23 @@ export -f get_cuda_version
 function get_hailo_hw_version(){
         hailo_version=0
         if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
-          hailo_version=$NEPI_HAILO_VERSION
+          hailo_version=$NEPI_HAILO_HW_VERSION
         else
-          if is_valid_hailo  >/dev/null 2>&1; then
-            hailo_info=$(hailortcli fw-control identify 2> /dev/null | tr -d '\0' 2>/dev/null)
-            hailo_arch=$(grep -m 1 -o '.*HAILO.*' <<< "$hailo_info")
-            hailo_device="${hailo_arch#*: }"
-            if [[ -n hailo_name ]]; then
-              hailo_version="${hailo_device#*HAILO}"
-            fi
+          pci_list=$(lspci)
+          hailo_split="${pci_list#*Hailo-}"
+          if [[ -n $hailo_split ]]; then
+            hailo_version="${hailo_split%% *}"
+          else
+            hailo_version=0
           fi
+          # if is_valid_hailo  >/dev/null 2>&1; then
+          #   hailo_info=$(hailortcli fw-control identify 2> /dev/null | tr -d '\0' 2>/dev/null)
+          #   hailo_arch=$(grep -m 1 -o '.*HAILO.*' <<< "$hailo_info")
+          #   hailo_device="${hailo_arch#*: }"
+          #   if [[ -n hailo_name ]]; then
+          #     hailo_version="${hailo_device#*HAILO}"
+          #   fi
+          # fi
         fi
         echo $hailo_version
 }
@@ -2685,6 +2709,7 @@ dev_version_string = Echos a NEPI Dev Version formated version of the provided V
 get_hw_type = Echos the current hardware type string (ie. jetson, arm64, amd64, or uname)
 get_hw_arch = Echos the current hardware arch string (ie. arm64, amd64, or uname)
 get_os_info = Echos the current OS NameVersion
+get_python_version = Echos the current python3 version
 get_cuda_version = Echos CUDA version number if nvcc --version availble or 0
 get_openvpn_version = Echos OpenVPN version number if openvpn installed or 0
 get_hailo_hw_version = Echos Hailo hardware version if software finds Hailo Device or 0
