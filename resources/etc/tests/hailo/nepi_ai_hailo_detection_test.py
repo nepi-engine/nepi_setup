@@ -62,7 +62,7 @@ IMAGES_DIR = os.path.join(script_dir, '..', 'images')
 
 
 
-WEIGHT_FILES = ["yolov8m_old.hef", "yolov8m_mz.hef", "yolov8m_apps.hef"]
+WEIGHT_FILES = ["yolov8m_mz.hef", "yolov8m_apps.hef"]
 THRESHOLD = 0.3
 
 

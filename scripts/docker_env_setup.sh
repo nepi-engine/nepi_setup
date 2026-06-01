@@ -431,20 +431,16 @@ sudo apt-get install --fix-broken -y
 
 #################################
 # Install Hailo Software
-sudo update-pciids
-# sudo apt remove hailo-all -y 2> /dev/null
-sudo apt install hailo-all -y
-
-# if [[ "$LITE_INSTALL" -eq 0 ]]; then
-#     SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-#     script_file=hailo_env_setup.sh
-#     script_path=${SCRIPT_FOLDER}/${script_file}
-#     if ! source_script $script_path; then
-#         script_error=$?
-#         echo "Script ${script_path} failed with error ${script_error}"
-#         return 
-#     fi
-# fi
+if is_valid_rpi; then
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install gparted dosfstools mtools -y
+    sudo rpi-eeprom-update
+    sudo apt install rpi-imager
+    sudo apt update && sudo apt update --fix-missing
+    sudo update-pciids
+    sudo apt install -f dkms -y
+    sudo apt install -f hailo-all -y
+fi
 
 
 #################################

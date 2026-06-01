@@ -49,6 +49,14 @@ Step 2 - Configure the M.2 Dual HAT
  # ADD THE FOLLOWING IN UNDER [all] 
  dtparam=pciex1
  dtparam=pciex1_gen=3
+ dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
+
+
+  # Configure Boot Order
+  sudo rpi-eeprom-config --edit
+  # CHANGE: BOOT_ORDER=0xf416
+  # ADD: PCIE_PROBE=1
+  # Ctrl-X to save
 
  sudo raspi-config
  #1) Select Advanced Options
@@ -61,26 +69,10 @@ Step 2 - Configure the M.2 Dual HAT
  # Install SSD drive
  # Power On
 
-source ~/nepi_setup/resources/bash/nepi_bash_utils
-
-# Check that SSD card is present with lsblk 
- 
-#if ssd_exists; then
-  #boot_ssd=$(ssd_select)
-
   # Flash SSD with RPI Firmware if needed
   sudo rpi-imager
 
-  # Configure Boot Order
-  sudo rpi-eeprom-config --edit
-  # CHANGE: BOOT_ORDER=0xf416
-  # ADD: PCIE_PROBE=1
-  # Ctrl-X to save
-
-#fi
-
-  #****************************#
-
+#####
 # Power Off
 # Remove SD card
 # Power On
@@ -88,103 +80,6 @@ source ~/nepi_setup/resources/bash/nepi_bash_utils
 
 
 
-
-
-
-####################
-# NEPI AUTOMATED RPI SETUP
-####################
-
-git clone https://github.com/nepi-engine/nepi_setup.git
-
-
-#***NEEDS TO BE AUTOMATED****#
-
-source ~/nepi_setup/resources/bash/nepi_bash_utils
-
-if is_valid_rpi; then
-
-    # Check if running on SSD
-    boot_type=$(get_path_type '/')
-    echo "RPI Boot to ${boot_type}"
-
-    #Do you want to continue with the installation ?
-
-    sudo apt update && sudo apt upgrade -y
-    sudo apt install gparted dosfstools mtools -y
-    sudo rpi-eeprom-update
-    sudo apt install rpi-imager
-    #sudo apt update && sudo apt update --fix-missing
-
-
-    NEPI_IS_SSD=0
-    if [[ "$boot_type" == 'ssd' ]]; then
-      NEPI_IS_SSD=1
-    fi
-    NEPI_HAILO_HW=$(get_hailo_hw_version)
-
-
-   
-    #ADD THE FOLLOWING IN UNDER [all]  if not there
-    sudo nano /boot/firmware/config.txt
-    if [[ "$boot_type" == 'ssd' ]]; then
-      dtparam=pciex1
-      dtparam=pciex1_gen=3
-    fi
-    if [[ "$NEPI_HAILO_HW" != "0" ]];
-      dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
-    fi
-
-    
-    if [[ "$NEPI_HAILO_HW" != "0" ]];
-      sudo update-pciids
-      sudo apt remove hailo-all hailort -y
-      sudo apt install -f dkms -y
-      sudo apt install -f hailo-all -y
-      sudo apt install -f hailoort -y
-      #sudo apt update && sudo apt update --fix-missing
-    fi
-fi
-
-#****************************#
-
-
-
-
-
-
-
-###########
-MISC TESTING
-######################################################
-#Hailo Setup
-sudo nano /boot/firmware/config.txt
-ADD THE FOLLOWING IN UNDER [all]  if not there
-dtparam=pciex1
-dtparam=pciex1_gen=3
-dtoverlay=pciex1-compat-pi5,no-mip,mmio-hi 
-
-###
-# Power OFF
-# Install Hailo Module
-# Power On
-
-1) # CHECK FOR HAILO DEVICE
-
-hailo_hw_version=$(get_hailo_hw_version)
-if 
-
-## Install Toolkit (Both HOST and NEPI)
-sudo apt remove hailo-all hailort -y
-#sudo apt update && sudo apt update --fix-missing
-sudo apt install -f dkms -y
-sudo apt install -f hailo-all -y
-#MAYBE sudo apt install -f hailort -y
-#sudo apt update && sudo apt update --fix-missing
-
-# CHECK THAT HAILO FIRMWARE SEES HAILO HARDWARE
-
-hailortcli fw-control identify
 
 ##############
  # Do this from the RPI Desktop
