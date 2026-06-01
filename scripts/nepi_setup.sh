@@ -172,7 +172,7 @@ sudo ln -sf $NEPI_BAUMER_PATH/libbgapi2_gige.cti.2.15 $NEPI_BAUMER_PATH/libbgapi
 
 #################################
 # Update System Info
-if [[ "$nepi_mode" == 'HOST' ]]; then
+if [[ "$NEPI_MODE" == 'HOST' ]]; then
     echo "Host updating HAILO HW Version"
     NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
     export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
@@ -185,7 +185,7 @@ fi
 
 
 
-if [[ "$nepi_mode" == 'SYSTEM' ]]; then
+if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
     NEPI_HAILO_SW_VERSION=$(get_hailo_hw_version)
     export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
     update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $NEPI_SYS_CONFIG_FILE

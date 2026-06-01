@@ -1,5 +1,0 @@
-[2026-06-01 07:23:37.269] [2907483] [HailoRT] [error] [driver_os_specific.cpp:159] [convert_errno_to_hailo_status] Ioctl HAILO_QUERY_DRIVER_INFO failed due to inappropriate ioctl for device (can happen due to version mismatch or unsupported feature)
-[2026-06-01 07:23:37.269] [2907483] [HailoRT] [error] [hailort_driver.cpp:215] [HailoRTDriver] Failed to query driver info with HAILO_DRIVER_INVALID_IOCTL(86)
-[2026-06-01 07:23:37.269] [2907483] [HailoRT] [error] [hailort_driver.cpp:146] [create] CHECK_SUCCESS failed with status=HAILO_DRIVER_INVALID_IOCTL(86)
-[2026-06-01 07:23:37.310] [2907483] [HailoRT] [error] [pcie_device.cpp:91] [create] CHECK_SUCCESS failed with status=HAILO_DRIVER_INVALID_IOCTL(86)
-[2026-06-01 07:23:37.310] [2907483] [HailoRT] [error] [device.cpp:126] [create_pcie] CHECK_SUCCESS failed with status=HAILO_DRIVER_INVALID_IOCTL(86)

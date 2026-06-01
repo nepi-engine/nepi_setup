@@ -82,8 +82,8 @@ NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 
 if ! is_valid_internet; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
-    return 
-fi
+
+else
 
 
 
@@ -91,8 +91,8 @@ fi
     
 
     cur_dir=$(pwd)
-    echo "Running in ${nepi_mode} mode"
-    if [[ "$nepi_mode" == "HOST" ]]; then
+    echo "Running in ${NEPI_MODE} mode"
+    if [[ "$NEPI_MODE" == "HOST" ]]; then
         echo "Host updating HAILO HW Version"
         NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
         export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
@@ -117,7 +117,6 @@ fi
     
     if [[ "$NEPI_HAILO_SW_VERSION" != "0" ]]; then
             cur_hailo_sw=$(get_hailo_sw_version)
-            if [[ "$cur_hailo_sw" != $NEPI_HAILO_SW_VERSION]]
 
             echo ""
             echo "######################################"
@@ -125,12 +124,6 @@ fi
             echo "######################################"
             echo ""
 
-            sudo apt remove hailo-all hailort -y 2> /dev/null
-
-            sudo apt install -f dkms -y 2> /dev/null
-            # sudo apt install -f hailo-all -y 
-            # sudo apt install -f hailort -y
-            #sudo apt update && sudo apt update --fix-missing
 
 
 
@@ -146,16 +139,28 @@ fi
 
 
             cur_folder=$(pwd)
+
+
+
             echo "#########"
-            echo "Installing hailort Version ${NEPI_HAILO_SW_VERSION} "
+            echo "Updating HAILO Softare and Firmware Version to ${NEPI_HAILO_SW_VERSION} "
 
-            hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
+
             hailo_folder="hailort-${NEPI_HAILO_SW_VERSION}"
-            hailo_zip="hailort-${NEPI_HAILO_SW_VERSION}.zip"
-
-           install_dir="${install_dir}/${hailo_folder}"
-           if [[ ! -d $install_dir ]]; then
-
+           
+           build_folder="/home/${CONFIG_USER}/hailo"
+            if [[ ! -d $build_folder ]]; then
+                sudo mkdir -p $build_folder
+            fi
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $build_folder
+            cd $build_folder
+          
+            install_dir="${build_folder}/${hailo_folder}"
+           
+           if [[ -d $install_dir ]]; then
+                echo "Found existing software at ${install_dir}"
+           else
+                cd $build_folder
                 if [[ -f ${hailo_zip} ]]; then
                     sudo rm -r $hailo_zip
                 fi
@@ -195,34 +200,71 @@ fi
                 #     sudo rm ${hailo_zip} > /dev/null 2>&1
                 # fi
 
-                cd $install_dir
-                bin_dir="${install_dir}/bin"
-                if [[ ! -d $bin_dir ]]; then
-                    mkdir $bin_dir
-                fi
-                cd $bin_dir
-
-                hailo_fw_file="hailo${NEPI_HAILO_HW_VERSION}_fw.${NEPI_HAILO_SW_VERSION}.bin"
-                hailo_fw_dest_file="hailo${NEPI_HAILO_HW_VERSION}_fw.bin"
-                hailo_fw_folder="/lib/firmware/hailo"
-
-                curl -o "$hailo_fw_file" https://hailo-hailort.s3.eu-west-2.amazonaws.com/Hailo8/${NEPI_HAILO_SW_VERSION}/FW/hailo8_fw.${NEPI_HAILO_SW_VERSION}.bin
-
-                if [[ -f $hailo_fw_file ]]; then
-                    if [[ ! -d $hailo_fw_folder ]]; then
-                        sudo mkdir -p $hailo_fw_folder
-                    fi
-                    sudo cp $hailo_fw_file "${hailo_fw_folder}/" 
-                    sudo ln -sf ${hailo_fw_folder}/${hailo_fw_file} ${hailo_fw_folder}/${hailo_fw_dest_file}
-                fi
 
             fi
 
-            hailortcli fw-control identify
+
+            # if [[ -d $install_dir ]]; then
+            #     #hailortcli fw-control identify
+
+            #     hailo_sw_version=$(get_hailo_sw_version)
+            #     hailo_fw_version=$(get_hailo_fw_version)
+            #     if [[ "$HAILO_FW_VERSION" != $"NEPI_HAILO_SW_VERSION" ]]; then
+
+            #         echo "#########"
+            #         echo "Installing Hailo Firmware Version ${NEPI_HAILO_SW_VERSION} "
+            #             cd $install_dir
+            #             bin_dir="${install_dir}/bin"
+            #             if [[ ! -d $bin_dir ]]; then
+            #                 mkdir $bin_dir
+            #             fi
+            #             cd ${install_dir}/${bin_dir}
+
+            #             hailo_fw_file="hailo${NEPI_HAILO_HW_VERSION}_fw.${NEPI_HAILO_SW_VERSION}.bin"
+            #             hailo_fw_dest_file="hailo${NEPI_HAILO_HW_VERSION}_fw.bin"
+            #             hailo_fw_folder="/lib/firmware/hailo"
+
+            #             curl -o "$hailo_fw_file" https://hailo-hailort.s3.eu-west-2.amazonaws.com/Hailo8/${NEPI_HAILO_SW_VERSION}/FW/hailo8_fw.${NEPI_HAILO_SW_VERSION}.bin
+
+            #             if [[ -f $hailo_fw_file ]]; then
+            #                 if [[ ! -d $hailo_fw_folder ]]; then
+            #                     sudo mkdir -p $hailo_fw_folder
+            #                 fi
+            #                 sudo cp $hailo_fw_file "${hailo_fw_folder}/" 
+            #                 if [[ "$hailo_sw_version" == $"hailo_fw_version" ]]; then
+            #                     hailortcli fw-update ${hailo_fw_folder}/${hailo_fw_file}
+            #                 fi
+            #                 sudo ln -sf ${hailo_fw_folder}/${hailo_fw_file} ${hailo_fw_folder}/${hailo_fw_dest_file}
+            #             fi
+            #     fi
+                
+            if [[ -d $install_dir ]]; then
+
+                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
+                hailo_zip="hailort-${NEPI_HAILO_SW_VERSION}.zip"
+                # CHECK VERSION: nepihost@device1:~/hailo/hailort-4.20.0$ hailortcli fw-control identify
+        
+
+                echo "#########"
+                echo "Installing HailoRT Version ${NEPI_HAILO_SW_VERSION} "
+
+                sudo apt remove hailo-all -y 2> /dev/null
+                # sudo apt remove hailort -y 2> /dev/null
+                # sudo rm -r /usr/local/bin/hailortcli
+                # sudo rm -f /usr/bin/hailortcli
+                # sudo apt-get remove --purge -y hailort hailort-pcie-driver hailo-tappas-core hailo-all hailofw
+                # sudo dpkg --purge hailort-pcie-driver hailort hailo-tappas-core hailo-all hailofw
+                # sudo rm -r /usr/local/hailo
+
+                # sudo rm -rf /usr/lib/libhailort*
+                # sudo rm -rf /usr/include/hailo
 
 
-            if [[ -d $install_dir && -n $hailo_folder ]]; then
 
+                sudo apt install -f dkms -y 2> /dev/null
+                # sudo apt install -f hailo-all -y 
+                # sudo apt install -f hailort -y
+                #sudo apt update && sudo apt update --fix-missing
 
                 PYTHON_VERSION=$(get_python_version)
                 if [[ -d "/usr/local/lib/python${PYTHON_VERSION}/dist-packages/hailo_platform" ]]; then
@@ -241,8 +283,8 @@ fi
 
                 pip install --upgrade pip setuptools wheel
 
-                cd hailort/libhailort/bindings/python/platform/
-                sudo apt update
+                platform_dir=${install_dir}/hailort/libhailort/bindings/python/platform
+                cd ${platform_dir}
                 sudo apt install build-essential gcc g++ ccache 
 
                 ### Update cmake_args in setup.py line 81 to
@@ -259,37 +301,30 @@ fi
                 python3 setup.py bdist_wheel --plat-name=linux_aarch64
 
                 deactivate
+                
                 if [[ ! -d "/usr/local/lib/python${PYTHON_VERSION}/dist-packages/hailo_platform" ]]; then
-                    sudo cp -R hailo_platform /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
+                    sudo cp -R ${platform_dir}/hailo_platform /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
                 fi
                 #pip uninstall typing
-            fi
-            
 
-            
-            # if hailortcli fw-control identify; then
-            #     if is_valid_halio_sw; then
-            #         echo ""
-            #         echo "######################################"
-            #         echo "Installing HAILO Apps "
-            #         echo "######################################"
-            #         echo ""
-            #         sudo apt install meson ninja-build portaudio19-dev python3-gi python3-gi-cairo libbz2-dev liblzma-dev libelf-dev libunwind-dev libdw-dev -y
-            #         cd $INSTALL_DIR
-            #         if [[ -d 'hailo-apps' ]]; then
-            #             git clone https://github.com/hailo-ai/hailo-apps.git
-            #             cd hailo-apps
-            #             sudo ./install.sh
-            #             source setup_env.sh
-            #             hailo-detect-simple
-            #         fi    
-            #     fi
-            # fi
+                echo "#########"
+                echo "Updating Hailo PCIE Driver Version to ${NEPI_HAILO_SW_VERSION} "
+
+                # Remove the old version
+                sudo dpkg --purge hailort-pcie-driver
+                sudo apt remove --purge hailort
+
+                # Install the new driver package
+                sudo dpkg --install hailort-pcie-driver_${NEPI_HAILO_SW_VERSION}_all.deb
+                sudo dpkg --install hailort_${NEPI_HAILO_SW_VERSION}_$(dpkg --print-architecture).deb
+                
+
+            fi
 
             cd $cur_dir
     fi
 
-    if [[ "$nepi_mode" == "SYSTEM" ]]; then
+    if [[ "$NEPI_MODE" == "SYSTEM" ]]; then
         echo "Host updating HAILO SW Version"
         NEPI_HAILO_SW_VERSION=$(get_hailo_sw_version)
         export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
@@ -300,3 +335,26 @@ fi
         NEPI_HAILO_SW_VERSION=0
     fi
 
+fi
+
+
+
+            
+                # if hailortcli fw-control identify; then
+                #     if is_valid_halio_sw; then
+                #         echo ""
+                #         echo "######################################"
+                #         echo "Installing HAILO Apps "
+                #         echo "######################################"
+                #         echo ""
+                #         sudo apt install meson ninja-build portaudio19-dev python3-gi python3-gi-cairo libbz2-dev liblzma-dev libelf-dev libunwind-dev libdw-dev -y
+                #         cd $INSTALL_DIR
+                #         if [[ -d 'hailo-apps' ]]; then
+                #             git clone https://github.com/hailo-ai/hailo-apps.git
+                #             cd hailo-apps
+                #             sudo ./install.sh
+                #             source setup_env.sh
+                #             hailo-detect-simple
+                #         fi    
+                #     fi
+                # fi
