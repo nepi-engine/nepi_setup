@@ -60,7 +60,7 @@ NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 # Load System Config File
-#echo "Loading NEPI SYSTEM CONFIG"
+echo "Loading NEPI SYSTEM CONFIG"
 nepi_config_loaded=0
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/load_system_config.sh
 NEPI_SYSTEM_CONFIG_FILE=${NEPI_SYSTEM_CONFIG}/etc/load_system_config.sh

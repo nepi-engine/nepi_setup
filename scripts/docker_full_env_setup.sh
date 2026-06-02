@@ -29,6 +29,8 @@ RESOURCES_FOLDER=$(dirname ${SCRIPT_FOLDER})/resources
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
+
+
 #######################################################
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 script_file=docker_env_setup.sh
