@@ -30,6 +30,31 @@ NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 source $NEPI_UTILS_SOURCE
 
 
+if ! is_valid_internet; then
+    echo "No Internet Connection Detected.  Connect and rerun this script"
+    return 
+fi
+
+    echo " "
+    echo "################################# "
+    echo "Installing System Required Software"
+    echo ""
+
+    sudo apt remove yq -y  2>/dev/null
+    NEPI_ARCH=$(get_hw_arch)
+    VERSION=v4.16.2
+    if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+        PLATFORM=linux_arm64
+    fi
+    if [[ "$NEPI_ARCH" == 'amd64' ]]; then
+        PLATFORM=linux_amd64
+    fi
+    wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}.tar.gz -O - |\
+        tar xz && sudo mv yq_${PLATFORM} /usr/bin/yq
+
+
+
+
 
 ####################################
 

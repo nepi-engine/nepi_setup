@@ -19,6 +19,11 @@ if [[ ! -f $SYSTEM_CONFIG_FILE ]]; then
     SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
     SOURCE_PATH=$(dirname "${SCRIPT_FOLDER}")/resources/etc
     UPDATE_PATH=$SYSTEM_FOLDER
+    
+    if [[ ! -d $SYSTEM_FOLDER ]]; then
+    	sudo mkdir -p $SYSTEM_FOLDER
+    	sudo chown ${CONFIG_USER}:${CONFIG_USER} $SYSTEM_FOLDER
+    fi
 
 
     find $UPDATE_PATH -mindepth 1 -maxdepth 1 -type d -exec sudo rm -rf {} +
