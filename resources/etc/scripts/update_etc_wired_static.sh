@@ -77,9 +77,9 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-        echo "Updating Network Status IP Address"
   
         if ! systemctl is-active --quiet NetworkManager; then
+                    echo "Updating Network Services"
                     echo ""
                     echo "########"
                     echo "Updating Network Services"
@@ -88,7 +88,7 @@ if [[ "$?" -eq 0 ]]; then
                     sudo systemctl disable networking >/dev/null 2>&1
                     sudo systemctl stop networking >/dev/null 2>&1
 
-                    ehco "Disabling hostapd access point service"
+                    echo "Disabling hostapd access point service"
                     sudo systemctl disable hostapd >/dev/null 2>&1
                     sudo systemctl stop hostapd >/dev/null 2>&1
 
@@ -112,20 +112,40 @@ if [[ "$?" -eq 0 ]]; then
         fi
 
         if systemctl is-active --quiet NetworkManager; then
-    
+
+            
+            nepi_wired_interface=$NEPI_WIRED_INTERFACE
+            if [[ -z $nepi_wired_interface ]]; then
+                nepi_wired_interface="NONE"
+            fi       
             # Check if Interface present, and update needed
-            if ip link show ${NEPI_WIRED_INTERFACE} &>/dev/null; then
-                echo "${NEPI_WIRED_INTERFACE} exists."
-                
-        
-        
-                    if [[ -n $nepi_static_ip ]]; then
-                        nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
-                        if is_valid_ipv4_netmask $nepi_static_ip; then
-                        
+            if ! ip link show ${nepi_wired_interface} &>/dev/null; then
+                echo "${nepi_wired_interface} NOT FOUND."
+            else
+                echo "${nepi_wired_interface} exists."
 
-                                echo "Updating Network Adapter ${NEPI_WIRED_INTERFACE} with IP Address ${nepi_static_ip}"
+                nepi_wired_name=$NEPI_WIRED_NAME
+                if [[ -z $nepi_wired_name ]]; then
+                    nepi_wired_name="NEPI_WIRED"
+                fi                   
+    
+                # CLEAN NAME
+                # CHECK NAME
+                sudo nmcli connection add type ethernet con-name "$nepi_wired_name" ifname $nepi_wired_interface
 
+                echo "Updating Network ${nepi_wired_name} Status IP Address"
+
+                nepi_static_ip=$NEPI_STATIC_IP
+                if [[ -z $nepi_static_ip ]]; then
+                    echo "IP Address is Not Set."
+                else
+                    nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
+                    if is_valid_ipv4_netmask $nepi_static_ip; then
+                            echo "Updating Network IP Address ${nepi_static_ip}"
+
+                            nepi_wired_internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
+                            if [[ $nepi_wired_internet_enabled -eq 1 ]]; then
+                           
                                 nepi_gateway=$NEPI_GATEWAY_IP
                                 if [[ "$nepi_gateway" == 'unknown' ]]; then
                                     local nepi_gateway=$(ip route | awk '/default/ {print $3; exit}')
@@ -133,94 +153,39 @@ if [[ "$?" -eq 0 ]]; then
                                         nepi_gateway=''
                                     fi
                                 fi
+                                echo "Using Gateway IP ${NEPI_GATEWAY_IP}"
+                            else
+                                nepi_gateway=''
+                            fi
 
-                                if is_valid_ip $nepi_gateway; then
-                                
-                                cmd='sudo nmcli connection modify "'${nepi_wired_interface}'" \
+                            if is_valid_ipv4 $nepi_gateway 2> /dev/null; then
+                                echo "Updating Network Gateway to ${nepi_gateway}"
+                                cmd='sudo nmcli connection modify "'${nepi_wired_name}'" \
                                     ipv4.addresses '${nepi_static_ip}' \
                                     ipv4.dns 8.8.8.8,8.8.4.4 \
                                     ipv4.method manual \
                                     ipv4.gateway '${nepi_static_ip}
-                                else
-                                cmd='sudo nmcli connection modify "'${nepi_wired_interface}'" \
+
+                            else
+                                echo "No Gateway Provided"
+                                cmd='sudo nmcli connection modify "'${nepi_wired_name}'" \
                                     ipv4.addresses '${nepi_static_ip}' \
                                     ipv4.dns 8.8.8.8,8.8.4.4 \
                                     ipv4.method manual '
-                                fi
 
-                                echo $cmd
-                                eval "$cmd"     
+                            fi
 
-                                cmd='sudo nmcli connection up "'${nepi_wired_interface}'"'
-                                #echo $cmd
-                                eval "$cmd"     
-                                echo ""
-                                
-                        fi
+                            echo $cmd
+                            eval "$cmd"     
+
+                            cmd='sudo nmcli connection up "'${nepi_wired_name}'"'
+                            #echo $cmd
+                            eval "$cmd"     
+                            echo ""
+                            
                     fi
                 fi
             fi
-
-
-
-
-            # echo "Updating ifupdown Static IP"
-            # ##################
-            # echo "Updating /etc/network files"
-            # if [ -d "${ETC_FOLDER}/network" ]; then
-            #     if [[ ! -d "/etc/network/interfaces.d" ]]; then
-            #         sudo mkdir -p "/etc/network/interfaces.d"
-            #     fi
-            #     sudo cp ${ETC_FOLDER}/network/* /etc/network/ 2>/dev/null
-            # else
-            #     echo "FAILED TO FIND SOURCE ${ETC_FOLDER}/network files"
-            # fi
-
-            # file=/etc/network/interfaces.d/nepi_static_ip
-            # echo "Fixing static ip ${NEPI_STATIC_IP}"
-            # needs_update=0
-            # nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
-            # if [[ "$?" -eq 2 ]]; then
-            #     needs_update=1
-            # fi
-            
-            # echo "Got fixed static ip ${nepi_static_ip}"
-            # if is_valid_ipv4_netmask "$nepi_static_ip" ]]; then
-            #     if [[ "$needs_update" -eq 1 ]]; then
-            #         update_file=${ETC_FOLDER}/nepi_system_config.yaml
-            #         echo "Updating NEPI System Config file ${file} with NEPI_STATIC_IP: ${nepi_static_ip}"
-            #         update_yaml_value "NEPI_STATIC_IP" ${nepi_static_ip} $update_file
-            #     fi
-
-
-            #     if [[ -d "/etc/network/interfaces.d" ]]; then
-            #         echo "Updating Static IP file ${file}"
-            #         sudo chmod +x -R /etc/network/interfaces.d
-            #         sudo bash -c "cat /dev/null > $file"
-            #         sudo echo 'auto '${NEPI_WIRED_INTERFACE} | sudo tee -a $file
-            #         sudo echo 'iface '${NEPI_WIRED_INTERFACE}' inet static' | sudo tee -a $file
-            #         sudo echo '    address '${nepi_static_ip} | sudo tee -a $file
-            #         if is_valid_ipv4 $NEPI_GATEWAY_IP  2>/dev/null; then
-            #             sudo route add default gw $NEPI_GATEWAY_IP $NEPI_WIRED_INTERFACE
-            #             echo "Adding IP Gateway ${NEPI_GATEWAY_IP}"
-            #             sudo echo '    gateway '${NEPI_GATEWAY_IP} | sudo tee -a $file
-            #         else
-            #             echo "Not Updating provided Gateway IP. Not A Valid IP Format ${NEPI_GATEWAY_IP} "
-            #         fi
-            #         echo "Updated Static IP file"
-            #         sudo bash -c "cat $file"
-            #         echo "Updating Bash files"
-            #         source ${ETC_SCRIPTS_FOLDER}/update_bash_config.sh
-
-            #         echo "NEPI Static IP address updated to ${nepi_static_ip}"
-            #     else
-            #         echo "Folder /etc/network/interfaces.d not found"
-            #     fi
-            # else
-            #     echo "Not Updating provided IP. Not A Valid IP Format ${nepi_static_ip} "
-            # fi
-
-
         fi  
     fi
 fi

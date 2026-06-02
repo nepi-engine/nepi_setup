@@ -35,6 +35,7 @@ NEPI_SW_DESC: unknown
 ## WIRED NETWORK SETTINGS
 # Set the NEPI device's wired network interface name
 NEPI_WIRED_INTERFACE: eth0
+NEPI_WIRED_NAME: NEPI_WIRED
 # Set the NEPI device's primary IP address and netmask
 # If netmask if left out, 24 will be used
 NEPI_STATIC_IP: 192.168.179.103/24
@@ -52,9 +53,10 @@ NEPI_ALIAS_IP_3: NONE
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
 NEPI_NTP_IP: 192.168.179.5
-# Enable Wired DHCP Wired Internet Connectivity on Startup. 
+# NEPI_WIRED_INTERNET_ENABLED=1 to enable Wired Wired Internet Connectivity. 
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
 #  a router with internet access. 
+NEPI_WIRED_INTERNET_ENABLED: 1
 NEPI_WIRED_DHCP_ENABLED: 1
 # Set the SSH Port that NEPI listens to, on top of the standard NEPI Host port (22).
 NEPI_SSH_PORT: 2222
