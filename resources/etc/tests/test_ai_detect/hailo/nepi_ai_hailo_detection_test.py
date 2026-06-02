@@ -125,7 +125,7 @@ def check_for_device():
     return device
 
 
-def preprocess_image(cv2_img,hef):
+def preprocess_image(cv2_img,input_shape):
         input_data = None
         ###################
         # Preprocess Image Data
@@ -140,18 +140,14 @@ def preprocess_image(cv2_img,hef):
             h, w, c = img_rgb.shape
 
             # Get expected model input dimensions
-            input_info = hef.get_input_stream_infos()[0]
-            input_shape = input_info.shape
-            print(input_info)
-            print(input_shape)
             input_height, input_width = input_shape[0], input_shape[1]
 
             # Resize image to match model input and normalize (if required by your pre-processing)
             cv2_img_shape = cv2_img.shape
             cv2_img_width = cv2_img_shape[1]
             cv2_img_height = cv2_img_shape[0]
-            print("Got image to w/h: " + str([cv2_img_width,cv2_img_height]))
-            print("Resizing image to w/h: " + str([input_width,input_height]))
+            # print("Got image to w/h: " + str([cv2_img_width,cv2_img_height]))
+            # print("Resizing image to w/h: " + str([input_width,input_height]))
             resized_image = cv2.resize(img_rgb, (input_width, input_height), interpolation=cv2.INTER_LINEAR)
             
             # Normalize the image (typically [0, 255] -> [0, 1] or [-1, 1] depending on your HEF model)
@@ -165,7 +161,7 @@ def preprocess_image(cv2_img,hef):
         return input_data
 
 
-def process_results(cv2_img, results):
+def process_results(cv2_img, input_shape, results):
     ######################
     cv2_img_shape = cv2_img.shape
     cv2_img_width = cv2_img_shape[1]
@@ -173,81 +169,42 @@ def process_results(cv2_img, results):
     cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
 
 
-
-    ##'results' is returned by the Hailo infer function
-    print("")
-    print("Got Results")
-    #print(results)
-    print(type(results))
-    keys=list(results.keys())
-    print(keys)
-    print(len(results))
-
-        
-    result = results[keys[0]][0]
-    print("")
-    print("Got Result")
-    print(type(result))
-    print(len(result))
-    print(result)
-
-
-    #print("Processing result " + str(result))
-
-
-    # # Convert HailoTensor to a numpy array
-    # raw_array = np.array(tensor, copy=False)
-
-    # # Dequantize (if tensor is quantized uint8)
-    # # Scale and zero_point are typically found in tensor.quantization_info
-    # scale = tensor.quantization_info.qp_scale
-    # zp = tensor.quantization_info.qp_zp
-    # detection = (raw_array - zp) * scale
-
-    # # Process float_array (e.g., reshape for YOLO format)
-    # print("Processed detection " + str(detection))
-
     detect_dict_list = []
-    # for result in results:
-    #     detection = []
+    for class_id, class_detections in enumerate(results[list(results.keys())[0]][0]):
+        if class_detections.shape[0]>0:
 
+            for detection in class_detections:
+                if len(detection) >= 5:
+                    if detection[4] > THRESHOLD:
+           
 
-    #     if len(detection) >= 7:
-    #         # Unpack the detection (assuming the 6th element is the class_id)
-    #         ymin, xmin, ymax, xmax, confidence, class_id = detection[:6]
-            
-    #         # Convert class_id to an integer to use as an index
-    #         class_id = int(class_id)
+                        det_name = "class_" + str(class_id) #### NEED TO GET CLASS NAMES FROM YAML
+                        det_id = class_id
+                        det_prob = round(detection[4].item(), 5)
+                        [ymin, xmin, ymax, xmax] = detection[:4]
 
+                        # Convert to pixel coordinates relative to the original image
+                        oh, ow, _ = np.asarray(cv2_img).shape
+                        rh, rw = oh/input_shape[0], ow/input_shape[1]
+                        abs_ymin = int(ymin * oh)
+                        abs_xmin = int(xmin * ow)
+                        abs_ymax = int(ymax * oh)
+                        abs_xmax = int(xmax * ow)
 
-    #         box = float_array
-    #         det_name = output_name
-    #         det_id = det_name
-    #         det_prob = detection['score']
-
-    #         # Unpack Hailo's normalized coordinates [ymin, xmin, ymax, xmax]
-    #         ymin, xmin, ymax, xmax = box
-
-    #         # Convert to pixel coordinates relative to the original image
-    #         abs_ymin = int(ymin * h)
-    #         abs_xmin = int(xmin * w)
-    #         abs_ymax = int(ymax * h)
-    #         abs_xmax = int(xmax * w)
-
-    #         det_area = (xmax - xmin) * (ymax - ymin)
-    #         detect_dict = {
-    #             'name': det_name,
-    #             'id': det_id,
-    #             'uid': '',
-    #             'prob': det_prob,
-    #             'xmin': abs_xmin,
-    #             'ymin': abs_ymin,
-    #             'xmax': abs_ymax,
-    #             'ymax': abs_ymax,
-    #             'area_pixels': int(det_area),
-    #             'area_ratio': det_area / cv2_img_area
-    #         }
-    #         detect_dict_list.append(detect_dict)
+                        det_area = (abs_xmax - abs_xmin) * (abs_ymax - abs_ymin)
+                        detect_dict = {
+                            'name': det_name,
+                            'id': det_id,
+                            'uid': '',
+                            'prob': det_prob,
+                            'xmin': abs_xmin,
+                            'ymin': abs_ymin,
+                            'xmax': abs_xmax,
+                            'ymax': abs_ymax,
+                            'area_pixels': int(det_area),
+                            'area_ratio': det_area / cv2_img_area
+                        }
+                        detect_dict_list.append(detect_dict)
     return detect_dict_list
 
 
@@ -303,22 +260,11 @@ if __name__ == '__main__':
                 input_infos = hef.get_input_vstream_infos()
                 print(f"--- Found {len(input_infos)} Input Stream(s) ---")
                 print(input_infos)
-                # for info in input_infos:
-                #     print(f"Name: {info.name}")
-                #     print(f"Shape (H, W, C): {info.shape}")
-                #     print(f"Data Type: {info.data_type}")
-                #     print(f"Format Type: {info.format_type}\n")
 
                 # 3. Extract output stream parameters 
                 output_infos = hef.get_output_vstream_infos()
                 print(f"--- Found {len(output_infos)} Output Stream(s) ---")
                 print(output_infos)
-                # for info in output_infos:
-                #     print(f"Name: {info.name}")
-                #     print(f"Shape: {info.shape}")
-                #     print(f"Data Type: {info.data_type}")
-                #     print(f"Quantization Info (Scale): {info.quant_info.scale}")
-                #     print(f"Quantization Info (Offset): {info.quant_info.offset}\n")
 
     
                 
@@ -329,7 +275,7 @@ if __name__ == '__main__':
                 network_group_params = None
                 try:
                     configure_params = ConfigureParams.create_from_hef(hef, interface=HAILO_INTERFACE)
-                    network_group = target.configure(hef, configure_params)[0]
+                    network_group = device.configure(hef, configure_params)[0]
                     network_group_params = network_group.create_params()
                 except Exception as e:
                     print("Device config failed with error: " + str(e))
@@ -347,13 +293,6 @@ if __name__ == '__main__':
                     print("")
                     # Build vstream params
 
-
-                    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False)
-                    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=False)
-
-                    # input_vstreams_params = InputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
-                    # output_vstreams_params = OutputVStreamParams.make(network_group, format_type=FormatType.FLOAT32)
-
                     ###########################
                     # Prime the Model
                    
@@ -365,7 +304,12 @@ if __name__ == '__main__':
 
                     ###################
                     results = None
-                    input_data=preprocess_image(cv2_img,hef)
+                    input_info = hef.get_input_stream_infos()[0]
+                    input_shape = input_info.shape
+                    print(input_info)
+                    print(input_shape)
+
+                    input_data=preprocess_image(cv2_img,input_shape)
                     if input_data is not None:
                         print('')
                         print("Priming the Model")
@@ -383,7 +327,7 @@ if __name__ == '__main__':
                     if results is not None:
                         print("Inference completed successfully!")
                         # You can now parse `results` using your specific model's post-processing logic
-                        detect_dict_list = process_results(cv2_img, results)
+                        detect_dict_list = process_results(cv2_img, input_shape, results)
                         print("Got Detect Dict List")
                         print(detect_dict_list)
 
@@ -396,45 +340,42 @@ if __name__ == '__main__':
                         print('')
                         print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
                         
-                        # elapsed_time = 0
+                        elapsed_time = 0
                         
-                        # for i in range(1, NUM_TESTS):
+                        for i in range(1, NUM_TESTS):
                             
-                        #     random_int = random.randint(1, num_files)-1
-                        #     image_file = os.path.join(IMAGES_DIR, image_files[random_int])
-                        #     cv2_img = cv2.imread(image_file)
+                            random_int = random.randint(1, num_files)-1
+                            image_file = os.path.join(IMAGES_DIR, image_files[random_int])
+                            cv2_img = cv2.imread(image_file)
 
-                        #     start_time = time.time()
-                        #     input_data=preprocess_image(cv2_img,hef)
-                        #     if input_data is not None:
-                        #         print('')
-                        #         print("Priming the Model")
-                        #         raw_output = None
-                        #         try:
-                        #             # Inference
-                        #             with VDevice() as device:
-                        #                 inferencer = Inferencer(device, network_group)
-                        #                 # Send image to the Hailo device and retrieve output
-                        #                 raw_output = inferencer.infer(input_data)
-                        #                 print("Got Output")
-                        #                 print(raw_output)
-                        #             except Exception as e:
-                        #                 print("Failed to process detection with exception: " + str(e))
-                        #     end_time = time.time()
+                            start_time = time.time()
 
-                        #     detect_time = end_time - start_time
-                        #     elapsed_time = elapsed_time + detect_time
+                            input_data=preprocess_image(cv2_img,input_shape)
+                            if input_data is not None:
+                                results = None
+                                try:
+                                    with InferVStreams(network_group, input_vstreams_params, output_vstreams_params) as infer_pipeline:   
+                                                with network_group.activate(network_group_params):
+                                                    results = infer_pipeline.infer(input_data)
+                                except Exception as e:
+                                    print("Failed to process detection with exception: " + str(e))
 
-                        # if raw_output is None:
-                        #     print("FAIL TO GET RESULTS FROM DETECTION PROCESS")
-                        # else:
 
-                        #         print("Got detect dict list: " + str(detect_dict_list))
+                            end_time = time.time()
 
-                        #         drate = float(1.0) / elapsed_time * NUM_TESTS
-                        #         print("")
-                        #         print("")
-                        #         print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
-                        #         print(f"Average detection rate: {drate:.2f} hz")
+                            detect_time = end_time - start_time
+                            elapsed_time = elapsed_time + detect_time
+
+                        if results is None:
+                            print("FAIL TO GET RESULTS FROM DETECTION PROCESS")
+                        else:
+
+                                print("Got detect dict list: " + str(detect_dict_list))
+
+                                drate = float(1.0) / elapsed_time * NUM_TESTS
+                                print("")
+                                print("")
+                                print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
+                                print(f"Average detection rate: {drate:.2f} hz")
 
             device.release()
