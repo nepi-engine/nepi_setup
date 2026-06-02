@@ -9,7 +9,7 @@ ai_model:
   description:
     name: Common object detector YoloV8m Hailo10 accelerated
   weight_file:
-    name: yolov8m.hef
+    name: common_objects_yolov8m_hailo10_640.hef
 
   device_type:
     name: hailo10

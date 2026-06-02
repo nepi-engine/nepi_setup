@@ -91,23 +91,18 @@ else
     
 
     cur_dir=$(pwd)
-    echo "Running in ${NEPI_MODE} mode"
-    if [[ "$NEPI_MODE" == "HOST" ]]; then
-        echo "Host updating HAILO HW Version"
-        NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
-        export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
-        update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $NEPI_SYS_CONFIG_FILE
-        echo $NEPI_HAILO_HW_VERSION
-    fi
-    if [[ -z $NEPI_HAILO_HW_VERSION ]]; then
-        NEPI_HAILO_HW_VERSION=0
-    fi
+    echo "Host updating HAILO HW Version"
+    NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
+    export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
+    update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $NEPI_SYS_CONFIG_FILE
+    echo $NEPI_HAILO_HW_VERSION
 
-    NEPI_HAILO_SW_VERSION=0
-    if [[ $NEPI_HAILO_HW_VERSION -eq 8 ]]; then
-        NEPI_HAILO_SW_VERSION=4.20.0
-    elif [[ $NEPI_HAILO_HW_VERSION -eq 10 ]]; then
-        NEPI_HAILO_SW_VERSION=4.23.0
+
+    NEPI_HAILO_FW_VERSION=$(get_hailo_fw_version)
+    if [[ "$NEPI_HAILO_FW_VERSION" != "0" ]]; then
+        NEPI_HAILO_SW_VERSION=$NEPI_HAILO_FW_VERSION
+    else
+        NEPI_HAILO_SW_VERSION=0
     fi
 
     echo ""
@@ -165,6 +160,9 @@ else
                     sudo rm -r $hailo_zip
                 fi
                 if [[ ! -f ${hailo_zip} ]]; then
+                    hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
+                    hailo_zip="hailort-${NEPI_HAILO_SW_VERSION}.zip"
+                    # CHECK VERSION: nepihost@device1:~/hailo/hailort-4.20.0$ hailortcli fw-control identify
                     sudo wget ${hailo_link} -O ${hailo_zip}
                     if [[ "$?" -ne 0 ]]; then
                         echo ""
@@ -206,10 +204,7 @@ else
 
             if [[ -d $install_dir ]]; then
 
-                hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
-                hailo_zip="hailort-${NEPI_HAILO_SW_VERSION}.zip"
-                # CHECK VERSION: nepihost@device1:~/hailo/hailort-4.20.0$ hailortcli fw-control identify
-        
+
 
                 echo "#########"
                 echo "Installing HailoRT Version ${NEPI_HAILO_SW_VERSION} "

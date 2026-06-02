@@ -80,7 +80,7 @@ def bash_nepi_cmd(bash_cmd_str, arg_str_list = []):
                                     executable='/bin/bash',
                                     capture_output=True,
                                     text=True)
-            return_str = result.stdout.replace('\n', ' ')
+            return_str = result.stdout
             exit_code = result.returncode
         except Exception as e:
            print(e)
@@ -95,7 +95,7 @@ def bash_nepi_check(bash_cmd_str, arg_str_list = []):
 
 def bash_nepi_get(bash_cmd_str, arg_str_list = []):
     return_str,exit_code = bash_nepi_cmd(bash_cmd_str, arg_str_list)
-    return return_str
+    return return_str.replace('\n', ' ')
 
 
 
@@ -164,9 +164,7 @@ def preprocess_image(cv2_img,input_shape):
         input_data = None
         ###################
         # Preprocess Image Data
-        if cv2_img is None:
-            print("Failed to import img file " + str(image_file))
-        else:
+        if cv2_img is not None:
             if is_gray(cv2_img):
                 img_rgb = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2RGB)
             else:
@@ -298,8 +296,7 @@ if __name__ == '__main__':
             else:
                 print("Found " + str(num_files) + " images")
 
-                device = VDevice()
-            
+                          
                 weights_path = os.path.join(script_dir, WEIGHTS_FOLDER)
                 weight_file = WEIGHT_FILE
                 
@@ -312,6 +309,11 @@ if __name__ == '__main__':
                 print('')
                 print("Loading HEF model: " + str(weight_file_path))
 
+
+
+
+                ###########################
+                device = VDevice()
                 hef = HEF(weight_file_path)
                 input_infos = hef.get_input_vstream_infos()
                 print(f"--- Found {len(input_infos)} Input Stream(s) ---")
