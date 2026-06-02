@@ -33,6 +33,8 @@ import random
 from typing import List, Tuple, Optional, Dict
 from PIL import Image
 
+import inspect
+
 
 
 
@@ -104,9 +106,11 @@ def is_gray(cv2_img):
         return False
 
 
-def check_for_device():
-    device = None
+def check_for_devices():
+    devices = None
     try:
+
+
         # Scan for all available Hailo devices
         discovered_devices = Device.scan()
         
@@ -116,13 +120,14 @@ def check_for_device():
             print(f"Found {len(discovered_devices)} Hailo device(s):")
             for idx, device_id in enumerate(discovered_devices, start=1):
                 print(f"  [{idx}] Device ID / PCIe Address: {device_id}")
-            device = device_id
-                
-    except HailoRTStatusException as e:
+                if devices is None:
+                    devices = [device_id]
+                else:
+                    devices.append(device_id)
+                           
+    except Exception as e:
         print(f"Error communicating with the Hailo interface: {e}")
-    except ModuleNotFoundError:
-        print("The 'hailo_platform' module is not installed. Please install pyHailoRT.")
-    return device
+    return devices
 
 
 def preprocess_image(cv2_img,input_shape):
@@ -217,8 +222,8 @@ if __name__ == '__main__':
 
 
 
-    device = check_for_device()
-    if device is not None:
+    devices = check_for_devices()
+    if devices is not None:
         # # Load model config from yaml
         # yaml_path = os.path.join(script_dir, YAML_FILE)
         # print('')
@@ -244,7 +249,7 @@ if __name__ == '__main__':
             print("Found " + str(num_files) + " images")
 
             device = VDevice()
-
+           
             weights_path = os.path.join(script_dir, WEIGHTS_FOLDER)
             for weight_file in WEIGHT_FILES:
                 print("########################")

@@ -78,9 +78,6 @@ else
         HUB_IMAGE="numurusinc/nepi:latest-jetson"
     elif is_valid_rpi; then
         HUB_IMAGE="numurusinc/nepi:latest-rpi"
-        if is_valid_hailo; then
-            HUB_IMAGE="numurusinc/nepi:latest-rpi-hailo"
-        fi
         
     fi
 
@@ -175,7 +172,7 @@ else
                     echo "Not enough free space in ${NEPI_DOCKER_ROOT} to pull image (need ${check_space} GB)"
                 else
 
-                    Remove stale staging images
+                    #Remove stale staging images
                     exist_ids=($(sudo docker images --filter "reference=${HUB_IMAGE}" --format "{{.ID}}"))
                     if [[ -n "${exist_ids[*]}" ]]; then
                         echo "Removing existing staging images"
