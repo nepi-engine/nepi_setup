@@ -352,7 +352,7 @@ if __name__ == '__main__':
                 network_group_params = None
                 try:
                     configure_params = ConfigureParams.create_from_hef(hef, interface=HAILO_INTERFACE)
-                    network_group = target.configure(hef, configure_params)[0]
+                    network_group = device.configure(hef, configure_params)[0]
                     network_group_params = network_group.create_params()
                 except Exception as e:
                     print("Device config failed with error: " + str(e))
