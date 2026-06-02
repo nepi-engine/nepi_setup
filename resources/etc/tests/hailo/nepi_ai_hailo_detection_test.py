@@ -78,6 +78,7 @@ HAILO_INTERFACE = HailoStreamInterface.PCIe
 #REF: 'https://community.hailo.ai/t/hailort-minimal-working-example-for-python-and-hailo8/7685'
 #REF: 'https://community.hailo.ai/t/looking-for-a-solution-to-yolov8n-yolov8-nms-postprocess-related-errors/6269'
 #REF: 'https://docs.degirum.com/pysdk/release-notes'
+#REF: 'https://github.com/hailo-ai/hailo-apps/issues/91'
 
 def get_files(folder_path):
     img_files = []
