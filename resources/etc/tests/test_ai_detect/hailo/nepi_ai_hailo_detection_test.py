@@ -24,27 +24,25 @@ print('')
 print("Importing packages")
 
 import os
+import subprocess
 import time
-import sys
-import yaml
+# import sys
+# import yaml
 import cv2
 import numpy as np
 import random
-from typing import List, Tuple, Optional, Dict
-from PIL import Image
-
-import inspect
-
-
-
+# from typing import List, Tuple, Optional, Dict
+# from PIL import Image
 
 try:
     from hailo_platform import (HEF, Device, VDevice, HailoStreamInterface, InferVStreams, ConfigureParams,
     InputVStreamParams, OutputVStreamParams, InputVStreams, OutputVStreams, FormatType)
-    #from hailo_platform import *
+    from hailo_platform import *
     HAILO_AVAILABLE = True
     HAILO_IMPORT_ERROR = None
 except ImportError as e:
+    print("FAILED TO LOAD hailo_platform")
+    HEF = None
     HAILO_AVAILABLE = False
     HAILO_IMPORT_ERROR = str(e)
 
@@ -56,34 +54,55 @@ print("HAILO_IMPORT_ERROR " + str(HAILO_AVAILABLE))
 script_dir = os.path.dirname(__file__)
 
 
-NUM_TESTS = 100
-IMAGES_DIR = os.path.join(script_dir, '..', 'images')
-#MODEL DOWNLOAD LINKS
-#'https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst'
-#'https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.9.0/yolov8m.hef'
 
 
-WEIGHTS_FOLDER = 'hailo8'
-WEIGHT_FILES = ["common_objects_yolov8m_hailo8_640.hef"]
-THRESHOLD = 0.3
+def bash_nepi_cmd(bash_cmd_str, arg_str_list = []):
+    return_str = ''
+    exit_code = 1
+    nepi_script = "/home/nepi/.nepi_bash_utils"
+    nepihost_script = "/home/nepihost/.nepi_bash_utils"
+    scipt_path = None
+    if os.path.exists(nepi_script) == True:
+        script_path = nepi_script
+    elif os.path.exists(nepihost_script) == True:
+        script_path = nepihost_script
+    else:
+        print("Script file not found")
+        
+    if script_path is not None:
+        cmd_str = f"source {script_path} && {bash_cmd_str}"
+        for arg_str in arg_str_list:
+            cmd_str = cmd_str + " " + f"'{arg_str}'"
+        #print(cmd_str)
+        
+        try:
+            result = subprocess.run(cmd_str, shell=True,
+                                    executable='/bin/bash',
+                                    capture_output=True,
+                                    text=True)
+            return_str = result.stdout.replace('\n', ' ')
+            exit_code = result.returncode
+        except Exception as e:
+           print(e)
+    return return_str,exit_code
+
+def bash_nepi_check(bash_cmd_str, arg_str_list = []):
+    return_str,exit_code = bash_nepi_cmd(bash_cmd_str, arg_str_list)
+    check=False
+    if exit_code == 0:
+        check=True
+    return check
+
+def bash_nepi_get(bash_cmd_str, arg_str_list = []):
+    return_str,exit_code = bash_nepi_cmd(bash_cmd_str, arg_str_list)
+    return return_str
 
 
-IMAGE_FILE_TYPES = ['jpg','JPG','jpeg','png','PNG']
-
-
-HAILO_INTERFACE = HailoStreamInterface.PCIe
-
-######################################
-
-#REF: 'https://docs.ultralytics.com/integrations/hailo#step-3-run-inference'
-#REF: 'https://community.hailo.ai/t/detection-and-tracking-in-real-time-using-the-python-api/4863/4'
-#REF: 'https://community.hailo.ai/t/hailort-minimal-working-example-for-python-and-hailo8/7685'
-#REF: 'https://community.hailo.ai/t/looking-for-a-solution-to-yolov8n-yolov8-nms-postprocess-related-errors/6269'
-#REF: 'https://docs.degirum.com/pysdk/release-notes'
-#REF: 'https://github.com/hailo-ai/hailo-apps/issues/91'
 
 def get_files(folder_path):
     img_files = []
+    xml_files = []
+    txt_files = []
     if os.path.exists(folder_path) == False:
         print('Folder not found: ' + folder_path)
     else:
@@ -105,29 +124,40 @@ def is_gray(cv2_img):
     else:
         return False
 
+######################################
 
-def check_for_devices():
-    devices = None
-    try:
+#REF: 'https://docs.ultralytics.com/integrations/hailo#step-3-run-inference'
+#REF: 'https://community.hailo.ai/t/detection-and-tracking-in-real-time-using-the-python-api/4863/4'
+#REF: 'https://community.hailo.ai/t/hailort-minimal-working-example-for-python-and-hailo8/7685'
+#REF: 'https://community.hailo.ai/t/looking-for-a-solution-to-yolov8n-yolov8-nms-postprocess-related-errors/6269'
+#REF: 'https://docs.degirum.com/pysdk/release-notes'
+#REF: 'https://github.com/hailo-ai/hailo-apps/issues/91'
 
 
-        # Scan for all available Hailo devices
-        discovered_devices = Device.scan()
-        
-        if not discovered_devices:
-            print("No Hailo devices found. Check your hardware connection or PCIe drivers.")
-        else:
-            print(f"Found {len(discovered_devices)} Hailo device(s):")
-            for idx, device_id in enumerate(discovered_devices, start=1):
-                print(f"  [{idx}] Device ID / PCIe Address: {device_id}")
-                if devices is None:
-                    devices = [device_id]
-                else:
-                    devices.append(device_id)
-                           
-    except Exception as e:
-        print(f"Error communicating with the Hailo interface: {e}")
-    return devices
+
+NUM_TESTS = 100
+IMAGES_DIR = os.path.join(script_dir, '..', 'images')
+IMAGE_FILE_TYPES = ['jpg','JPG','jpeg','png','PNG']
+
+
+WEIGHTS_FOLDER = None
+WEIGHT_FILE = None
+hailo_hw_version = str(bash_nepi_get('get_hailo_hw_version')).replace(" ","")
+if hailo_hw_version == "8":
+    print("Got Hailo HW Version: " + hailo_hw_version)
+    WEIGHTS_FOLDER = 'hailo8'
+    WEIGHT_FILE = "common_objects_yolov8m_hailo8_640.hef"
+elif hailo_hw_version == "10":
+    print("Got Hailo HW Version: " + hailo_hw_version)
+    WEIGHTS_FOLDER = 'hailo8'
+    WEIGHT_FILE = "common_objects_yolov8m_hailo8_640.hef"
+else:
+    print("Got Unknown Hailo HW Version: " + hailo_hw_version)
+THRESHOLD = 0.3
+
+HAILO_INTERFACE = HailoStreamInterface.PCIe
+
+
 
 
 def preprocess_image(cv2_img,input_shape):
@@ -220,38 +250,59 @@ def process_results(cv2_img, input_shape, results):
 ######################################
 if __name__ == '__main__':
 
+    print([HEF,WEIGHTS_FOLDER,WEIGHT_FILE])
+    if HEF is not None and WEIGHTS_FOLDER is not None and WEIGHT_FILE is not None:
+        
 
+        devices = None
+        try:
+            # Scan for all available Hailo devices
+            discovered_devices = Device.scan()
+            
+            if not discovered_devices:
+                print("No Hailo devices found. Check your hardware connection or PCIe drivers.")
+            else:
+                print(f"Found {len(discovered_devices)} Hailo device(s):")
+                for idx, device_id in enumerate(discovered_devices, start=1):
+                    print(f"  [{idx}] Device ID / PCIe Address: {device_id}")
+                    if devices is None:
+                        devices = [device_id]
+                    else:
+                        devices.append(device_id)
+                            
+        except Exception as e:
+            print(f"Error communicating with the Hailo interface: {e}")
 
-    devices = check_for_devices()
-    if devices is not None:
-        # # Load model config from yaml
-        # yaml_path = os.path.join(script_dir, YAML_FILE)
-        # print('')
-        # print("Loading model config: " + str(yaml_path))
-        # with open(yaml_path, 'r') as f:
-        #     yaml_dict = yaml.safe_load(f)
-        # model_info = yaml_dict['ai_model']
-        # classes = model_info['classes']['names']
-        # proc_img_width = model_info['image_size']['image_width']['value']
-        # proc_img_height = model_info['image_size']['image_height']['value']
-        # print("Classes: " + str(len(classes)))
-        # print("Process size: " + str(proc_img_width) + "x" + str(proc_img_height))
+        if devices is not None:
+            # # Load model config from yaml
+            # yaml_path = os.path.join(script_dir, YAML_FILE)
+            # print('')
+            # print("Loading model config: " + str(yaml_path))
+            # with open(yaml_path, 'r') as f:
+            #     yaml_dict = yaml.safe_load(f)
+            # model_info = yaml_dict['ai_model']
+            # classes = model_info['classes']['names']
+            # proc_img_width = model_info['image_size']['image_width']['value']
+            # proc_img_height = model_info['image_size']['image_height']['value']
+            # print("Classes: " + str(len(classes)))
+            # print("Process size: " + str(proc_img_width) + "x" + str(proc_img_height))
 
-        print('')
-        print("Getting test images from: " + str(IMAGES_DIR))
+            print('')
+            print("Getting test images from: " + str(IMAGES_DIR))
 
-        image_files = get_files(IMAGES_DIR)
-        num_files = len(image_files)
+            image_files = get_files(IMAGES_DIR)
+            num_files = len(image_files)
 
-        if num_files == 0:
-            print("No images found at: " + str(IMAGES_DIR))
-        else:
-            print("Found " + str(num_files) + " images")
+            if num_files == 0:
+                print("No images found at: " + str(IMAGES_DIR))
+            else:
+                print("Found " + str(num_files) + " images")
 
-            device = VDevice()
-           
-            weights_path = os.path.join(script_dir, WEIGHTS_FOLDER)
-            for weight_file in WEIGHT_FILES:
+                device = VDevice()
+            
+                weights_path = os.path.join(script_dir, WEIGHTS_FOLDER)
+                weight_file = WEIGHT_FILE
+                
                 print("########################")
                 print("Testing model file " + str(weight_file))
                 print("########################")
@@ -300,7 +351,7 @@ if __name__ == '__main__':
 
                     ###########################
                     # Prime the Model
-                   
+                
 
                     random_int = random.randint(1, num_files)-1
                     image_file = os.path.join(IMAGES_DIR, image_files[random_int])
@@ -383,4 +434,4 @@ if __name__ == '__main__':
                                 print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
                                 print(f"Average detection rate: {drate:.2f} hz")
 
-            device.release()
+                device.release()
