@@ -143,14 +143,14 @@ else
 
             hailo_folder="hailort-${NEPI_HAILO_SW_VERSION}"
            
-           build_folder="/home/${CONFIG_USER}/hailo"
+           export build_folder="/home/${CONFIG_USER}/hailo"
             if [[ ! -d $build_folder ]]; then
                 sudo mkdir -p $build_folder
             fi
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $build_folder
             cd $build_folder
           
-            install_dir="${build_folder}/${hailo_folder}"
+            export install_dir="${build_folder}/${hailo_folder}"
            
            if [[ -d $install_dir ]]; then
                 echo "Found existing software at ${install_dir}"
@@ -160,7 +160,9 @@ else
                     sudo rm -r $hailo_zip
                 fi
                 if [[ ! -f ${hailo_zip} ]]; then
+                
                     hailo_link="https://github.com/hailo-ai/hailort/archive/refs/tags/v${NEPI_HAILO_SW_VERSION}.zip"
+                    echo $hailo_link
                     hailo_zip="hailort-${NEPI_HAILO_SW_VERSION}.zip"
                     # CHECK VERSION: nepihost@device1:~/hailo/hailort-4.20.0$ hailortcli fw-control identify
                     sudo wget ${hailo_link} -O ${hailo_zip}
@@ -181,6 +183,7 @@ else
                     sudo unzip -o -q $hailo_zip
                     if [ $? -eq 0 ]; then
                         #sudo rm ${hailo_zip} > /dev/null 2>&1
+                        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $hailo_folder
                         success_storage=1
                     else
                         echo ""
@@ -248,6 +251,8 @@ else
                 cd ${platform_dir}
                 sudo apt install build-essential gcc g++ ccache 
 
+                ## Make changes then hit enter to continue
+
                 ### Update cmake_args in setup.py line 81 to
                 # cmake_args = [
                 #     f"-B{build_dir}",
@@ -267,17 +272,6 @@ else
                     sudo cp -R ${platform_dir}/hailo_platform /usr/local/lib/python${PYTHON_VERSION}/dist-packages/
                 fi
                 #pip uninstall typing
-
-                echo "#########"
-                echo "Updating Hailo PCIE Driver Version to ${NEPI_HAILO_SW_VERSION} "
-
-                # Remove the old version
-                sudo dpkg --purge hailort-pcie-driver
-                sudo apt remove --purge hailort
-
-                # Install the new driver package
-                sudo dpkg --install hailort-pcie-driver_${NEPI_HAILO_SW_VERSION}_all.deb
-                sudo dpkg --install hailort_${NEPI_HAILO_SW_VERSION}_$(dpkg --print-architecture).deb
                 
 
             fi

@@ -569,10 +569,13 @@ if [[ $SKIP_SOFTWARE -eq 0 ]]; then
         echo "Locating Chromium profile"
         if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
             CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
         elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
             CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}.config/chromium
         else
             CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
             if [[ ! -d CHROMIUM_FOLDER ]]; then
                 sudo mkdir -p ${CHROMIUM_FOLDER}/Default
             fi
