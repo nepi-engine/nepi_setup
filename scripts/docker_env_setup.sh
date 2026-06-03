@@ -1,4 +1,4 @@
-#!/bin/bash
+F#!/bin/bash
 
 ##
 ## Copyright (c) 2024 Numurus <https://www.numurus.com>.
@@ -250,10 +250,9 @@ if [[ "$LITE_INSTALL" -eq 0 ]]; then
     echo "Installing Network Apps"
     echo ""
 
-    sudo apt install net-tools iproute2 isc-dhcp-client -y
-    sudo apt install util-linux procps hostapd iw haveged dnsmasq -y
+    sudo apt install net-tools iproute2 -y
     # #sudo apt install netplan.io -y
-    # sudo apt install ifupdown  wpasupplicant -y
+    # sudo apt install ifupdown isc-dhcp-client wpasupplicant -y
     # sudo apt install util-linux procps hostapd iw haveged dnsmasq -y
     # if [[ ! -f /etc/hostapd/hostapd.conf ]]; then
     # sudo cp /usr/share/doc/hostapd/examples/hostapd.conf /etc/hostapd/
@@ -465,9 +464,9 @@ if [[ -n "$DISPLAY" ]]; then
     if command -v chromium-browser &>/dev/null; then
         echo "Chromium is installed."
     else
-        # Check for an alternative common name if the first one fails
-        if command -v chromium &>/dev/null; then
-            echo "Chromium is installed."
+        if is_valid_rpi; then
+            sudo apt full-upgrade -y
+            sudo apt install chromium -y
         else
             echo "Installing Chromium Browser"
             #sudo snap remove --purge chromium
