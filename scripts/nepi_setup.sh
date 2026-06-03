@@ -1059,6 +1059,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             # /etc/lightdm/lightdm.conf
             # #autologin-user=pi
 
+
             # Add 'Open In Terminal' options to Desktop and File Managers
             source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
             dest_folder="/home/${CONFIG_USER}/.config"
@@ -1072,9 +1073,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
             # Change Desktop Wallpaper
             cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
-            pcmanfm --set-wallpaper "home/${CONFIG_USER}/nepi_wallpaper.jpg"
-
-            pcmanfm --desktop-off && pcmanfm --desktop &
+            pcmanfm --set-wallpaper "/home/${CONFIG_USER}/nepi_wallpaper.jpg"
         fi
 
         echo "########"
