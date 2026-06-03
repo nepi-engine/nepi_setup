@@ -45,14 +45,12 @@ export CONFIG_USER=$CONFIG_USER
 
 echo "NEPI_DOCKER Service starting with CONFIG_USER=${CONFIG_USER}"
 
-bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_host_aliases
-
+echo "Sourcing NEPI Bash Utils file at: ${ufile}"
 if [[ -f "$ufile" ]]; then
     source $ufile
 else
-    echo "NEPI Utils bash file not found at: ${ufile}"
+    echo "NEPI Bash Utils file not found at: ${ufile}"
     exit 0
 fi
 
@@ -69,183 +67,6 @@ DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
 ######################
 
 
-function nipa(){
-  
-  file=/etc/network/interfaces.d/nepi_static_ip
-  if [ ! -f "$file" ]; then
-      return 2
-  else
-    addr=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file" | head -n 1)
-    if [[ -n "$addr" ]]; then
-      echo $addr
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f nipa
-
-
-function naipa(){
-  
-  file=/etc/network/interfaces.d/nepi_user_ip_aliases
-  if [ ! -f "$file" ]; then
-      return 2
-  else
-    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
-    if [[ -n "$addrs" ]]; then
-      echo $addrs
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f naipa
-
-function nnipa(){
-  
-  file=/etc/chrony/chrony.conf
-  if [ ! -f "$file" ]; then
-      return 1
-  else
-    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
-    if [[ -n "$addrs" ]]; then
-      echo $addrs
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f nnipa
-
-function nnet(){
-    
-    nepi_ip=$(nipa)
-    if [[ -z "$nepi_ip" ]]; then
-      return 1
-    else
-      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        echo "Can't ping NEPI IP address: ${nepi_ip}"
-
-        echo "Restarting NetworkManager"
-        systemctl restart NetworkManager
-
-        # echo "Restarting Network"
-        # systemctl restart networking
-        wait
-        ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-          echo "Failed to connect NEPI IP address: ${nepi_ip}"
-        fi
-      fi
-    fi
-}
-export -f nnet
-
-# function ndhcp(){
-  
-#   if nnet; then
-#     # This file sets up nepi bash aliases and util functions
-#     # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-#     # -c 1: Send only one ping packet
-#     # -W 1: Wait for 1 second for a response
-#     ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
-
-#     # Check the exit status of the ping command
-#     # 0 indicates success (internet connection)
-#     # Non-zero indicates failure (no internet connection)
-#     if [ $? -ne 0 ]; then
-#       echo "No internet connection detected. Will try and connect"
-
-#       echo "Enabling DHCP internet connection"
-#       echo "Killing existing DHCP clients"
-#       kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-#       echo "Renewing dhclient"
-#       dhclient -nw
-#       sleep 2
-#       nnet # Restart network
-#       wait
-#       if ! pingi; then
-#         return 1
-#       fi
-#     fi
-#     kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-#   fi
-# }
-# export -f ndhcp
-
-
-function nclock(){
-      
-      # This file sets up nepi bash aliases and util functions
-      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-      # -c 1: Send only one ping packet
-      # -W 1: Wait for 1 second for a response
-      ping -c 1 -W 1 $(nnipa) > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo "No Internet or NTP Server connection detected. Can't sync clocks"
-            return 1 # Exit with a non-zero status to indicate an error
-        fi
-      fi
-
-      
-     
-      if [[ "$(date +%Y)" -lt 2025 ]]; then
-        echo "NTP Server connection detected. Will try to sync clocks"
-        echo "Restarting chrony time service"
-        systemctl restart chronyd
-        sleep 1
-        chronyc -a makestep > /dev/null 2>&1
-      fi
-      #chronyc waitsync 1
-      # chronyc -a makestep > /dev/null 2>&1
-      # echo "Forcing clock sync"
-      #chronyc -a makestep > /dev/null 2>&1
-
-
-    if [[ "$(date +%Y)" -lt 2025 ]]; then
-        echo "Clock Not Updated"
-        return 1
-    else
-        echo "Clock Updated"
-    fi
-}
-export -f nclock
-
-
-function ninet(){
-  
-  echo "Running NEPI Internet Update Processes"
-  if nnet; then
-      # This file sets up nepi bash aliases and util functions
-      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-      # -c 1: Send only one ping packet
-      # -W 1: Wait for 1 second for a response
-      ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
-
-      # Check the exit status of the ping command
-      # 0 indicates success (internet connection)
-      # Non-zero indicates failure (no internet connection)
-      if [ $? -ne 0 ]; then
-          echo "No internet connection detected. Will try and connect"
-      
-  fi
-  #ndhcp # Enable DHCP internet connection if needed
-  wait
-  sleep 1
-  if ! nclock; then # Connect to NTP server
-      return 1
-  fi
-}
-export function ninet
-
-
 
 function nepiload(){
     NEPI_CONFIG_LOAD_FILE=${SETC_FOLDER}/load_system_config.sh
@@ -259,24 +80,6 @@ function nepiload(){
         echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
     fi
 
-}
-
-
-function netupdate(){
-    nnet  >/dev/null 2>&1
-    wait
-
-    enable_dhcp=0
-    if [[ -n "$NEPI_WIRED_DHCP_ENABLED" ]]; then
-        enable_dhcp=$NEPI_WIRED_DHCP_ENABLED
-    fi
-
-    if [[ "$enable_dhcp" -eq 1 ]]; then
-        #echo "Running ninet"
-        ninet  >/dev/null 2>&1
-        wait
-        sleep 2
-    fi
 }
 
 ####################################
@@ -508,7 +311,10 @@ echo "---------------------------------"
 echo "Reseting Network Config"
 echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
 echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
-netupdate
+
+if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
+    ninet
+fi
 
 
 
@@ -543,8 +349,10 @@ if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi
         export NEPI_STATIC_IP=nepi_static_ip
         LOAD_NEPI_CONFIG=1
         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-        sleep 2
-        netupdate
+        # sleep 2
+        # if ! pingn; then
+        #     nnet
+        # fi
     else
         echo "Failed to run recovery mode setup"
     fi
@@ -611,9 +419,6 @@ fi
 
     DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
     DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-
-
-    netupdate
 
 
     if [[ "$CONFIG_MODE" != "STOP" ]]; then
