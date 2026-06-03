@@ -1143,134 +1143,45 @@ function ask_yes_no {
 export -f ask_yes_no
 
 
-
-function nipa(){
-  sudo -v
-  file=/etc/network/interfaces.d/nepi_static_ip
-  if [ ! -f "$file" ]; then
-      return 2
-  else
-    addr=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file" | head -n 1)
-    if [[ -n "$addr" ]]; then
-      echo $addr
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f nipa
-
-
-function naipa(){
-  sudo -v
-  file=/etc/network/interfaces.d/nepi_user_ip_aliases
-  if [ ! -f "$file" ]; then
-      return 2
-  else
-    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
-    if [[ -n "$addrs" ]]; then
-      echo $addrs
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f naipa
-
-function nnipa(){
-  sudo -v
-  file=/etc/chrony/chrony.conf
-  if [ ! -f "$file" ]; then
-      return 1
-  else
-    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
-    if [[ -n "$addrs" ]]; then
-      echo $addrs
-    else
-      return 1
-    fi
-  fi 
-
-}
-export -f nnipa
-
 function nnet(){
     sudo -v
-    nepi_ip=$(nipa)
-    if [[ -z "$nepi_ip" ]]; then
-      return 1
-    else
+    if ! pingn; then
+      echo "Restarting NetworkManager"
+      sudo systemctl restart NetworkManager
+
+      # echo "Restarting Network"
+      # sudo systemctl restart networking
+      wait
       ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
       if [ $? -ne 0 ]; then
-        echo "Can't ping NEPI IP address: ${nepi_ip}"
-
-        echo "Restarting NetworkManager"
-        sudo systemctl restart NetworkManager
-
-        # echo "Restarting Network"
-        # sudo systemctl restart networking
-        wait
-        ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-          echo "Failed to connect NEPI IP address: ${nepi_ip}"
-        fi
+        echo "Failed to connect NEPI IP address: ${nepi_ip}"
       fi
     fi
+    
 }
 export -f nnet
 
-# function nnet_release(){
-#         echo "Stopping ifupdown Networking Service"
-#         #sudo systemctl disable networking >/dev/null 2>&1
-#         sudo systemctl stop networking >/dev/null 2>&1
-
-#         echo "Restarting NetworkManager Service" 
-#         if is_valid_rpi; then
-#             #sudo systemctl enable NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-#             sudo systemctl restart NetworkManager NetworkManager-wait-online NetworkManager-dispatcher >/dev/null 2>&1
-#         else
-#             #sudo systemctl enable NetworkManager >/dev/null 2>&1
-#             sudo systemctl restart NetworkManager >/dev/null 2>&1
-#         fi
-
-#         echo "Restarting netplan Service" 
-#         #sudo systemctl enable netplan >/dev/null 2>&1
-#         sudo systemctl restart netplan >/dev/null 2>&1
-
-# }
-# export -f nnet_release
 
 function ndhcp(){
   sudo -v
-  if nnet; then
-    # This file sets up nepi bash aliases and util functions
-    # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-    # -c 1: Send only one ping packet
-    # -W 1: Wait for 1 second for a response
+
     ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
 
     # Check the exit status of the ping command
     # 0 indicates success (internet connection)
     # Non-zero indicates failure (no internet connection)
     if [ $? -ne 0 ]; then
-      echo "No internet connection detected. Will try and connect"
-
-      echo "Enabling DHCP internet connection"
+      echo "Can't Reach Internet"
+      return 1
+    else
+      echo "Resetting DHCP Clients"
       echo "Killing existing DHCP clients"
       sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
-      sudo dhclient -nw
-      sleep 2
-      nnet # Restart network
-      wait
-      if ! pingi; then
-        return 1
-      fi
+      sudo dhclient -nw > /dev/null 2>&1
     fi
     sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-  fi
+
 }
 export -f ndhcp
 
@@ -1281,7 +1192,7 @@ function nclock(){
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
       # -W 1: Wait for 1 second for a response
-      ping -c 1 -W 1 $(nnipa) > /dev/null 2>&1
+      ping -c 1 -W 1 $(ntpipa) > /dev/null 2>&1
       if [ $? -ne 0 ]; then
         ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -1316,30 +1227,18 @@ export -f nclock
 
 
 
-
-
-
 function ninet(){
   sudo -v
-  echo "Running NEPI Internet Update Processes"
-  if nnet; then
-      # This file sets up nepi bash aliases and util functions
-      # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
-      # -c 1: Send only one ping packet
-      # -W 1: Wait for 1 second for a response
-      ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
-
-      # Check the exit status of the ping command
-      # 0 indicates success (internet connection)
-      # Non-zero indicates failure (no internet connection)
-      if [ $? -ne 0 ]; then
-          echo "No internet connection detected. Will try and connect"
-      fi
-      
-  fi
   ndhcp # Enable DHCP internet connection if needed
-  wait
-  sleep 1
+  if [[ $? -eq 0 ]]; then
+      sleep 2
+      wait
+      if ! pingi; then
+        return 1
+      fi
+      wait
+      sleep 1
+  fi
   if ! nclock; then # Connect to NTP server
       return 1
   fi
@@ -1450,7 +1349,22 @@ function nls(){
 }
 export function nls
 
+function getip_ntp(){
+  sudo -v
+  file=/etc/chrony/chrony.conf
+  if [ ! -f "$file" ]; then
+      return 1
+  else
+    addrs=$(grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' "$file")
+    if [[ -n "$addrs" ]]; then
+      echo $addrs
+    else
+      return 1
+    fi
+  fi 
 
+}
+export -f getip_ntp
 
 
 utilsn="${utilsn}
@@ -1471,12 +1385,10 @@ pingi = Check connection to internet
 pings = Check connection to Self IP address
 pingn = Check connection to NEPI IP
 pingnc = Ping NEPI IP address continously
-nipa= Echo NEPI set IP address
-naipa= Echo NEPI set IP alias addresses
-nnipa= Echo NEPI set NTP IP addresses
 nnet = Restart the network
 nclock = Sync clock
 ninet = check connection and sync clock
+getip_ntp = Echo current set NTP server address
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues
