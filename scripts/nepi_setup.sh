@@ -576,6 +576,10 @@ if [[ "$?" -eq 0 ]]; then
                     sudo systemctl disable hostapd >/dev/null 2>&1
                     sudo systemctl stop hostapd >/dev/null 2>&1
 
+                    if [[ -d "/etc/network/interfaces.d" ]]; then
+                        sudo rm -r /etc/network/interfaces.d/*
+                    fi 
+
                     echo "Configuring NetworkManager Service" 
 
                     sudo systemctl enable NetworkManager >/dev/null 2>&1

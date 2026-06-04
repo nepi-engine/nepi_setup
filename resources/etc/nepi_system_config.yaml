@@ -34,7 +34,7 @@ NEPI_SW_DESC: unknown
 ####################################################
 ## WIRED NETWORK SETTINGS
 # Set the NEPI device's wired network interface name
-NEPI_WIRED_INTERFACE: eth0
+NEPI_WIRED_INTERFACE: unknown
 NEPI_WIRED_NAME: NEPI_WIRED
 # Set the NEPI device's primary IP address and netmask
 # If netmask if left out, 24 will be used

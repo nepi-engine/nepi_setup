@@ -63,6 +63,8 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
         exit 1
     fi
 fi
+
+system_config_file=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
 ######################################
 echo ""
 echo "UPDATING ETC WIRED ALIASES"
@@ -73,67 +75,77 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-        echo "Checking Wired Alias IP Addresses"
-
-        ###########################
-        # NEPI_HOST UPDATE PROCESS
-
-
-
-
-        pos=0
-        for i in {1..10}; do
-            alias_ip_var="NEPI_ALIAS_IP_"${i}
-            needs_update=0
-            ip_address=$(fix_ipv4_netmask "${!alias_ip_var}")
-            if [[ "$?" -eq 2 ]]; then
+        nepi_wired_name=$NEPI_WIRED_NAME
+        if [[ -z $nepi_wired_name ]]; then
+            nepi_wired_name="NEPI_WIRED"
+            if [[ -f "$system_config_file" ]]; then
+                export NEPI_WIRED_NAME=$nepi_wired_name
+                update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $system_config_file
                 needs_update=1
             fi
-            
-            #echo "Checking alias_ip_alias ip var ${alias_ip_var} : ${ip_address}"
-            if is_valid_ipv4_netmask $ip_address >/dev/null 2>&1; then
+        fi    
+        echo "Checking Wired Alias IP Addresses on ${nepi_wired_name}"
 
-                echo "Updating Alias IP Address ${ip_address}"
-                if [[ "$needs_update" -eq 1 ]]; then
-                    update_file=${ETC_FOLDER}/nepi_system_config.yaml
-                    update_yaml_value "${alias_ip_var}" $ip_address $update_file
+        needs_update=0
+
+        nepi_wired_interface=$(netget_hw $nepi_wired_name 2> /dev/null)
+        if [[ -n $nepi_wired_interface ]]; then
+            echo "Got interface for ${nepi_wired_name}: ${nepi_wired_interface}"
+            pos=0
+            purge_aliases=$(netget_ip_aliases $nepi_wired_name)
+            echo "Current Aliases: ${purge_aliases}"
+            skip_udpate=1
+            do_update=0
+            for i in {1..10}; do
+                alias_ip_var="NEPI_ALIAS_IP_"${i}
+                needs_update=0
+                ipn_alias=$(fix_ipv4_netmask "${!alias_ip_var}")
+                if [[ "$?" -eq 2 ]]; then
+                    needs_update=1
                 fi
-                position=$((i - 1)) 
-                alias_name=${NEPI_WIRED_INTERFACE}":"${position}
+                
+                
+                if is_valid_ipv4_netmask $ipn_alias >/dev/null 2>&1; then
+                    #echo "Checking alias_ip_alias ip var ${alias_ip_var} : ${ipn_alias}"
 
+                    ip_alias="${ipn_alias%%/*}"
+                    if [[ "$needs_update" -eq 1 ]]; then
+                        update_file=${ETC_FOLDER}/nepi_system_config.yaml
+                        update_yaml_value "${alias_ip_var}" $ipn_alias $update_file
+                    fi
+                    #position=$((i - 1)) 
+                    #alias_name=${nepi_wired_interface}":"${position}
 
-                # file=/etc/network/interfaces.d/nepi_user_ip_aliases
-                # echo "Updating Alias IP file ${file}"
-                # if [ ! -f "${file}" ]; then
-                #     if [ ! -d "/etc/network/interfaces.d" ]; then
-                #         sudo mkdir -p /etc/network/interfaces.d
-                #     fi
-                #     sudo cp -a ${ETC_FOLDER}/network/interfaces.d/nepi_user_ip_aliases $file
-                # fi
-                # sudo chmod +x -R /etc/network/interfaces.d
-                # sudo bash -c "cat /dev/null > $file"
-
-
-                # sudo echo 'auto '${alias_name} | sudo tee -a $file
-                # sudo echo 'iface '${alias_name}' inet static' | sudo tee -a $file
-                # sudo echo '    address '${ip_address} | sudo tee -a $file
-                # sudo echo '' | sudo tee -a $file
-
-                #echo "Pinging alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
-                if ping -c 1 "${ip_address%%/*}" >/dev/null 2>&1; then
-                    : # DO NOTHING
-                    #echo "Pinged alias_ip_varlias ip var ${alias_ip_var} : ${ip_address}"
-                else
-                    sudo ip addr add $ip_address dev ${NEPI_WIRED_INTERFACE}
-
+                    if [[ "$purge_aliases" != *"$ip_alias"* ]]; then
+                        echo "Adding Alias IP Alias ${ipn_alias}"
+                        if netadd_ip_alias $nepi_wired_interface $ipn_alias $skip_udpate; then
+                            do_update=1
+                        fi
+                    else
+                         echo "Allready IP Alias ${ip_alias}"
+                    fi
+                    
+                    purge_aliases="${purge_aliases/$ip_alias/}"
                 fi
 
+            done
+
+            for alias_ip in $purge_aliases; do
+                alias_ipn=$(fix_ipv4_netmask $alias_ip)
+                if is_valid_ipv4_netmask $alias_ipn; then
+                    echo "Removing Alias IP Address ${alias_ipn}"
+                    if netremove_ip_alias $nepi_wired_interface $alias_ipn $skip_udpate; then
+                        do_update=1
+                    fi
+                fi
+            done
+
+            if [[ $do_update -eq 1 ]]; then
+                echo "Restarting Network"
+                nmcli connection up "$net_name"
             fi
 
-        done
-
-        echo "Updated Alias IP Aliases file"
-        sudo bash -c "cat $file"
+        fi
 
            
     fi    
