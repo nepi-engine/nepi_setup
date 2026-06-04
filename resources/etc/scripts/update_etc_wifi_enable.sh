@@ -77,7 +77,7 @@ if [[ "$?" -eq 0 ]]; then
 
     needs_update=0
 
-    if ! is_wireless_hw; then
+    if ! is_wifi_hw; then
         echo "No WiFi Hardware Detected"
     else
             nepi_wifi_interface=$NEPI_WIFI_INTERFACE
@@ -126,10 +126,12 @@ if [[ "$?" -eq 0 ]]; then
 
             if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
                 if netget_info $nepi_wifi_interface; then 
-                    if [[ "$wifi_enabled" -eq 1 ]]; then
-                        netenable_wireless $nepi_wifi_interface
+                    if [[ $wifi_enabled -eq 1 ]]; then
+                        echo "Enabling WiFi ${wifi_enabled}"
+                        netenable_wifi $nepi_wifi_interface
                     else
-                        netdisable_wireless $nepi_wifi_interface
+                        echo "Disabling WiFi ${wifi_enabled}"
+                        netdisable_wifi $nepi_wifi_interface
                     fi
                 fi
             fi

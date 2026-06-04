@@ -119,6 +119,7 @@ if [[ "$?" -eq 0 ]]; then
             if [[ -d "/etc/network/interfaces.d" ]]; then
                 sudo rm -r /etc/network/interfaces.d/* 2> /dev/null
             fi 
+            sudo usermod -aG netdev ${CONFIG_USER} >/dev/null 2>&1
 
             needs_update=0
 

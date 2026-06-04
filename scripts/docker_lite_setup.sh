@@ -103,6 +103,7 @@ sudo usermod -aG tty ${CONFIG_USER} >/dev/null 2>&1
 sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
 sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
 sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+sudo usermod -aG netdev ${CONFIG_USER} >/dev/null 2>&1
 USER_1000=$(id -nu 1000)
 if [[ ${CONFIG_USER} != ${USER_1000} ]]; then
     sudo usermod -aG ${USER_1000} ${CONFIG_USER} >/dev/null 2>&1

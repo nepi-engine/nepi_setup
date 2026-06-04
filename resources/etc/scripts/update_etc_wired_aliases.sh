@@ -142,7 +142,7 @@ if [[ "$?" -eq 0 ]]; then
 
             if [[ $do_update -eq 1 ]]; then
                 echo "Restarting Network"
-                nmcli connection up "$net_name"
+                sudo nmcli connection up "$net_name"
             fi
 
         fi

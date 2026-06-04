@@ -672,7 +672,7 @@ fi
     echo " "
     echo "You can connect to your NEPI Device's shared network drives by typing:"
     echo "nepistorage  OR   nepiconfig   to change to sharedrive drive"
-    echo "nepistorageopen  OR   nepiconfigopen   to open file manager to sharedrive drive"
+    echo "nepistorage_open  OR   nepiconfig_open   to open file manager to sharedrive drive"
 
     echo " "
     echo "You can connect to your NEPI Device's RUI in a Chrome browser at:"

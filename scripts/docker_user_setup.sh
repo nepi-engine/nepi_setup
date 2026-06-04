@@ -130,6 +130,7 @@ sudo usermod -aG tty root >/dev/null 2>&1
 sudo usermod -aG i2c root >/dev/null 2>&1
 sudo usermod -aG video root >/dev/null 2>&1
 sudo usermod -aG docker root >/dev/null 2>&1
+sudo usermod -aG netdev root >/dev/null 2>&1
 
 echo ""
 echo "###################################"
@@ -184,8 +185,10 @@ function new_system_user(){
         sudo usermod -aG i2c ${user} >/dev/null 2>&1
         sudo usermod -aG video ${user} >/dev/null 2>&1
         sudo usermod -aG docker ${user} >/dev/null 2>&1
+        sudo usermod -aG netdev ${user} >/dev/null 2>&1
         sudo usermod -aG $SUDO_USER  ${user} >/dev/null 2>&1
         sudo usermod -aG $user ${SUDO_USER} >/dev/null 2>&1
+        
         sudo usermod -s /sbin/nologin $user
 		
         sudo chown ${user}:${user} /home/${user}
@@ -230,6 +233,7 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     sudo usermod -aG i2c ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG video ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG docker ${CONFIG_USER} >/dev/null 2>&1
+    sudo usermod -aG netdev ${CONFIG_USER} >/dev/null 2>&1
     sudo usermod -aG ${SUDO_USER} ${CONFIG_USER} #>/dev/null 2>&1
 
 

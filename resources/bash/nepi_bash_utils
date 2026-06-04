@@ -366,22 +366,22 @@ function is_wired_hw() {
 export -f is_wired_hw
 
 
-function is_wireless_hw() {
-  if ! lspci | grep -i wireless >/dev/null 2>&1; then
-    echo "No Wireless Hardware Found"
-    return 1
+function is_wifi_hw() {
+  net_wifi=$(nmcli -t -f DEVICE,TYPE device status | grep ":wifi$" | cut -d: -f1)
+  if [[  $? -eq 0 &&  -n $net_wifi ]]; then
+    echo "Wifi Hardware Found"
+    return 0
   fi
-  #lspci | grep -i wireless
-  echo "Wireless Hardware Found"
-  return 0
+  echo "No Wifi Hardware Found"
+  return 1
 }
-export -f is_wireless_hw
+export -f is_wifi_hw
 
 
 
 
 function is_wifi_enabled() {
-    if ! is_wireless_hw; then
+    if ! is_wifi_hw; then
         return 1
     fi
     if nmcli radio wifi | grep -q "enabled"; then
@@ -410,8 +410,8 @@ function is_wifi_avalable() {
 export -f is_wifi_avalable
 
 function is_wifi_connected() {
-  net_wireless=$(nmcli -t -f DEVICE,TYPE device status | grep ":net_wireless$" | cut -d: -f1)
-  if [[  $? -eq 0 && -n $net_wireless ]]; then
+  net_wifi=$(nmcli -t -f DEVICE,TYPE device status | grep ":wifi$" | cut -d: -f1)
+  if [[  $? -eq 0 && -n $net_wifi ]]; then
     return 1
   fi
   return 0
@@ -424,10 +424,10 @@ function is_wifi_ap() {
     local mode=""
     local found=false
 
-    # Iterate through all available wireless interfaces
+    # Iterate through all available wifi interfaces
     for interface in $(ls /sys/class/net/ 2>/dev/null); do
-        # Verify it is a wireless interface by checking for the wireless extension
-        if iwconfig "$interface" 2>/dev/null | grep -q "no wireless extensions"; then
+        # Verify it is a wifi interface by checking for the wifi extension
+        if iwconfig "$interface" 2>/dev/null | grep -q "no wifi extensions"; then
             continue
         fi
 
@@ -739,7 +739,7 @@ is_valid_ipv4_netmask = Check for valid ip and netmask
 is_valid_net_hw = Check if passed network adapter exists
 is_valid_net_id = Check if passed network adapter id exists
 is_wired_hw = Check if a wired ethernet adapter installed
-is_wireless_hw = Check if a wireless adapter installed
+is_wifi_hw = Check if a wifi adapter installed
 is_wifi_enabled = Check if WiFi hardware is enabled
 is_wifi_available = Check if WiFi hardware detects any WiFi networks
 is_wifi_connected = Check if WiFi hardware connected WiFi network
@@ -799,19 +799,19 @@ export -f echoce
 
 
 ######################
-function netenable_wireless(){
-  if is_wireless_hw; then
-    nmcli radio wifi on
+function netenable_wifi(){
+  if is_wifi_hw; then
+    sudo nmcli radio wifi on
   fi
 }
-export -f netenable_wireless
+export -f netenable_wifi
 
-function netdisable_wireless(){
-  if is_wireless_hw; then
-    nmcli radio wifi off
+function netdisable_wifi(){
+  if is_wifi_hw; then
+    sudo nmcli radio wifi off
   fi
 }
-export -f netdisable_wireless
+export -f netdisable_wifi
 
 
 
@@ -826,7 +826,7 @@ function netlist() {
       dlist=$(nmcli -t -f DEVICE,TYPE device status | cut -d: -f1)
     elif [[ "$find_type" == 'wired' ]]; then
       dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
-    elif [[ "$find_type" == 'wireless' ]]; then
+    elif [[ "$find_type" == 'wifi' ]]; then
       dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
     else
       dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet|wifi' | grep  -v 'wifi-' | cut -d: -f1)
@@ -890,11 +890,11 @@ function netlist_wired(){
 }
 export -f netlist_wired
 
-function netlist_wireless(){
-  find_type=wireless
+function netlist_wifi(){
+  find_type=wifi
   netlist $find_type
 }
-export -f netlist_wireless
+export -f netlist_wifi
 
 
 ######################
@@ -1140,6 +1140,9 @@ function netget_ip_aliases(){
     #echo $r_line
     ip_line=$(echo "${r_line#*ipv4.addresses:}" | sed -s 's/^[[:space:]]*//')
     #echo $ip_line
+    if [[ "$ip_line" != *","* ]]; then
+      return 1
+    fi
     a_line="${ip_line#*,}"
     #echo $a_line
     if [[ -n $a_line ]]; then
@@ -1179,7 +1182,7 @@ export -f netget_wifi_avail
 
 
 function netget_wifi_connected(){
-  echo $(netlist_wireless | awk '{print $1}')
+  echo $(netlist_wifi | awk '{print $1}')
 }
 export -f netget_wifi_connected
 
@@ -1200,8 +1203,8 @@ function netselect(){
           nslist=$(netlist 'all') 
         elif [[ "$adapter_type" == "wired" ]]; then
           nslist=$(netlist_wired) 
-        elif [[ "$adapter_type" == "wireless" ]]; then
-          nslist=$(netlist_wireless) 
+        elif [[ "$adapter_type" == "wifi" ]]; then
+          nslist=$(netlist_wifi) 
         else
           nslist=$(netlist) 
         fi
@@ -1267,15 +1270,15 @@ function netselect_wired(){
 }
 export -f netselect_wired
 
-function netselect_wireless(){
-        if ! is_wireless_hw; then
+function netselect_wifi(){
+        if ! is_wifi_hw; then
           return 1
         else
-          selected_net=$(netselect "wireless" | tail -n1 )
+          selected_net=$(netselect "wifi" | tail -n1 )
           echo $selected_net
         fi
 }
-export -f netselect_wireless
+export -f netselect_wifi
 
 ######################
 function netdelete() {
@@ -1632,9 +1635,9 @@ function netadd_ip_alias(){
         netget_info $net_name
         return 1
       else
-        nmcli connection modify "$net_name" +ipv4.addresses "$ipn_alias"
+        sudo nmcli connection modify "$net_name" +ipv4.addresses "$ipn_alias"
         if [[ $skip_update -eq 0 ]]; then
-          nmcli connection up "$net_name"
+          sudo nmcli connection up "$net_name"
         fi
       fi
     else
@@ -1667,9 +1670,9 @@ function netremove_ip_alias(){
         netget_info $net_name
         return 1
       else
-        nmcli connection modify "$net_name" -ipv4.addresses "$ipn_alias"
+        sudo nmcli connection modify "$net_name" -ipv4.addresses "$ipn_alias"
         if [[ $skip_update -eq 0 ]]; then
-          nmcli connection up "$net_name"
+          sudo nmcli connection up "$net_name"
         fi
       fi
     else
@@ -3546,14 +3549,16 @@ function nepistorage() {
 
 export -f nepistorage
 
-function nepistorageopen() {
+function nepistorage_open() {
   sudo -v
-  if shdrive=$(nepistorage); then
+  if nepistorage; then
+      shfolder=nepi_storage
+      shdrive=/mnt/${shfolder}
       xdg-open $shdrive
   fi
 }
 
-export -f nepistorageopen
+export -f nepistorage_open
 
 
 function nepiconfig() {
@@ -3614,14 +3619,16 @@ function nepiconfig() {
 
 export -f nepiconfig
 
-function nepiconfigopen() {
+function nepiconfig_open() {
   sudo -v
-  if shdrive=$(nepiconfig); then
+  if nepiconfig; then
+      shfolder=nepi_config
+      shdrive=/mnt/${shfolder}
       xdg-open $shdrive
   fi
 }
 
-export -f nepiconfigopen
+export -f nepiconfig_open
 
 
 function nepisync {
@@ -4468,9 +4475,9 @@ nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
 nepirui = Open Chromium to RUI Dashboard page
 nepistorage = Change dir to NEPI shared Storage Drive if accessable
-nepistorageopen = Open file manager to NEPI shared Storage Drive if accessable
+nepistorage_open = Open file manager to NEPI shared Storage Drive if accessable
 nepiconfig = Change dir to NEPI shared Config Drive if accessable
-nepiconfigopen = Open file manager to NEPI shared Config Drive if accessable
+nepiconfig_open = Open file manager to NEPI shared Config Drive if accessable
 nepisync = Sync NEPI SSH Key files
 nepisetkey = Set provided key name as NEPI device key
 nepisshkey = NEPI SSH key setup function
