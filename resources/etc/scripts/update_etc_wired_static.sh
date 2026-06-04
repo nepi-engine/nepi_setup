@@ -147,7 +147,7 @@ if [[ "$?" -eq 0 ]]; then
                 fi       
 
                 dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
-                if [[ -n $dlist && "$nepi_wired_interface" != 'None' ]]; then
+                if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
                     echo "Auto updating wired interface hw option"
                     if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
                         echo "Got wired interface hw options ${dlist}"

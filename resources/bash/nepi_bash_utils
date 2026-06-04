@@ -1147,7 +1147,9 @@ function netget_ip_aliases(){
               for item in "${a_array[@]}"; do
                   read -r ipn <<< "$item"
                   ip="${ipn%%/*}"
-                  echo "$ip"
+                  if [[ "$ip" != *"10.0.0"* ]]; then
+                    echo "$ip"
+                  fi
               done
     else
       return 1

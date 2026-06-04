@@ -63,6 +63,11 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     fi
 fi
 
+
+system_config_file=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
+
+################################
+
 echo ""
 echo "UPDATING ETC WIFI ENABLE"
 
@@ -70,33 +75,65 @@ echo "UPDATING ETC WIFI ENABLE"
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+    needs_update=0
 
-        echo "Disabling WiFi Adapter on interface ${NEPI_WIFI_INTERFACE}"
-        sudo ip link set ${NEPI_WIFI_INTERFACE} down        
-        if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
+    if ! is_wireless_hw; then
+        echo "No WiFi Hardware Detected"
+    else
+            nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+            if [[ "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
+                nepi_wifi_interface="unknown"
+                nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+                if [[ -z $nepi_wifi_interface ]]; then
+                    nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
+                    echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
+                    if [[ -z $nepi_wifi_interface ]]; then
+                        nepi_wifi_interface="unknown"
+                    fi   
+                fi       
 
-            if ip link show ${NEPI_WIFI_INTERFACE} &>/dev/null; then
-                echo "${NEPI_WIFI_INTERFACE} exists."
-
-                if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
-                    echo "Enabling WiFi Adapter on interface ${NEPI_WIFI_INTERFACE}"
-                    sudo ip link set ${NEPI_WIFI_INTERFACE} up 
+                dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
+                if [[ -n $dlist && "$nepi_wifi_interface" != 'NONE' ]]; then
+                    echo "Auto updating wifi interface hw option"
+                    if [[ "$dlist" != *"$nepi_wifi_interface" ]]; then
+                        echo "Got wifi interface hw options ${dlist}"
+                        read -r nepi_wifi_interface _ <<< "$dlist"
+                        echo "Updated wifi interface hw options ${nepi_wifi_interface}"
+                        if [[ -f "$system_config_file" && "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
+                            export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
+                            update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $system_config_file
+                            needs_update=1
+                        fi
+                    else
+                        nepi_wifi_interface="unknown"
+                    fi
                 fi
-            else
-                echo "NEPI Wifi Interface ${NEPI_WIFI_INTERFACE} not found. Disabling WiFi support"
-                config_setting="NEPI_WIFI_ENABLED"
-                config_file=${ETC_FOLDER}/nepi_system_config.yaml
-                update_val=0
-                update_yaml_value $config_setting $update_val $config_file
-                export NEPI_WIFI_ENABLED=0
             fi
-        else
-            echo "NEPI Wifi not enabled"
-        fi
-        
-    fi
+            echo "Using Wifi Interface ${nepi_wifi_interface}"
 
+
+            wifi_enabled=$NEPI_WIFI_ENABLED
+            if [[ -z $wifi_enabled ]]; then
+                wifi_enabled=1
+                if [[ -f "$system_config_file" ]]; then
+                    export NEPI_WIFI_ENABLED=$wifi_enabled
+                    update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $system_config_file
+                    needs_update=1
+                fi
+            fi    
+            echo "Using Wifi Enabled ${wifi_enabled}"
+
+
+            if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+                if netget_info $nepi_wifi_interface; then 
+                    if [[ "$wifi_enabled" -eq 1 ]]; then
+                        netenable_wireless $nepi_wifi_interface
+                    else
+                        netdisable_wireless $nepi_wifi_interface
+                    fi
+                fi
+            fi
+    fi
 fi
 
 
