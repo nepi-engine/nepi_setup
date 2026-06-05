@@ -218,9 +218,17 @@ if id -u "$CONFIG_USER" >/dev/null 2>&1; then
 
     if [[ $CONFIG_USER == "nepihost" ]]; then
         echo "${CONFIG_USER}:${CONFIG_USER_PW}" | sudo chpasswd
+        AUTOLOGIN_CONF="/etc/systemd/system/getty@tty1.service.d/autologin.conf"
+
+        if is_valid_rpi && [ -f "$AUTOLOGIN_CONF" ]; then
+            if [ -f "$AUTOLOGIN_CONF" ]; then
+                rm "$AUTOLOGIN_CONF"
+                systemctl daemon-reload
+            fi
+        fi
 
         if is_valid_rpi && [ -f "/etc/lightdm/lightdm.conf" ]; then
-            update_text_value "/etc/lightdm/lightdm.conf" "autologin-user=" "autologin-user=nepihost" 
+            update_text_value "/etc/lightdm/lightdm.conf" "autologin-user=" "#autologin-user=" 
         fi
     fi
     #sudo usermod -aG $CONFIG_USER $CONFIG_USER
