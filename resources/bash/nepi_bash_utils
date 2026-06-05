@@ -63,7 +63,6 @@ export NEPI_RECOVERY_IP=192.168.179.103
 export NEPI_IN_CONTAINER=1
 export REMOTE_IP=192.168.179.5
 
-
 export NEPI_HOME=/home/$CONFIG_USER
 export NEPI_BASE='/opt/nepi'
 export NEPI_ENGINE=${NEPI_BASE}/nepi_engine
@@ -88,7 +87,7 @@ else
 fi
 
 
-export NEPI_TARGET_IP=$NEPI_IP
+export NEPI_TARGet_wired_ip=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
 export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
 
@@ -210,6 +209,26 @@ function is_valid_pw() {
     }
 export -f is_valid_pw
 
+function is_valid_wpa2_pw() {
+    local pass="$1"
+    
+    # 1. Check length (8 to 63 chars)
+    if [[ ${#pass} -lt 8 || ${#pass} -gt 63 ]]; then
+        echo "Error: Password must be 8 to 63 characters long."
+        return 1
+    fi
+
+    # 2. Check for only printable ASCII characters
+    if [[ ! "$pass" =~ ^[\x20-\x7E]+$ ]]; then
+        echo "Error: Password contains invalid or non-ASCII characters."
+        return 1
+    fi
+
+    #echo "Valid WPA2 password."
+    return 0
+}
+
+export -f is_valid_wpa2_pw
 
 function is_valid_did() {
     local input=$1
@@ -410,11 +429,13 @@ function is_wifi_avalable() {
 export -f is_wifi_avalable
 
 function is_wifi_connected() {
-  net_wifi=$(nmcli -t -f DEVICE,TYPE device status | grep ":wifi$" | cut -d: -f1)
-  if [[  $? -eq 0 && -n $net_wifi ]]; then
-    return 1
-  fi
-  return 0
+    if nmcli -t -f TYPE,STATE device | grep -q "wifi:connected"; then
+        echo "Wi-Fi is connected."
+        return 0
+    else
+        echo "Wi-Fi is disconnected."
+        return 1
+    fi
 }
 
 export -f is_wifi_connected
@@ -729,7 +750,8 @@ utilsn="${utilsn}
 *** These checks return 0 error value if true ***
 is_not_blank = Check if variable is blank
 is_valid_uid = Check for valid user id name
-is_valid_pw = Check for valid use password
+is_valid_pw = Check for valid user password
+is_valid_wpa2_pw = Check for valid WPA2 password
 is_valid_did = Check for valid device id name
 is_valid_string = Check that string is not empty
 is_valid_sn = Check for valid nepi serial number
@@ -798,894 +820,9 @@ function echoce(){
 export -f echoce
 
 
-######################
-function netenable_wifi(){
-  if is_wifi_hw; then
-    sudo nmcli radio wifi on
-  fi
-}
-export -f netenable_wifi
 
-function netdisable_wifi(){
-  if is_wifi_hw; then
-    sudo nmcli radio wifi off
-  fi
-}
-export -f netdisable_wifi
 
-
-
-
-######################
-function netlist() {
-    find_type="$1"
-    
-    if [[ "$find_type" == 'bridge' ]]; then
-      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'bridge' | cut -d: -f1)
-    elif [[ "$find_type" == 'all' ]]; then
-      dlist=$(nmcli -t -f DEVICE,TYPE device status | cut -d: -f1)
-    elif [[ "$find_type" == 'wired' ]]; then
-      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
-    elif [[ "$find_type" == 'wifi' ]]; then
-      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
-    else
-      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet|wifi' | grep  -v 'wifi-' | cut -d: -f1)
-    fi
-
-    for word in $dlist; do
-
-      n_device=$word
-      n_type=$(nmcli -g GENERAL.TYPE device show $n_device)
-
-      d_name=$(nmcli -g GENERAL.CONNECTION device show $n_device)
-      if [[ -n $d_name ]]; then
-        n_name="${d_name}"
-        ips_line=$(ip -4 addr show $n_device | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
-        ips_list=${ips_line// | /,}
-        d_ip=$(echo $ips_list | tr ',' '\n' | tac | paste -sd, -)
-        if [[ -n $d_ip ]]; then
-          n_ip="${d_ip// /,}"
-        else
-          n_ip="--"
-        fi
-      else
-        n_name="--"
-        n_ip="--"
-      fi
-      #echo "${d_name} : ${n_name}"
-      #echo "${d_ip} : ${n_ip}"
-
-
-      d_state=$(nmcli -g GENERAL.STATE device show $n_device)
-      if [[  "$n_type" == 'ethernet' && "$d_state" == *"connected"* ]]; then
-        n_state=connected
-      elif [[  "$n_type" == 'wifi' && "$d_state" == *"connected"* && "$n_name" != "--" ]]; then
-        n_state=connected
-      # elif [[ "$n_type" == 'ethernet' && "$n_name" == '--' ]]; then
-      #   n_state=disabled
-      elif [[ "$n_type" == 'wifi' && "$d_state" == *"unavailable"* ]]; then
-        n_state=disabled
-      # elif [[ "$n_type" == 'ethernet' && "$n_name" != '--' ]]; then
-      #   n_state=disconnected
-      # elif [[ "$d_state" == *"disconnected"* ]]; then
-      #   n_state=disconnected
-      else
-        n_state=disconnected
-      fi
-      #echo "${d_state} : ${n_state}"
-
-
-
-      echo "${n_device} | ${n_type##*-} | ${n_state} | ${n_name} | ${n_ip}"
-    done
-
-}
-export -f netlist
-
-
-
-function netlist_wired(){
-  find_type=wired
-  netlist $find_type
-}
-export -f netlist_wired
-
-function netlist_wifi(){
-  find_type=wifi
-  netlist $find_type
-}
-export -f netlist_wifi
-
-
-######################
-
-function netget_info(){
-      check="$1"
-      match=''
-      if [[ -z $check ]]; then
-        return 1
-      else          
-          nlist=$(netlist)
-          while IFS= read -r line; do
-              # 3. Print or process each line
-              #echo "Processing: $line"
-              readarray -d '|' -t line_array < <(printf '%s' "$line")
-
-
-              read -rd '' text <<< "${line_array[0]}"
-              read -r text <<< "$text"
-              line_hw=$text
-
-              read -rd '' text <<< "${line_array[1]}"
-              read -r text <<< "$text"
-              line_type=$text
-              
-              read -rd '' text <<< "${line_array[2]}"
-              read -r text <<< "$text"
-              line_state=$text
-              
-              read -rd '' text <<< "${line_array[3]}"
-              read -r text <<< "$text"
-              line_name=$text
-
-              read -rd '' text <<< "${line_array[4]}"
-              read -r text <<< "$text"
-              line_ip=$text
-
-
-
-              #echo "${line_name},${line_hw},${check}"
-              if [[ ${line_name} == ${check} ||
-                    ${line_ip} == *"${check}"* ||
-                    ${line_hw} == ${check} ||
-                    ${line_type} == ${check} ]]; then
-                
-                match="$line"
-              fi
-          done <<< "$nlist"      
-
-          if [[ -n $match ]]; then
-            echo ${match}
-          else
-            return 1
-          fi    
-    fi
-}
-export -f netget_info
-
-
-function netget_name(){
-  check=$1
-  check_return=''
-  if [[ -n $check ]]; then
-
-    line=$(netget_info "$check")
-    if [[ -n $line ]]; then
-              readarray -d '|' -t line_array < <(printf '%s' "$line")
-
-              read -rd '' text <<< "${line_array[3]}"
-              read -r text <<< "$text"
-              check_return=$text
-    fi 
-  fi
-
-  if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
-    echo ${check_return}
-  else
-    return 1
-  fi
-}
-
-export -f netget_name
-
-function netget_state(){
-      check_name="$1"
-      check_return=""
-      if [[ -z $check_name ]]; then
-        return 1
-      else          
-          nlist=$(netlist)
-          while IFS= read -r line; do
-              # 3. Print or process each line
-              #echo "Processing: $line"
-              readarray -d '|' -t line_array < <(printf '%s' "$line")
-
-              
-              read -rd '' text <<< "${line_array[0]}"
-              read -r text <<< "$text"
-              line_hw=$text
-
-              read -rd '' text <<< "${line_array[1]}"
-              read -r text <<< "$text"
-              line_type=$text
-              
-              read -rd '' text <<< "${line_array[2]}"
-              read -r text <<< "$text"
-              line_state=$text
-              
-              read -rd '' text <<< "${line_array[3]}"
-              read -r text <<< "$text"
-              line_name=$text
-
-              read -rd '' text <<< "${line_array[4]}"
-              read -r text <<< "$text"
-              line_ip=$text
-              
-              #echo "${line_name},${line_hw},${check_name}"
-              if [[ ${line_name} == ${check_name} || ${line_hw} == ${check_name} ]]; then
-                check_return="$line_state"
-              fi
-          done <<< "$nlist"      
-
-          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
-            echo ${check_return}
-          else
-            return 1
-          fi     
-    fi
-}
-export -f netget_state
-
-
-function netget_hw(){
-      check_name="$1"
-      check_return=""
-      if [[ -z $check_name ]]; then
-        return 1
-      else          
-          nlist=$(netlist)
-          while IFS= read -r line; do
-              # 3. Print or process each line
-              #echo "Processing: $line"
-              readarray -d '|' -t line_array < <(printf '%s' "$line")
-
-              
-              read -rd '' text <<< "${line_array[0]}"
-              read -r text <<< "$text"
-              line_hw=$text
-
-              read -rd '' text <<< "${line_array[1]}"
-              read -r text <<< "$text"
-              line_type=$text
-              
-              read -rd '' text <<< "${line_array[2]}"
-              read -r text <<< "$text"
-              line_state=$text
-              
-              read -rd '' text <<< "${line_array[3]}"
-              read -r text <<< "$text"
-              line_name=$text
-
-              read -rd '' text <<< "${line_array[4]}"
-              read -r text <<< "$text"
-              line_ip=$text
-              
-              #echo "${line_name},${line_hw},${check_name}"
-              if [[ ${line_name} == ${check_name} ]]; then
-                check_return="$line_hw"
-              fi
-          done <<< "$nlist"      
-
-          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
-            echo ${check_return}
-          else
-            return 1
-          fi         
-    fi
-}
-export -f netget_hw
-
-
-
-
-
-
-function netget_ip(){
-      check_name="$1"
-      check_return=""
-      if [[ -z $check_name ]]; then
-        return 1
-      else          
-          nlist=$(netlist)
-          while IFS= read -r line; do
-              # 3. Print or process each line
-              #echo "Processing: $line"
-              readarray -d '|' -t line_array < <(printf '%s' "$line")
-
-              
-              read -rd '' text <<< "${line_array[0]}"
-              read -r text <<< "$text"
-              line_hw=$text
-
-              read -rd '' text <<< "${line_array[1]}"
-              read -r text <<< "$text"
-              line_type=$text
-              
-              read -rd '' text <<< "${line_array[2]}"
-              read -r text <<< "$text"
-              line_state=$text
-              
-              read -rd '' text <<< "${line_array[3]}"
-              read -r text <<< "$text"
-              line_name=$text
-
-              read -rd '' text <<< "${line_array[4]}"
-              read -r text <<< "$text"
-              line_ip=$text
-              
-              #echo "${line_name},${line_ip},${check_name}"
-              if [[ ${line_name} == ${check_name} ]]; then
-                check_return="${line_ip%%,*}"
-              fi
-          done <<< "$nlist"      
-
-          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
-            echo ${check_return}
-          else
-            return 1
-          fi           
-    fi
-}
-export -f netget_ip
-
-
-
-
-function netget_ip_aliases(){
-  check_name=$1
-  check_return=''
-  #echo $check_name
-  if [[ -n $check_name ]]; then
-    r_line=$(nmcli connection show $check_name | grep ipv4.addresses)
-    #echo $r_line
-    ip_line=$(echo "${r_line#*ipv4.addresses:}" | sed -s 's/^[[:space:]]*//')
-    #echo $ip_line
-    if [[ "$ip_line" != *","* ]]; then
-      return 1
-    fi
-    a_line="${ip_line#*,}"
-    #echo $a_line
-    if [[ -n $a_line ]]; then
-              readarray -d ',' -t a_array < <(printf '%s' "$a_line")
-              for item in "${a_array[@]}"; do
-                  read -r ipn <<< "$item"
-                  ip="${ipn%%/*}"
-                  if [[ "$ip" != *"10.0.0"* ]]; then
-                    echo "$ip"
-                  fi
-              done
-    else
-      return 1
-    fi 
-  fi
-
-}
-
-export -f netget_ip_aliases
-
-
-function netget_ip_router(){
-    # Get the default gateway IP address
-    local router_ip=$(ip route | awk '/default/ {print $3; exit}')
-    if [[ "$router_ip" == *"192.168"* ]]; then
-      router_ip=''
-    fi
-    echo $router_ip
-}
-export netget_ip_router
-
-
-function netget_wifi_avail(){
-  nmcli -t -f SSID dev wifi
-}
-export -f netget_wifi_avail
-
-
-function netget_wifi_connected(){
-  echo $(netlist_wifi | awk '{print $1}')
-}
-export -f netget_wifi_connected
-
-
-
-
-
-
-
-
-######################
-function netselect(){
-        adapter_type=$1
-        selected_net=""
-        # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
-        # 'awk' is then used to parse the output and format it
-        if [[ "$adapter_type" == "all" ]]; then
-          nslist=$(netlist 'all') 
-        elif [[ "$adapter_type" == "wired" ]]; then
-          nslist=$(netlist_wired) 
-        elif [[ "$adapter_type" == "wifi" ]]; then
-          nslist=$(netlist_wifi) 
-        else
-          nslist=$(netlist) 
-        fi
-
-        if ! is_not_blank $nslist; then
-            echo "No Networks Found"
-            return 1
-        fi
-        #echo $nslist
-        # Set IFS to | and read into an array
-        readarray -t adapters <<< "$nslist"
-        # adapters=("${adapters[@]:1}")
-        num_adapters=${#adapters[@]}
-        #echo "Found ${num_adapters} : ${adapters}"
-        
-        # Check if there are any adapters
-        if [[ $num_adapters -eq 0 ]]; then
-            #echo "No Networks Found"
-            return 1
-        fi
-
-        # Check if there are any adapters
-        if [[ $num_adapters -eq 1 ]]; then
-            adapter=${adapters[0]}
-            delimiter=" |"
-            selected_net=${adapter%%$delimiter*}
-            #echo "Using adapter ${selected_net}"
-        fi
-
-        if [[ -z $selected_net ]]; then
-          COLUMNS=1
-          select adapter in "${adapters[@]}"; do
-              if [[ -n "$adapter" ]]; then
-                  delimiter=" |"
-                  selected_net=${adapter%%$delimiter*}
-                  break
-              else
-                  selected_net=""
-                  echo "Invalid selection. Please try again."
-              fi
-          done
-        fi
-
-        
-        if [[ -n $selected_net ]]; then
-          echo "${selected_net}"
-          return 0
-        else
-          echo ""
-          return 1
-        fi
-
-}
-export -f netselect
-
-function netselect_wired(){
-        if ! is_wired_hw; then
-          return 1
-        else
-          selected_net=$(netselect "wired" | tail -n1 )
-          echo $selected_net
-        fi
-}
-export -f netselect_wired
-
-function netselect_wifi(){
-        if ! is_wifi_hw; then
-          return 1
-        else
-          selected_net=$(netselect "wifi" | tail -n1 )
-          echo $selected_net
-        fi
-}
-export -f netselect_wifi
-
-######################
-function netdelete() {
-  selected_net="$1"
-  if ! systemctl is-active --quiet NetworkManager; then
-    echo "NetworkManager not running"
-    return 1
-  fi
-
-  # if ! is_wired_hw; then
-  #   return 1
-  # fi
-
-  if [[ -z $selected_net ]]; then
-    echo ""
-    echo "Select a Network to Delete"
-    echo "--------------------"
-    echo ""
-    selected_net=$(netselect 'all'  | tail -n1)
-    #echo "Selected adpater ${selected_net}"
-  fi
-  
-  # Output the full path of the selected file
-  if [[ -z "$selected_net" ]]; then
-      echo "No Network Selected"
-  else
-      # nslist=$(netlist_wired) 
-      
-      # if ! is_not_blank $nslist; then
-      #     echo "No Networks Found"
-      #     return 1
-      # fi
-      # if ! is_in_string $nslist $selected_net; then
-      #     echo "Wired Network ${selected_net} NOT Found"
-      #     return 1
-      # fi
-
-      if systemctl is-active --quiet NetworkManager; then
-
-          echo "Deleting Network ${selected_net}"
-
-          cmd='sudo nmcli connection delete "'${selected_net}'"'
-          #echo $cmd
-          eval "$cmd"     
-
-      fi
-  fi
-
-}
-export -f netdelete
-
-
-
-function netcreate_wired() {
-    new_net_name="$1"
-    selected_hw="$2"
-    new_ip_netmask="$3"
-    new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
-    new_gateway="$4"
-    
-
-    if ! systemctl is-active --quiet NetworkManager; then
-      echo "NetworkManager not running"
-      return 1
-    fi
-
-    if ! is_wired_hw; then
-      return 1
-    fi
-
-    if [[ -z $selected_hw ]]; then
-      echo ""
-      echo "Select Wired Network to Update"
-      echo "--------------------"
-      echo ""
-      selected_net=$(netselect_wired  | tail -n1)
-      selected_hw=$(getnet_hw "$selected_net")
-      #echo "Selected adpater ${selected_hw}"
-    fi
-    
-    # Output the full path of the selected file
-    if [[ -z "$selected_hw" ]]; then
-        echo "Wired Hardware Not Provided"
-        return 1
-    else
-        nslist=$(netlist_wired) 
-        
-        if ! is_not_blank $nslist; then
-            echo "No Networks Found"
-            return 1
-        fi
-
-        # exist_network=$(netget_info "$new_net_name")
-        # if [[ -z $exist_network ]]; then
-        #     echo "Wired Network ${new_net_name} Exists"
-        #     echo "${exist_network}"
-        #     return 1
-        # fi
-
-        if systemctl is-active --quiet NetworkManager; then
-            netdelete_wired ${new_net_name}
-            cmd=""
-
-            echo "Creating Network ${new_net_name} on ${selected_hw} with IP Address ${new_ip_netmask}"
-            if [[ ${new_ip_netmask} == 'auto' ]]; then
-              cmd='sudo nmcli connection add type ethernet con-name "'${new_net_name}'" ifname '${selected_hw}' '
-              echo $cmd
-              eval "$cmd" 
-
-            elif [[ -n $new_ip_netmask ]]; then
-                    
-                    if [[ ${new_ip_netmask} != 'auto' ]]; then
-                      new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
-                      if ! is_valid_ipv4_netmask $new_ip_netmask; then
-                        echo "Invalid Address/Netmask Combination ${net_ip}"
-                        return 1
-                      fi
-                    fi
-                    echo "Updating static ip to ${new_ip_netmask}"
-                    if ! is_valid_ipv4 $new_gateway; then
-                        new_ip="${new_ip_netmask%%/*}"
-                        new_octet=1
-                        new_gateway="${new_ip%.*}.$new_octet"
-                    fi
-                    
-                    echo "Using Gateway ${new_gateway}"
-                    cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
-                        con-name "'${new_net_name}'" \
-                        ipv4.address '${nepi_static_ip}' \
-                        ipv4.dns 8.8.8.8,8.8.4.4 \
-                        ipv4.method manual \
-                        ipv4.gateway '${nepi_gateway_ip}
-                    echo $cmd
-                    eval "$cmd"     
-
-            fi
-
-
-
-            cmd='sudo nmcli connection modify "'${new_net_name}'" connection.interface-name "'${selected_hw}'"'
-            echo $cmd
-            eval "$cmd" 
-
-            cmd='sudo nmcli connection up "'${new_net_name}'"'
-            echo $cmd
-            eval "$cmd"     
-            echo ""
-
-            sleep 3
-            sleep 1
-            ndhcp 2> /dev/null
-            
-        fi
-    fi
-}
-
-export -f netcreate_wired
-
-######################
-function netset_wired() {
-    new_ip_netmask="$1"
-    new_gateway="$2"
-    selected_net="$3"
-
-    if ! systemctl is-active --quiet NetworkManager; then
-      echo "NetworkManager not running"
-      return 1
-    fi
-
-    if ! is_wired_hw; then
-      return 1
-    fi
-
-    if [[ -z $selected_net ]]; then
-      echo ""
-      echo "Select a Network to Update"
-      echo "--------------------"
-      echo ""
-      selected_net=$(netselect_wired  | tail -n1)
-      #echo "Selected adpater ${selected_net}"
-    fi
-    
-    # Output the full path of the selected file
-    if [[ -z "$selected_net" ]]; then
-        echo "No Network Selected"
-    else
-        nslist=$(netlist_wired) 
-        
-        if ! is_not_blank $nslist; then
-            echo "No Networks Found"
-            return 1
-        fi
-        if ! netget_name $selected_net; then
-            echo "Wired Network ${selected_net} NOT Found"
-            return 1
-        fi
-        selected_net=$(netget_name $selected_net)
-        if systemctl is-active --quiet NetworkManager; then
-            cmd=""
-
-            echo "Updating Network ${selected_net} with IP Address ${new_ip_netmask}"
-            if [[ ${new_ip_netmask} == 'auto' ]]; then
-              cmd='sudo nmcli con mod "'${selected_net}'" ipv4.method auto '
-              echo $cmd
-              eval "$cmd"     
-
-              cmd='sudo nmcli con mod "'${selected_net}'" connection.autoconnect yes '
-              echo $cmd
-              eval "$cmd" 
-
-              cmd='sudo nmcli connection up "'${selected_net}'"'
-              #echo $cmd
-              eval "$cmd"     
-              echo ""
-
-            elif [[ -n $new_ip_netmask ]]; then
-                    
-                    if [[ ${new_ip_netmask} != 'auto' ]]; then
-                      new_ip_netmask=$(fix_ipv4_netmask $new_ip_netmask)
-                      if ! is_valid_ipv4_netmask $new_ip_netmask; then
-                        echo "Invalid Address/Netmask Combination ${net_ip}"
-                        return 1
-                      fi
-                    fi
-                    echo "Updating static ip to ${new_ip_netmask}"
-
-
-                    if ! is_valid_ipv4 $new_gateway; then
-                        new_gateway=$(netget_ip_router)
-                        if ! is_valid_ipv4 $new_gateway; then
-                          new_ip="${new_ip_netmask%%/*}"
-                          new_octet=1
-                          new_gateway="${new_ip%.*}.$new_octet"
-                        fi
-                    fi
-                    echo "Using Gateway ${new_gateway}"
-
-
-                    cmd='sudo nmcli connection modify "'${selected_net}'" \
-                        ipv4.addresses '${new_ip_netmask}' \
-                        ipv4.dns 8.8.8.8,8.8.4.4 \
-                        ipv4.method manual \
-                        ipv4.gateway '${new_gateway}
-                  
-
-                    echo $cmd
-                    eval "$cmd"     
-
-                    cmd='sudo nmcli connection up "'${selected_net}'"'
-                    echo $cmd
-                    eval "$cmd" 
-                    sleep 1
-                    ndhcp 2> /dev/null
-            fi
-        fi
-    fi
-}
-
-export -f netset_wired
-
-
-
-function netset_wired_auto() {
-  netset_wired 'auto' $1
-  return $?
-}
-
-export -f netset_wired_auto
-
-function netset_wired_custom() {
-  netset_wired $1 $2
-  return $?
-}
-
-export -f netset_wired_custom
-
-function netset_wired_nepi() {
-  if [[ $NEPI_MODE == 'REMOTE' ]]; then
-    ip="${REMOTE_IP%%/*}"
-  else
-    ip="${NEPI_IP%%/*}"
-  fi
-  netset_wired $ip $1
-  return $?
-}
-
-export -f netset_wired_nepi
-
-
-
-
-function netset_wifi() {
-  wifi_ssid="$1"
-  wifi_pw="$2"
-  
-  if ! is_wifi_enabled; then
-    return 1
-  else
-
-    wifi_list=$(netlist_wifi)
-
-    if [[ -z wifi_ssid ]]; then
-      echo "WiFi SSID empty"
-      return 1
-    fi
-
-    cur_ssid=$(netget_wifi)
-    if [[ "$wifi_ssid" == "$cur_ssid" ]]; then
-      echo "WiFi SSID ${wifi_ssid} Connected"
-      return 0
-    fi
-
-    if [[ "$wifi_list" != *"wifi_ssid"* ]]; then
-      echo "WiFi SSID ${wifi_ssid} Not Found"
-      return 1
-    fi
-
-    if [[ -z wifi_pw ]]; then
-      echo "WiFi Password empty"
-      return 1
-    fi
-
-    nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_ssid"
-    cur_ssid=$(netget_wifi)
-    if [[ "$wifi_ssid" == "$cur_ssid" ]]; then
-      echo "WiFi SSID ${wifi_ssid} Connected"
-      return 0
-    else
-      echo "WiFi SSID ${wifi_ssid} NOT Connected"
-      return 1
-    fi    
-
-  fi
-}
-
-export -f netset_wifi
-
-
-function netadd_ip_alias(){
-  net_ref=$1
-  ipn_alias=$2
-  ipn_alias=$(fix_ipv4_netmask "${ipn_alias}")
-  ip_alias="${ipn_alias%%/*}"
-  skip_update=$3
-  if [[ "$skip_update" -ne 1 ]]; then
-    skip_update=0
-  fi
-  net_name=$(netget_name $net_ref)
-  #echo $net_name
-  if [[ -n $net_name ]]; then
-    if is_valid_ipv4_netmask $ipn_alias; then
-      if netget_info $ip_alias 2> /dev/null; then
-        echo "IP address allready in use ${ipn_alias}"
-        netget_info $net_name
-        return 1
-      else
-        sudo nmcli connection modify "$net_name" +ipv4.addresses "$ipn_alias"
-        if [[ $skip_update -eq 0 ]]; then
-          sudo nmcli connection up "$net_name"
-        fi
-      fi
-    else
-      echo "Not a valid IP address ${ipn_alias}"
-      return 1
-    fi 
-  else
-    echo "Network reference ${net_ref} not found"
-    return 1
-  fi 
-}
-
-export -f netadd_ip_alias
-
-
-function netremove_ip_alias(){
-  net_ref=$1
-  ipn_alias=$2
-  ipn_alias=$(fix_ipv4_netmask "${ipn_alias}")
-  ip_alias="${ipn_alias%%/*}"
-  skip_update=$3
-  if [[ "$skip_update" -ne 1 ]]; then
-    skip_update=0
-  fi
-  net_name=$(netget_name $net_ref)
-  if [[ -n $net_name ]]; then
-    if is_valid_ipv4_netmask $ipn_alias; then
-      if ! netget_info $ip_alias 2> /dev/null; then
-        echo "IP address does not exist ${ipn_alias} for ${net_name}"
-        netget_info $net_name
-        return 1
-      else
-        sudo nmcli connection modify "$net_name" -ipv4.addresses "$ipn_alias"
-        if [[ $skip_update -eq 0 ]]; then
-          sudo nmcli connection up "$net_name"
-        fi
-      fi
-    else
-      echo "Not a valid IP address ${ipn_alias}"
-      return 1
-    fi 
-  else
-    echo "Network reference ${net_ref} not found"
-    return 1
-  fi 
-}
-
-export -f netremove_ip_alias
+#######################
 
 
 # ping self
@@ -1847,7 +984,7 @@ function ndhcp(){
 export -f ndhcp
 
 
-function get_ip_ntp(){
+function netget_ntp_ip(){
   sudo -v
   file=/etc/chrony/chrony.conf
   if [ ! -f "$file" ]; then
@@ -1862,7 +999,8 @@ function get_ip_ntp(){
   fi 
 
 }
-export -f get_ip_ntp
+export -f netget_ntp_ip
+
 
 function nclock(){
       sudo -v
@@ -1870,7 +1008,7 @@ function nclock(){
       # Check for internet connection by pinging a reliable public DNS server (e.g., Google's 8.8.8.8)
       # -c 1: Send only one ping packet
       # -W 1: Wait for 1 second for a response
-      ping -c 1 -W 1 $(get_ip_ntp) > /dev/null 2>&1
+      ping -c 1 -W 1 $(netget_ntp_ip) > /dev/null 2>&1
       if [ $? -ne 0 ]; then
         ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
         if [ $? -ne 0 ]; then
@@ -1922,6 +1060,1345 @@ function ninet(){
   fi
 }
 export function ninet
+
+######################
+function netenable_wifi(){
+  if is_wifi_hw; then
+    sudo nmcli radio wifi on
+  fi
+}
+export -f netenable_wifi
+
+function netdisable_wifi(){
+  if is_wifi_hw; then
+    sudo nmcli radio wifi off
+  fi
+}
+export -f netdisable_wifi
+
+
+
+
+######################
+function netlist() {
+    find_type="$1"
+    
+    if [[ "$find_type" == 'bridge' ]]; then
+      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'bridge' | cut -d: -f1)
+    elif [[ "$find_type" == 'all' ]]; then
+      dlist=$(nmcli -t -f DEVICE,TYPE device status | cut -d: -f1)
+    elif [[ "$find_type" == 'wired' ]]; then
+      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
+    elif [[ "$find_type" == 'wifi' ]]; then
+      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
+    else
+      dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet|wifi' | grep  -v 'wifi-' | cut -d: -f1)
+    fi
+
+    for word in $dlist; do
+
+      n_device=$word
+      n_type=$(nmcli -g GENERAL.TYPE device show $n_device)
+
+      d_name=$(nmcli -g GENERAL.CONNECTION device show $n_device)
+      if [[ -n $d_name ]]; then
+        n_name="${d_name}"
+        #ips_line=$(ip -4 addr show dev "$n_device" 2>/dev/null | awk '/inet / {print $2; exit}')
+        ips_line=$(ip -4 addr show $n_device | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+')
+        ips_list=${ips_line// | /,}
+        d_ip=$(echo $ips_list | tr ',' '\n' | tac | paste -sd, -)
+        if [[ -n $d_ip ]]; then
+          n_ip="${d_ip// /,}"
+        else
+          n_ip="--"
+        fi
+      else
+        n_name="--"
+        n_ip="--"
+      fi
+      #echo "${d_name} : ${n_name}"
+      #echo "${d_ip} : ${n_ip}"
+
+
+      d_state=$(nmcli -g GENERAL.STATE device show $n_device)
+      if [[  "$n_type" == 'ethernet' && "$d_state" == *"connected"* ]]; then
+        n_state=connected
+      elif [[  "$n_type" == 'wifi' && "$d_state" == *"connected"* && "$n_name" != "--" ]]; then
+        n_state=connected
+      # elif [[ "$n_type" == 'ethernet' && "$n_name" == '--' ]]; then
+      #   n_state=disabled
+      elif [[ "$n_type" == 'wifi' && "$d_state" == *"unavailable"* ]]; then
+        n_state=disabled
+      # elif [[ "$n_type" == 'ethernet' && "$n_name" != '--' ]]; then
+      #   n_state=disconnected
+      # elif [[ "$d_state" == *"disconnected"* ]]; then
+      #   n_state=disconnected
+      else
+        n_state=disconnected
+      fi
+      #echo "${d_state} : ${n_state}"
+
+
+
+      echo "${n_device} | ${n_type##*-} | ${n_state} | ${n_name} | ${n_ip}"
+    done
+
+}
+export -f netlist
+
+
+
+function netlist_wired(){
+  find_type=wired
+  netlist $find_type
+}
+export -f netlist_wired
+
+function netlist_wifi(){
+  find_type=wifi
+  netlist $find_type
+}
+export -f netlist_wifi
+
+
+######################
+
+function netget_info(){
+      check="$1"
+      match=''
+      if [[ -z $check ]]; then
+        return 1
+      else          
+          nlist=$(netlist)
+          while IFS= read -r line; do
+              # 3. Print or process each line
+              #echo "Processing: $line"
+              readarray -d '|' -t line_array < <(printf '%s' "$line")
+
+
+              read -rd '' text <<< "${line_array[0]}"
+              read -r text <<< "$text"
+              line_hw=$text
+
+              read -rd '' text <<< "${line_array[1]}"
+              read -r text <<< "$text"
+              line_type=$text
+              
+              read -rd '' text <<< "${line_array[2]}"
+              read -r text <<< "$text"
+              line_state=$text
+              
+              read -rd '' text <<< "${line_array[3]}"
+              read -r text <<< "$text"
+              line_name=$text
+
+              read -rd '' text <<< "${line_array[4]}"
+              read -r text <<< "$text"
+              line_ip=$text
+
+
+
+              #echo "${line_name},${line_hw},${check}"
+              if [[ ${line_name} == ${check} ||
+                    ${line_ip} == *"${check}"* ||
+                    ${line_hw} == ${check} ||
+                    ${line_type} == ${check} ]]; then
+                
+                match="$line"
+              fi
+          done <<< "$nlist"      
+
+          if [[ -n $match ]]; then
+            echo ${match}
+          else
+            return 1
+          fi    
+    fi
+}
+export -f netget_info
+
+
+function netget_name(){
+
+  check_name="$1"
+  check_return=""
+  if [[ -z $check_name ]]; then
+    return 1
+  else          
+      nlist=$(netlist)
+      while IFS= read -r line; do
+          # 3. Print or process each line
+          #echo "Processing: $line"
+          readarray -d '|' -t line_array < <(printf '%s' "$line")
+
+          
+          read -rd '' text <<< "${line_array[0]}"
+          read -r text <<< "$text"
+          line_hw=$text
+
+          read -rd '' text <<< "${line_array[1]}"
+          read -r text <<< "$text"
+          line_type=$text
+          
+          read -rd '' text <<< "${line_array[2]}"
+          read -r text <<< "$text"
+          line_state=$text
+          
+          read -rd '' text <<< "${line_array[3]}"
+          read -r text <<< "$text"
+          line_name=$text
+
+          read -rd '' text <<< "${line_array[4]}"
+          read -r text <<< "$text"
+          line_ip=$text
+          
+          #echo "${line_name},${line_hw},${check_name}"
+          if [[ ${line_name} == ${check_name} || ${line_hw} == ${check_name} ]]; then
+            check_return="$line_name"
+          fi
+      done <<< "$nlist"      
+
+      if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
+        echo ${check_return}
+      else
+        return 1
+      fi     
+  fi
+
+}
+
+export -f netget_name
+
+function netget_state(){
+      check_name="$1"
+      check_return=""
+      if [[ -z $check_name ]]; then
+        return 1
+      else          
+          nlist=$(netlist)
+          while IFS= read -r line; do
+              # 3. Print or process each line
+              #echo "Processing: $line"
+              readarray -d '|' -t line_array < <(printf '%s' "$line")
+
+              
+              read -rd '' text <<< "${line_array[0]}"
+              read -r text <<< "$text"
+              line_hw=$text
+
+              read -rd '' text <<< "${line_array[1]}"
+              read -r text <<< "$text"
+              line_type=$text
+              
+              read -rd '' text <<< "${line_array[2]}"
+              read -r text <<< "$text"
+              line_state=$text
+              
+              read -rd '' text <<< "${line_array[3]}"
+              read -r text <<< "$text"
+              line_name=$text
+
+              read -rd '' text <<< "${line_array[4]}"
+              read -r text <<< "$text"
+              line_ip=$text
+              
+              #echo "${line_name},${line_hw},${check_name}"
+              if [[ ${line_name} == ${check_name} || ${line_hw} == ${check_name} ]]; then
+                check_return="$line_state"
+              fi
+          done <<< "$nlist"      
+
+          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
+            echo ${check_return}
+          else
+            return 1
+          fi     
+    fi
+}
+export -f netget_state
+
+
+function netget_hw(){
+      check_name="$1"
+      check_return=""
+      if [[ -z $check_name ]]; then
+        return 1
+      else          
+          nlist=$(netlist)
+          while IFS= read -r line; do
+              # 3. Print or process each line
+              #echo "Processing: $line"
+              readarray -d '|' -t line_array < <(printf '%s' "$line")
+
+              
+              read -rd '' text <<< "${line_array[0]}"
+              read -r text <<< "$text"
+              line_hw=$text
+
+              read -rd '' text <<< "${line_array[1]}"
+              read -r text <<< "$text"
+              line_type=$text
+              
+              read -rd '' text <<< "${line_array[2]}"
+              read -r text <<< "$text"
+              line_state=$text
+              
+              read -rd '' text <<< "${line_array[3]}"
+              read -r text <<< "$text"
+              line_name=$text
+
+              read -rd '' text <<< "${line_array[4]}"
+              read -r text <<< "$text"
+              line_ip=$text
+              
+              #echo "${line_name},${line_hw},${check_name}"
+              if [[ ${line_name} == ${check_name} || ${line_hw} == ${check_name} ]]; then
+                check_return="$line_hw"
+              fi
+          done <<< "$nlist"      
+
+          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
+            echo ${check_return}
+          else
+            return 1
+          fi         
+    fi
+}
+export -f netget_hw
+
+
+
+
+function netget_wired_ipn(){
+      check_name="$1"
+      check_return=""
+      if [[ -z $check_name ]]; then
+        return 1
+      else          
+          nlist=$(netlist)
+          while IFS= read -r line; do
+              # 3. Print or process each line
+              #echo "Processing: $line"
+              readarray -d '|' -t line_array < <(printf '%s' "$line")
+
+              
+              read -rd '' text <<< "${line_array[0]}"
+              read -r text <<< "$text"
+              line_hw=$text
+
+              read -rd '' text <<< "${line_array[1]}"
+              read -r text <<< "$text"
+              line_type=$text
+              
+              read -rd '' text <<< "${line_array[2]}"
+              read -r text <<< "$text"
+              line_state=$text
+              
+              read -rd '' text <<< "${line_array[3]}"
+              read -r text <<< "$text"
+              line_name=$text
+
+              read -rd '' text <<< "${line_array[4]}"
+              read -r text <<< "$text"
+              line_ip=$text
+              
+              #echo "${line_name},${line_ip},${check_name}"
+              if [[ ${line_name} == ${check_name} || ${line_hw} == ${check_name} ]]; then
+                check_return="${line_ip%%,*}"
+              fi
+          done <<< "$nlist"      
+
+          if [[ -n $check_return  &&  "$check_return" != '--' ]]; then
+            echo ${check_return}
+          else
+            return 1
+          fi           
+    fi
+}
+export -f netget_wired_ipn
+
+
+
+function netget_wired_ip(){
+      check_name="$1"
+      ipn=$(netget_wired_ipn $check_name)
+      if [[ -z ipn ]]; then
+        return 1
+      fi
+      echo "${ipn%%/*}"
+
+}
+export -f netget_wired_ip
+
+
+function netget_wired_ipn_aliases(){
+  check_name=$1
+  check_return=''
+  #echo $check_name
+  if [[ -n $check_name ]]; then
+    r_line=$(nmcli connection show $check_name | grep ipv4.addresses)
+    #echo $r_line
+    ipn_line=$(echo "${r_line#*ipv4.addresses:}" | sed -s 's/^[[:space:]]*//')
+    #echo $ip_line
+    if [[ "$ipn_line" != *","* ]]; then
+      return 1
+    fi
+    a_line="${ipn_line#*,}"
+    #echo $a_line
+    if [[ -n $a_line ]]; then
+              readarray -d ',' -t a_array < <(printf '%s' "$a_line")
+              for item in "${a_array[@]}"; do
+                  read -r ipn <<< "$item"
+                  #ip="${ipn%%/*}"
+                  if [[ "$ipn" != *"10.0.0"* ]]; then
+                    echo "$ipn"
+                  fi
+              done
+    else
+      return 1
+    fi 
+  fi
+
+}
+
+export -f netget_wired_ipn_aliases
+
+function netget_wired_ip_aliases(){
+  check_name=$1
+  ipn_list=$(netget_wired_ipn_aliases $check_name)
+  #echo $ipn_list
+  if [[ -n $ipns ]]; then
+          while IFS= read -r line; do
+              read -r text <<< "$line"
+              ip="${text%%/*}"
+              if [[ "$ip" != *"10.0.0"* ]]; then
+                echo "$ip"
+              fi
+          done <<< "$ipn_list"      
+
+  else
+    return 1
+  fi 
+}
+
+export -f netget_wired_ip_aliases
+
+
+function netget_router_ip(){
+    # Get the default gateway IP address
+    local router_ip=$(ip route | awk '/default/ {print $3; exit}')
+    if [[ "$router_ip" == *"192.168"* ]]; then
+      router_ip=''
+    fi
+    echo $router_ip
+}
+export netget_router_ip
+
+
+function netget_wifi_networks(){
+  wifi_list=$(nmcli -t -f SSID dev wifi)
+  #echo $wifi_list
+  wifis=''
+  for wifi_avail in $wifi_list; do
+    if [[ "$wifis" != *"$wifi_avail"* ]]; then
+      #echo $wifis
+      echo "$wifi_avail"
+    fi
+    wifis="${wifis},${wifi_avail}"
+  done
+}
+export -f netget_wifi_networks
+
+
+
+
+
+
+######################
+function netselect(){
+        adapter_type=$1
+        selected_net=""
+        # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+        # 'awk' is then used to parse the output and format it
+        if [[ "$adapter_type" == "all" ]]; then
+          nslist=$(netlist 'all') 
+        elif [[ "$adapter_type" == "wired" ]]; then
+          nslist=$(netlist_wired) 
+        elif [[ "$adapter_type" == "wifi" ]]; then
+          nslist=$(netlist_wifi) 
+        else
+          nslist=$(netlist) 
+        fi
+
+        if ! is_not_blank $nslist; then
+            return 1
+        fi
+        #echo $nslist
+        # Set IFS to | and read into an array
+        readarray -t adapters <<< "$nslist"
+        # adapters=("${adapters[@]:1}")
+        num_adapters=${#adapters[@]}
+        #echo "Found ${num_adapters} : ${adapters}"
+        
+        # Check if there are any adapters
+        if [[ $num_adapters -eq 0 ]]; then
+            #echo "No Networks Found"
+            return 1
+        fi
+
+        # Check if there are any adapters
+        if [[ $num_adapters -eq 1 ]]; then
+            adapter=${adapters[0]}
+            delimiter=" |"
+            selected_net=${adapter%%$delimiter*}
+            #echo "Using adapter ${selected_net}"
+        fi
+
+        if [[ -z $selected_net ]]; then
+          COLUMNS=1
+          select adapter in "${adapters[@]}"; do
+              if [[ -n "$adapter" ]]; then
+                  delimiter=" |"
+                  selected_net=${adapter%%$delimiter*}
+                  break
+              else
+                  selected_net=""
+                  echo "Invalid selection. Please try again."
+              fi
+          done
+        fi
+
+        
+        if [[ -n $selected_net ]]; then
+          echo "${selected_net}"
+          return 0
+        else
+          echo ""
+          return 1
+        fi
+
+}
+export -f netselect
+
+function netselect_wired(){
+        if ! is_wired_hw; then
+          return 1
+        else
+          selected_net=$(netselect "wired" | tail -n1 )
+          echo $selected_net
+        fi
+}
+export -f netselect_wired
+
+function netselect_wifi(){
+        if ! is_wifi_hw; then
+          return 1
+        else
+          selected_net=$(netselect "wifi" | tail -n1 )
+          echo $selected_net
+        fi
+}
+export -f netselect_wifi
+
+function netselect_wifi_network(){
+        # Use 'ip -4 -o addr show' for a consistent, machine-readable output for IPv4 addresses only
+        # 'awk' is then used to parse the output and format it
+        wlist=$(netget_wifi_networks) 
+       
+        if ! is_not_blank $wlist; then
+            return 1
+        fi
+
+        selected_wifi=''
+     
+        readarray -t wifis <<< "$wlist"
+     
+        COLUMNS=1
+        select wifi in "${wifis[@]}"; do
+            if [[ -n "$wifi" ]]; then
+                selected_wifi=${wifi}
+                break
+            else
+                selected_wifi=""
+                echo "Invalid selection. Please try again."
+            fi
+        done
+
+        
+        if [[ -n $selected_wifi ]]; then
+          echo "${selected_wifi}"
+          return 0
+        else
+          return 1
+        fi
+
+}
+export -f netselect_wifi_network
+
+######################
+function netdelete() {
+  selected_net="$1"
+  if ! systemctl is-active --quiet NetworkManager; then
+    echo "NetworkManager not running"
+    return 1
+  fi
+
+  # if ! is_wired_hw; then
+  #   return 1
+  # fi
+
+  if [[ -z $selected_net ]]; then
+    echo ""
+    echo "Select a Network to Delete"
+    echo "--------------------"
+    echo ""
+    selected_net=$(netselect 'all'  | tail -n1)
+    #echo "Selected adpater ${selected_net}"
+  fi
+  
+  # Output the full path of the selected file
+  if [[ -z "$selected_net" ]]; then
+      echo "No Network Selected"
+  else
+      # nslist=$(netlist_wired) 
+      
+      # if ! is_not_blank $nslist; then
+      #     echo "No Networks Found"
+      #     return 1
+      # fi
+      # if ! is_in_string $nslist $selected_net; then
+      #     echo "Wired Network ${selected_net} NOT Found"
+      #     return 1
+      # fi
+
+      if systemctl is-active --quiet NetworkManager; then
+
+          echo "Deleting Network ${selected_net}"
+
+          cmd='sudo nmcli connection delete "'${selected_net}'"'
+          #echo $cmd
+          eval "$cmd"     
+
+      fi
+  fi
+
+}
+export -f netdelete
+
+
+
+function netcreate_wired() {
+    net_name="$1"
+    selected_hw="$2"
+    ip_netmask="$3"
+    ip_netmask=$(fix_ipv4_netmask $ip_netmask)
+    gateway="$4"
+    
+
+    if ! systemctl is-active --quiet NetworkManager; then
+      echo "NetworkManager not running"
+      return 1
+    fi
+
+    if ! is_wired_hw; then
+      return 1
+    fi
+
+    if [[ -z $selected_hw ]]; then
+      echo ""
+      echo "Select Wired Network to Update"
+      echo "--------------------"
+      echo ""
+      selected_net=$(netselect_wired  | tail -n1)
+      selected_hw=$(getnet_hw "$selected_net")
+      #echo "Selected adpater ${selected_hw}"
+    fi
+    
+    # Output the full path of the selected file
+    if [[ -z "$selected_hw" ]]; then
+        echo "Wired Hardware Not Provided"
+        return 1
+    else
+        nslist=$(netlist_wired) 
+        
+        if ! is_not_blank $nslist; then
+            echo "No Networks Found"
+            return 1
+        fi
+
+        # exist_network=$(netget_info "$net_name")
+        # if [[ -z $exist_network ]]; then
+        #     echo "Wired Network ${net_name} Exists"
+        #     echo "${exist_network}"
+        #     return 1
+        # fi
+
+        if systemctl is-active --quiet NetworkManager; then
+
+          while nmcli connection show $net_name > /dev/null 2>&1; do
+              #echo "Disconnecting from current hotspot connection"
+              sudo nmcli connection delete $net_name
+              sleep 1
+          done
+          
+            cmd=""
+
+            echo "Creating Network ${net_name} on ${selected_hw} with IP Address ${ip_netmask}"
+            if [[ ${ip_netmask} == 'auto' ]]; then
+              cmd='sudo nmcli connection add type ethernet con-name "'${net_name}'" ifname '${selected_hw}' '
+              echo $cmd
+              eval "$cmd" 
+
+            elif [[ -n $ip_netmask ]]; then
+                    
+                    if [[ ${ip_netmask} != 'auto' ]]; then
+                      ip_netmask=$(fix_ipv4_netmask $ip_netmask)
+                      if ! is_valid_ipv4_netmask $ip_netmask; then
+                        echo "Invalid Address/Netmask Combination ${net_wired_ip}"
+                        return 1
+                      fi
+                    fi
+                    echo "Updating static ip to ${ip_netmask}"
+                    if ! is_valid_ipv4 $gateway; then
+                        new_ip="${ip_netmask%%/*}"
+                        new_octet=1
+                        gateway="${new_ip%.*}.$new_octet"
+                    fi
+                    
+                    echo "Using Gateway ${gateway}"
+                    cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
+                        con-name "'${net_name}'" \
+                        ipv4.address '${nepi_static_ip}' \
+                        ipv4.dns 8.8.8.8,8.8.4.4 \
+                        ipv4.method manual \
+                        ipv4.gateway '${nepi_gateway_ip}
+                    echo $cmd
+                    eval "$cmd"     
+
+            fi
+
+
+
+            cmd='sudo nmcli connection modify "'${net_name}'" connection.interface-name "'${selected_hw}'"'
+            echo $cmd
+            eval "$cmd" 
+
+            cmd='sudo nmcli connection up "'${net_name}'"'
+            echo $cmd
+            eval "$cmd"     
+            echo ""
+
+            sleep 3
+            # Reset Network
+            nnet
+            sleep 1
+            ndhcp 2> /dev/null
+            
+        fi
+    fi
+}
+
+export -f netcreate_wired
+
+
+
+function netconnect_wifi() {
+  wifi_ssid="$1"
+  if [[  "$wifi_ssid" == 'NONE' ]]; then
+    return 1
+  fi
+
+  wifi_pw="$2"
+  wifi_hw="$3"
+  
+  if ! is_wifi_hw; then
+    echo No Wifi Hardware Detected
+    return 1
+  fi
+
+    ##############
+    wifi_list=$(netget_wifi_networks)
+
+    if [[ -z wifi_list ]]; then
+      echo "No Available WiFi Networks"
+      return 1
+    fi
+
+    if [[ -z $wifi_ssid ]]; then
+      echo ""
+      echo "Select a WiFi Network to Connect"
+      echo "--------------------"
+      echo ""
+      wifi_ssid=$(netselect_wifi_network  | tail -n1)
+      #echo "Selected Network ${wifi_ssid}"
+    fi
+
+
+    if [[ -z wifi_ssid ]]; then
+      echo "WiFi SSID empty"
+      return 1
+    fi
+    
+
+    if [[ "$wifi_list" != *"$wifi_ssid"* ]]; then
+      echo "WiFi SSID ${wifi_ssid} Not Found"
+      return 1
+    fi
+
+
+    # ##############
+
+    if [[ -z $wifi_pw || "$wifi_pw" == 'ENTER' ]]; then
+      echo ""
+      read -p $'\n'"Enter WiFi Password for ${wifi_ssid}: " USER_INPUT
+      wifi_pw=$USER_INPUT
+      echo ""
+    fi
+
+    if [[ "$wifi_pw" == "DELETE" ]]; then
+      wifi_pw=''
+    fi
+
+    if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' ]]; then
+      echo "WiFi Password Not Provided"
+      return 1
+    fi
+
+
+    ##############
+    if [[ -z $wifi_hw ]]; then
+      wifis=$(netlist_wifi)
+      if [[ -n wifis ]]; then
+        first_line="${wifis%%$'\n'*}"
+        read -r first_word _ <<< "$first_line"
+        wifi_hw=$first_word
+      fi
+    else
+      wifi_hw=$(netget_hw $wifi_hw)
+    fi
+
+    if [[ -z $wifi_hw ]]; then
+      echo "WiFi Device ${wifi_hw} Not Found"
+      return 1
+    fi
+
+
+    ##############
+
+
+    net_name=$(netget_name $wifi_ssid)
+    if [[ -n $net_name ]]; then
+      if [[ -z $wifi_pw ]]; then
+        # nmcli connection down id "$net_name"
+        echo "Disconnecting from current ${net_name} connection"
+        sudo nmcli connection delete "$net_name" 2> /dev/null
+      else
+        echo "WiFi SSID ${wifi_ssid} Connected"
+      fi
+      return 0
+    fi
+
+    
+    if [[ -n $wifi_pw ]]; then
+      # Disconnect the Device SSID Connection if exists
+      wifi_name=$(netget_name $wifi_hw)
+      if [[ -n $wifi_name ]]; then
+        echo "Disconnecting from current ${wifi_name} connection"
+        sudo nmcli connection delete "$wifi_name" 2> /dev/null
+        sleep 1
+      fi
+      #sudo nmcli connection delete "$wifi_ssid" 2> /dev/null
+      echo "Connecting to WiFi SSID ${wifi_ssid} with password ${wifi_pw} on ${wifi_hw}"
+      sudo nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_pw" ifname $wifi_hw 
+
+      sleep 3
+      # Reset Network
+      nnet
+      sleep 1
+      ndhcp 2> /dev/null
+     
+    fi
+    
+
+}
+
+export -f netconnect_wifi
+
+
+
+
+
+
+function netcreate_hotspot() {
+  wifi_ssid="$1"
+  if [[  "$wifi_ssid" == 'NONE' ]]; then
+    return 1
+  fi
+
+  wifi_pw="$2"
+  wifi_hw="$3"
+  
+  if ! is_wifi_hw; then
+    echo No Wifi Hardware Detected
+    return 1
+  fi
+
+  if ! is_wifi_enabled; then
+      echo "NEPI Wifi not enabled"
+      return 1
+  fi
+
+  if [[ -z wifi_ssid ]]; then
+    echo "WiFi SSID empty"
+    return 1
+  fi
+
+
+  # ##############
+
+  if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' ]]; then
+    echo "WiFi Password Not Provided"
+    return 1
+  fi
+
+  if [[ "$wifi_pw" == "DELETE" ]]; then
+    wifi_pw=''
+  fi
+
+
+  ##############
+  if [[ -z $wifi_hw ]]; then
+    wifis=$(netlist_wifi)
+    if [[ -n wifis ]]; then
+      first_line="${wifis%%$'\n'*}"
+      read -r first_word _ <<< "$first_line"
+      wifi_hw=$first_word
+    fi
+  else
+    wifi_hw=$(netget_hw $wifi_hw)
+  fi
+
+  if [[ -z $wifi_hw ]]; then
+    echo "WiFi Device ${wifi_hw} Not Found"
+    return 1
+  fi
+
+
+  ##############
+  #REF: 'https://raspberrypi.stackexchange.com/questions/114213/creating-a-hotspot-and-connecting-pi-to-the-internet-over-wifi'
+  #REF: 'https://raspberrypi.stackexchange.com/a/89804/79866'
+  # Add the script below with the name 00-virtualwlan1 in /etc/NetworkManager/dispatcher.d with execution rights for the file
+  # (restart the machine to activate)
+  # and thus to have a wlan1 virtual card at each startup (see iw command)
+
+  #TEST
+  # netcreate_wifi_ap NEPI 2065255002
+
+
+  while nmcli connection show hotspot > /dev/null 2>&1; do
+      echo "Disconnecting from current hotspot connection"
+      sudo nmcli connection delete "hotspot"
+      sleep 1
+  done
+
+
+  if [[ -n $wifi_pw ]]; then
+
+
+
+    # wifi_hw="${wifi_hw}_nepi"
+    # # Create virtual wifi network for wifi_hw
+    # if ! netget_info $wifi_hw; then
+    #   sudo iw phy phy0 interface add $wifi_hw type managed
+    #   #sudo iw dev $wifi_hw del
+    #   sleep 1
+    # fi
+
+
+    if netget_info $wifi_hw; then
+
+
+      wifi_name=$(netget_name $wifi_hw)
+      if [[ -n $wifi_name ]]; then
+        echo "Disconnecting from current ${wifi_name} connection"
+        sudo nmcli connection delete "$wifi_name" 2> /dev/null
+        sleep 1
+      fi
+
+      nmcli connection show
+
+      echo ""
+      echo "Configuring WiFi Access Point with SSID ${wifi_ssid} password ${wifi_pw} on ${wifi_hw}"
+
+            
+          file=/etc/network/create_ap
+          if [[ -f "$file" ]]; then
+
+              sudo ${file} --stop ${wifi_hw}
+
+
+                echo "Starting WiFi Access Point Settings Files with AP ID: ${wifi_ssid} with PW: ${wifi_pw}"
+                if [[ "$wifi_ssid" != '' ]]; then
+                    # if [[ ${wifi_ssid} == 'NONE' ]]; then
+                    #     wifi_ssid="nepi_"${NEPI_DEVICE_SN}
+                    # fi
+
+                    if [[ "$wifi_pw" != '' && "$wifi_pw" != 'NONE' ]]; then
+                        echo "Calling create access point file ${file}"
+                        echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${wifi_ssid} with PW: ${wifi_pw}"
+                        cmd="${file} -n --redirect-to-localhost --isolate-clients  --daemon \
+                                ${wifi_hw} \
+                                ${wifi_ssid} \
+                                ${wifi_pw}"
+                        echo $cmd
+                        sudo ${cmd}
+
+                        #cat /etc/hostapd/hostapd.conf
+                  else
+                      echo "WiFi Access Point ID not set"
+                  fi
+              else
+                  echo "WiFi Access Point Disabled"
+              fi
+          else
+              echo "NEPI Wifi Access Point Create file not found ${file}"
+          fi
+
+
+
+
+        # #nmcli dev wifi show-password  ### shows the Wi-Fi name and password.
+
+        #   cmd='sudo nmcli con add con-name hotspot ifname '${wifi_hw}' type wifi ssid "'${wifi_ssid}'"'
+        #   echo $cmd
+        #   eval "$cmd" 
+
+        #   cmd='sudo nmcli con modify hotspot wifi-sec.key-mgmt wpa-psk'
+        #   echo $cmd
+        #   eval "$cmd"     
+        #   echo ""
+
+        #   cmd='sudo nmcli con modify hotspot wifi-sec.psk "'${wifi_pw}'"'
+        #   echo $cmd
+        #   eval "$cmd"     
+        #   echo ""
+
+
+        #   cmd='sudo nmcli con modify hotspot 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared'
+        #   echo $cmd
+        #   eval "$cmd"     
+        #   echo ""
+
+
+
+        #   cmd='sudo nmcli con modify hotspot connection.autoconnect yes'
+        #   echo $cmd
+        #   eval "$cmd"     
+        #   echo ""
+
+        #   cmd='sudo nmcli connection up hotspot'
+        #   echo $cmd
+        #   eval "$cmd"     
+        #   echo ""
+
+        #   sleep 3
+        #   # Reset Network
+        #   nnet
+        #   sleep 1
+        #   ndhcp 2> /dev/null
+
+    fi
+    
+  fi
+}
+
+export -f netcreate_hotspot
+
+
+# function netset_wifi_ap() {
+#   wifi_ssid="$1"
+#   wifi_pw="$2"
+#   wifi_hw="$3"
+  
+
+#   if ! is_wifi_hw; then
+#     return 1
+#   fi
+
+#   ##############
+#   if [[ -z $wifi_hw ]]; then
+#     wifis=$(netlist_wifi)
+#     if [[ -n wifis ]]; then
+#       first_line="${wifis%%$'\n'*}"
+#       read -r first_word _ <<< "$first_line"
+#       wifi_hw=$first_word
+#     fi
+#   else
+#     wifi_hw=$(netget_hw $wifi_hw)
+#   fi
+#   echo $wifi_hw
+
+#   if [[ -z $wifi_hw ]]; then
+#     echo "WiFi Device ${wifi_hw} Not Found"
+#     return 1
+#   fi
+
+#   if [[ -z $wifi_ssid ]]; then
+#     echo "AP SSID Not Provided"
+#     return 1
+#   fi
+
+# echo "Configuring WiFi Access Point with SSID ${wifi_ssid} password ${wifi_pw} on ${wifi_hw}"
+#   if [[ "$wifi_pw" == 'DELETE' ]]; then
+#     echo $wifi_pw
+#   else
+#     if ! is_valid_wpa2_pw $wifi_pw; then
+#       echo "AP Password Not WPA2 Valid"
+#       return 1
+#     fi
+
+#     wifi_name=$(netget_name $wifi_hw)
+#     if [[ -n $wifi_name ]]; then
+#       echo "Disconnecting from current ${wifi_name} connection"
+#       sudo nmcli connection delete "$wifi_name" 2> /dev/null
+#       sleep 1
+#     fi
+
+
+
+
+
+#     #sudo nmcli connection delete "Wi-Fi_Network_Name"
+#     echo "Configuring WiFi Access Point with SSID ${wifi_ssid} password ${wifi_pw} on ${wifi_hw}"
+#     sudo nmcli --wait 30 device wifi hotspot ifname $wifi_hw ssid "$wifi_ssid" password "$wifi_pw"
+
+#     # Reset Network
+#     nnet
+#   fi
+
+
+
+# }
+
+# export -f netset_wifi_ap
+
+
+
+
+
+######################
+function netset_wired_ipn() {
+    ip_netmask="$1"
+    gateway="$2"
+    selected_net="$3"
+
+    if ! systemctl is-active --quiet NetworkManager; then
+      echo "NetworkManager not running"
+      return 1
+    fi
+
+    if ! is_wired_hw; then
+      return 1
+    fi
+
+    if [[ -z $selected_net ]]; then
+      echo ""
+      echo "Select a Network to Update"
+      echo "--------------------"
+      echo ""
+      selected_net=$(netselect_wired  | tail -n1)
+      #echo "Selected adpater ${selected_net}"
+    fi
+    
+    # Output the full path of the selected file
+    if [[ -z "$selected_net" ]]; then
+        echo "No Network Selected"
+    else
+        nslist=$(netlist_wired) 
+        
+        if ! is_not_blank $nslist; then
+            echo "No Networks Found"
+            return 1
+        fi
+        if ! netget_name $selected_net; then
+            echo "Wired Network ${selected_net} NOT Found"
+            return 1
+        fi
+        selected_net=$(netget_name $selected_net)
+        if systemctl is-active --quiet NetworkManager; then
+            cmd=""
+
+            echo "Updating Network ${selected_net} with IP Address ${ip_netmask}"
+            if [[ ${ip_netmask} == 'auto' ]]; then
+              cmd='sudo nmcli con mod "'${selected_net}'" ipv4.method auto '
+              echo $cmd
+              eval "$cmd"     
+
+              cmd='sudo nmcli con mod "'${selected_net}'" connection.autoconnect yes '
+              echo $cmd
+              eval "$cmd" 
+
+              cmd='sudo nmcli connection up "'${selected_net}'"'
+              #echo $cmd
+              eval "$cmd"     
+              echo ""
+
+            elif [[ -n $ip_netmask ]]; then
+                    
+                    if [[ ${ip_netmask} != 'auto' ]]; then
+                      ip_netmask=$(fix_ipv4_netmask $ip_netmask)
+                      if ! is_valid_ipv4_netmask $ip_netmask; then
+                        echo "Invalid Address/Netmask Combination ${net_wired_ip}"
+                        return 1
+                      fi
+                    fi
+                    echo "Updating static ip to ${ip_netmask}"
+
+
+                    if ! is_valid_ipv4 $gateway; then
+                        gateway=$(netget_router_ip)
+                        if ! is_valid_ipv4 $gateway; then
+                          new_ip="${ip_netmask%%/*}"
+                          new_octet=1
+                          gateway="${new_ip%.*}.$new_octet"
+                        fi
+                    fi
+                    echo "Using Gateway ${gateway}"
+
+
+                    cmd='sudo nmcli connection modify "'${selected_net}'" \
+                        ipv4.addresses '${ip_netmask}' \
+                        ipv4.dns 8.8.8.8,8.8.4.4 \
+                        ipv4.method manual \
+                        ipv4.gateway '${gateway}
+                  
+
+                    echo $cmd
+                    eval "$cmd"     
+
+                    cmd='sudo nmcli connection up "'${selected_net}'"'
+                    echo $cmd
+                    eval "$cmd" 
+
+                    # Reset Network
+                    nnet
+                    sleep 1
+                    ndhcp 2> /dev/null
+            fi
+        fi
+    fi
+}
+
+export -f netset_wired_ipn
+
+
+
+function netset_wired_ipn_auto() {
+  netset_wired_ipn 'auto' $1
+  return $?
+}
+
+export -f netset_wired_ipn_auto
+
+function netset_wired_ipn_custom() {
+  netset_wired_ipn $1 $2
+  return $?
+}
+
+export -f netset_wired_ipn_custom
+
+function netset_wired_ipn_nepi() {
+  if [[ $NEPI_MODE == 'REMOTE' ]]; then
+    ip="${REMOTE_IP%%/*}"
+  else
+    ip="${NEPI_IP%%/*}"
+  fi
+  netset_wired_ipn $ip $1
+  return $?
+}
+
+export -f netset_wired_ipn_nepi
+
+
+
+function netadd_ipn_alias(){
+  net_ref=$1
+  ipn_alias=$2
+  ipn_alias=$(fix_ipv4_netmask "${ipn_alias}")
+  ip_alias="${ipn_alias%%/*}"
+  skip_update=$3
+  if [[ "$skip_update" -ne 1 ]]; then
+    skip_update=0
+  fi
+  net_name=$(netget_name $net_ref)
+  #echo $net_name
+  if [[ -n $net_name ]]; then
+    if is_valid_ipv4_netmask $ipn_alias; then
+      if netget_info $ip_alias 2> /dev/null; then
+        echo "IP address allready in use ${ipn_alias}"
+        netget_info $net_name
+        return 1
+      else
+        sudo nmcli connection modify "$net_name" +ipv4.addresses "$ipn_alias"
+        if [[ $skip_update -eq 0 ]]; then
+          sudo nmcli connection up "$net_name"
+        fi
+        # Reset Network
+        nnet
+      fi
+    else
+      echo "Not a valid IP address ${ipn_alias}"
+      return 1
+    fi 
+  else
+    echo "Network reference ${net_ref} not found"
+    return 1
+  fi 
+}
+
+export -f netadd_ipn_alias
+
+
+function netremove_ipn_alias(){
+  net_ref=$1
+  ipn_alias=$2
+  ipn_alias=$(fix_ipv4_netmask "${ipn_alias}")
+  ip_alias="${ipn_alias%%/*}"
+  skip_update=$3
+  if [[ "$skip_update" -ne 1 ]]; then
+    skip_update=0
+  fi
+  net_name=$(netget_name $net_ref)
+  if [[ -n $net_name ]]; then
+    if is_valid_ipv4_netmask $ipn_alias; then
+      if ! netget_info $ip_alias 2> /dev/null; then
+        echo "IP address does not exist ${ipn_alias} for ${net_name}"
+        netget_info $net_name
+        return 1
+      else
+        sudo nmcli connection modify "$net_name" -ipv4.addresses "$ipn_alias"
+        if [[ $skip_update -eq 0 ]]; then
+          sudo nmcli connection up "$net_name"
+        fi
+        # Reset Network
+        nnet
+      fi
+    else
+      echo "Not a valid IP address ${ipn_alias}"
+      return 1
+    fi 
+  else
+    echo "Network reference ${net_ref} not found"
+    return 1
+  fi 
+}
+
+export -f netremove_ipn_alias
+
+
+
+
+
 
 function check_password() {
     local username=$1
@@ -2034,15 +2511,10 @@ utilsn="${utilsn}
 ################################
 ### SYSTEM UTIL FUNCTIONS
 ################################
-get_router_ipn = Echos router_ip if found
-netlist = list network adapters and IP addresses
-netsetstatic = Select network adapter and set static_ip with provided IP like '192.168.179.103' or 'auto'
-netsetauto = Select network adapter and set static_ip to auto'
-netsetcustom = Select network adapter and enter a custom static IP address'
-netsetnepi = Select network adapter and set static_ip to current NEPI_IP value'
-netlistwifi = list network adapters and static IP addresses
-netconnectwifi = Select wifi adapter and try to connect to the provided network and provided password
-netaccesswifi = Select wifi adapter and try to configure access point with provided name and provided password
+echov = Echo variable value
+echonv = Echo variable name and value
+echoce = Echo command error
+
 pinga = Check connection to provided IP address
 pingi = Check connection to internet
 pings = Check connection to Self IP address
@@ -2051,7 +2523,45 @@ pingnc = Ping NEPI IP address continously
 nnet = Restart the network
 nclock = Sync clock
 ninet = check connection and sync clock
-get_ip_ntp = Echo current set NTP server address
+
+netenable_wifi = Enable WiFi on passed device name
+netdisable_wifi = Disable Wifi on passed device name
+
+netlist = Echo a list of ethernet and wifi devices and info, pass 'all' for all devices
+netlist_wired = Echo a list of ethernet devices and info
+netlist_wifi = Echo a list of wifi devices and info
+
+netget_info = Echo device info for passed device, name, or ip if found. last found is returned
+netget_name = Echo name for passed device or name if found. last found is returned
+netget_state = Echo state for passed device or name if found. last found is returned
+netget_hw = Echo device for passed device or name if. last found is returned
+netget_wired_ipn = Echo primary ip/netmask for passed device or name if found. last found is returned
+netget_wired_ip = Echo primary ip for passed device or name if found. last found is returned
+netget_wired_ipn_aliases = Echo list of ip/netmask aliases for passed device or name if found. last found is returned
+netget_wired_ip_aliases = Echo list of ip aliases for passed device or name if found. last found is returned
+netget_router_ip = Echo ip of router if connected
+netget_ntp_ip = Echo current set NTP server address
+netget_wifi_networks = Echo list of available wifi networks
+
+netselect = Select from list available ethernet or wifi hardware devices
+netselect_wired = Select from list available ethernet hardware devices
+netselect_wifi = Select from list available wifi hardware devices
+netselect_wifi_network = Select from list available wifi networks
+netdelete = Delete passed or selected device ethernet or wifi connection
+
+netcreate_wired = Create a connection with passed name, device, ip/netmask, gateway
+netonnect_wifi = Connect to WiFi network with name, password, (optional device). 
+  Use password ENTER to manually enter, Use password DELETE to disconnect
+netcreate_hotspot = Configure a WiFi access point with  with name, password, (optional device). 
+  Use password DELETE to disconnect
+
+netset_wired_ipn = Set primary wired network config with passed ip/netmask, gateway, name
+netset_wired_ipn_auto = Set primary wired network config to auto
+netset_wired_ipn_custom = Set primary wired network config to ip/netmask
+netset_wired_ipn_nepi = Set primary wired network config to NEPI_IP/24
+netadd_ipn_alias = Add alias to wired network config with passed ip/netmask, name
+netremove_ipn_alias = Remove alias from wired network config with passed ip/netmask, name
+
 nls = Run ls with -l -a for current folder, or pass FOLDER_PATH
 check_passord = Check username and password combination
 fix_chromium = Fix any Chromium config issues

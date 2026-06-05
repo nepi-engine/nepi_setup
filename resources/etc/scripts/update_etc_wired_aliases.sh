@@ -92,7 +92,7 @@ if [[ "$?" -eq 0 ]]; then
         if [[ -n $nepi_wired_interface ]]; then
             echo "Got interface for ${nepi_wired_name}: ${nepi_wired_interface}"
             pos=0
-            purge_aliases=$(netget_ip_aliases $nepi_wired_name)
+            purge_aliases=$(netget_wired_ip_aliases $nepi_wired_name)
             echo "Current Aliases: ${purge_aliases}"
             skip_udpate=1
             do_update=0
@@ -108,7 +108,6 @@ if [[ "$?" -eq 0 ]]; then
                 if is_valid_ipv4_netmask $ipn_alias >/dev/null 2>&1; then
                     #echo "Checking alias_ip_alias ip var ${alias_ip_var} : ${ipn_alias}"
 
-                    ip_alias="${ipn_alias%%/*}"
                     if [[ "$needs_update" -eq 1 ]]; then
                         update_file=${ETC_FOLDER}/nepi_system_config.yaml
                         update_yaml_value "${alias_ip_var}" $ipn_alias $update_file
@@ -116,16 +115,16 @@ if [[ "$?" -eq 0 ]]; then
                     #position=$((i - 1)) 
                     #alias_name=${nepi_wired_interface}":"${position}
 
-                    if [[ "$purge_aliases" != *"$ip_alias"* ]]; then
+                    if [[ "$purge_aliases" != *"$ipn_alias"* ]]; then
                         echo "Adding Alias IP Alias ${ipn_alias}"
-                        if netadd_ip_alias $nepi_wired_interface $ipn_alias $skip_udpate; then
+                        if netadd_ipn_alias $nepi_wired_interface $ipn_alias $skip_udpate; then
                             do_update=1
                         fi
                     else
-                         echo "Allready IP Alias ${ip_alias}"
+                         echo "Allready IP Alias ${ipn_alias}"
                     fi
                     
-                    purge_aliases="${purge_aliases/$ip_alias/}"
+                    purge_aliases="${purge_aliases/$ipn_alias/}"
                 fi
 
             done
@@ -134,7 +133,7 @@ if [[ "$?" -eq 0 ]]; then
                 alias_ipn=$(fix_ipv4_netmask $alias_ip)
                 if is_valid_ipv4_netmask $alias_ipn; then
                     echo "Removing Alias IP Address ${alias_ipn}"
-                    if netremove_ip_alias $nepi_wired_interface $alias_ipn $skip_udpate; then
+                    if netremove_ipn_alias $nepi_wired_interface $alias_ipn $skip_udpate; then
                         do_update=1
                     fi
                 fi

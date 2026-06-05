@@ -68,58 +68,58 @@ echo ""
 echo "UPDATING ETC WIFI ACCESS POINT"
 
 # Update ETC files if systemd is running (Not in Container)
-systemctl&> /dev/null
-if [[ "$?" -eq 0 ]]; then
+# systemctl&> /dev/null
+# if [[ "$?" -eq 0 ]]; then
 
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+#     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
 
-        if is_valid_rpi; then
-            if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
-                file=${ETC_FOLDER}/network/create_ap
-                if [[ -f "$file" ]]; then
 
-                    sudo ${file} --stop ${NEPI_WIFI_INTERFACE}
+#             if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
+#                 file=${ETC_FOLDER}/network/create_ap
+#                 if [[ -f "$file" ]]; then
 
-                    if [[ "$NEPI_WIFI_ACCESS_POINT_ENABLED" -eq 1 ]]; then
-                        echo "Starting WiFi Access Point Settings Files with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
-                        if [[ "$NEPI_WIFI_ACCESS_POINT_ID" != '' ]]; then
-                            if [[ ${NEPI_WIFI_ACCESS_POINT_ID} == 'NONE' ]]; then
-                                NEPI_WIFI_ACCESS_POINT_ID="nepi_"${NEPI_DEVICE_SN}
-                            fi
+#                     sudo ${file} --stop ${NEPI_WIFI_INTERFACE}
 
-                            if [[ "$NEPI_WIFI_ACCESS_POINT_PW" != '' && "$NEPI_WIFI_ACCESS_POINT_PW" != 'NONE' ]]; then
-                                echo "Calling create access point file ${file}"
-                                echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
-                                cmd="${file} -n --redirect-to-localhost --isolate-clients  --daemon \
-                                        ${NEPI_WIFI_INTERFACE} \
-                                        ${NEPI_WIFI_ACCESS_POINT_ID} \
-                                        ${NEPI_WIFI_ACCESS_POINT_PW}"
-                                echo $cmd
-                                sudo ${cmd}
+#                     if [[ "$NEPI_WIFI_ACCESS_POINT_ENABLED" -eq 1 ]]; then
+#                         echo "Starting WiFi Access Point Settings Files with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
+#                         if [[ "$NEPI_WIFI_ACCESS_POINT_ID" != '' ]]; then
+#                             if [[ ${NEPI_WIFI_ACCESS_POINT_ID} == 'NONE' ]]; then
+#                                 NEPI_WIFI_ACCESS_POINT_ID="nepi_"${NEPI_DEVICE_SN}
+#                             fi
 
-                                #cat /etc/hostapd/hostapd.conf
-                            else
-                                echo "WiFi Access Point Password not set"
-                            fi
-                        else
-                            echo "WiFi Access Point ID not set"
-                        fi
-                    else
-                        echo "WiFi Access Point Disabled"
-                    fi
-                else
-                    echo "NEPI Wifi Access Point Create file not found ${file}"
-                fi
+#                             if [[ "$NEPI_WIFI_ACCESS_POINT_PW" != '' && "$NEPI_WIFI_ACCESS_POINT_PW" != 'NONE' ]]; then
+#                                 echo "Calling create access point file ${file}"
+#                                 echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
+#                                 cmd="${file} -n --redirect-to-localhost --isolate-clients  --daemon \
+#                                         ${NEPI_WIFI_INTERFACE} \
+#                                         ${NEPI_WIFI_ACCESS_POINT_ID} \
+#                                         ${NEPI_WIFI_ACCESS_POINT_PW}"
+#                                 echo $cmd
+#                                 sudo ${cmd}
 
-            else
-                echo "NEPI Wifi not enabled"
-            fi
-        fi
+#                                 #cat /etc/hostapd/hostapd.conf
+#                             else
+#                                 echo "WiFi Access Point Password not set"
+#                             fi
+#                         else
+#                             echo "WiFi Access Point ID not set"
+#                         fi
+#                     else
+#                         echo "WiFi Access Point Disabled"
+#                     fi
+#                 else
+#                     echo "NEPI Wifi Access Point Create file not found ${file}"
+#                 fi
+
+#             else
+#                 echo "NEPI Wifi not enabled"
+#             fi
         
-    fi
+        
+#     fi
 
-fi
+# fi
 
 
 # Update NEPI Docker Config if needed

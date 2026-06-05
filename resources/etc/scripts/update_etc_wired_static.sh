@@ -194,7 +194,7 @@ if [[ "$?" -eq 0 ]]; then
             nepi_gateway_ip=$NEPI_GATEWAY_IP
             if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
                 if [[ $internet_enabled -eq 1 ]]; then
-                    nepi_gateway_ip=$(netget_ip_router)
+                    nepi_gateway_ip=$(netget_router_ip)
                 fi
                 if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
                     new_ip="${nepi_static_ip%%/*}"
@@ -224,7 +224,7 @@ if [[ "$?" -eq 0 ]]; then
                     echo "Network ${nepi_wired_name} not configured"
                 else
                     echo "Network exists ${nepi_wired_name} on ${nepi_wired_interface}"
-                    netset_wired ${nepi_static_ip} ${nepi_gateway_ip} ${nepi_wired_name}
+                    netset_wired_ipn ${nepi_static_ip} ${nepi_gateway_ip} ${nepi_wired_name}
                 fi
             else
                 echo "Skipping Network update ${nepi_wired_name} on ${nepi_wired_interface}"
