@@ -2691,6 +2691,16 @@ export -f fix_scripts
 
 
 
+clean_yaml_file() {
+    local input_file="$1"
+    if [[ -f "$input_file" ]]; then
+        grep -E '^.+:.+$' "$input_file" > "$input_file.tmp" && mv "$input_file.tmp" "$input_file"
+    else
+        echo "Error: File '$input_file' not found." >&2
+        return 1
+    fi
+}
+export -f clean_yaml_file
 
 
 function update_yaml_value(){
@@ -2770,16 +2780,6 @@ function sync_yaml_files(){
 }
 export -f sync_yaml_files
 
-clean_yaml_file() {
-    local input_file="$1"
-    if [[ -f "$input_file" ]]; then
-        grep -E '^.+:.+$' "$input_file" > "$input_file.tmp" && mv "$input_file.tmp" "$input_file"
-    else
-        echo "Error: File '$input_file' not found." >&2
-        return 1
-    fi
-}
-export -f clean_yaml_file
 
 function load_yaml_file(){
     yaml_file=$1

@@ -415,13 +415,10 @@ fi
  echo "Starting NEPI Service Monitoring"
  echo "********************************"
 
- while [[ 1 ]]; do
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
-    DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-    DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-
-
-    if [[ "$CONFIG_MODE" != "STOP" ]]; then
+ while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
 
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
@@ -503,9 +500,10 @@ fi
         # Load NEPI DOCKER CONFIG Updates
         bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
         source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
-    fi
-    #echo "NEPI DOCKER SERVICE MONITOR LOOP COMPLETE"
-    sleep 1
+  
+        sleep 1
+
+    
 done
 
 

@@ -117,12 +117,13 @@ if [[ "$?" -eq 0 ]]; then
                         wifi_ssid="NONE"
                         NEPI_WIFI_CLIENT_PW="NONE"
                     fi
-
+                    echo "Using wifi ssid ${wifi_ssid}"
 
                     wifi_pw=$NEPI_WIFI_CLIENT_PW
                     if [[ -z wifi_pw || "$wifi_pw" == "None"  || "$wifi_pw" == 'encrypted' ]]; then
                         wifi_pw="NONE"
                     fi
+                    echo "Using wifi pw ${wifi_pw}"
 
                     if [[ "$wifi_ssid" != "NONE" && "$wifi_pw" != "NONE" ]]; then
                             netconnect_wifi $wifi_ssid $wifi_pw $nepi_wifi_interface
