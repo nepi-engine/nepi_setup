@@ -68,7 +68,7 @@ if [[ -n $passed_ip ]]; then
 NEPI_STATIC_IP=$passed_ip
 fi
 
-system_config_file=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
+system_config_file=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
 
 ###############################
 echo ""

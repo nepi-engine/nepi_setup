@@ -98,14 +98,7 @@ function nepistart(){
 }
 export -f nepistart
 
-function nepidev(){
-  sudo -v
-  echo "Stopping NEPI Docker Service"
-  sudo systemctl stop nepi_docker
-  run_cmd=$1
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_dev.sh $run_cmd
-}
-export -f nepidev
+
 
 
 
@@ -123,6 +116,26 @@ function nepiloginroot(){
 }
 export -f nepiloginroot
 
+
+function nepidev(){
+  sudo -v
+  echo "Stopping NEPI Docker Service"
+  sudo systemctl stop nepi_docker
+  run_mode=DEV
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh $run_mode
+  nepilogin
+}
+export -f nepidev
+
+function nepidevroot(){
+  sudo -v
+  echo "Stopping NEPI Docker Service"
+  sudo systemctl stop nepi_docker
+  run_mode=DEV
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh $run_mode
+  nepiloginroot
+}
+export -f nepidevroot
 
 
 function nepicommit(){
@@ -254,11 +267,11 @@ function nepiexport(){
 }
 export -f nepiexport
 
-function nepiexportclean(){
+function nepiexportc(){
   sudo -v
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh 'clean'
 }
-export -f nepiexportclean
+export -f nepiexportc
 
 
 function nepisave(){
@@ -371,7 +384,6 @@ export -f nepicreate
 ## NEPI build shortcuts
 function nepibld(){
   SHOW_CONFIG_MENU=$1
-  echo "SHOW MENU SET TO: ${SHOW_CONFIG_MENU}"
   sudo -v
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
@@ -386,7 +398,7 @@ HELPN="${HELPN}
 ## NEPI Docker Shortcut Functions ##
 ################################
 nepistart = Start the NEPI docker container.
-nepidev = Start the NEPI docker container in a dev mode with no processes running, and an OPTIONAL_RUN_COMMAND.
+nepidev = Start the NEPI docker container in a dev mode with no processes running, then logs in.
 nepistop = Stop the running NEPI docker container.
 nepilogin = Log into the running NEPI container as user 'nepi'.
 nepiloginroot = Log into the running NEPI container as user 'root'.
@@ -397,7 +409,7 @@ nepiinit = Reset, clear, and import new NEPI Image.
 nepidownload = Download and install image from provided 'dropbox_shared_folder_link_address' in qoutes.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
-nepiexportclean = Export the running NEPI container without a tailing description.
+nepiexportc = Export the running NEPI container without a tailing description.
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
 nepisave = Save the active NEPI Image with all commits to a .archieve.tar file. Enter a file name or full file path.
 nepitag = Update the Software Description field in the active NEPI container.

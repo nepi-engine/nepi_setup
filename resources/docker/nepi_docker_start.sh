@@ -20,6 +20,8 @@
 # This script launches NEPI Container
 sudo -v
 
+START_MODE=$1
+
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
     if [[ ${CONFIG_USER} == 'root' ]]; then
@@ -91,8 +93,9 @@ sudo chown 1000:1000 /mnt/nepi_config
 sudo chown 1000:1000 /mnt/nepi_storage
 echo ""
 
-
-
+echo ""
+echo "Syncing SSH Keys"
+nepisync
 ### This is done by nepi_docker service before calling nepi_docker_start
 #######################
 # Update ETC Config Files
@@ -200,14 +203,23 @@ fi
 
 echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
 
+
+if [[ "$RUN_MODE" == "DEV" ]]; then
+
+run_cmd=""
+
+else
+
+run_cmd="-c '/nepi_start_all'"
+
+fi
+
+
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
-${nepi_fs}:${nepi_fs_tag} /bin/bash \
--c '/nepi_start_all'"
+${nepi_fs}:${nepi_fs_tag} /bin/bash ${run_cmd} "
 
 DOCKER_RUN_COMMAND_FALLBACK="${DOCKER_RUN_COMMAND_FALLBACK} \
-${nepi_fs}:${nepi_fs_tag} /bin/bash \
--c '/nepi_start_all'"
-
+${nepi_fs}:${nepi_fs_tag} /bin/bash ${run_cmd} "
 
 ########################
 # Run NEPI Docker

@@ -64,7 +64,7 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     fi
 fi
 
-system_config_file=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
+system_config_file=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
 ######################################
 echo ""
 echo "UPDATING ETC WIRED ALIASES"

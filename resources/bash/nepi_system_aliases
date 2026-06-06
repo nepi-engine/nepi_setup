@@ -97,6 +97,13 @@ cd $NEPI_BUILD_REPO_FOLDER
 source ./build_nepi_complete.sh
 sbrc"
 
+alias nepibldc="
+sudo -v
+cd $NEPI_BUILD_REPO_FOLDER
+build_clean=1
+source ./build_nepi_complete.sh $build_clean
+sbrc"
+
 
 # NEPI build shortcuts
 function codebld(){

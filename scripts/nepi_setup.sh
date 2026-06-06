@@ -372,176 +372,176 @@ function udpate_config_file(){
 # Update NEPI System Config if needed
 #####################################
 
-echo ""
-echo "Running setup in ${NEPI_INSTALL} mode"
-echo "NEPI MANAGES SERVICES ${NEPI_MANAGES_SERVICES}"
-echo "SHOW MENU SET TO: ${SHOW_CONFIG_MENU}"
-
-
-update_current_config
-
-if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
-    echo "Configuring Managed Services Menu"
-
-    echo ""
-    PS3=$'\n'"Please enter your choice by NUMBER: "
-    options=(   "Update NEPI_MANAGES_USERS" "Update NEPI_MANAGES_HOSTNAME" "Update NEPI_MANAGES_NETWORK" "Update NEPI_MANAGES_TIME"\
-                "Update NEPI_MANAGES_SSH" "Update NEPI_MANAGES_SHARE" "Update NEPI_MANAGES_SOFTWARE" "Update NEPI_MANAGES_DOCKER"\
-                "ENABLE_ALL" "DISABLE_ALL" "CONTINUE" )
-
-
-    while true; do
-        #clear # Optional: Clear the screen before displaying the menu
-
-        print_current_config
-        COLUMNS=1
-        select opt in "${options[@]}" ; do
-            case $opt in
-
-
-                        "Update NEPI_MANAGES_USERS")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_USERS=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_HOSTNAME")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_HOSTNAME=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_NETWORK")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_NETWORK=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_TIME")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_TIME=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_SSH")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_SSH=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_SHARE")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_SHARE=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_SOFTWARE")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_SOFTWARE=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Update NEPI_MANAGES_DOCKER")
-                            read -p $'\n'"Enter 0 or 1: " USER_INPUT
-                            if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
-                                CURRENT_NEPI_MANAGES_DOCKER=$USER_INPUT
-                                echo ""
-                                break # Exit the select statement, re-display menu
-                            
-                            else
-                                echo "Not A Valid Input"
-                            fi           
-                        ;;
-                        "Enable All")
-                            CURRENT_NEPI_MANAGES_USERS=1
-                            CURRENT_NEPI_MANAGES_HOSTNAME=1
-                            CURRENT_NEPI_MANAGES_NETWORK=1
-                            CURRENT_NEPI_MANAGES_TIME=1
-                            CURRENT_NEPI_MANAGES_SSH=1
-                            CURRENT_NEPI_MANAGES_SHARE=1
-                            CURRENT_NEPI_MANAGES_SOFTWARE=1
-                            CURRENT_NEPI_MANAGES_DOCKER=1
-                            break # Exit the select statement, re-display menu   
-                        ;;
-                        "Disable All")
-                            CURRENT_NEPI_MANAGES_USERS=0
-                            CURRENT_NEPI_MANAGES_HOSTNAME=0
-                            CURRENT_NEPI_MANAGES_NETWORK=0
-                            CURRENT_NEPI_MANAGES_TIME=0
-                            CURRENT_NEPI_MANAGES_SSH=0
-                            CURRENT_NEPI_MANAGES_SHARE=0
-                            CURRENT_NEPI_MANAGES_SOFTWARE=0
-                            CURRENT_NEPI_MANAGES_DOCKER=0
-                            break # Exit the select statement, re-display menu   
-                        ;;
-
-
-                        "CONTINUE")
-                            break 2 # Exit both the select and the while loop
-                            ;;
-                        *)
-                            echo "Invalid option, please try again."
-                            ;;
-                    esac
-                done
-        done
-        echo ""
-
-fi
-
-udpate_config_file
-
-print_current_config
-
-
-# echo ""
-# echo "NEPI_MANAGES_USERS ${NEPI_MANAGES_USERS}"
-# echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
-# echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
-# echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
-# echo "NEPI_MANAGES_SSH ${NEPI_MANAGES_SSH}"
-# echo "NEPI_MANAGES_SHARE ${NEPI_MANAGES_SHARE}"
-# echo "NEPI_MANAGES_SOFTWARE ${NEPI_MANAGES_SOFTWARE}"
-# echo "NEPI_MANAGES_DOCKER ${NEPI_MANAGES_DOCKER}"
-
-
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
+    echo ""
+    echo "Running setup in ${NEPI_INSTALL} mode"
+    echo "NEPI MANAGES SERVICES ${NEPI_MANAGES_SERVICES}"
+    echo "SHOW MENU SET TO: ${SHOW_CONFIG_MENU}"
+
+
+    update_current_config
+
+    if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
+        echo "Configuring Managed Services Menu"
+
+        echo ""
+        PS3=$'\n'"Please enter your choice by NUMBER: "
+        options=(   "Update NEPI_MANAGES_USERS" "Update NEPI_MANAGES_HOSTNAME" "Update NEPI_MANAGES_NETWORK" "Update NEPI_MANAGES_TIME"\
+                    "Update NEPI_MANAGES_SSH" "Update NEPI_MANAGES_SHARE" "Update NEPI_MANAGES_SOFTWARE" "Update NEPI_MANAGES_DOCKER"\
+                    "ENABLE_ALL" "DISABLE_ALL" "CONTINUE" )
+
+
+        while true; do
+            #clear # Optional: Clear the screen before displaying the menu
+
+            print_current_config
+            COLUMNS=1
+            select opt in "${options[@]}" ; do
+                case $opt in
+
+
+                            "Update NEPI_MANAGES_USERS")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_USERS=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_HOSTNAME")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_HOSTNAME=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_NETWORK")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_NETWORK=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_TIME")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_TIME=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_SSH")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_SSH=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_SHARE")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_SHARE=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_SOFTWARE")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_SOFTWARE=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Update NEPI_MANAGES_DOCKER")
+                                read -p $'\n'"Enter 0 or 1: " USER_INPUT
+                                if [[ "$USER_INPUT" == '0' || "$USER_INPUT" == '1' ]]; then
+                                    CURRENT_NEPI_MANAGES_DOCKER=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Input"
+                                fi           
+                            ;;
+                            "Enable All")
+                                CURRENT_NEPI_MANAGES_USERS=1
+                                CURRENT_NEPI_MANAGES_HOSTNAME=1
+                                CURRENT_NEPI_MANAGES_NETWORK=1
+                                CURRENT_NEPI_MANAGES_TIME=1
+                                CURRENT_NEPI_MANAGES_SSH=1
+                                CURRENT_NEPI_MANAGES_SHARE=1
+                                CURRENT_NEPI_MANAGES_SOFTWARE=1
+                                CURRENT_NEPI_MANAGES_DOCKER=1
+                                break # Exit the select statement, re-display menu   
+                            ;;
+                            "Disable All")
+                                CURRENT_NEPI_MANAGES_USERS=0
+                                CURRENT_NEPI_MANAGES_HOSTNAME=0
+                                CURRENT_NEPI_MANAGES_NETWORK=0
+                                CURRENT_NEPI_MANAGES_TIME=0
+                                CURRENT_NEPI_MANAGES_SSH=0
+                                CURRENT_NEPI_MANAGES_SHARE=0
+                                CURRENT_NEPI_MANAGES_SOFTWARE=0
+                                CURRENT_NEPI_MANAGES_DOCKER=0
+                                break # Exit the select statement, re-display menu   
+                            ;;
+
+
+                            "CONTINUE")
+                                break 2 # Exit both the select and the while loop
+                                ;;
+                            *)
+                                echo "Invalid option, please try again."
+                                ;;
+                        esac
+                    done
+            done
+            echo ""
+
+    fi
+
+    udpate_config_file
+
+    print_current_config
+
+
+    # echo ""
+    # echo "NEPI_MANAGES_USERS ${NEPI_MANAGES_USERS}"
+    # echo "NEPI_MANAGES_HOSTNAME ${NEPI_MANAGES_HOSTNAME}"
+    # echo "NEPI_MANAGES_NETWORK ${NEPI_MANAGES_NETWORK}"
+    # echo "NEPI_MANAGES_TIME ${NEPI_MANAGES_TIME}"
+    # echo "NEPI_MANAGES_SSH ${NEPI_MANAGES_SSH}"
+    # echo "NEPI_MANAGES_SHARE ${NEPI_MANAGES_SHARE}"
+    # echo "NEPI_MANAGES_SOFTWARE ${NEPI_MANAGES_SOFTWARE}"
+    # echo "NEPI_MANAGES_DOCKER ${NEPI_MANAGES_DOCKER}"
+
+
 
 
     if [[ $NEPI_MANAGES_SERVICES -eq 1 ]]; then
@@ -577,7 +577,7 @@ if [[ "$?" -eq 0 ]]; then
                     sudo systemctl stop hostapd >/dev/null 2>&1
 
                     if [[ -d "/etc/network/interfaces.d" ]]; then
-                        sudo rm -r /etc/network/interfaces.d/*
+                        sudo rm -r /etc/network/interfaces.d/* >/dev/null 2>&1
                     fi 
 
                     echo "Configuring NetworkManager Service" 
@@ -1060,24 +1060,30 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         elif is_valid_rpi; then
 
             # Disable Auto Login
-            # /etc/lightdm/lightdm.conf
-            # #autologin-user=pi
+            sudo sed -i 's/^greeter-hide-users=true/greeter-hide-users=false/g' /etc/lightdm/lightdm.conf
+            sudo sed -i 's/^\#greeter-allow-guest=true/greeter-allow-guest=false/g' /etc/lightdm/lightdm.conf
+            sudo sed -i 's/^\#greeter-show-manual-login=false/greeter-show-manual-login=true/g' /etc/lightdm/lightdm.conf
+            sudo sed -i 's/^\#allow-guest=true/allow-guest=false/g' /etc/lightdm/lightdm.conf
+            sudo sed -i 's/^\#allow-guest=true/allow-guest=false/g' /etc/lightdm/lightdm.conf
+            sudo sed -i 's/^\#autologin-user-timeout=0/autologin-user-timeout=10/g' /etc/lightdm/lightdm.conf
+            # also comment out default login from 'pi'
+            sudo sed -i 's/^autologin-user=pi/\#autologin-user=pi/g' /etc/lightdm/lightdm.conf
 
 
-            # Add 'Open In Terminal' options to Desktop and File Managers
-            source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
-            dest_folder="/home/${CONFIG_USER}/.config"
-            sudo cp -R $source_folder/* $dest_folder/
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
+            # # Add 'Open In Terminal' options to Desktop and File Managers
+            # source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
+            # dest_folder="/home/${CONFIG_USER}/.config"
+            # sudo cp -R $source_folder/* $dest_folder/
+            # sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
 
-            source_folder="${SOURCE_ETC_PATH}/user/rpi/local"
-            dest_folder="/home/${CONFIG_USER}/.local"
-            sudo cp -R $source_folder/* $dest_folder/
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
+            # source_folder="${SOURCE_ETC_PATH}/user/rpi/local"
+            # dest_folder="/home/${CONFIG_USER}/.local"
+            # sudo cp -R $source_folder/* $dest_folder/
+            # sudo chown ${CONFIG_USER}:${CONFIG_USER} $dest_folder
 
-            # Change Desktop Wallpaper
-            cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
-            pcmanfm --set-wallpaper "/home/${CONFIG_USER}/nepi_wallpaper.jpg"
+            # # Change Desktop Wallpaper
+            # cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg  /home/${CONFIG_USER}/
+            # pcmanfm --set-wallpaper "/home/${CONFIG_USER}/nepi_wallpaper.jpg"
         fi
 
         echo "########"
@@ -1227,12 +1233,10 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
+                    add_chromium_bookmark "RUI-App" "127.0.0.1:5003" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                 fi
-                rui_ip=$nepi_ip
-                sed -i "s/localhost/$rui_ip/g" $BOOKMARKS_FILE
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"

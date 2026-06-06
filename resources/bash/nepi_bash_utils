@@ -1496,6 +1496,7 @@ export netget_router_ip
 
 
 function netget_wifi_networks(){
+  sudo nmcli dev wifi rescan
   wifi_list=$(nmcli -t -f SSID dev wifi)
   #echo $wifi_list
   wifis=''
@@ -1859,7 +1860,7 @@ function netconnect_wifi() {
       wifi_pw=''
     fi
 
-    if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' ]]; then
+    if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' || "$wifi_pw" == 'encrypted' ]]; then
       echo "WiFi Password Not Provided"
       return 1
     fi
@@ -2771,35 +2772,14 @@ export -f sync_yaml_files
 
 clean_yaml_file() {
     local input_file="$1"
-    if [[ -z "$input_file" ]]; then
-        echo "Usage: remove_invalid_yaml_lines <filename>" >&2
-        return 1
-    fi
-
-    # Use yq to re-parse and output the YAML, which filters invalid content
-    # If the file is completely invalid, this command will fail.
-    # The output is a new, valid YAML stream.
-    if ! yq eval '.' "$input_file" > /dev/null; then
-        echo "Error: Could not process the YAML file entirely. Check for major syntax errors." >&2
+    if [[ -f "$input_file" ]]; then
+        grep -E '^.+:.+$' "$input_file" > "$input_file.tmp" && mv "$input_file.tmp" "$input_file"
+    else
+        echo "Error: File '$input_file' not found." >&2
         return 1
     fi
 }
-
-# function clean_yaml_file(){
-#     yaml_file=$1
-#     #echo $yaml_file
-#     if [ -f "$yaml_file" ]; then
-
-#       success=0
-#       eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/clean_yaml_file.py $tmp_file)"  #2>/dev/null"
-#       eval "$eval_cmd"
-      
-#     else
-#         echo "Yaml file not found ${yaml_file}"
-#         return 1
-#     fi
-# }
-# export -f clean_yaml_file
+export -f clean_yaml_file
 
 function load_yaml_file(){
     yaml_file=$1
@@ -3971,6 +3951,8 @@ cd ${NEPI_HOME}"
 
 alias nsetup="cd $(NSETUP)/scripts"
 
+alias nssh="cd ${NEPI_HOME}/.ssh"
+
 
 function nepirui() {
   if [[ -n "$DISPLAY" ]]; then
@@ -4985,6 +4967,7 @@ nepisetup = Run the environment setup script for the current NEPI environment MO
 nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
+nssh = Change Dir to the User .ssh folder folder
 nepirui = Open Chromium to RUI Dashboard page
 nepistorage = Change dir to NEPI shared Storage Drive if accessable
 nepistorage_open = Open file manager to NEPI shared Storage Drive if accessable
