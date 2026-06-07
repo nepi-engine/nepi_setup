@@ -32,6 +32,7 @@ fi
 
 sudo -v
 
+nepistop
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -76,8 +77,8 @@ fi
 
 
 # Run NEPI System Config Load if exists
-NEPI_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
-sudo chown $CONFIG_USER:$CONFIG_USER $NEPI_SYS_CONFIG_FILE
+SYSTEM_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
+sudo chown $CONFIG_USER:$CONFIG_USER $SYSTEM_SYS_CONFIG_FILE
 
 #######################################################################################
 
@@ -176,7 +177,7 @@ if [[ "$NEPI_MODE" == 'HOST' ]]; then
     echo "Host updating HAILO HW Version"
     NEPI_HAILO_HW_VERSION=$(get_hailo_hw_version)
     export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
-    update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $SYSTEM_SYS_CONFIG_FILE
     echo $NEPI_HAILO_HW_VERSION
 fi
 if [[ -z $NEPI_HAILO_HW_VERSION ]]; then
@@ -188,7 +189,7 @@ fi
 if [[ "$NEPI_MODE" == 'SYSTEM' ]]; then
     NEPI_HAILO_SW_VERSION=$(get_hailo_hw_version)
     export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
-    update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $SYSTEM_SYS_CONFIG_FILE
 fi
 
 
@@ -220,7 +221,7 @@ echo "########################"
 ################################
 # Update ETC files if systemd is running (Not in Container)
 
-# echo "Running NEPI Setup in ${LITE_INSTALL},${NEPI_INSTALL}"
+echo "Running NEPI Setup in ${LITE_INSTALL},${NEPI_INSTALL}"
 echo "Got NEPI_MANAGES_SERVICES ${NEPI_MANAGES_SERVICES},${CONFIG_USER}"
 if [[ "$NEPI_INSTALL" == 'FULL' && "$CONFIG_USER" == 'nepihost' ]]; then
     echo "Configuring settings for ${NEPI_INSTALL} Mode"
@@ -286,7 +287,7 @@ function update_current_config() {
 }     
 
 function print_user_config(){
-    config_file=${NEPI_SYS_CONFIG_FILE}
+    config_file=${SYSTEM_SYS_CONFIG_FILE}
     if [ -f "$config_file" ]; then
         CONFIGN="#############################
         ## NEPI Config Settings ##
@@ -327,44 +328,47 @@ function print_current_config(){
 
 
 function udpate_config_file(){
-    echo "Updating nepi system config values in file ${NEPI_SYS_CONFIG_FILE}"
-
+    echo "Updating nepi system config values in file ${SYSTEM_SYS_CONFIG_FILE}"
 
     NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
     export NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
-    update_yaml_value "NEPI_MANAGES_SERVICES" $NEPI_MANAGES_SERVICES $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_SERVICES" $NEPI_MANAGES_SERVICES $SYSTEM_SYS_CONFIG_FILE
+
+    NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
+    export NEPI_MANAGES_SERVICES=$NEPI_MANAGES_SERVICES
+    update_yaml_value "NEPI_MANAGES_SERVICES" $NEPI_MANAGES_SERVICES $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_USERS=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_USERS ))
     export NEPI_MANAGES_USERS=$NEPI_MANAGES_USERS
-    update_yaml_value "NEPI_MANAGES_USERS" $NEPI_MANAGES_USERS $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_USERS" $NEPI_MANAGES_USERS $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_HOSTNAME=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_HOSTNAME ))
     export NEPI_MANAGES_HOSTNAME=$NEPI_MANAGES_HOSTNAME
-    update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_HOSTNAME" $NEPI_MANAGES_HOSTNAME $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_NETWORK=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_NETWORK ))
     export NEPI_MANAGES_NETWORK=$NEPI_MANAGES_NETWORK
-    update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_NETWORK" $NEPI_MANAGES_NETWORK $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_TIME=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_TIME ))
     export NEPI_MANAGES_TIME=$NEPI_MANAGES_TIME
-    update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_TIME" $NEPI_MANAGES_TIME $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_SSH=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SSH ))
     export NEPI_MANAGES_SSH=$NEPI_MANAGES_SSH
-    update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_SSH" $NEPI_MANAGES_SSH $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_SHARE=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SHARE ))
     export NEPI_MANAGES_SHARE=$NEPI_MANAGES_SHARE
-    update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_SHARE" $NEPI_MANAGES_SHARE $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_SOFTWARE=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_SOFTWARE ))
     export NEPI_MANAGES_SOFTWARE=$NEPI_MANAGES_SOFTWARE
-    update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_SOFTWARE" $NEPI_MANAGES_SOFTWARE $SYSTEM_SYS_CONFIG_FILE
 
     NEPI_MANAGES_DOCKER=$(( NEPI_MANAGES_SERVICES & CURRENT_NEPI_MANAGES_DOCKER ))
     export NEPI_MANAGES_DOCKER=$NEPI_MANAGES_DOCKER
-    update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $NEPI_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_MANAGES_DOCKER" $NEPI_MANAGES_DOCKER $SYSTEM_SYS_CONFIG_FILE
 
 }
 
@@ -382,6 +386,59 @@ if [[ "$?" -eq 0 ]]; then
 
     update_current_config
 
+    #########################
+    needs_update=0
+    if [[ ("$NEPI_INSTALL" != "FULL" && "$NEPI_INSTALL" != "LITE") ]]; then
+        if [[ $SHOW_CONFIG_MENU -eq 1 ]]; then
+            echo "Select Install Option:"
+            options=("FULL" "LITE")
+            select opt in "${options[@]}"; do
+                case $opt in
+                    "FULL")
+                        # echo "Installing in FULL mode"
+                        export NEPI_INSTALL="FULL"
+                        break
+                        ;;
+                    "LITE")
+                        # echo "Installing in LITE mode"
+                        export NEPI_INSTALL="LITE"
+                        break
+                        ;;
+                    *)
+                        echo "Invalid option, try agian"
+                        ;;
+                esac
+            done
+        else
+            if [[ "$NEPI_HOST_USER" == "nepihost" ]]; then
+                export NEPI_INSTALL="FULL"
+            else
+                export NEPI_INSTALL="LITE"
+            fi
+        fi
+        needs_update=1
+    fi
+
+    if [[ "$NEPI_INSTALL" == "FULL" ]]; then
+        LITE_INSTALL=0
+    elif [[ "$NEPI_INSTALL" == "LITE" ]]; then
+        LITE_INSTALL=1
+    fi
+
+    if [[ -z $LITE_INSTALL ]]; then
+        echo "Defaulting to NEPI_INSTALL: LITE"
+        LITE_INSTALL=1
+    fi
+    export LITE_INSTALL=$LITE_INSTALL
+    export NEPI_INSTALL=$NEPI_INSTALL
+    echo "Running in install mode: ${NEPI_INSTALL}"
+
+    if [[ -f $SYSTEM_SYS_CONFIG_FILE && $needs_update -eq 1 ]]; then
+            echo "Updating NEPI_INSTALL value in ${SYSTEM_SYS_CONFIG_FILE}"
+            update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_SYS_CONFIG_FILE
+    fi
+
+    ###############################
     if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == "FULL" ]]; then
         echo "Configuring Managed Services Menu"
 

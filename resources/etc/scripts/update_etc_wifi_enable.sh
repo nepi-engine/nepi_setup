@@ -64,7 +64,7 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
 fi
 
 
-system_config_file=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
+SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
 
 ################################
 
@@ -99,9 +99,9 @@ if [[ "$?" -eq 0 ]]; then
                         echo "Got wifi interface hw options ${dlist}"
                         read -r nepi_wifi_interface _ <<< "$dlist"
                         echo "Updated wifi interface hw options ${nepi_wifi_interface}"
-                        if [[ -f "$system_config_file" && "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
+                        if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
                             export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
-                            update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $system_config_file
+                            update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
                             needs_update=1
                         fi
                     else
@@ -115,9 +115,9 @@ if [[ "$?" -eq 0 ]]; then
             wifi_enabled=$NEPI_WIFI_ENABLED
             if [[ -z $wifi_enabled ]]; then
                 wifi_enabled=1
-                if [[ -f "$system_config_file" ]]; then
+                if [[ -f "$SYSTEM_SYS_CONFIG_FILE" ]]; then
                     export NEPI_WIFI_ENABLED=$wifi_enabled
-                    update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $system_config_file
+                    update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
                     needs_update=1
                 fi
             fi    

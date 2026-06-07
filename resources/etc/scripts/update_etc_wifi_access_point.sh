@@ -64,6 +64,8 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     fi
 fi
 
+SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
+
 echo ""
 echo "UPDATING ETC WIFI ACCESS POINT"
 

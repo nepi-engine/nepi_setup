@@ -815,7 +815,6 @@ function echoce(){
       echo "error: ${error}"
       return 0
     fi
-    echo ''
 }
 export -f echoce
 
@@ -1431,7 +1430,7 @@ function netget_wired_ip(){
 export -f netget_wired_ip
 
 
-function netget_wired_ipn_aliases(){
+function netget_aliases(){
   check_name=$1
   check_return=''
   #echo $check_name
@@ -1461,11 +1460,11 @@ function netget_wired_ipn_aliases(){
 
 }
 
-export -f netget_wired_ipn_aliases
+export -f netget_aliases
 
 function netget_wired_ip_aliases(){
   check_name=$1
-  ipn_list=$(netget_wired_ipn_aliases $check_name)
+  ipn_list=$(netget_aliases $check_name)
   #echo $ipn_list
   if [[ -n $ipns ]]; then
           while IFS= read -r line; do
@@ -1487,8 +1486,11 @@ export -f netget_wired_ip_aliases
 function netget_router_ip(){
     # Get the default gateway IP address
     local router_ip=$(ip route | awk '/default/ {print $3; exit}')
+    if [[ -z $router_ip ]]; then
+      return 1
+    fi
     if [[ "$router_ip" == *"192.168"* ]]; then
-      router_ip=''
+      return 2
     fi
     echo $router_ip
 }
@@ -1574,7 +1576,7 @@ function netselect(){
           echo "${selected_net}"
           return 0
         else
-          echo ""
+          
           return 1
         fi
 
@@ -1607,8 +1609,10 @@ function netselect_wifi_network(){
         wlist=$(netget_wifi_networks) 
        
         if ! is_not_blank $wlist; then
+            echo ""
             return 1
         fi
+
 
         selected_wifi=''
      
@@ -1630,6 +1634,7 @@ function netselect_wifi_network(){
           echo "${selected_wifi}"
           return 0
         else
+          echo ""
           return 1
         fi
 
@@ -1813,7 +1818,7 @@ function netconnect_wifi() {
   wifi_hw="$3"
   
   if ! is_wifi_hw; then
-    echo No Wifi Hardware Detected
+    echo "No Wifi Hardware Detected"
     return 1
   fi
 
@@ -1830,22 +1835,27 @@ function netconnect_wifi() {
       echo "Select a WiFi Network to Connect"
       echo "--------------------"
       echo ""
-      wifi_ssid=$(netselect_wifi_network  | tail -n1)
-      #echo "Selected Network ${wifi_ssid}"
+      selection=$(echo $(netselect_wifi_network))
+      wifi_ssid="${selection##*$'\n'}"
+    elif [[ "$wifi_list" != *"$wifi_ssid"* ]]; then
+      echo "WiFi SSID ${wifi_ssid} Not Found"
+      return 1
     fi
 
+    echo "Selected Network ${wifi_ssid}"
 
     if [[ -z wifi_ssid ]]; then
       echo "WiFi SSID empty"
       return 1
     fi
-    
 
-    if [[ "$wifi_list" != *"$wifi_ssid"* ]]; then
-      echo "WiFi SSID ${wifi_ssid} Not Found"
-      return 1
+    echo "Using SSID ${wifi_ssid}"
+    wifi_info=$(netget_info $wifi_ssid)
+    echo "Checking for existing connection to ${wifi_ssid} returned ${wifi_info}"
+    if [[ -n $wifi_info && "$wifi_pw" != "DELETE" ]]; then
+      echo "WiFi SSID ${wifi_ssid} Already Connected"
+      return 0
     fi
-
 
     # ##############
 
@@ -1868,11 +1878,15 @@ function netconnect_wifi() {
 
     ##############
     if [[ -z $wifi_hw ]]; then
-      wifis=$(netlist_wifi)
-      if [[ -n wifis ]]; then
-        first_line="${wifis%%$'\n'*}"
-        read -r first_word _ <<< "$first_line"
-        wifi_hw=$first_word
+      if [[ -n $NEPI_WIFI_INTERFACE ]]; then
+        wifi_hw=$NEPI_WIFI_INTERFACE
+      else
+        wifis=$(netlist_wifi)
+        if [[ -n wifis ]]; then
+          first_line="${wifis%%$'\n'*}"
+          read -r first_word _ <<< "$first_line"
+          wifi_hw=$first_word
+        fi
       fi
     else
       wifi_hw=$(netget_hw $wifi_hw)
@@ -1910,13 +1924,16 @@ function netconnect_wifi() {
       fi
       #sudo nmcli connection delete "$wifi_ssid" 2> /dev/null
       echo "Connecting to WiFi SSID ${wifi_ssid} with password ${wifi_pw} on ${wifi_hw}"
-      sudo nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_pw" ifname $wifi_hw 
-
-      sleep 3
-      # Reset Network
-      nnet
-      sleep 1
-      ndhcp 2> /dev/null
+      if sudo nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_pw" ifname $wifi_hw; then        
+        sleep 3
+        # Reset Network
+        nnet
+        sleep 1
+        ndhcp 2> /dev/null
+        echo $wifi_ssid
+      else
+       return 2
+      fi
      
     fi
     
@@ -1940,7 +1957,7 @@ function netcreate_hotspot() {
   wifi_hw="$3"
   
   if ! is_wifi_hw; then
-    echo No Wifi Hardware Detected
+    echo "No Wifi Hardware Detected"
     return 1
   fi
 
@@ -2294,21 +2311,21 @@ export -f netset_wired_ipn
 
 
 
-function netset_wired_ipn_auto() {
+function netset_auto() {
   netset_wired_ipn 'auto' $1
   return $?
 }
 
-export -f netset_wired_ipn_auto
+export -f netset_auto
 
-function netset_wired_ipn_custom() {
+function netset_custom() {
   netset_wired_ipn $1 $2
   return $?
 }
 
-export -f netset_wired_ipn_custom
+export -f netset_custom
 
-function netset_wired_ipn_nepi() {
+function netset_nepi() {
   if [[ $NEPI_MODE == 'REMOTE' ]]; then
     ip="${REMOTE_IP%%/*}"
   else
@@ -2318,7 +2335,7 @@ function netset_wired_ipn_nepi() {
   return $?
 }
 
-export -f netset_wired_ipn_nepi
+export -f netset_nepi
 
 
 
@@ -2538,7 +2555,7 @@ netget_state = Echo state for passed device or name if found. last found is retu
 netget_hw = Echo device for passed device or name if. last found is returned
 netget_wired_ipn = Echo primary ip/netmask for passed device or name if found. last found is returned
 netget_wired_ip = Echo primary ip for passed device or name if found. last found is returned
-netget_wired_ipn_aliases = Echo list of ip/netmask aliases for passed device or name if found. last found is returned
+netget_aliases = Echo list of ip/netmask aliases for passed device or name if found. last found is returned
 netget_wired_ip_aliases = Echo list of ip aliases for passed device or name if found. last found is returned
 netget_router_ip = Echo ip of router if connected
 netget_ntp_ip = Echo current set NTP server address
@@ -2557,9 +2574,9 @@ netcreate_hotspot = Configure a WiFi access point with  with name, password, (op
   Use password DELETE to disconnect
 
 netset_wired_ipn = Set primary wired network config with passed ip/netmask, gateway, name
-netset_wired_ipn_auto = Set primary wired network config to auto
-netset_wired_ipn_custom = Set primary wired network config to ip/netmask
-netset_wired_ipn_nepi = Set primary wired network config to NEPI_IP/24
+netset_auto = Set primary wired network config to auto
+netset_custom = Set primary wired network config to ip/netmask
+netset_nepi = Set primary wired network config to NEPI_IP/24
 netadd_ipn_alias = Add alias to wired network config with passed ip/netmask, name
 netremove_ipn_alias = Remove alias from wired network config with passed ip/netmask, name
 
@@ -4020,11 +4037,9 @@ function nepistorage() {
         return 0
       else
         echo "Failed to mount and connect nepi shared folder: ${shdrive}"
-        echo ''
         return 1
       fi
     else
-        echo ''
         return 1
     fi
   else
@@ -4035,7 +4050,7 @@ function nepistorage() {
       return 0
     else
       echo "Failed to mount and connect nepi shared folder: ${shdrive}"
-      echo ''
+      
       return 1
     fi
   fi
@@ -4090,11 +4105,11 @@ function nepiconfig() {
         return 0
       else
         echo "Failed to mount and connect nepi shared folder: ${shdrive}"
-        echo ''
+        
         return 1
       fi
     else
-        echo ''
+        
         return 1
     fi
   else
@@ -4105,7 +4120,7 @@ function nepiconfig() {
       return 0
     else
       echo "Failed to mount and connect nepi shared folder: ${shdrive}"
-      echo ''
+      
       return 1
     fi
   fi

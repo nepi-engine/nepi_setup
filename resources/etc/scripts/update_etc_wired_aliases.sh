@@ -64,7 +64,7 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
     fi
 fi
 
-system_config_file=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
+SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
 ######################################
 echo ""
 echo "UPDATING ETC WIRED ALIASES"
@@ -78,9 +78,9 @@ if [[ "$?" -eq 0 ]]; then
         nepi_wired_name=$NEPI_WIRED_NAME
         if [[ -z $nepi_wired_name ]]; then
             nepi_wired_name="NEPI_WIRED"
-            if [[ -f "$system_config_file" ]]; then
+            if [[ -f "$SYSTEM_SYS_CONFIG_FILE" ]]; then
                 export NEPI_WIRED_NAME=$nepi_wired_name
-                update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $system_config_file
+                update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
                 needs_update=1
             fi
         fi    

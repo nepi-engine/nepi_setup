@@ -34,6 +34,7 @@ fi
 
 sudo -v
 
+nepistop
 
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
@@ -124,7 +125,7 @@ echo "########################"
 # Define Folders
 NEPI_CONFIG_PATH=/opt/nepi
 NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
-NEPI_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
+SYSTEM_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
 
 FACTORY_CONFIG_PATH=/mnt/nepi_config/factory_cfg
@@ -151,8 +152,8 @@ NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
 
 
-# ########################################
-# # Update NEPI System Config
+
+
 
 
 #####################################
@@ -291,6 +292,234 @@ function udpate_config_file(){
 
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     update_current_config
+
+
+
+    # ########################################
+    # # Update NEPI Network Config
+    echo ""
+    echo "##################################"
+    echo 'Updating NEPI Network Settings'
+    echo "##################################"
+    echo ""
+
+
+    needs_update=0
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+
+        echo "#########"
+        echo "WIRED NETWORK SETTINGS"
+        echo ""
+                nepi_wired_name=$NEPI_WIRED_NAME
+                if [[ -z $nepi_wired_name ]]; then
+                    nepi_wired_name="NEPI_WIRED"
+                    export NEPI_WIRED_NAME=$nepi_wired_name
+                    needs_update=1
+                fi    
+                echo "Using Wired Name ${nepi_wired_name}"
+
+                nepi_wired_interface=$NEPI_WIRED_INTERFACE
+                if [[ "$nepi_wired_interface" != 'NONE' ]]; then
+                    if ! netget_info $nepi_wired_interface; then 
+                        dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
+                        if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
+                            echo "Auto updating wired interface hw option"
+                            if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
+                                echo "Got wired interface hw options ${dlist}"
+                                read -r nepi_wired_interface _ <<< "$dlist"
+                                echo "Updated wired interface hw options ${nepi_wired_interface}"
+                                export NEPI_WIRED_INTERFACE=$nepi_wired_interface
+                                needs_update=1
+                            else
+                                nepi_wired_interface="unknown"
+                            fi
+                        else
+                            nepi_wired_interface="unknown"
+                        fi
+                    fi
+                fi
+                echo "Using Wired Interface ${nepi_wired_interface}"
+
+
+
+                internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
+                if [[ -z $internet_enabled ]]; then
+                    internet_enabled=1
+                    export NEPI_WIRED_INTERNET_ENABLED=$internet_enabled
+                    needs_update=1
+                fi    
+                echo "Using Internet Enabled ${internet_enabled}"
+
+                nepi_static_ip=$NEPI_STATIC_IP
+                if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
+                    nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
+                    if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
+                        nepi_static_ip=192.168.179.103/24
+                    fi
+                    export NEPI_STATIC_IP=$nepi_static_ip
+                    needs_update=1
+                fi
+                echo "Using Static IP Address ${nepi_static_ip}"
+
+
+
+                nepi_gateway_ip=$NEPI_GATEWAY_IP
+                if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
+                    if [[ $internet_enabled -eq 1 ]]; then
+                        nepi_gateway_ip=$(netget_router_ip)
+                        if [[ -z $nepi_gateway_ip ]]; then
+                            nepi_gateway_ip=10.0.0.1
+                        fi
+                    fi
+                    if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
+                        new_ip="${nepi_static_ip%%/*}"
+                        new_octet=1
+                        nepi_gateway_ip="${new_ip%.*}.${new_octet}"
+                    fi
+                    export NEPI_GATEWAY_IP=$nepi_gateway_ip
+                    needs_update=1
+
+                fi
+                echo "Using Gateway ${nepi_gateway_ip}"
+
+    fi
+
+
+    if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
+        update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_WIRED_INTERFACE" $NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_WIRED_INTERNET_ENABLED" $NEPI_WIRED_INTERNET_ENABLED $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
+    fi
+
+
+
+    needs_update=0
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+
+        echo "#########"
+        echo "WIFI NETWORK SETTINGS"
+        echo ""
+
+                nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+                if [[ "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
+                    nepi_wifi_interface="unknown"
+                    nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+                    if [[ -z $nepi_wifi_interface ]]; then
+                        nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
+                        echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
+                        if [[ -z $nepi_wifi_interface ]]; then
+                            nepi_wifi_interface="unknown"
+                        fi   
+                    fi       
+
+                    dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
+                    if [[ -n $dlist && "$nepi_wifi_interface" != 'NONE' ]]; then
+                        echo "Auto updating wifi interface hw option"
+                        if [[ "$dlist" != *"$nepi_wifi_interface" ]]; then
+                            echo "Got wifi interface hw options ${dlist}"
+                            read -r nepi_wifi_interface _ <<< "$dlist"
+                            echo "Updated wifi interface hw options ${nepi_wifi_interface}"
+                            if [[ "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
+                                export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
+                                needs_update=1
+                            fi
+                        else
+                            nepi_wifi_interface="unknown"
+                        fi
+                    fi
+                fi
+                echo "Using Wifi Interface ${nepi_wifi_interface}"
+
+
+                wifi_enabled=$NEPI_WIFI_ENABLED
+                if [[ -z $wifi_enabled ]]; then
+                    wifi_enabled=1
+                    export NEPI_WIFI_ENABLED=$wifi_enabled
+                    needs_update=1
+
+                fi    
+                echo "Using Wifi Enabled ${wifi_enabled}"
+
+    fi
+
+    if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
+        update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
+        update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
+    fi
+
+
+
+    #########################
+    needs_update=0
+    if [[ ("$NEPI_INSTALL" != "FULL" && "$NEPI_INSTALL" != "LITE") ]]; then
+        if [[ $SHOW_CONFIG_MENU -eq 1 ]]; then
+            echo "Select Install Option:"
+            options=("FULL" "LITE")
+            select opt in "${options[@]}"; do
+                case $opt in
+                    "FULL")
+                        # echo "Installing in FULL mode"
+                        export NEPI_INSTALL="FULL"
+                        break
+                        ;;
+                    "LITE")
+                        # echo "Installing in LITE mode"
+                        export NEPI_INSTALL="LITE"
+                        break
+                        ;;
+                    *)
+                        echo "Invalid option, try agian"
+                        ;;
+                esac
+            done
+        else
+            if [[ "$NEPI_HOST_USER" == "nepihost" ]]; then
+                export NEPI_INSTALL="FULL"
+            else
+                export NEPI_INSTALL="LITE"
+            fi
+        fi
+        needs_update=1
+    fi
+
+    if [[ "$NEPI_INSTALL" == "FULL" ]]; then
+        LITE_INSTALL=0
+    elif [[ "$NEPI_INSTALL" == "LITE" ]]; then
+        LITE_INSTALL=1
+    fi
+
+    if [[ -z $LITE_INSTALL ]]; then
+        echo "Defaulting to NEPI_INSTALL: LITE"
+        LITE_INSTALL=1
+    fi
+    export LITE_INSTALL=$LITE_INSTALL
+    export NEPI_INSTALL=$NEPI_INSTALL
+    echo "Running in install mode: ${NEPI_INSTALL}"
+
+    if [[ -f $SYSTEM_SYS_CONFIG_FILE && $needs_update -eq 1 ]]; then
+            echo "Updating NEPI_INSTALL value in ${SYSTEM_SYS_CONFIG_FILE}"
+            update_yaml_value "NEPI_INSTALL" $NEPI_INSTALL $SYSTEM_SYS_CONFIG_FILE
+    fi
+
+    # cat $SYSTEM_SYS_CONFIG_FILE | grep "NEPI_INSTALL"
+    # yes_no=$(ask_yes_no)
+    ###############################
+
+    echo ""
+    echo "##################################"
+    echo 'Updating NEPI System Settings'
+    echo "##################################"
+
+
+    echo ""
+    echo "Running System Config in ${NEPI_INSTALL} mode"
+    echo "Show Menu set to: ${SHOW_CONFIG_MENU}"
+    echo ""
+
     
     if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
         echo "Configuring Setup Menu"
@@ -302,6 +531,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                             "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                             "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY"\
+                            "CONNECT WIFI" "CREATE HOTSPOT" \
                             "FACTORY RESET" "APPLY SETTINGS" )
 
         while true; do
@@ -496,6 +726,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 fi
                                 ;;
 
+
                             "Update NEPI_FS_AB")
                                 read -p $'\n'"Enter 1 or 0 to enable or disable NEPI AB Backup Filesystem: " USER_INPUT
                                 if [[ "$USER_INPUT" == '' ]]; then
@@ -552,24 +783,24 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
                                 ;;
 
-                            # "Update NEPI_VPN_ENABLED")
-                            #         vpn_version=$(get_openvpn_version)
-                            #         if [[ -z $vpn_version ]]; then
-                            #             vpn_version=0
-                            #         fi    
-                            #         if [[ "$vpn_version" == '0' ]]; then
-                            #             echo "No VPN software installed"
-                            #             break # Exit the select statement
-                            #         fi                        
-                            #         echo "Do you want to enable NEPI VPN service on your device"
-                            #         choice=$(ask_yes_no)
-                            #         if [[ "$choice" == 'yes' ]]; then
-                            #             CURRENT_NEPI_VPN_ENABLED=1
-                            #         else
-                            #             CURRENT_NEPI_VPN_ENABLED=0
-                            #         fi
-                            #         break # Exit the select statement
-                            #     ;;
+                            "CONNECT WIFI")
+                                if is_wifi_enabled; then
+
+                                    echo "Using wifi Interface ${NEPI_WIFI_INTERFACE}"
+                                    export NEPI_WIFI_INTERFACE=$NEPI_WIFI_INTERFACE
+                                    netconnect_wifi
+
+                                fi 
+                                break # Exit the select statement
+                                ;;
+                           "CREATE HOTSPOT")
+                                if is_wifi_enabled; then
+
+                                    echo "Using wifi Interface ${NEPI_WIFI_INTERFACE}"
+
+                                fi 
+                                break # Exit the select statement
+                                ;;
                             "FACTORY RESET")
                                 echo "ARE YOU SURE"
                                 choice=$(ask_yes_no)
@@ -596,6 +827,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     done
             done
             echo ""
+
     elif [[ ${NEPI_MODE} == 'HOST' && "$NEPI_INSTALL" == 'LITE' && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
         echo "Creating a Custom NEPI SSH KEY"
         sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
