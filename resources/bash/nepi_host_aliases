@@ -75,8 +75,8 @@ function nepipush(){
 
   hub_tag=$1
   echo "Pushing NEPI Docker Image"
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $hub_tag
-  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+  source ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $hub_tag
+  # bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
 export -f nepipull
 

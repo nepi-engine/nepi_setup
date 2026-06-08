@@ -69,34 +69,40 @@ SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
 echo ""
 echo "UPDATING ETC WIFI ACCESS POINT"
 
-# Update ETC files if systemd is running (Not in Container)
+#Update ETC files if systemd is running (Not in Container)
 # systemctl&> /dev/null
 # if [[ "$?" -eq 0 ]]; then
 
 #     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
+# NEPI_HOTSPOT_INTERFACE=wlan0
+# NEPI_HOTSPOT_ENABLED=1
+# NEPI_HOTSPOT_ID=NEPI
+# NEPI_DEVICE_ID=DEVICE1
+# NEPI_DEVICE_SN=999999
+# NEPI_HOTSPOT_PW="nepi#12345"
 
 
-#             if [[ "$NEPI_WIFI_ENABLED" -eq 1 ]]; then
-#                 file=${ETC_FOLDER}/network/create_ap
+#             if [[ "$NEPI_HOTSPOT_ENABLED" -eq 1 ]]; then
+#                 file=/etc/network/create_ap
 #                 if [[ -f "$file" ]]; then
 
-#                     sudo ${file} --stop ${NEPI_WIFI_INTERFACE}
+#                     sudo ${file} --stop ${NEPI_HOTSPOT_INTERFACE}
 
-#                     if [[ "$NEPI_WIFI_ACCESS_POINT_ENABLED" -eq 1 ]]; then
-#                         echo "Starting WiFi Access Point Settings Files with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
-#                         if [[ "$NEPI_WIFI_ACCESS_POINT_ID" != '' ]]; then
-#                             if [[ ${NEPI_WIFI_ACCESS_POINT_ID} == 'NONE' ]]; then
-#                                 NEPI_WIFI_ACCESS_POINT_ID="nepi_"${NEPI_DEVICE_SN}
+#                     if [[ "$NEPI_HOTSPOT_ENABLED" -eq 1 ]]; then
+#                         echo "Starting WiFi Access Point Settings Files with AP ID: ${NEPI_HOTSPOT_ID} with PW: ${NEPI_HOTSPOT_PW}"
+#                         if [[ "$NEPI_HOTSPOT_ID" != '' ]]; then
+#                             if [[ ${NEPI_HOTSPOT_ID} == 'NONE' ]]; then
+#                                 NEPI_HOTSPOT_ID="nepi_"${NEPI_DEVICE_SN}
 #                             fi
 
-#                             if [[ "$NEPI_WIFI_ACCESS_POINT_PW" != '' && "$NEPI_WIFI_ACCESS_POINT_PW" != 'NONE' ]]; then
+#                             if [[ "$NEPI_HOTSPOT_PW" != '' && "$NEPI_HOTSPOT_PW" != 'NONE' ]]; then
 #                                 echo "Calling create access point file ${file}"
-#                                 echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${NEPI_WIFI_ACCESS_POINT_ID} with PW: ${NEPI_WIFI_ACCESS_POINT_PW}"
+#                                 echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${NEPI_HOTSPOT_ID} with PW: ${NEPI_HOTSPOT_PW}"
 #                                 cmd="${file} -n --redirect-to-localhost --isolate-clients  --daemon \
-#                                         ${NEPI_WIFI_INTERFACE} \
-#                                         ${NEPI_WIFI_ACCESS_POINT_ID} \
-#                                         ${NEPI_WIFI_ACCESS_POINT_PW}"
+#                                         ${NEPI_HOTSPOT_INTERFACE} \
+#                                         ${NEPI_HOTSPOT_ID} \
+#                                         ${NEPI_HOTSPOT_PW}"
 #                                 echo $cmd
 #                                 sudo ${cmd}
 
@@ -125,7 +131,7 @@ echo "UPDATING ETC WIFI ACCESS POINT"
 
 
 # Update NEPI Docker Config if needed
-docker_config_setting="NEPI_ETC_WIFI_ACCESS_POINT_UPDATE"
+docker_config_setting="NEPI_ETC_HOTSPOT_UPDATE"
 if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
     echo "Updating NEPI Docker Setting ${docker_config_setting}"
     docker_config_file=${NEPI_CONFIG}/docker_cfg/nepi_docker_config.yaml

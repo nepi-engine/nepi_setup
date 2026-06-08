@@ -531,7 +531,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                             "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
                             "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY"\
-                            "CONNECT WIFI" "CREATE HOTSPOT" \
+                            "CONNECT WIFI" \
                             "FACTORY RESET" "APPLY SETTINGS" )
 
         while true; do
@@ -789,14 +789,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                     echo "Using wifi Interface ${NEPI_WIFI_INTERFACE}"
                                     export NEPI_WIFI_INTERFACE=$NEPI_WIFI_INTERFACE
                                     netconnect_wifi
-
-                                fi 
-                                break # Exit the select statement
-                                ;;
-                           "CREATE HOTSPOT")
-                                if is_wifi_enabled; then
-
-                                    echo "Using wifi Interface ${NEPI_WIFI_INTERFACE}"
 
                                 fi 
                                 break # Exit the select statement

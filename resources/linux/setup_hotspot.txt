@@ -1,0 +1,78 @@
+
+
+#################
+sudo touch /etc/systemd/network/br0.netdev
+sudo vi /etc/systemd/network/br0.netdev
+
+[Match]
+Name=br0
+
+[Network]
+DHCP=yes
+
+##########
+sudo touch /etc/systemd/network/eth0.network
+sudo vi /etc/systemd/network/eth0.network
+
+#REPLACE
+[Match]
+Name=eth0
+
+[Network]
+Bridge=br0
+
+##########
+sudo touch /etc/hostapd/hostapd.conf
+sudo vi /etc/hostapd/hostapd.conf
+
+#REPLACE
+interface=wlan0
+bridge=br0
+driver=nl80211
+ssid=NEPI_DEVICE1_999999
+hw_mode=g
+channel=6
+wpa=2
+wpa_passphrase=nepi#12345
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+ieee80211n=1
+
+
+############
+sudo touch /etc/default/hostapd
+sudo vi /etc/default/hostapd
+
+#REPLACE
+DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+
+############
+sudo touch /etc/dnsmasq.conf
+sudo vi /etc/dnsmasq.conf
+
+#REPLACE
+bind-dynamic
+
+interface=br0
+dhcp-range=192.168.10.50,192.168.10.150,255.255.255.0,12h
+dhcp-option=3,192.168.10.1
+dhcp-option=6,192.168.10.1
+server=8.8.8.8
+server=1.1.1.1
+
+
+############
+sudo touch /etc/sysctl.conf
+sudo vi /etc/sysctl.conf
+
+#REPLACE
+net.ipv4.ip_forward=1
+
+
+#############
+sudo sysctl -p
+sudo systemctl restart systemd-networkd
+sudo systemctl unmask hostapd
+sudo systemctl restart hostapd
+sudo systemctl restart dnsmasq

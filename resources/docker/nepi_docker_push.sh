@@ -59,12 +59,12 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_UPDATE_FILE=${DOCKER_FOLDER}/nepi_docker_update.sh
 
 
-ninet > /dev/null 2>&1
+# ninet > /dev/null 2>&1
 
-if ! is_valid_internet > /dev/null; then
+if ! is_valid_internet; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
 else
-
+        echo "Internet Connected"
         docker_hub_account=''
         if docker info 2> /dev/null; then
             docker_hub_account=$( docker info | grep "Username:" | awk '{print $2}')

@@ -312,7 +312,7 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
         fi  
         echo ""     
         if systemctl is-active --quiet NetworkManager; then
-            slist=$(netliststatic)
+            slist=$(netlist_wired)
             if [[ "$slist" != *"$network_id"*  ]]; then
 
                 if systemctl is-active --quiet NetworkManager; then
@@ -324,7 +324,7 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
                         netsetstatic "${REMOTE_IP}/24"
                         echo ""
                         echo "Updated Static IPs"
-                        netliststatic
+                        netlist_wired
                         sleep 3
                         # echo ""
                         # echo "Syncing NEPI Configs"

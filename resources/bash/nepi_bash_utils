@@ -1046,7 +1046,7 @@ function ninet(){
   sudo -v
   ndhcp # Enable DHCP internet connection if needed
   if [[ $? -eq 0 ]]; then
-      sleep 2
+      sleep 4
       wait
       if ! pingi; then
         return 1
@@ -1866,14 +1866,17 @@ function netconnect_wifi() {
       echo ""
     fi
 
-    if [[ "$wifi_pw" == "DELETE" ]]; then
-      wifi_pw=''
-    fi
 
     if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' || "$wifi_pw" == 'encrypted' ]]; then
       echo "WiFi Password Not Provided"
       return 1
     fi
+
+    if [[ "$wifi_pw" == "DELETE" ]]; then
+      wifi_pw=''
+    fi
+
+
 
 
     ##############
@@ -1948,14 +1951,15 @@ export -f netconnect_wifi
 
 
 function netcreate_hotspot() {
-  wifi_ssid="$1"
+  wifi_name="$1"
+  wifi_ssid="$2"
+  wifi_pw="$3"
+  wifi_hw="$4"
+  
   if [[  "$wifi_ssid" == 'NONE' ]]; then
     return 1
   fi
 
-  wifi_pw="$2"
-  wifi_hw="$3"
-  
   if ! is_wifi_hw; then
     echo "No Wifi Hardware Detected"
     return 1
@@ -1966,8 +1970,14 @@ function netcreate_hotspot() {
       return 1
   fi
 
+    #####################
+  if [[ -z wifi_name ]]; then
+    wifi_name=NEPI_HOSTSPOT
+  fi
+
+    #####################
   if [[ -z wifi_ssid ]]; then
-    echo "WiFi SSID empty"
+    echo "Hotspot SSID empty"
     return 1
   fi
 
@@ -1975,13 +1985,15 @@ function netcreate_hotspot() {
   # ##############
 
   if [[ -z $wifi_pw || "$wifi_pw" == 'NONE' ]]; then
-    echo "WiFi Password Not Provided"
+    echo "Hotspot Password Not Provided"
     return 1
   fi
 
   if [[ "$wifi_pw" == "DELETE" ]]; then
     wifi_pw=''
   fi
+
+
 
 
   ##############
@@ -2036,10 +2048,10 @@ function netcreate_hotspot() {
     if netget_info $wifi_hw; then
 
 
-      wifi_name=$(netget_name $wifi_hw)
-      if [[ -n $wifi_name ]]; then
-        echo "Disconnecting from current ${wifi_name} connection"
-        sudo nmcli connection delete "$wifi_name" 2> /dev/null
+      del_name=$(netget_name $wifi_hw)
+      if [[ -n $del_name ]]; then
+        echo "Disconnecting from current ${del_name} connection"
+        sudo nmcli connection delete "$del_name" 2> /dev/null
         sleep 1
       fi
 
@@ -2064,14 +2076,25 @@ function netcreate_hotspot() {
                     if [[ "$wifi_pw" != '' && "$wifi_pw" != 'NONE' ]]; then
                         echo "Calling create access point file ${file}"
                         echo "Updating WiFi Access Point Settings in /etc/hostapd/hostapd.conf with AP ID: ${wifi_ssid} with PW: ${wifi_pw}"
-                        cmd="${file} -n --redirect-to-localhost --isolate-clients  --daemon \
-                                ${wifi_hw} \
-                                ${wifi_ssid} \
-                                ${wifi_pw}"
+                        cmd="sudo nmcli connection add type wifi ifname ${wifi_hw} con-name ${wifi_name} autoconnect yes ssid ${wifi_ssid}"
                         echo $cmd
                         sudo ${cmd}
+                        sleep 1
 
-                        #cat /etc/hostapd/hostapd.conf
+                        
+                        cmd='sudo nmcli connection modify '${wifi_name}' 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared'
+                        echo $cmd
+                        eval "$cmd" 
+
+                        cmd='sudo nmcli connection modify '${wifi_name}' wifi-sec.key-mgmt wpa-psk wifi-sec.psk  "'${wifi_pw}'"'
+                        echo $cmd
+                        eval "$cmd" 
+
+                        cmd='sudo nmcli connection up '${wifi_name}''
+                        echo $cmd
+                        eval "$cmd"     
+                        echo ""
+
                   else
                       echo "WiFi Access Point ID not set"
                   fi
