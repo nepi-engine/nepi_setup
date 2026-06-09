@@ -1,0 +1,66 @@
+GL-iNet Setup
+=======================
+
+Refrences: 
+    
+    Step 1-3: https://docs.gl-inet.com/router/en/4/faq/first_time_setup/
+
+    Step 4-7: https://forum.gl-inet.com/t/allow-remote-access-lan-how-does-this-work/25231
+              https://www.reddit.com/r/GlInet/comments/1fpm9xz/how_do_i_change_the_ip/
+
+
+
+
+Step 1 - Power On
+
+    Plug in power cable.
+
+    When powered on, your router will broudcast both 2.4G and 5G Wi-Fi signal with the SSID: GL-SFT1200-xxx and GL-SFT1200-xxx-5G.
+
+Step 2 - Connect via Wi-Fi OR Connect via LAN
+
+    Connect to the Wi-Fi called GL-SFT1200-xxx, and then input the default Wi-Fi password goodlife, which is also printed at the bottom of the router.
+
+    OR
+
+    Plug the cable connecting to your computer into LAN port.
+
+Step 3 - Set Up Router
+
+    Visit http://192.168.8.1 in your broswer to set up your router start by choosing your prefered language.
+
+    NOTE: If you cannot access the web Admin Panel, please check: https://docs.gl-inet.com/router/en/4/faq/cannot_access_web_admin_panel/
+
+    Set up your admin password to nepi#12345
+
+    Note: Wi-Fi may turn off during the initialization, please make sure to reconnect to the router.
+
+Step 4 - Configure your GL-iNet
+
+    Go to Admin Panel > Wireless
+
+    Modify 5GHz WiFi
+
+        Wi-Fi Name (SSID): NEPI_DEVICE1_999999
+        
+        Wi-Fi Password: nepi#12345
+
+    Go to Admin Panel > Network > LAN
+
+    Set Router IP Address to 192.168.179.1
+
+Step 6 - Connect your computer
+
+    In step 2 if you connected via Wi-Fi disconnect from the Wi-Fi called GL-SFT1200-xxx.
+
+    If you connected via LAN unplug the cable connecting to your computer into LAN port.
+
+    Then connect to the Wi-Fi called NEPI_DEVICE1_999999, and then input the Wi-Fi password nepi#12345
+
+Step 7 - Connect Raspberry Pi 5
+
+    Plug the cable connecting to your Raspberry Pi 5 into your LAN port
+
+
+
+
