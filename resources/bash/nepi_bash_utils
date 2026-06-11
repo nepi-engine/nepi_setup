@@ -976,7 +976,7 @@ function ndhcp(){
       sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
       echo "Renewing dhclient"
       sudo dhclient -nw > /dev/null 2>&1
-      sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+      #sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
     # fi
     
 }
