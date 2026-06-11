@@ -4084,9 +4084,16 @@ export -f nepistorage
 function nepistorage_open() {
   sudo -v
   if nepistorage; then
-      shfolder=nepi_storage
-      shdrive=/mnt/${shfolder}
+    if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+      if pingn; then
+        shdrive=/mnt/nepi_share_storage
+        xdg-open $shdrive
+      fi
+    else
+      shdrive=/mnt/nepi_storage
       xdg-open $shdrive
+    fi
+      
   fi
 }
 
@@ -4154,9 +4161,17 @@ export -f nepiconfig
 function nepiconfig_open() {
   sudo -v
   if nepiconfig; then
-      shfolder=nepi_config
-      shdrive=/mnt/${shfolder}
+    if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+      if pingn; then
+        shdrive=/mnt/nepi_share_config
+        xdg-open $shdrive
+      fi
+    else
+      shdrive=/mnt/nepi_config
       xdg-open $shdrive
+    fi
+
+      
   fi
 }
 
