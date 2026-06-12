@@ -91,21 +91,7 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_WIRED_DHCP_ENABLED" -eq 1 ]]; then
 
 
-        ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
-
-        # Check the exit status of the ping command
-        # 0 indicates success (internet connection)
-        # Non-zero indicates failure (no internet connection)
-        if [ $? -ne 0 ]; then
-            echo "Can't Ping Internet t 8.8.8.8"
-        else
-            echo "Resetting DHCP Clients"
-            echo "Killing existing DHCP clients"
-            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-            echo "Renewing dhclient"
-            sudo dhclient -nw > /dev/null 2>&1
-            sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-        fi
+        ndhcp
         
     fi  
 
