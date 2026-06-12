@@ -2436,7 +2436,62 @@ function netremove_ipn_alias(){
 
 export -f netremove_ipn_alias
 
+function netset_ip_ntp(){
+  ntp_ip=$1
+  if ! is_valid_ipv4 $ntp_ip; then
+    echo "Not a valid IP address ${ntp_ip}"
+    return 1
+  fi
 
+
+
+  # Update ETC files if systemd is running (Not in Container)
+  systemctl&> /dev/null
+  if [[ "$?" -eq 0 ]]; then
+      echo ""
+      echo "UPDATING NTP TIME SOURCE"
+
+
+        echo " "
+        echo "Configuring chrony.conf"
+
+        sudo systemctl stop chrony
+
+        source_file=${NEPI_SYSTEM_CONFIG}/etc/chrony/chrony.conf.blank
+        file=/etc/chrony/chrony.conf
+        echo "Updating etc file: ${file}"
+        if [[ ! -d "/etc/chrony" ]]; then
+            sudo mkdir /etc/chrony
+        fi
+        if [[ -f "${source_file}" ]]; then
+            sudo cp -a ${source_file} $file
+            sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
+      
+
+
+            if [[ "$ntp_ip" != "NONE" &&  "$ntp_ip" != "None" ]]; then
+                echo "Updating NEPI IP in ${file} with NTP Server ${ntp_ip}"
+                # update with NTP IP address
+APPEND_SECTION="#### NEPI NTP SOURCES #### 
+allow ${ntp_ip%.*}/24 
+server ${ntp_ip} iburst minpoll 2"
+                sudo echo "$APPEND_SECTION" >> $file
+
+            fi
+        else
+            echo "FAILED TO FIND SOURCE ${source_file}"
+        fi  
+        ###
+        sudo systemctl restart chrony
+
+  else
+    echo "SYSTEMCTL not present"
+    return 1
+
+  fi
+
+
+}
 
 
 

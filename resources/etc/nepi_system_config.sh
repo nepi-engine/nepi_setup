@@ -283,6 +283,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_SSH_KEY" $CURRENT_NEPI_SSH_KEY $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_VPN_ENABLED" $CURRENT_NEPI_VPN_ENABLED $SYSTEM_SYS_CONFIG_FILE
+    
 
 }
 

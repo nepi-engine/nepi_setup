@@ -53,11 +53,17 @@ NEPI_GATEWAY_IP: unknown
 NEPI_ALIAS_IP_1: 192.168.0.103/24
 NEPI_ALIAS_IP_2: 192.168.1.103/24
 NEPI_ALIAS_IP_3: NONE
-# Add an IP address Alias on top of NEPI's Primary NTP address (time1.google.com), or set to NONE.
+# Add an IP address for NTP server or set to NONE.
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_STATIC_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
 NEPI_NTP_IP: 192.168.179.5
+# Add an IP address for NAVPOSE source or set to NONE. 
+# This value will be used as the default value for any NPX drivers that have an IP address option
+# NOTE: If the subnet of your desired NTP source IP address is different then NEPI_STATIC_IP's subnet,
+#   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
+#   subnet
+NEPI_NAV_IP: NONE
 # NEPI_WIRED_INTERNET_ENABLED=1 to enable Wired Wired Internet Connectivity. 
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
 #  a router with internet access. 

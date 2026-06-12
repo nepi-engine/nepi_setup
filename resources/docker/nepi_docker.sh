@@ -82,6 +82,8 @@ function nepiload(){
 
 }
 
+
+
 ####################################
 # Process Functions
 function NEPI_START_FUNCTION(){
@@ -274,36 +276,9 @@ echo ""
 ###############################
 # Check for NEPI Config Changes
 
-echo ""
-echo "---------------------------------"
-NEPI_CONFIG_FILE=${SETC_FOLDER}/nepi_system_config.yaml
-NEPI_CONFIG_BACKUP_FILE=${NEPI_CONFIG_FILE}.bak
-NEPI_CONFIG_SETUP_FILE=${SETC_FOLDER}/nepi_system_config.sh
-echo "Checking for NEPI System Config Changes ${NEPI_CONFIG_FILE}"
-if [[ -f "$NEPI_CONFIG_FILE" ]]; then
-    if [[ ! -f "$NEPI_CONFIG_BACKUP_FILE" ]]; then
-        cp $NEPI_CONFIG_FILE $NEPI_CONFIG_BACKUP_FILE
-    fi
-
-    if cmp -s $NEPI_CONFIG_FILE $NEPI_CONFIG_BACKUP_FILE; then
-        echo "NEPI System Config Files Match"
-        nepiload
-        ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
-        echo "Calling NEPI SSH KEY uppdate script ${ssh_key_script}"
-        source $ssh_key_script
-    else
-        echo "NEPI System Config File Has Updated"
-        nepiload
-        if [[ -f "$NEPI_CONFIG_SETUP_FILE" ]]; then
-            source $NEPI_CONFIG_SETUP_FILE
-        else
-            echo "Failed to find ${NEPI_CONFIG_SETUP_FILE}"
-        fi        
-    fi
-else
-    echo "Failed to find ${NEPI_CONFIG_FILE}"
-fi
-
+ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
+echo "Calling NEPI SSH KEY update script ${ssh_key_script}"
+source $ssh_key_script
 
 ###############################
 echo ""
@@ -421,6 +396,8 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
  while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
 
+
+
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"
             source ${DOCKER_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE
@@ -495,11 +472,12 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
             fi
         fi
 
-
         ########################
         # Load NEPI DOCKER CONFIG Updates
         bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
         source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
+
+         
   
         sleep 1
 

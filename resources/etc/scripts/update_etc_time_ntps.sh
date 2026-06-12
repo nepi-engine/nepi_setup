@@ -76,37 +76,8 @@ if [[ "$?" -eq 0 ]]; then
     if [[ "$NEPI_MANAGES_TIME" -eq 1 ]]; then
         # Install NTP Sources
 
-        echo " "
-        echo "Configuring chrony.conf"
+        netset_ip_ntp $NEPI_NTP_IP
 
-        sudo systemctl stop chrony
-
-        source_file=${ETC_FOLDER}/chrony/chrony.conf.blank
-        file=/etc/chrony/chrony.conf
-        echo "Updating etc file: ${file}"
-        if [[ ! -d "/etc/chrony" ]]; then
-            sudo mkdir /etc/chrony
-        fi
-        if [[ -f "${source_file}" ]]; then
-            sudo cp -a ${source_file} $file
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $file
-      
-
-
-            if [[ "$NEPI_NTP_IP" != "NONE" &&  "$NEPI_NTP_IP" != "None" ]]; then
-                echo "Updating NEPI IP in ${file} with NTP Server ${NEPI_NTP_IP}"
-                # update with NTP IP address
-APPEND_SECTION="#### NEPI NTP SOURCES #### 
-allow ${NEPI_NTP_IP%.*}/24 
-server ${NEPI_NTP_IP} iburst minpoll 2"
-                sudo echo "$APPEND_SECTION" >> $file
-
-            fi
-        else
-            echo "FAILED TO FIND SOURCE ${source_file}"
-        fi  
-        ###
-        sudo systemctl restart chrony
     fi
 
 fi

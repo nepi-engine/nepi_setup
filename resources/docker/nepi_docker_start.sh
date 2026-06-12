@@ -37,9 +37,7 @@ if [[ ! -n $CONFIG_USER ]]; then
 fi
 export CONFIG_USER=$CONFIG_USER
 
-bfile=/home/${CONFIG_USER}/.bashrc
 ufile=/home/${CONFIG_USER}/.nepi_bash_utils
-afile=/home/${CONFIG_USER}/.nepi_host_aliases
 
 if [[ -f "$ufile" ]]; then
     source $ufile
@@ -58,6 +56,7 @@ if [[ -d $blank_config ]]; then
     cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml
     cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml.bak
 fi
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
 echo "Calling NEPI Docker Stop Process"
 source ${DOCKER_FOLDER}/nepi_docker_stop.sh
@@ -96,33 +95,53 @@ echo ""
 echo ""
 echo "Syncing SSH Keys"
 nepisync
+
+
 ### This is done by nepi_docker service before calling nepi_docker_start
 #######################
 # Update ETC Config Files
 #######################
-# source ${DOCKER_FOLDER}/update_etc_files.sh
-# wait
+
+DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
+DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+
+source ${DOCKER_CONFIG_LOAD_FILE}
+if [[ "$?" -eq 1 ]]; then
+    echo "Failed to load ${DOCKER_CONFIG_FILE}"
+else
+
+    if [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
+        echo ""
+        echo "---------------------------------"
+        NEPI_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
+        NEPI_CONFIG_SETUP_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
+        #echo "Checking for NEPI System Config Changes ${NEPI_CONFIG_FILE}"
+        if [[ -f "$NEPI_CONFIG_FILE" && -f $NEPI_CONFIG_SETUP_FILE ]]; then
+                echo "Updating NEPI System Config"
+                source $NEPI_CONFIG_SETUP_FILE   
+        else
+            echo "Failed to find ${NEPI_CONFIG_FILE}"
+        fi
+    fi
+
+    update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
+fi
+
 
 ########################
 # Build Run Command
 ########################
 echo "Building NEPI Docker Run Command"
 
-# NEPI_STORAGE=/mnt/nepi_storage
-# NEPI_CONFIG=/mnt/nepi_coinfig
+# if [[ "$RUN_MODE" == "DEV" ]]; then
 
-# if [[ "$1" -eq 0 ]]; then 
-#     echo "Starting with rm process disabled"
-#     rm_cmd=''
-# if [[ "$1" -eq 1 ]]; then 
-#     echo "Starting with rm process enabled"
-#     rm_cmd="--rm"
-# elif [[ "$NEPI_RM_PS" -eq 0 ]]; then
-#     echo "Starting with rm process disabled"
-#     rm_cmd=''
+# run_cmd=""
+
 # else
-#     echo "Starting with rm process enabled"
-#     rm_cmd="--rm"
+
+# rm_cmd="--rm"
+
 # fi
 
 rm_cmd="--rm"
