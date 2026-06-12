@@ -321,7 +321,7 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
                     choice=$(ask_yes_no)
                     if [[ "$choice" == 'yes' ]]; then
                         echo ""
-                        netsetstatic "${REMOTE_IP}/24"
+                        netset_custom "${REMOTE_IP}/24"
                         echo ""
                         echo "Updated Static IPs"
                         netlist_wired
