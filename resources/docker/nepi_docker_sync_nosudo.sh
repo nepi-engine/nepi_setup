@@ -87,7 +87,7 @@ if [[ ! -f $SOURCE_FILE ]]; then
 fi
 
 sync_yaml_files $UPDATE_FILE $SOURCE_FILE 
-rsync -ar --exclude=${CONFIG_FILENAME} ${SOURCE_PATH}/ ${UPDATE_PATH}/
+rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}" 
 rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/
@@ -106,8 +106,8 @@ chmod 775 ${UPDATE_PATH}
 
 # Synce from /opt/nepi first
 
-SOURCE_PATH=/opt/nepi/docker_cfg
-UPDATE_PATH=/mnt/nepi_config/docker_cfg
+SOURCE_PATH=/mnt/nepi_config/docker_cfg
+UPDATE_PATH=/opt/nepi/docker_cfg
 CONFIG_FILENAME=nepi_docker_config.yaml
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
@@ -119,9 +119,9 @@ if [[ ! -f $SOURCE_FILE ]]; then
     cp $UPDATE_FILE $SOURCE_FILE 
 fi
 
-sync_yaml_files $SOURCE_FILE $UPDATE_PATH 
+sync_yaml_files $UPDATE_PATH $SOURCE_FILE 
 
-rsync -ar --exclude=${CONFIG_FILENAME} --exclude=${CONFIG_FILENAME}.bak ${SOURCE_PATH}/ ${UPDATE_PATH}/
+rsync -ar ${SOURCE_PATH}/ ${UPDATE_PATH}/
 
 echo "Syncing files from ${UPDATE_PATH} to ${SOURCE_PATH}"
 rsync -ar ${UPDATE_PATH}/ ${SOURCE_PATH}/

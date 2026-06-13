@@ -116,19 +116,6 @@ function NEPI_START_FUNCTION(){
             echo "##########################"
             NEPI_FS_RESTART=0
             update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
-            # Update Recovery Config Files
-            echo "Updating Recovery Config files with System Config Files"
-            SOURCE_PATH=${NEPI_CONFIG}/system_cfg
-            UPDATE_PATH=${NEPI_CONFIG}/recovery_cfg
-            if [ -d "${UPDATE_PATH}" ]; then
-                rm -r $UPDATE_PATH
-            fi
-            if [ -d "${SOURCE_PATH}" ]; then
-                mkdir ${UPDATE_PATH}
-                cp -R -a ${SOURCE_PATH}/* ${UPDATE_PATH}/
-                chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
-                chmod 775 ${UPDATE_PATH}
-            fi
 
         
         # SWITCH CONFIG MODE ON MAX FAIL COUNT
@@ -152,52 +139,6 @@ function NEPI_START_FUNCTION(){
                 echo "NEPI Failed to Start. Will Not Retry"
                 CONFIG_MODE=STOP
             fi
-        
-
-            # # Try Recovery Mode if Backup CONFIG Fails
-            # elif [[ "$CONFIG_MODE" == "BACKUP" ]]; then
-            #     # Load NEPI Recovery CONFIG
-            #     echo "##########################"
-            #     echo "Loading NEPI Recovery Config"
-            #     echo "##########################"
-            #     CONFIG_MODE=RECOVERY
-            #     ETC_FOLDER=$RCFG_FOLDER
-            #     source  ${RETC_FOLDER}/update_etc_files.sh $RETC_FOLDER
-            #     if [[ "$?" -eq 0 ]]; then
-            #         echo "Recovery config loaded successfully"
-            #         NEPI_FAIL_COUNT=-1
-            #         update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-            #     else
-            #         echo "Failed to run Recovery Config setup"
-            #     fi
-
-            # # Try Factory Mode if Recovery CONFIG Fails
-            # elif [[ "$CONFIG_MODE" == "RECOVERY" ]]; then
-            #     # Load NEPI Factory CONFIG
-            #     echo "##########################"
-            #     echo "Loading NEPI Factory Config"
-            #     echo "##########################"
-            #     CONFIG_MODE=FACTORY
-            #     ETC_FOLDER=$FCFG_FOLDER
-            #     source  ${FETC_FOLDER}/update_etc_files.sh $FETC_FOLDER
-            #     if [[ "$?" -eq 0 ]]; then
-            #         echo "Factory config loaded successfully"
-            #         NEPI_FAIL_COUNT=-1
-            #         update_yaml_value "NEPI_FAIL_COUNT" $NEPI_FAIL_COUNT $DOCKER_CONFIG_FILE
-            #     else
-            #         echo "##########################"
-            #         echo "Failed to run Factoery Config Setup"
-            #         echo "##########################"
-            #     fi
-
-            # # Stop Trying if Factory CONFIG Fails
-            # elif [[ "$CONFIG_MODE" == "FACTORY" ]]; then
-            #     echo "No Options Left to Try.  Will not attempt to start NEPI Docker processes again"
-            #     CONFIG_MODE=STOP
-            # else
-            #     echo "Not sure how we got here.  Will not attempt to start NEPI Docker processes again"
-            #     CONFIG_MODE=STOP
-            # fi
         
         # RESTART IN SET CONFIG MODE WHILE FAIL COUNT != 0
         elif [[ ! "$NEPI_FAIL_COUNT" -eq 0 ]]; then # Try Again
@@ -395,91 +336,149 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
  while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
+    ########################
+    # Load NEPI DOCKER CONFIG Updates
+    bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
+    source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
+    #echo "Got NEPI Config Update Value ${NEPI_UPDATE_CONFIG}"
 
+    ##################################
+    if [[ "$NEPI_FS_RESTART" -eq 1 && "$NEPI_STARTING" -eq 0 ]]; then
+        update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
+        echo "NEPI RESTARTING"
+        CONFIG_MODE=SYSTEM
+        NEPI_FAIL_COUNT=-1
+        NEPI_START_FUNCTION
+        if [[ ! "$?" -eq 0 ]]; then
+            echo " Container Start Process Failed. Will Stop Trying"
+            CONFIG_MODE=STOP
+        fi
+        echo ""
+        echo "Returning to NEPI Service Monitoring"
+        echo "********************************"
 
+    ##################################
+    elif [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
+        echo ""
+        echo "---------------------------------"
+        NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
+        echo "Got NEPI System Update Request"
+        if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
+                echo "Updating NEPI System Config"
+                source $NEPI_CONFIG_UPDATE_FILE   
+        else
+            echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
+        fi
+        update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
+        echo ""
+        echo "Returning to NEPI Service Monitoring"
+        echo "********************************"
 
+        
+    else
+        ##################################
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
             echo "Calling: nepi_docker_import"
             source ${DOCKER_FOLDER}/nepi_docker_import.sh $NEPI_IMPORT_FILE
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_FS_SWITCH" -eq 1 ]]; then
             echo "Calling: nepi_docker_switch"
             source ${DOCKER_FOLDER}/nepi_docker_switch.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_HOSTNAME_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_hostname"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_hostname.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_TIME_NTPS_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_time_ntps"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_time_ntps.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIRED_STATIC_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_static"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_static.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIRED_ALIASES_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_aliases"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_aliases.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIRED_DHCP_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_dhcp"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_dhcp.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIFI_ENABLE_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_enable"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_enable.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIFI_LOW_POWER_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_low_power"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_low_power.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIFI_CLIENT_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_client"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_client.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_ETC_WIFI_ACCESS_POINT_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_access_point"
             source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_access_point.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
         if [[ "$NEPI_FS_EXPORT" -eq 1 && "$NEPI_RUNNING" -eq 1 ]]; then
             echo "Calling: nepi_docker_export"
             source ${DOCKER_FOLDER}/nepi_docker_export.sh $NEPI_EXPORT_FILE
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
         fi
 
 
-        ##################################
-        if [[ "$NEPI_FS_RESTART" -eq 1 && "$NEPI_STARTING" -eq 0 ]]; then
-            update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
-            echo "NEPI RESTARTING"
-            CONFIG_MODE=SYSTEM
-            NEPI_FAIL_COUNT=-1
-            NEPI_START_FUNCTION
-            if [[ ! "$?" -eq 0 ]]; then
-                echo " Container Start Process Failed. Will Stop Trying"
-                CONFIG_MODE=STOP
-            fi
-        fi
 
-        ########################
-        # Load NEPI DOCKER CONFIG Updates
-        bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
-        source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
+    fi
+      
 
-         
-  
-        sleep 1
+    sleep 1
 
     
 done

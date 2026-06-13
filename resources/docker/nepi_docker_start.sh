@@ -20,7 +20,10 @@
 # This script launches NEPI Container
 sudo -v
 
-START_MODE=$1
+RUN_MODE=$1
+if [[ -n $RUN_MODE ]]; then
+    echo "Starting in Run Mode: ${RUN_MODE}"
+fi
 
 if [[ ! -n $CONFIG_USER ]]; then
     CONFIG_USER=$(id -un)
@@ -48,22 +51,19 @@ fi
 
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-
-
-echo "Resetting NEPI Docker Config File"
-blank_config=${DOCKER_FOLDER}/nepi_docker_config.blank
-if [[ -d $blank_config ]]; then
-    cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml
-    cp $blank_config ${DOCKER_FOLDER}/nepi_docker_config.yaml.bak
-fi
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
+
 
 echo "Calling NEPI Docker Stop Process"
 source ${DOCKER_FOLDER}/nepi_docker_stop.sh
 wait
 
+echo "Calling NEPI Docker Update Process"
+source ${DOCKER_FOLDER}/nepi_docker_update.sh
+wait
 
-# Reset. Updated by NEPI Software
+
+echo "Reseting NEPI Config File"
 SYSTEM_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 update_yaml_value "NEPI_VERSION" 'XpXpX' "$SYSTEM_CONFIG_FILE"
 update_yaml_value "NEPI_SW_DESC" 'unknown' "$SYSTEM_CONFIG_FILE"
@@ -97,45 +97,6 @@ echo "Syncing SSH Keys"
 nepisync
 
 
-### This is done by nepi_docker service before calling nepi_docker_start
-#######################
-# Update ETC Config Files
-#######################
-###############################
-# Load NEPI Config File
-NEPI_CONFIG_LOAD_FILE=/mnt/nepi_config/system_cfg/etc/load_system_config.sh
-if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
-    echo "Running System Config Load Script: ${NEPI_CONFIG_LOAD_FILE}"
-    source $NEPI_CONFIG_LOAD_FILE
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${NEPI_CONFIG_LOAD_FILE}"
-    fi
-else
-    echo "Failed to find ${NEPI_CONFIG_LOAD_FILE}"
-fi
-
-
-
-
-# if [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
-#     echo ""
-#     echo "---------------------------------"
-#     NEPI_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
-#     NEPI_CONFIG_SETUP_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
-#     #echo "Checking for NEPI System Config Changes ${NEPI_CONFIG_FILE}"
-#     if [[ -f "$NEPI_CONFIG_FILE" && -f $NEPI_CONFIG_SETUP_FILE ]]; then
-#             echo "Updating NEPI System Config"
-#             source $NEPI_CONFIG_SETUP_FILE   
-#             echo "Sleeping for 3 seconds"
-#             sleep 3
-#     else
-#         echo "Failed to find ${NEPI_CONFIG_FILE}"
-#     fi
-
-#     update_yaml_value "NEPI_UPDATE_CONFIG" 0 $NEPI_CONFIG_FILE
-# fi
-
-
 
 
 ########################
@@ -143,22 +104,16 @@ fi
 ########################
 echo "Building NEPI Docker Run Command"
 
-# if [[ "$RUN_MODE" == "DEV" ]]; then
-
-# run_cmd=""
-
-# else
-
-# rm_cmd="--rm"
-
-# fi
-
-rm_cmd="--rm"
+if [[ "$RUN_MODE" == "DEV" ]]; then
+    run_cmd="-it"
+else
+    run_cmd="--rm"
+fi
 
 
 ########
 # Initialize Run Command
-DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${rm_cmd} -e UDEV=1 --ipc=host --user 0:0 \
+DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${run_cmd} -e UDEV=1 --ipc=host --user 0:0 \
 --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
 --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
 --mount type=bind,source=/dev,target=/dev \
@@ -233,14 +188,12 @@ echo "Using name:tag ${nepi_fs}:${nepi_fs_tag} with Command"
 
 
 if [[ "$RUN_MODE" == "DEV" ]]; then
-
-run_cmd=""
-
+    run_cmd=""
 else
-
-run_cmd="-c '/nepi_start_all'"
-
+    run_cmd="-c '/nepi_start_all'"
 fi
+
+echo "Using Run Cmd: ${run_cmd}"
 
 
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \

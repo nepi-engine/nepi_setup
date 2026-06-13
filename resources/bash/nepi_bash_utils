@@ -4107,7 +4107,7 @@ function nepistorage() {
       echo "Setting mount folder permissions: ${shdrive}"
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
       echo "Mounting shared drive at: //${NEPI_IP}/${shfolder} to ${shdrive}"
-      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_USER
+      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_USER,uid=$(id -u),gid=$(id -g)
     
       if timeout 1 mountpoint -q $shdrive; then
         cd $shdrive
@@ -4182,7 +4182,7 @@ function nepiconfig() {
       echo "Setting mount folder permissions: ${shdrive}"
       sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
       echo "Mounting shared drive at: //${NEPI_IP}/${shfolder} to ${shdrive}"
-      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_ADMIN_USER
+      sudo mount.cifs //${NEPI_IP}/${shfolder} $shdrive -o user=$NEPI_ADMIN_USER,uid=$(id -u),gid=$(id -g)
     
       if timeout 1 mountpoint -q $shdrive; then
         cd $shdrive
