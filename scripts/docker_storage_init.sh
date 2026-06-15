@@ -142,9 +142,12 @@ else
             ##############################
             ### GET STORAGE LATEST FOLDERS
             success_storage=0
-            storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=hj0yewy3&dl=0'
+            if is_valid_rpi; then
+                storage_latest_link='https://www.dropbox.com/scl/fi/930ooy8mh9n6jv4pg9zhg/nepi_storage-latest-rpi.zip?rlkey=zse5xksdxlwfqj6khre26ihan&st=3xa2v2vu&dl=0'
+            else
+                storage_latest_link='https://www.dropbox.com/scl/fi/za3sz2q7e0pbcj6m89d8h/nepi_storage-latest.zip?rlkey=eq6u97w6qpqiqblcudqnwj8ud&st=hj0yewy3&dl=0'
+            fi
             storage_latest_zip=nepi_storage-latest.zip
-
             if [[ -f ${storage_latest_zip} ]]; then
                 sudo rm -r $storage_latest_zip
             fi

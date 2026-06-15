@@ -1,2 +1,7 @@
 cd /mnt/nepi_storage
-zip -r nepi_storage-latest.zip ai_models sample_data user_cfg
+
+if is_valid_rpi; then
+    zip -r nepi_storage-latest-rpi.zip ai_models sample_data user_cfg
+else
+    zip -r nepi_storage-latest.zip ai_models sample_data user_cfg
+fi
