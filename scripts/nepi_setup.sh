@@ -80,6 +80,7 @@ fi
 SYSTEM_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
 sudo chown $CONFIG_USER:$CONFIG_USER $SYSTEM_SYS_CONFIG_FILE
 
+
 #######################################################################################
 
 
@@ -1320,6 +1321,16 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
 fi
 
+echo ""
+echo "########################"
+echo "Updating System Factory Config"
+echo ""
+SYSTEM_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml
+FACTORY_SYS_CONFIG_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.factory
+
+sudo cp $SYSTEM_SYS_CONFIG_FILE $FACTORY_SYS_CONFIG_FILE
+sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
+sudo chmod 775 ${UPDATE_PATH}
 
 echo ""
 echo "########################"

@@ -285,6 +285,7 @@ else
     update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "$(date +%Y-%m-%d)" "${DOCKER_CONFIG_FILE}"
     update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_FILE}"
     update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
+    update_yaml_value "NEPI_SERVICE_RUNNING" 0 "${DOCKER_CONFIG_FILE}"
 fi
 
 

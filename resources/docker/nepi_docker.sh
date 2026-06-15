@@ -82,6 +82,15 @@ function nepiload(){
 
 }
 
+netlist_str=$(netlist)
+NETLIST_FILE=${SETC_FOLDER}/netlist.txt
+function updatenetlist(){
+    netlist_last=$netlist_str
+    netlist_str=$(netlist)
+    if [[ "$netlist_str" != '$netlist_last' || ! -f $NETLIST_FILE ]]; then
+        netlist > $NETLIST_FILE
+    fi
+}
 
 
 ####################################
@@ -331,6 +340,8 @@ fi
  echo "Starting NEPI Service Monitoring"
  echo "********************************"
 
+netlist_str=''
+
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
@@ -364,11 +375,13 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
         NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
         echo "Got NEPI System Update Request"
         if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
+                update_yaml_value "NEPI_UPDATING_CONFIG" 1 $DOCKER_CONFIG_FILE
                 echo "Updating NEPI System Config"
                 source $NEPI_CONFIG_UPDATE_FILE   
         else
             echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
         fi
+        update_yaml_value "NEPI_UPDATING_CONFIG" 0 $DOCKER_CONFIG_FILE
         update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
         echo ""
         echo "Returning to NEPI Service Monitoring"
@@ -477,8 +490,10 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
     fi
       
-
     sleep 1
+
+    updatenetlist
+    update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
 
     
 done
