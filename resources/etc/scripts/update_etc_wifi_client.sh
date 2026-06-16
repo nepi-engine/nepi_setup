@@ -79,61 +79,52 @@ if [[ "$?" -eq 0 ]]; then
 
             if is_wifi_enabled; then
 
-
-                    nepi_wifi_interface=$NEPI_WIFI_INTERFACE
-                    if [[ "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
-                        nepi_wifi_interface="unknown"
-                        nepi_wifi_interface=$NEPI_WIFI_INTERFACE
-                        if [[ -z $nepi_wifi_interface ]]; then
-                            nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
-                            echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
-                            if [[ -z $nepi_wifi_interface ]]; then
-                                nepi_wifi_interface="unknown"
-                            fi   
-                        fi       
-
+                    echo "Starting with WiFi Interface ${NEPI_WIFI_INTERFACE}"
+                    nepi_wifi_interface='unknown'
+                    
+                    if [[ -n $NEPI_WIFI_INTERFACE && "$NEPI_WIFI_INTERFACE" != 'NONE' && "$NEPI_wifi_INTERFACE" != "unknown" ]]; then
                         dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | cut -d: -f1)
-                        if [[ -n $dlist && "$nepi_wifi_interface" != 'NONE' ]]; then
-                            echo "Auto updating wifi interface hw option"
-                            if [[ "$dlist" != *"$nepi_wifi_interface" ]]; then
-                                echo "Got wifi interface hw options ${dlist}"
-                                read -r nepi_wifi_interface _ <<< "$dlist"
-                                echo "Updated wifi interface hw options ${nepi_wifi_interface}"
-                                if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && "$NEPI_wifi_INTERFACE" == "unknown" ]]; then
-                                    export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
-                                    update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
-                                    needs_update=1
-                                fi
+                        if [[ -n $dlist ]]; then
+                            echo "Got wifi interface hw options ${dlist}"
+                            if [[ "$dlist" == *"$NEPI_WIFI_INTERFACE" ]]; then
+                                echo "Found WiFi Interface ${NEPI_WIFI_INTERFACE}"
+                                nepi_wifi_interface=$NEPI_WIFI_INTERFACE
                             else
+                                echo "Failed to find WiFi Interface ${NEPI_WIFI_INTERFACE}"
                                 nepi_wifi_interface="unknown"
                             fi
+                        else
+                            echo "Failed to find Any WiFi Interfaces"
+                            nepi_wifi_interface="unknown"
                         fi
                     fi
                     echo "Using wifi Interface ${nepi_wifi_interface}"
 
 
-                    wifi_ssid=$NEPI_WIFI_CLIENT_ID
-                    if [[ -z $wifi_ssid || "$wifi_ssid" == "None" ]]; then
-                        wifi_ssid="NONE"
-                        NEPI_WIFI_CLIENT_PW="NONE"
-                    fi
-                    echo "Using wifi ssid ${wifi_ssid}"
+                    if [[ "$nepi_wifi_interface" != 'unknown' ]]; then
+                        wifi_ssid=$NEPI_WIFI_CLIENT_ID
+                        if [[ -z $wifi_ssid || "$wifi_ssid" == "None" ]]; then
+                            wifi_ssid="NONE"
+                            NEPI_WIFI_CLIENT_PW="NONE"
+                        fi
+                        echo "Using wifi ssid ${wifi_ssid}"
 
-                    wifi_pw=$NEPI_WIFI_CLIENT_PW
-                    if [[ -z wifi_pw || "$wifi_pw" == "None"  || "$wifi_pw" == 'encrypted' ]]; then
-                        wifi_pw="NONE"
-                    fi
-                    echo "Using wifi pw ${wifi_pw}"
+                        wifi_pw=$NEPI_WIFI_CLIENT_PW
+                        if [[ -z wifi_pw || "$wifi_pw" == "None"  || "$wifi_pw" == 'encrypted' ]]; then
+                            wifi_pw="NONE"
+                        fi
+                        echo "Using wifi pw ${wifi_pw}"
 
-                    if [[ "$wifi_ssid" != "NONE" && "$wifi_pw" != "NONE" ]]; then
-                            if netconnect_wifi $wifi_ssid $wifi_pw $nepi_wifi_interface; then
-                                update_yaml_value "NEPI_WIFI_CLIENT_ID" $wifi_ssid $SYSTEM_SYS_CONFIG_FILE
-                                update_yaml_value "NEPI_WIFI_CLIENT_PW" 'encrypted' $SYSTEM_SYS_CONFIG_FILE
-                            else
-                                update_yaml_value "NEPI_WIFI_CLIENT_ID" 'NOT_SET' $SYSTEM_SYS_CONFIG_FILE
-                                update_yaml_value "NEPI_WIFI_CLIENT_PW" 'NOT_SET' $SYSTEM_SYS_CONFIG_FILE
-                            fi
+                        if [[ "$wifi_ssid" != "NONE" && "$wifi_pw" != "NONE" ]]; then
+                                if netconnect_wifi $wifi_ssid $wifi_pw $nepi_wifi_interface; then
+                                    update_yaml_value "NEPI_WIFI_CLIENT_ID" $wifi_ssid $SYSTEM_SYS_CONFIG_FILE
+                                    update_yaml_value "NEPI_WIFI_CLIENT_PW" 'encrypted' $SYSTEM_SYS_CONFIG_FILE
+                                else
+                                    update_yaml_value "NEPI_WIFI_CLIENT_ID" 'NOT_SET' $SYSTEM_SYS_CONFIG_FILE
+                                    update_yaml_value "NEPI_WIFI_CLIENT_PW" 'NOT_SET' $SYSTEM_SYS_CONFIG_FILE
+                                fi
 
+                        fi
                     fi
 
             fi 
