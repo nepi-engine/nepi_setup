@@ -121,9 +121,6 @@ if [[ "$?" -eq 0 ]]; then
             fi 
             sudo usermod -aG netdev ${CONFIG_USER} >/dev/null 2>&1
 
-            needs_update=0
-            systemctl &> /dev/null
-            if [[ "$?" -eq 0 ]]; then
 
             echo "#########"
             echo "UPDATING WIRED INTERFACE SETTINGS"
