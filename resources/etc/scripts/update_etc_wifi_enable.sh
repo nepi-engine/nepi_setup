@@ -64,7 +64,7 @@ if [[ $LOAD_NEPI_CONFIG -eq 1 ]]; then
 fi
 
 
-SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/nepi_system_config.yaml
+SYSTEM_SYS_CONFIG_FILE=${NEPI_CONFIG}/system_cfg/etc/nepi_system_config.yaml
 
 ################################
 
@@ -80,58 +80,54 @@ if [[ "$?" -eq 0 ]]; then
     if ! is_wifi_hw; then
         echo "No WiFi Hardware Detected"
     else
-            nepi_wifi_interface=$NEPI_WIFI_INTERFACE
-            if [[ "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
-                nepi_wifi_interface="unknown"
+            echo "Starting with WiFi Interface ${NEPI_WIFI_INTERFACE}"
+            nepi_wifi_interface="unknown"
+            if [[ -n $NEPI_WIFI_INTERFACE && "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
                 nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+                nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
+                echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
                 if [[ -z $nepi_wifi_interface ]]; then
-                    nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
-                    echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
-                    if [[ -z $nepi_wifi_interface ]]; then
-                        nepi_wifi_interface="unknown"
-                    fi   
-                fi       
 
-                dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
-                if [[ -n $dlist && "$nepi_wifi_interface" != 'NONE' ]]; then
-                    echo "Auto updating wifi interface hw option"
-                    if [[ "$dlist" != *"$nepi_wifi_interface" ]]; then
+                    dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
+                    if [[ -n $dlist ]]; then
                         echo "Got wifi interface hw options ${dlist}"
+                        
                         read -r nepi_wifi_interface _ <<< "$dlist"
-                        echo "Updated wifi interface hw options ${nepi_wifi_interface}"
-                        if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
+                        
+                        if [[ -f $SYSTEM_SYS_CONFIG_FILE ]]; then
+                            echo "Updating wifi interface hw options ${nepi_wifi_interface}"
                             export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
                             update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
                             needs_update=1
                         fi
-                    else
-                        nepi_wifi_interface="unknown"
                     fi
                 fi
             fi
+
             echo "Using Wifi Interface ${nepi_wifi_interface}"
 
+            if [[ "$nepi_wifi_interface" != "unknown" ]]; then
+                wifi_enabled=$NEPI_WIFI_ENABLED
+                if [[ -z $wifi_enabled ]]; then
+                    wifi_enabled=1
+                    if [[ -f "$SYSTEM_SYS_CONFIG_FILE" ]]; then
+                        export NEPI_WIFI_ENABLED=$wifi_enabled
+                        update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
+                        needs_update=1
+                    fi
+                fi    
+                echo "Using Wifi Enabled ${wifi_enabled}"
 
-            wifi_enabled=$NEPI_WIFI_ENABLED
-            if [[ -z $wifi_enabled ]]; then
-                wifi_enabled=1
-                if [[ -f "$SYSTEM_SYS_CONFIG_FILE" ]]; then
-                    export NEPI_WIFI_ENABLED=$wifi_enabled
-                    update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
-                    needs_update=1
-                fi
-            fi    
-            echo "Using Wifi Enabled ${wifi_enabled}"
 
-
-            if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
-                if netget_info $nepi_wifi_interface; then 
-                    if [[ $wifi_enabled -eq 1 ]]; then
-                        echo "Enabling WiFi ${wifi_enabled}"
-                        netenable_wifi $nepi_wifi_interface
-                    else
-                        echo "Disabling WiFi ${wifi_enabled}"
-                        netdisable_wifi $nepi_wifi_interface
+                if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+                    if netget_info $nepi_wifi_interface; then 
+                        if [[ $wifi_enabled -eq 1 ]]; then
+                            echo "Enabling WiFi ${wifi_enabled}"
+                            netenable_wifi $nepi_wifi_interface
+                        else
+                            echo "Disabling WiFi ${wifi_enabled}"
+                            netdisable_wifi $nepi_wifi_interface
+                        fi
                     fi
                 fi
             fi

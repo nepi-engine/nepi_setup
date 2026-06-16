@@ -137,23 +137,21 @@ if [[ "$?" -eq 0 ]]; then
                         echo "Using Wired Name ${nepi_wired_name}"
 
                         nepi_wired_interface=$NEPI_WIRED_INTERFACE
-                        if [[ "$nepi_wired_interface" != 'NONE' ]]; then
-                            if ! netget_info $nepi_wired_interface; then 
-                                dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
-                                if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
-                                    echo "Auto updating wired interface hw option"
-                                    if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
-                                        echo "Got wired interface hw options ${dlist}"
-                                        read -r nepi_wired_interface _ <<< "$dlist"
-                                        echo "Updated wired interface hw options ${nepi_wired_interface}"
-                                        export NEPI_WIRED_INTERFACE=$nepi_wired_interface
-                                        needs_update=1
-                                    else
-                                        nepi_wired_interface="unknown"
-                                    fi
+                        if ! netget_info $nepi_wired_interface; then 
+                            dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
+                            if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
+                                echo "Auto updating wired interface hw option"
+                                if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
+                                    echo "Got wired interface hw options ${dlist}"
+                                    read -r nepi_wired_interface _ <<< "$dlist"
+                                    echo "Updated wired interface hw options ${nepi_wired_interface}"
+                                    export NEPI_WIRED_INTERFACE=$nepi_wired_interface
+                                    needs_update=1
                                 else
                                     nepi_wired_interface="unknown"
                                 fi
+                            else
+                                nepi_wired_interface="unknown"
                             fi
                         fi
                         echo "Using Wired Interface ${nepi_wired_interface}"
