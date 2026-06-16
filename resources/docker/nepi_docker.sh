@@ -344,7 +344,7 @@ netlist_str=''
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-
+SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
  while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
     ########################
@@ -408,7 +408,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_HOSTNAME_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_hostname"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_hostname.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_hostname.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -416,7 +416,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_TIME_NTPS_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_time_ntps"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_time_ntps.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_time_ntps.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -424,7 +424,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIRED_STATIC_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_static"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_static.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wired_static.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -432,7 +432,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIRED_ALIASES_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_aliases"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_aliases.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wired_aliases.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -440,7 +440,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIRED_DHCP_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_dhcp"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wired_dhcp.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wired_dhcp.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -448,7 +448,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIFI_ENABLE_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_enable"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_enable.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wifi_enable.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -456,7 +456,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIFI_LOW_POWER_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_low_power"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_low_power.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wifi_low_power.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -464,7 +464,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIFI_CLIENT_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_client"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_client.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wifi_client.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
@@ -472,7 +472,7 @@ DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 
         if [[ "$NEPI_ETC_WIFI_ACCESS_POINT_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wifi_access_point"
-            source ${DOCKER_FOLDER}/etc/scripts/update_etc_wifi_access_point.sh
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wifi_access_point.sh
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"
