@@ -305,153 +305,150 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     echo ""
 
 
-    needs_update=0
     systemctl &> /dev/null
     if [[ "$?" -eq 0 ]]; then
 
         echo "#########"
-        echo "WIRED NETWORK SETTINGS"
+        echo "UPDATING WIRED INTERFACE SETTINGS"
         echo ""
-                nepi_wired_name=$NEPI_WIRED_NAME
-                if [[ -z $nepi_wired_name ]]; then
-                    nepi_wired_name="NEPI_WIRED"
-                    export NEPI_WIRED_NAME=$nepi_wired_name
-                    needs_update=1
-                fi    
-                echo "Using Wired Name ${nepi_wired_name}"
+        needs_update=0
+        echo "Starting with Wired NEPI_WIRED_NAME}"
+        nepi_wired_name=$NEPI_WIRED_NAME
+        if [[ -z $nepi_wired_name ]]; then
+            nepi_wired_name="NEPI_WIRED"
+            export NEPI_WIRED_NAME=$nepi_wired_name
+            needs_update=1
+        fi    
+        echo "Using Wired Name ${nepi_wired_name}"
 
-                nepi_wired_interface=$NEPI_WIRED_INTERFACE
-                if [[ "$nepi_wired_interface" != 'NONE' ]]; then
-                    if ! netget_info $nepi_wired_interface; then 
-                        dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
-                        if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
-                            echo "Auto updating wired interface hw option"
-                            if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
-                                echo "Got wired interface hw options ${dlist}"
-                                read -r nepi_wired_interface _ <<< "$dlist"
-                                echo "Updated wired interface hw options ${nepi_wired_interface}"
-                                export NEPI_WIRED_INTERFACE=$nepi_wired_interface
-                                needs_update=1
-                            else
-                                nepi_wired_interface="unknown"
-                            fi
-                        else
-                            nepi_wired_interface="unknown"
-                        fi
+        echo "Starting with Wired Interface ${NEPI_WIRED_INTERFACE}"
+        nepi_wired_interface=$NEPI_WIRED_INTERFACE
+        if [[ "$nepi_wired_interface" != 'NONE' ]]; then
+            if ! netget_info $nepi_wired_interface; then 
+                dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'ethernet' | cut -d: -f1)
+                if [[ -n $dlist && "$nepi_wired_interface" != 'NONE' ]]; then
+                    echo "Auto updating wired interface hw option"
+                    if [[ "$dlist" != *"$nepi_wired_interface" ]]; then
+                        echo "Got wired interface hw options ${dlist}"
+                        read -r nepi_wired_interface _ <<< "$dlist"
+                        echo "Updated wired interface hw options ${nepi_wired_interface}"
+                        export NEPI_WIRED_INTERFACE=$nepi_wired_interface
+                        needs_update=1
+                    else
+                        nepi_wired_interface="unknown"
                     fi
+                else
+                    nepi_wired_interface="unknown"
                 fi
-                echo "Using Wired Interface ${nepi_wired_interface}"
+            fi
+        fi
+        echo "Using Wired Interface ${nepi_wired_interface}"
 
 
 
-                internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
-                if [[ -z $internet_enabled ]]; then
-                    internet_enabled=1
-                    export NEPI_WIRED_INTERNET_ENABLED=$internet_enabled
-                    needs_update=1
-                fi    
-                echo "Using Internet Enabled ${internet_enabled}"
+        internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
+        if [[ -z $internet_enabled ]]; then
+            internet_enabled=1
+            export NEPI_WIRED_INTERNET_ENABLED=$internet_enabled
+            needs_update=1
+        fi    
+        echo "Using Internet Enabled ${internet_enabled}"
 
-                nepi_static_ip=$NEPI_STATIC_IP
-                if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
-                    nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
-                    if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
-                        nepi_static_ip=192.168.179.103/24
-                    fi
-                    export NEPI_STATIC_IP=$nepi_static_ip
-                    needs_update=1
+        nepi_static_ip=$NEPI_STATIC_IP
+        if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
+            nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
+            if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
+                nepi_static_ip=192.168.179.103/24
+            fi
+            export NEPI_STATIC_IP=$nepi_static_ip
+            needs_update=1
+        fi
+        echo "Using Static IP Address ${nepi_static_ip}"
+
+
+
+        nepi_gateway_ip=$NEPI_GATEWAY_IP
+        if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
+            if [[ $internet_enabled -eq 1 ]]; then
+                nepi_gateway_ip=$(netget_router_ip)
+                if [[ -z $nepi_gateway_ip ]]; then
+                    nepi_gateway_ip=10.0.0.1
                 fi
-                echo "Using Static IP Address ${nepi_static_ip}"
+            fi
+            if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
+                new_ip="${nepi_static_ip%%/*}"
+                new_octet=1
+                nepi_gateway_ip="${new_ip%.*}.${new_octet}"
+            fi
+            export NEPI_GATEWAY_IP=$nepi_gateway_ip
+            needs_update=1
 
+        fi
+        echo "Using Gateway ${nepi_gateway_ip}"
 
-
-                nepi_gateway_ip=$NEPI_GATEWAY_IP
-                if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-                    if [[ $internet_enabled -eq 1 ]]; then
-                        nepi_gateway_ip=$(netget_router_ip)
-                        if [[ -z $nepi_gateway_ip ]]; then
-                            nepi_gateway_ip=10.0.0.1
-                        fi
-                    fi
-                    if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-                        new_ip="${nepi_static_ip%%/*}"
-                        new_octet=1
-                        nepi_gateway_ip="${new_ip%.*}.${new_octet}"
-                    fi
-                    export NEPI_GATEWAY_IP=$nepi_gateway_ip
-                    needs_update=1
-
-                fi
-                echo "Using Gateway ${nepi_gateway_ip}"
+        if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
+            update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_WIRED_INTERFACE" $NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_WIRED_INTERNET_ENABLED" $NEPI_WIRED_INTERNET_ENABLED $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
+        fi
 
     fi
 
 
-    if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
-        update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_WIRED_INTERFACE" $NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_WIRED_INTERNET_ENABLED" $NEPI_WIRED_INTERNET_ENABLED $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
-    fi
 
 
 
-    needs_update=0
+
+    
     systemctl &> /dev/null
     if [[ "$?" -eq 0 ]]; then
 
         echo "#########"
-        echo "WIFI NETWORK SETTINGS"
+        echo "UPDATING WIFI INTERFACE SETTINGS"
         echo ""
+        needs_update=0
+        echo "Starting with WiFi Interface ${NEPI_WIFI_INTERFACE}"
+        nepi_wifi_interface="unknown"
+        if [[ -n $NEPI_WIFI_INTERFACE && "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
+            nepi_wifi_interface=$NEPI_WIFI_INTERFACE
+            nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
+            echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
+            if [[ -z $nepi_wifi_interface ]]; then
 
-                nepi_wifi_interface=$NEPI_WIFI_INTERFACE
-                if [[ "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
-                    nepi_wifi_interface="unknown"
-                    nepi_wifi_interface=$NEPI_WIFI_INTERFACE
-                    if [[ -z $nepi_wifi_interface ]]; then
-                        nepi_wifi_interface=$(netget_hw $nepi_wifi_name)
-                        echo "Got wifi interface name and hardware  ${nepi_wifi_name}: ${nepi_wifi_interface}"
-                        if [[ -z $nepi_wifi_interface ]]; then
-                            nepi_wifi_interface="unknown"
-                        fi   
-                    fi       
-
-                    dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
-                    if [[ -n $dlist && "$nepi_wifi_interface" != 'NONE' ]]; then
-                        echo "Auto updating wifi interface hw option"
-                        if [[ "$dlist" != *"$nepi_wifi_interface" ]]; then
-                            echo "Got wifi interface hw options ${dlist}"
-                            read -r nepi_wifi_interface _ <<< "$dlist"
-                            echo "Updated wifi interface hw options ${nepi_wifi_interface}"
-                            if [[ "$NEPI_WIFI_INTERFACE" == "unknown" ]]; then
-                                export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
-                                needs_update=1
-                            fi
-                        else
-                            nepi_wifi_interface="unknown"
-                        fi
+                dlist=$(nmcli -t -f DEVICE,TYPE device status | grep -E 'wifi' | grep  -v 'wifi-' | cut -d: -f1)
+                if [[ -n $dlist ]]; then
+                    echo "Got wifi interface hw options ${dlist}"
+                    
+                    read -r nepi_wifi_interface _ <<< "$dlist"
+                    
+                    if [[ -f $SYSTEM_SYS_CONFIG_FILE ]]; then
+                        echo "Updating wifi interface hw options ${nepi_wifi_interface}"
+                        export NEPI_WIFI_INTERFACE=$nepi_wifi_interface
+                        needs_update=1
                     fi
                 fi
-                echo "Using Wifi Interface ${nepi_wifi_interface}"
+            fi
+        fi
+
+        echo "Using Wifi Interface ${nepi_wifi_interface}"
 
 
-                wifi_enabled=$NEPI_WIFI_ENABLED
-                if [[ -z $wifi_enabled ]]; then
-                    wifi_enabled=1
-                    export NEPI_WIFI_ENABLED=$wifi_enabled
-                    needs_update=1
+        wifi_enabled=$NEPI_WIFI_ENABLED
+        if [[ -z $wifi_enabled ]]; then
+            wifi_enabled=1
+            export NEPI_WIFI_ENABLED=$wifi_enabled
+            needs_update=1
 
-                fi    
-                echo "Using Wifi Enabled ${wifi_enabled}"
+        fi    
+        echo "Using Wifi Enabled ${wifi_enabled}"
 
+        if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
+            update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
+        fi
     fi
-
-    if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
-        update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
-        update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
-    fi
-
 
 
     #########################

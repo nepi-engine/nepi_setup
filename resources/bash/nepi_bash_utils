@@ -1769,6 +1769,7 @@ function netcreate_wired() {
                         new_ip="${ip_netmask%%/*}"
                         new_octet=1
                         gateway="${new_ip%.*}.$new_octet"
+                        disable_dns=1
                     fi
                     
                     echo "Using Gateway ${gateway}"
@@ -1789,6 +1790,12 @@ function netcreate_wired() {
             echo $cmd
             eval "$cmd" 
 
+            if [[ $disable_dns -eq 1 ]]; then
+            cmd='sudo nmcli connection modify "'${net_name}'" \
+              ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes'
+
+            fi
+
             cmd='sudo nmcli connection up "'${net_name}'"'
             echo $cmd
             eval "$cmd"     
@@ -1797,8 +1804,11 @@ function netcreate_wired() {
             sleep 3
             # Reset Network
             nnet
-            sleep 1
-            ndhcp 2> /dev/null
+
+            if [[ $disable_dns -ne 1 ]]; then
+              sleep 1
+              ndhcp 2> /dev/null
+            fi
             
         fi
     fi
