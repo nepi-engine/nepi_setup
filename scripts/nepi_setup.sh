@@ -1130,8 +1130,6 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.jpg /home/${CONFIG_USER}/
             pcmanfm --set-wallpaper "/home/${CONFIG_USER}/nepi_wallpaper.jpg"
 
-            sudo cp "${SOURCE_ETC_PATH}/user/Numurus Circle_Icon_Blue_500x500.PNG" /usr/share/pixmaps/raspberrypi-logo.png
-
             # # Add 'Open In Terminal' options to Desktop and File Managers
             # source_folder="${SOURCE_ETC_PATH}/user/rpi/config"
             # dest_folder="/home/${CONFIG_USER}/.config"
