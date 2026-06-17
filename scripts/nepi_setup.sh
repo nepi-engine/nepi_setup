@@ -1263,10 +1263,10 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
     else
         CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
-        if [[ ! -d CHROMIUM_FOLDER ]]; then
+        if [[ ! -d $CHROMIUM_FOLDER ]]; then
             sudo mkdir -p ${CHROMIUM_FOLDER}/Default
         fi
-        if [[ -d CHROMIUM_FOLDER ]]; then
+        if [[ -d $CHROMIUM_FOLDER ]]; then
             CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
         fi
         
@@ -1293,7 +1293,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "127.0.0.1:5003" $BOOKMARKS_FILE
+                    add_chromium_bookmark "RUI-App" "http://192.168.179.103:5003/" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                 fi
