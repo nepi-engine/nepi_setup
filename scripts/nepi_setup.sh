@@ -1293,7 +1293,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "http://192.168.179.103:5003/" $BOOKMARKS_FILE
+                    add_chromium_bookmark "RUI-App" "http://localhost:5003" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
                     add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                 fi
