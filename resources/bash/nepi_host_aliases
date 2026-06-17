@@ -597,6 +597,8 @@ export NDRIVE="${NEPI_STORAGE}"
 export DCFG="${NEPI_DOCKER_CONFIG}"
 export FCFG="${NEPI_FACTORY_CONFIG}"
 export SCFG="${NEPI_SYSTEM_CONFIG}"
+export SCFGE="${NEPI_SYSTEM_CONFIG}/etc"
+export SCFGS="${NEPI_SYSTEM_CONFIG}/etc/scripts"
 export UCFG="${NEPI_STORAGE}/user_cfg"
 
 
@@ -620,6 +622,8 @@ alias tmp="cd $TMP"
 alias dcfg="cd $DCFG"
 alias fcfg="cd $FCFG"
 alias scfg="cd $SCFG"
+alias scfge="cd $SCFGE"
+alias scfgs="cd $SCFGS"
 alias ucfg="cd $UCFG"
 
 
@@ -651,6 +655,8 @@ tmp = ${NEPI_STORAGE}/tmp
 dcfg = ${NEPI_DOCKER_CONFIG}
 fcfg = ${NEPI_FACTORY_CONFIG}
 scfg = ${NEPI_FACTORY_CONFIG}
+scfge = ${NEPI_SYSTEM_CONFIG}/etc
+scfgs = ${NEPI_SYSTEM_CONFIG}/etc/scripts
 ucfg = ${NEPI_STORAGE}/user_cfg
 
 ndsetup = /mnt/nepi_config/docker_config

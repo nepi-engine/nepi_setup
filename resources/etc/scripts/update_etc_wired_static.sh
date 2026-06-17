@@ -183,17 +183,7 @@ if [[ "$?" -eq 0 ]]; then
 
             nepi_gateway_ip=$NEPI_GATEWAY_IP
             if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-                if [[ $internet_enabled -eq 1 ]]; then
-                    nepi_gateway_ip=$(netget_router_ip)
-                    if [[ -z $nepi_gateway_ip ]]; then
-                        nepi_gateway_ip=10.0.0.1
-                    fi
-                fi
-                if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-                    new_ip="${nepi_static_ip%%/*}"
-                    new_octet=1
-                    nepi_gateway_ip="${new_ip%.*}.${new_octet}"
-                fi
+                nepi_gateway_ip=NONE
                 export NEPI_GATEWAY_IP=$nepi_gateway_ip
                 needs_update=1
 
@@ -211,20 +201,22 @@ if [[ "$?" -eq 0 ]]; then
 
             if netget_info $nepi_wired_interface; then
 
-                if ! netget_hw $nepi_wired_name; then
-                    echo "Network ${nepi_wired_name} not configured"
-                    echo "Will create ${nepi_wired_name} on ${nepi_wired_interface}"
-                    netcreate_wired ${nepi_wired_name} ${nepi_wired_interface} ${nepi_static_ip} ${nepi_gateway_ip}
+                # if ! netget_hw $nepi_wired_name; then
+                #     echo "Network ${nepi_wired_name} not configured"
+                #     echo "Will create ${nepi_wired_name} on ${nepi_wired_interface}"
+                #     netcreate_wired ${nepi_wired_name} ${nepi_wired_interface} ${nepi_static_ip} ${nepi_gateway_ip}
 
-                fi  
+                # fi  
 
-                nepi_wired_interface=$(netget_hw $nepi_wired_name)
-                if [[ -z $nepi_wired_interface ]]; then
-                    echo "Network ${nepi_wired_name} not configured"
-                else
-                    echo "Network exists ${nepi_wired_name} on ${nepi_wired_interface}"
-                    netset_wired_ipn ${nepi_static_ip} ${nepi_gateway_ip} ${nepi_wired_name}
-                fi
+                # nepi_wired_interface=$(netget_hw $nepi_wired_name)
+                # if [[ -z $nepi_wired_interface ]]; then
+                #     echo "Network ${nepi_wired_name} not configured"
+                # else
+                #     echo "Network exists ${nepi_wired_name} on ${nepi_wired_interface}"
+                #     netset_wired_ipn ${nepi_static_ip} ${nepi_gateway_ip} ${nepi_wired_name}
+                # fi
+
+                netcreate_wired ${nepi_wired_name} ${nepi_wired_interface} ${nepi_static_ip} ${nepi_gateway_ip} 
             else
                 echo "Skipping Network update ${nepi_wired_name} on ${nepi_wired_interface}"
             fi        
@@ -243,9 +235,11 @@ if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
             update_yaml_value $docker_config_setting $update_val $docker_config_file
         fi
     elif [[ "$CONFIG_USER" == "$NEPI_HOST_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
-        update_val=0
         if [[ -f "$docker_config_file" ]]; then
+            update_val=0
             update_yaml_value $docker_config_setting $update_val $docker_config_file
+            update_val=1
+            update_yaml_value "NEPI_ETC_WIRED_ALIASES_UPDATE" $update_val $docker_config_file
         fi
     fi
 fi

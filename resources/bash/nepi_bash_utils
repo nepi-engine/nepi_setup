@@ -1741,74 +1741,140 @@ function netcreate_wired() {
 
         if systemctl is-active --quiet NetworkManager; then
 
-          while nmcli connection show $net_name > /dev/null 2>&1; do
-              #echo "Disconnecting from current hotspot connection"
-              sudo nmcli connection delete $net_name
-              sleep 1
-          done
-          
-            cmd=""
 
-            echo "Creating Network ${net_name} on ${selected_hw} with IP Address ${ip_netmask}"
-            if [[ ${ip_netmask} == 'auto' ]]; then
-              cmd='sudo nmcli connection add type ethernet con-name "'${net_name}'" ifname '${selected_hw}' '
-              echo $cmd
-              eval "$cmd" 
-
-            elif [[ -n $ip_netmask ]]; then
-                    
-                    if [[ ${ip_netmask} != 'auto' ]]; then
-                      ip_netmask=$(fix_ipv4_netmask $ip_netmask)
-                      if ! is_valid_ipv4_netmask $ip_netmask; then
-                        echo "Invalid Address/Netmask Combination ${net_wired_ip}"
-                        return 1
-                      fi
-                    fi
-                    echo "Updating static ip to ${ip_netmask}"
-                    if ! is_valid_ipv4 $gateway; then
-                        new_ip="${ip_netmask%%/*}"
-                        new_octet=1
-                        gateway="${new_ip%.*}.$new_octet"
-                        disable_dns=1
-                    fi
-                    
-                    echo "Using Gateway ${gateway}"
-                    cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
-                        con-name "'${net_name}'" \
-                        ipv4.address '${nepi_static_ip}' \
-                        ipv4.dns 8.8.8.8,8.8.4.4 \
-                        ipv4.method manual \
-                        ipv4.gateway '${nepi_gateway_ip}
-                    echo $cmd
-                    eval "$cmd"     
-
-            fi
-
-
-
-            cmd='sudo nmcli connection modify "'${net_name}'" connection.interface-name "'${selected_hw}'"'
+            echo ""
+            echo "Configuring Connection ${net_name} on ${selected_hw} with IP Address ${ip_netmask}"
+            echo "--------------------------"
+            echo ""
+      
+            echo "Setting managed on ${selected_hw}"
+            cmd='sudo nmcli device set '${selected_hw}' managed yes'
             echo $cmd
             eval "$cmd" 
-
-            if [[ $disable_dns -eq 1 ]]; then
-            cmd='sudo nmcli connection modify "'${net_name}'" \
-              ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes'
-
-            fi
-
-            cmd='sudo nmcli connection up "'${net_name}'"'
-            echo $cmd
-            eval "$cmd"     
             echo ""
 
-            sleep 3
-            # Reset Network
-            nnet
 
-            if [[ $disable_dns -ne 1 ]]; then
-              sleep 1
-              ndhcp 2> /dev/null
-            fi
+            echo "disabling low-power mode on ${selected_hw}"
+            cmd='sudo ethtool -s '${selected_hw}' wol d'
+            echo $cmd
+            eval "$cmd" 
+            echo ""
+            
+            # net_hw=$(netget_hw  ${net_name})
+            # if [[ -n $net_hw ]]; then
+            #     net_hw=$(netget_hw  ${net_name})
+            #     if [[ "$net_hw" != "$selected_hw" ]]; then
+            #       echo "Deleting existing connection for ${net_name} on ${selected_hw}"
+            #       sudo nmcli connection delete $net_name
+            #       sleep 1
+            #     fi
+            # fi
+
+            while netget_hw  ${net_name}; do
+                net_hw=$(netget_hw  ${net_name})
+                echo "Deleting existing connection for ${net_name} on ${selected_hw}"
+                sudo nmcli connection delete $net_name
+                sleep 1
+            done
+
+            # net_hw=$(netget_hw  ${net_name})
+            # if [[ "$net_hw" != "$selected_hw" ]]; then
+
+            #   echo "Creating connection name ${net_name} to ${selected_hw}"
+            #   cmd='sudo nmcli connection modify "'${net_name}'" connection.interface-name "'${selected_hw}'"'
+            #   echo $cmd
+            #   eval "$cmd" 
+            #   echo ""
+
+            # fi
+
+
+            # net_hw=$(netget_hw  ${net_name})
+            # if [[ -z $net_hw ]]; then
+            #     echo "No connection found with name ${net_name}"
+            # else
+                echo "Bringin up ${net_name} on ${selected_hw}"
+
+                if [[ ${ip_netmask} == 'auto' ]]; then
+                  echo "Adding wired hw connection"
+                  cmd='sudo nmcli connection add type ethernet con-name "'${net_name}'" ifname '${selected_hw}' '
+                  echo $cmd
+                  eval "$cmd" 
+                  echo ""
+
+                elif [[ -n $ip_netmask ]]; then
+                        
+                        if [[ ${ip_netmask} != 'auto' ]]; then
+                          ip_netmask=$(fix_ipv4_netmask $ip_netmask)
+                          if ! is_valid_ipv4_netmask $ip_netmask; then
+                            echo "Invalid Address/Netmask Combination ${selected_hw}"
+                            return 1
+                          fi
+                        fi
+                        echo "Updating static ip to ${ip_netmask}"
+
+                        if ! is_valid_ipv4 $gateway; then
+                            new_ip="${ip_netmask%%/*}"
+                            new_octet=1
+                            gateway="${new_ip%.*}.$new_octet"
+                            disable_dns=1
+                        fi
+                        
+                        echo "Using Gateway ${gateway}"
+                        cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
+                            con-name "'${net_name}'" \
+                            ipv4.address '${nepi_static_ip}' \
+                            ipv4.dns 8.8.8.8,8.8.4.4 \
+                            ipv4.method manual \
+                            ipv4.gateway '${gateway}
+                        echo $cmd
+                        eval "$cmd"     
+                        echo ""
+
+
+                        if [[ $disable_dns -eq 1 ]]; then
+                          echo "Disabling auto-dns for ${net_name} on ${selected_hw}"
+                          cmd='sudo nmcli connection modify "'${net_name}'" \
+                            ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes'
+                          echo $cmd
+                          eval "$cmd"     
+                          echo ""
+                        fi
+
+                fi
+      
+
+
+                echo "Setting auto-negotiate on ${net_name}"
+                cmd='sudo nmcli connection modify '${net_name}' connection.autoconnect yes 802-3-ethernet.auto-negotiate yes'
+                echo $cmd
+                eval "$cmd" 
+                echo ""
+
+
+
+                echo "Setting highest priority for ${net_name} on ${selected_hw}"
+                cmd='sudo nmcli connection modify "'${net_name}'" connection.autoconnect-priority 100'
+                echo $cmd
+                eval "$cmd"     
+                echo ""
+
+
+                echo "Bringin up ${net_name} on ${selected_hw}"
+                cmd='sudo nmcli connection up "'${net_name}'"'
+                echo $cmd
+                eval "$cmd"     
+                echo ""
+
+                sleep 3
+                # Reset Network
+                nnet
+
+                if [[ $disable_dns -ne 1 ]]; then
+                  sleep 1
+                  ndhcp 2> /dev/null
+                fi
+            # fi
             
         fi
     fi
@@ -2799,7 +2865,9 @@ export -f fix_scripts
 clean_yaml_file() {
     local input_file="$1"
     if [[ -f "$input_file" ]]; then
-        grep -E '^.+:.+$' "$input_file" > "$input_file.tmp" && mv "$input_file.tmp" "$input_file"
+        sudo grep -E '^.+:.+$' "$input_file" > "$input_file.clean" && sudo mv "$input_file.clean" "$input_file"
+        sudo chown ${CONFIG_USER}:${CONFIG_USER} $input_file > /dev/null 2>&1
+        sudo chmod +x $input_file > /dev/null 2>&1
     else
         echo "Error: File '$input_file' not found." >&2
         return 1
@@ -4295,14 +4363,14 @@ function nepisync {
             sudo chown ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEYS_SHARE
             if [[ ${NEPI_MODE} == 'HOST' ]]; then
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
-              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/ 2> /dev/null
+              sudo cp -p ${NEPI_SSH_KEYS_DEST}/nepi_* ${NEPI_SSH_KEYS_SHARE}/ 2> /dev/null
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
-              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/ 2> /dev/null
+              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/nepi_* ${NEPI_SSH_KEYS_DEST}/ 2> /dev/null
             else
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SHARE} to ${NEPI_SSH_KEYS_DEST}"
-              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/ 2> /dev/null
+              sudo cp -p ${NEPI_SSH_KEYS_SHARE}/nepi_* ${NEPI_SSH_KEYS_DEST}/ 2> /dev/null
               echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_DEST} to ${NEPI_SSH_KEYS_SHARE}"
-              sudo cp -p ${NEPI_SSH_KEYS_DEST}/*nepi_* ${NEPI_SSH_KEYS_SHARE}/ 2> /dev/null
+              sudo cp -p ${NEPI_SSH_KEYS_DEST}/nepi_* ${NEPI_SSH_KEYS_SHARE}/ 2> /dev/null
             fi
         else
           echo "NEPI SYSTEM SSH folder not found at: ${NEPI_SSH_KEYS_SHARE} "
@@ -4671,7 +4739,8 @@ function nepigithub {
                                     ;;
                                 "Create SSH Key")
                                     key_path=''
-                                    echo "Creating NEPI GitHub ssh_key ${key_file}"
+                                    key_name="$(hostname)_${CONFIG_USER}_github"
+                                    echo "Creating NEPI GitHub ssh_key ${key_name}"
                                     echo ""
 
                                     while [[ -z "$ghub_email" ]]; do
@@ -4688,7 +4757,7 @@ function nepigithub {
 
                                     
 
-                                    key_name="$(hostname)_${CONFIG_USER}_github"
+                                    
                                     ret=$(create_ssh_key $key_folder $key_name $ghub_email)
                                     sel_error=$?
                                     sel_file=$(echo $ret | awk '{print $NF}')

@@ -44,7 +44,7 @@ NEPI_WIRED_NAME: NEPI_WIRED
 # Set the NEPI device's primary IP address and netmask
 # If netmask if left out, 24 will be used
 NEPI_STATIC_IP: 192.168.179.103/24
-# Set the NEPI device's primary IP Gatway address, set to 'unknown' to auto detect, or set to 'NONE' to disable
+# Set the NEPI device's primary IP Gatway address, set to 'unknown' to auto set, or set to 'NONE' to disable
 NEPI_GATEWAY_IP: unknown
 # Add up to 10 IP address and netmask Aliases on top of NEPI's Primary IP address (NEPI_STATIC_IP), or set to NONE.
 # If netmask if left out, 24 will be used
