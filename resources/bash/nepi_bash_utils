@@ -3511,7 +3511,7 @@ export -f get_hailo_hw_version
 
 function get_hailo_sw_version(){
         hailo_version=0
-        hailo_info=$(hailortcli -version) >/dev/null 2>&1
+        hailo_info=$(hailortcli -version >/dev/null 2>&1)
         if [[ -n $hailo_info ]] ; then
           hailo_sw="${hailo_info##* }"
           if [[ -n hailo_sw ]]; then
@@ -3582,11 +3582,11 @@ export -f get_openvpn_version
 function get_sw_desc() {
   os_desc=$(get_os_info)
   sw_desc=${os_desc}
-  cuda_ver=$(get_cuda_version)
+  cuda_ver=$(get_cuda_version 2> /dev/null) 
   if [[ -n $cuda_ver && "$cuda_ver" != '0' ]]; then
     sw_desc="${sw_desc}_cuda${cuda_ver}"
   fi
-  hailo_ver=$(get_hailo_sw_version)
+  hailo_ver=$(get_hailo_sw_version 2> /dev/null) 
   if [[ -n $hailo_ver && "$hailo_ver" != '0' ]]; then
     sw_desc="${sw_desc}_hailo${hailo_ver}"
   fi

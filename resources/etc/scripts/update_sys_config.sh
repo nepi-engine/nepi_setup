@@ -107,8 +107,11 @@ if [[ "$CONFIG_USER" == 'nepi' && -f "$UPDATE_PATH" ]]; then
     update_yaml_value "NEPI_HAS_HAILO" $NEPI_HAS_HAILO $UPDATE_PATH
     export NEPI_HAILO_HW_VERSION=$NEPI_HAILO_HW_VERSION
     update_yaml_value "NEPI_HAILO_HW_VERSION" $NEPI_HAILO_HW_VERSION $UPDATE_PATH
-            export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
-    update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $SYSTEM_SYS_CUPDATE_PATHONFIG_FILE
+    if [[ -z NEPI_HAILO_SW_VERSION ]]; then
+        NEPI_HAILO_SW_VERSION=0
+    fi
+    export NEPI_HAILO_SW_VERSION=$NEPI_HAILO_SW_VERSION
+    update_yaml_value "NEPI_HAILO_SW_VERSION" $NEPI_HAILO_SW_VERSION $UPDATE_PATH
 
     ###########
     sw_desc=$(get_sw_desc)
