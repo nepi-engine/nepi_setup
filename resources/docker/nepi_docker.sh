@@ -231,15 +231,15 @@ echo "Calling NEPI SSH KEY update script ${ssh_key_script}"
 source $ssh_key_script
 
 ###############################
-echo ""
-echo "---------------------------------"
-echo "Reseting Network Config"
-echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
-echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
+# echo ""
+# echo "---------------------------------"
+# echo "Reseting Network Config"
+# echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+# echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
 
-if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
-    ninet
-fi
+# if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
+#     ninet
+# fi
 
 
 
@@ -254,34 +254,34 @@ fi
 nepi_static_ip=$NEPI_STATIC_IP
 nepi_recovery_ip=192.168.179.103/24
 
-if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi_static_ip" != "$nepi_recovery_ip" ]]; then
+# if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi_static_ip" != "$nepi_recovery_ip" ]]; then
 
-    echo "##########################"
-    echo "Starting Recovery Mode"
-    echo "##########################"
-    echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
-    echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - ${nepi_recovery_ip}"
+#     echo "##########################"
+#     echo "Starting Recovery Mode"
+#     echo "##########################"
+#     echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+#     echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - ${nepi_recovery_ip}"
 
-    # Load NEPI FACTORY CONFIG
-    echo "Setting Static IP to ${nepi_recovery_ip}"
-    # Load NEPI FACTORY CONFIG
-    export NEPI_STATIC_IP=nepi_recovery_ip
-    LOAD_NEPI_CONFIG=0
-    source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG $nepi_recovery_ip
-    if [[ "$?" -eq 0 ]]; then
-        echo "Sleeping for 10 seconds"
-        sleep 10
-        export NEPI_STATIC_IP=nepi_static_ip
-        LOAD_NEPI_CONFIG=1
-        source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-        # sleep 2
-        # if ! pingn; then
-        #     nnet
-        # fi
-    else
-        echo "Failed to run recovery mode setup"
-    fi
-fi
+#     # Load NEPI FACTORY CONFIG
+#     echo "Setting Static IP to ${nepi_recovery_ip}"
+#     # Load NEPI FACTORY CONFIG
+#     export NEPI_STATIC_IP=nepi_recovery_ip
+#     LOAD_NEPI_CONFIG=0
+#     source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG $nepi_recovery_ip
+#     if [[ "$?" -eq 0 ]]; then
+#         echo "Sleeping for 10 seconds"
+#         sleep 10
+#         export NEPI_STATIC_IP=nepi_static_ip
+#         LOAD_NEPI_CONFIG=1
+#         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
+#         # sleep 2
+#         # if ! pingn; then
+#         #     nnet
+#         # fi
+#     else
+#         echo "Failed to run recovery mode setup"
+#     fi
+# fi
 
 
 
