@@ -961,7 +961,6 @@ export -f nnet
 
 function ndhcp(){
   sudo -v
-
     # ping -c 1 -W 1 8.8.8.8 > /dev/null 2>&1
 
     # # Check the exit status of the ping command
@@ -971,12 +970,17 @@ function ndhcp(){
     #   echo "Can't Ping Internet t 8.8.8.8"
     #   return 1
     # else
-      echo "Resetting DHCP Clients"
-      echo "Killing existing DHCP clients"
-      sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
-      echo "Renewing dhclient"
-      sudo dhclient -nw > /dev/null 2>&1
-      #sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+    #   ping -c 1 -W 1 google.com > /dev/null 2>&1
+    #   if [ $? -ne 0 ]; then
+    #     echo "Can't Ping google.com"
+    #   return 1
+          echo "Resetting DHCP Clients"
+          echo "Killing existing DHCP clients"
+          sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+          echo "Renewing dhclient"
+          sudo dhclient -nw > /dev/null 2>&1
+          #sudo kill $(ps aux | grep 'dhclient' | awk '{print $2}') >/dev/null 2>&1
+    #   fi
     # fi
     
 }
@@ -1044,6 +1048,7 @@ export -f nclock
 
 function ninet(){
   sudo -v
+  nnet
   ndhcp # Enable DHCP internet connection if needed
   if [[ $? -eq 0 ]]; then
       sleep 4
@@ -1698,7 +1703,7 @@ function netcreate_wired() {
     selected_hw="$2"
     ip_netmask="$3"
     ip_netmask=$(fix_ipv4_netmask $ip_netmask)
-    gateway="$4"
+    # gateway="$4"
     
 
     if ! systemctl is-active --quiet NetworkManager; then
@@ -1774,7 +1779,6 @@ function netcreate_wired() {
                 net_hw=$(netget_hw  ${net_name})
                 echo "Deleting existing connection for ${net_name} on ${selected_hw}"
                 sudo nmcli connection delete $net_name
-                sleep 1
             done
 
             # net_hw=$(netget_hw  ${net_name})
@@ -1813,37 +1817,35 @@ function netcreate_wired() {
                         fi
                         echo "Updating static ip to ${ip_netmask}"
 
-                        if ! is_valid_ipv4 $gateway; then
-                            new_ip="${ip_netmask%%/*}"
-                            new_octet=1
-                            gateway="${new_ip%.*}.$new_octet"
-                            disable_dns=1
-                        fi
-                        
-                        echo "Using Gateway ${gateway}"
+                        # if ! is_valid_ipv4 $gateway; then
+                        #     new_ip="${ip_netmask%%/*}"
+                        #     new_octet=1
+                        #     gateway="${new_ip%.*}.$new_octet"
+                        #     disable_dns=1
+                        # fi
+                        # echo "Using Gateway ${gateway}"
+
                         cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
                             con-name "'${net_name}'" \
                             ipv4.address '${nepi_static_ip}' \
-                            ipv4.dns 8.8.8.8,8.8.4.4 \
                             ipv4.method manual \
-                            ipv4.gateway '${gateway}
+                            # ipv4.gateway '${gateway}
                         echo $cmd
                         eval "$cmd"     
                         echo ""
 
 
-                        if [[ $disable_dns -eq 1 ]]; then
-                          echo "Disabling auto-dns for ${net_name} on ${selected_hw}"
-                          cmd='sudo nmcli connection modify "'${net_name}'" \
-                            ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes'
-                          echo $cmd
-                          eval "$cmd"     
-                          echo ""
-                        fi
+
+
 
                 fi
       
-
+                echo "Disabling auto-dns for ${net_name} on ${selected_hw}"
+                cmd='sudo nmcli connection modify "'${net_name}'" \
+                  ipv4.ignore-auto-dns yes ipv6.ignore-auto-dns yes'
+                echo $cmd
+                eval "$cmd"     
+                echo ""
 
                 echo "Setting auto-negotiate on ${net_name}"
                 cmd='sudo nmcli connection modify '${net_name}' connection.autoconnect yes 802-3-ethernet.auto-negotiate yes'
@@ -1860,6 +1862,18 @@ function netcreate_wired() {
                 echo ""
 
 
+                echo "Disablong ipv6 for ${net_name} on ${selected_hw}"
+                cmd='sudo nmcli connection modify "'${net_name}'" ipv6.method disabled'
+                echo $cmd
+                eval "$cmd"     
+                echo ""
+
+                cmd='sudo nmcli connection modify "'${net_name}'" ipv6.method ignore'
+                echo $cmd
+                eval "$cmd"     
+                echo ""
+
+
                 echo "Bringin up ${net_name} on ${selected_hw}"
                 cmd='sudo nmcli connection up "'${net_name}'"'
                 echo $cmd
@@ -1867,13 +1881,6 @@ function netcreate_wired() {
                 echo ""
 
                 sleep 3
-                # Reset Network
-                nnet
-
-                if [[ $disable_dns -ne 1 ]]; then
-                  sleep 1
-                  ndhcp 2> /dev/null
-                fi
             # fi
             
         fi
@@ -2721,7 +2728,7 @@ netselect_wifi = Select from list available wifi hardware devices
 netselect_wifi_network = Select from list available wifi networks
 netdelete = Delete passed or selected device ethernet or wifi connection
 
-netcreate_wired = Create a connection with passed name, device, ip/netmask, gateway
+netcreate_wired = Create a connection with passed name, device, ip/netmask
 netonnect_wifi = Connect to WiFi network with name, password, (optional device). 
   Use password ENTER to manually enter, Use password DELETE to disconnect
 netcreate_hotspot = Configure a WiFi access point with  with name, password, (optional device). 

@@ -223,26 +223,6 @@ echo ""
 
 
 
-###############################
-# Check for NEPI Config Changes
-
-ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
-echo "Calling NEPI SSH KEY update script ${ssh_key_script}"
-source $ssh_key_script
-
-###############################
-# echo ""
-# echo "---------------------------------"
-# echo "Reseting Network Config"
-# echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
-# echo "DHCP ENABLED = ${NEPI_WIRED_DHCP_ENABLED}"
-
-# if [[ $NEPI_WIRED_DHCP_ENABLED -eq 1 ]]; then
-#     ninet
-# fi
-
-
-
 
 ####################################
 # Run in Recovery Mode if Needed
@@ -340,6 +320,32 @@ fi
  echo "Starting NEPI Service Monitoring"
  echo "********************************"
 
+
+echo "Loading NEPI System Config"
+netpiload
+
+###############################
+# Check for NEPI Config Changes
+
+# ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
+# echo "Calling NEPI SSH KEY update script ${ssh_key_script}"
+# source $ssh_key_script
+
+###############################
+
+# echo ""
+# echo "---------------------------------"
+# echo "Reseting Network Config"
+# echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+# echo "DHCP ENABLED = ${NEPI_WIRED_INTERNET_ENABLED}"
+
+# if [[ $NEPI_WIRED_INTERNET_ENABLED -eq 1 ]]; then
+#     ninet
+# else
+#     nnet
+# fi
+
+
 netlist_str=''
 
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
@@ -364,6 +370,19 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
             echo " Container Start Process Failed. Will Stop Trying"
             CONFIG_MODE=STOP
         fi
+
+        echo ""
+        echo "---------------------------------"
+        echo "Checking Network Config"
+        echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+        echo "DHCP ENABLED = ${NEPI_WIRED_INTERNET_ENABLED}"
+
+        if [[ $NEPI_WIRED_INTERNET_ENABLED -eq 1 ]]; then
+            ninet
+        else
+            nnet
+        fi
+
         echo ""
         echo "Returning to NEPI Service Monitoring"
         echo "********************************"
@@ -489,9 +508,10 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
 
 
     fi
-      
+    
     sleep 1
 
+    nnet
     updatenetlist
     update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
 

@@ -89,10 +89,7 @@ systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_WIRED_DHCP_ENABLED" -eq 1 ]]; then
-
-
         ndhcp
-        
     fi  
 
 fi

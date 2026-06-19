@@ -80,39 +80,7 @@ if [[ "$?" -eq 0 ]]; then
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-  
-        if ! systemctl is-active --quiet NetworkManager; then
-                    echo "Updating Network Services"
-                    echo ""
-                    echo "########"
-                    echo "Updating Network Services"
 
-                    echo "Disabling ifupdown Networking Service"
-                    sudo systemctl disable networking >/dev/null 2>&1
-                    sudo systemctl stop networking >/dev/null 2>&1
-
-                    echo "Disabling hostapd access point service"
-                    sudo systemctl disable hostapd >/dev/null 2>&1
-                    sudo systemctl stop hostapd >/dev/null 2>&1
-
-                    echo "Configuring NetworkManager Service" 
-
-                    sudo systemctl enable NetworkManager >/dev/null 2>&1
-                    sudo systemctl restart NetworkManager >/dev/null 2>&1
-
-                    sudo systemctl enable NetworkManager-dispatcher >/dev/null 2>&1
-                    sudo systemctl restart NetworkManager-dispatcher >/dev/null 2>&1
-
-                    sudo systemctl disable NetworkManager-wait-online >/dev/null 2>&1
-                    sudo systemctl stop NetworkManager-wait-online >/dev/null 2>&1
-
-                    if is_valid_ubuntu; then
-                        echo "Enabling netplan Service" 
-                        sudo systemctl enable netplan >/dev/null 2>&1
-                        sudo systemctl restart netplan >/dev/null 2>&1
-                    fi
-                    sleep 3
-        fi
 
         if systemctl is-active --quiet NetworkManager; then
 

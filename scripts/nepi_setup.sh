@@ -622,7 +622,6 @@ if [[ "$?" -eq 0 ]]; then
 
             if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
 
-                    echo ""
                     echo "########"
                     echo "Updating Network Services"
 
@@ -630,13 +629,22 @@ if [[ "$?" -eq 0 ]]; then
                     sudo systemctl disable networking >/dev/null 2>&1
                     sudo systemctl stop networking >/dev/null 2>&1
 
-                    ehco "Disabling hostapd access point service"
-                    sudo systemctl disable hostapd >/dev/null 2>&1
-                    sudo systemctl stop hostapd >/dev/null 2>&1
-
                     if [[ -d "/etc/network/interfaces.d" ]]; then
                         sudo rm -r /etc/network/interfaces.d/* >/dev/null 2>&1
                     fi 
+
+                    echo "Disabling hostapd access point service"
+                    sudo systemctl disable hostapd >/dev/null 2>&1
+                    sudo systemctl stop hostapd >/dev/null 2>&1
+
+                    echo "Disabling avahi service"
+                    sudo systemctl stop avahi-daemon.service avahi-daemon.socket >/dev/null 2>&1
+                    sudo systemctl disable avahi-daemon.service avahi-daemon.socket >/dev/null 2>&1
+                    sudo systemctl mask avahi-daemon.service avahi-daemon.socket >/dev/null 2>&1
+
+                    echo "Enabling netplan Service" 
+                    sudo systemctl disable netplan >/dev/null 2>&1
+                    sudo systemctl stop netplan >/dev/null 2>&1
 
                     echo "Configuring NetworkManager Service" 
 
@@ -649,11 +657,7 @@ if [[ "$?" -eq 0 ]]; then
                     sudo systemctl disable NetworkManager-wait-online >/dev/null 2>&1
                     sudo systemctl stop NetworkManager-wait-online >/dev/null 2>&1
 
-                    if is_valid_ubuntu; then
-                        echo "Enabling netplan Service" 
-                        sudo systemctl enable netplan >/dev/null 2>&1
-                        sudo systemctl restart netplan >/dev/null 2>&1
-                    fi
+                    echo "Configuring dhcclient Service" 
 
             fi
 
