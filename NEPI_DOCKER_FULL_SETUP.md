@@ -149,9 +149,9 @@ This section will initialize and test your NEPI Docker installation.
 
 Log back into `nepihost` using password 'nepi' 
 
-Check for internet connection
+Test that you can reconnect to the internet and sync clocks:
 
-    ping -c 1 google.com
+    ninet
 
 Run the NEPI Docker Storage Initialization script (sudo password is now 'nepi'):
 
