@@ -1277,7 +1277,8 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
     fi
 
     if [[ -n "$CHROMIUM_PROFILE" ]]; then
-
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap  > /dev/null 2>&1
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.config/chromium  > /dev/null 2>&1
         if [[ -d ${CHROMIUM_PROFILE} ]]; then
             echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
             sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
