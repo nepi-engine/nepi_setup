@@ -3,7 +3,7 @@ sudo rm -rf /var/lib/docker
 sudo systemctl start docker
 
 # sudo docker system prune -a --volumes --force
-# sudo docker system df -v
+# sudo docker system df -vls 
 #sudo docker rm -f $(sudo docker ps -aq)
 #sudo docker rmi -f $(sudo docker images -aq)
 
