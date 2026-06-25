@@ -497,6 +497,14 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
             echo "********************************"
         fi
 
+        if [[ "$NEPI_ETC_SSH_KEY_UPDATE" -eq 1 ]]; then
+            echo "Calling: update_etc_ssh_key"
+            source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_ssh_keys.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
+        fi
+
         if [[ "$NEPI_FS_EXPORT" -eq 1 && "$NEPI_RUNNING" -eq 1 ]]; then
             echo "Calling: nepi_docker_export"
             source ${DOCKER_FOLDER}/nepi_docker_export.sh $NEPI_EXPORT_FILE
