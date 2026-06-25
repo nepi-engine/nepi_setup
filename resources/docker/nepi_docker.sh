@@ -322,7 +322,7 @@ fi
 
 
 echo "Loading NEPI System Config"
-netpiload
+nepiload
 
 ###############################
 # Check for NEPI Config Changes
@@ -519,7 +519,9 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
     
     sleep 1
 
-    nnet
+    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+        nnet
+    fi
     updatenetlist
     update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
 
