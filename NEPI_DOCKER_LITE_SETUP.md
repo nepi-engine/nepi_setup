@@ -19,7 +19,7 @@ See the 'Check Available Disk Space' section at the end of these instructions fo
 
 This step will setup NEPI Docker required user accounts on your device
 
-Log into a user account on the device with 'Adminstrator' privilages, **or 'nepihost' if exists**.
+Log into a user account on the device with 'Adminstrator' privilages.
 
 Open Terminal Window - Right click on the desktop and select the "Open in Terminal" option.
 
@@ -60,7 +60,7 @@ This process will create (if not allready created) and setup the following NEPI 
 
 
 **NOTE:**  After this process, the following changes will be made:
-1) NEPI bash alias and util functions added to 'nepihost user bash profile.
+1) NEPI bash alias and util functions added to the user bash profile.
 2) NEPI folder shortcuts added to File Manager folder bookmarks.
 3) Chromium browser updated with useful NEPI browser bookmarks.
 
@@ -71,7 +71,7 @@ This process will create (if not allready created) and setup the following NEPI 
 ### NEPI Docker Init Setup
 This section will initialize and test your NEPI Docker installation.  
 
-Log back into `nepihost` using password 'nepi' 
+Log back into the user account on the device with 'Adminstrator' privilages.
 
 Check for internet connection
 
@@ -79,13 +79,13 @@ Check for internet connection
 
 Run the NEPI Docker Storage Initialization script (sudo password is now 'nepi'):
 
-    source /home/nepihost/nepi_setup/scripts/docker_storage_init.sh
+    source ~/nepi_setup/scripts/docker_storage_init.sh
 
 Run the NEPI Docker Image Initialization script (sudo password is now 'nepi'):
 
 **NOTE:** This step can take a long time as it involves dowloading several large files from the internet.
 
-    source /home/nepihost/nepi_setup/scripts/docker_image_init.sh
+    source ~/nepi_setup/scripts/docker_image_init.sh
 
 After the import completes, you can print the current installed NEPI Docker Image by typing:
 
@@ -165,7 +165,7 @@ If everthing is working, you can enable the NEPI Docker Service which will autom
 
 **POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
 
-Log back into `nepihost` using password 'nepi' 
+Log back into the user account on the device with 'Adminstrator' privilages. 
 
 Check that your NEPI Container is running after reboot:
 
