@@ -155,29 +155,6 @@ the default admin password is: **nepiadmin**
 **NOTE:** If you encounter any issues starting and running the NEPI Software container, 
 see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
 
-
-################################################################
-### NEPI Docker Service Setup
-
-If everthing is working, you can enable the NEPI Docker Service which will automatically start the NEPI Container and Software on boot:
-
-    nepienable # You can disable the NEPI Docker Service with 'nepidisable'
-
-**POWER CYCLE YOUR SYSTEM WHEN COMPLETE**
-
-Log back into the user account on the device with 'Adminstrator' privilages. 
-
-Check that your NEPI Container is running after reboot:
-
-    dps
-
-    #If your container is not running, try to debug NEPI Docker Service issues with the following commands:
-
-        nepirestart
-        nepistatus
-        nepilogs
-
-
 ################################################################
 ### NEPI Docker Host Config Setup
 
