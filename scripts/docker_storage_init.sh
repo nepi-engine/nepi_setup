@@ -73,8 +73,9 @@ elif [[ -f $NEPI_SETUP_CONFIG_FILE && $nepi_config_loaded -eq 0 ]]; then
     fi
 fi
 
-
-ninet > /dev/null 2>&1
+if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+    ninet > /dev/null 2>&1
+fi
 
 if ! is_valid_internet > /dev/null; then
     echo "No Internet Connection Detected.  Connect and rerun this script"
