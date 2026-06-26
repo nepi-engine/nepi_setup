@@ -818,22 +818,22 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
             done
             echo ""
 
-    elif [[ ${NEPI_MODE} == 'HOST' && "$NEPI_INSTALL" == 'LITE' && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
-        echo "Creating a Custom NEPI SSH KEY"
-        sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
-        ret=$(create_ssh_key)
-        error=$?
-        echo "Got select SSH Key file error: ${error}"
-        key_file=$(echo $ret | awk '{print $NF}')
-        echo "Got select SSH Key file: ${key_file}"
+    # elif [[ ${NEPI_MODE} == 'HOST' && "$NEPI_INSTALL" == 'LITE' && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
+    #     echo "Creating a Custom NEPI SSH KEY"
+    #     sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
+    #     ret=$(create_ssh_key)
+    #     error=$?
+    #     echo "Got select SSH Key file error: ${error}"
+    #     key_file=$(echo $ret | awk '{print $NF}')
+    #     echo "Got select SSH Key file: ${key_file}"
         
-        if [[ $error -eq 0 && -n key_file ]]; then
-            echo ''
-            echo "Created Custom NEPI SSH KEY: ${key_file}"
-            CURRENT_NEPI_SSH_KEY=$(basename $key_file)
-        else
-            echo "Failed to create Custom NEPI SSH KEY"
-        fi     
+    #     if [[ $error -eq 0 && -n key_file ]]; then
+    #         echo ''
+    #         echo "Created Custom NEPI SSH KEY: ${key_file}"
+    #         CURRENT_NEPI_SSH_KEY=$(basename $key_file)
+    #     else
+    #         echo "Failed to create Custom NEPI SSH KEY"
+    #     fi     
 
     fi
 
