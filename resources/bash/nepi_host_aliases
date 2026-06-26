@@ -276,12 +276,12 @@ function nepiimportc(){
   if [[ -f "$image_path" ]]; then
     echo "Cleaning and Restarting Docker"
     nepistop
-    sleep(2)
+    sleep 2
     sudo systemctl stop docker
     sudo rm -rf /var/lib/docker
     sudo systemctl start docker
     echo "Staring Import Process"
-    sleep(2)
+    sleep 2
     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
   else
       echo "No NEPI Image Files Found in: ${import_path}"
