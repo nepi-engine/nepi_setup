@@ -250,6 +250,45 @@ function nepiimport(){
 }
 export -f nepiimport
 
+function nepiimportc(){
+  sudo -v
+  import_path=${NEPI_STORAGE}/nepi_images
+  if [[ -n "$1" ]]; then
+    if [[ -f "$1" ]]; then
+      image_path=$1
+    elif [[ -n "$2" ]]; then
+      image_path=${import_path}/${$2}
+    fi
+  fi
+
+  if [[ -d "$import_path" ]]; then
+      selected=$(select_file_from_folder $import_path | tail -n1)
+      echo "Selected NEPI Image file ${selected}"
+      if [[ -n "$selected" ]]; then
+        echo "Importing NEPI Image file ${selected}"
+        image_path="${import_path}/${selected}"
+      else
+          echo "No NEPI Image Files Found in: ${import_path}"
+          return 1
+      fi  
+  fi
+  echo "Calling NEPI Import script with file ${image_path}"
+  if [[ -f "$image_path" ]]; then
+    echo "Cleaning and Restarting Docker"
+    nepistop
+    sleep(2)
+    sudo systemctl stop docker
+    sudo rm -rf /var/lib/docker
+    sudo systemctl start docker
+    echo "Staring Import Process"
+    sleep(2)
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_import.sh $image_path
+  else
+      echo "No NEPI Image Files Found in: ${import_path}"
+      return 1
+  fi  
+}
+export -f nepiimportc
 
 
 function nepiretag(){
@@ -408,6 +447,7 @@ nepipull = Download and install a NEPI Docker image from the provided link
 nepiinit = Reset, clear, and import new NEPI Image.
 nepidownload = Download and install image from provided 'dropbox_shared_folder_link_address' in qoutes.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
+nepiimportc = Clear and Reset Docker before importing a NEPI image .tar file. Optional: Enter a file name or full file path.
 nepiexport = Export the running NEPI container to a .tar file. Enter a file name or full file path.
 nepiexportc = Export the running NEPI container without a tailing description.
 nepiload = Import a NEPI image .archive.tar file. Optional: Enter a file name or full file path.
