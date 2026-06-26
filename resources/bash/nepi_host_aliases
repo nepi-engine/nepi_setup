@@ -430,6 +430,18 @@ function nepibld(){
 }
 export -f nepibld
 
+## NEPI build shortcuts
+function nepibldc(){
+  SHOW_CONFIG_MENU=$1
+  sudo -v
+  sudo rm -r /home/${CONFIG_USER}/.ssh/*
+  sudo rm -r ${NEPI_SYSTEM_CONFIG}/ssh_keys/*
+  source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
+  sbrc
+  ninet
+}
+export -f nepibldc
+
 
 
 HELPN="${HELPN}
@@ -458,7 +470,8 @@ nepidisable = Disable NEPI Docker service on next boot.
 nepirestart = Restart NEPI docker service.
 nepistatus = Show the systemctl status for nepi_docker service.
 nepilogs = Show live NEPI Docker service journal file.
-nepibld = Build or Update the NEPI Docker File System from source code in ${NEPI_BUILD_REPO_FOLDER}.
+nepibld = Builds the NEPI Docker File System from source code in ${NEPI_BUILD_REPO_FOLDER}.
+nepibldc = Clears SSH and other files, then builds the NEPI Docker File System from source code in ${NEPI_BUILD_REPO_FOLDER}.
 nepiupdate = Run NEPI Docker bash, folders, files, and config update processes.
 nepicreate = Export and Import a new NEPI Docker Image from running container
 nepiprint = Print current NEPI DOCKER and SYSTEM configuration settings."
