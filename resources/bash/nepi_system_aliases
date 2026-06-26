@@ -91,18 +91,25 @@ export -f nepistart
 
 ## NEPI build shortcuts
 
-alias nepibld="
-sudo -v
-cd $NEPI_BUILD_REPO_FOLDER
-source ./build_nepi_complete.sh
-sbrc"
+function nepibld(){
+  sudo -v
+  nepistop
+  cd $NEPI_BUILD_REPO_FOLDER
+  source ./build_nepi_complete.sh
+  sbrc
+}
 
-alias nepibldc="
-sudo -v
-cd $NEPI_BUILD_REPO_FOLDER
-build_clean=1
-source ./build_nepi_complete.sh $build_clean
-sbrc"
+function nepibldc(){
+  sudo -v
+  echo "Cleaning NEPI SSH Folders"
+  system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
+  sudo rm -r $system_source_config
+  sudo rm -r /home/nepi/.ssh/*
+  nepistop
+  cd $NEPI_BUILD_REPO_FOLDER
+  source ./build_nepi_complete.sh
+  sbrc
+}
 
 
 # NEPI build shortcuts
@@ -163,6 +170,7 @@ nepihome = change to NEPI home dir
 nepistart = start the NEPI processes
 nepistop = stop the NEPI processe
 nepibld = Build NEPI bash, config, code repos, and RUI
+nepibldc = Clear SSH folders and Build complete
 codebld = Build NEPI code repos only
 ruibld = Build the RUI only
 nepistatus = Print running status of all NEPI processes
