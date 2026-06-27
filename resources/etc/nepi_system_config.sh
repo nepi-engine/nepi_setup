@@ -518,8 +518,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     echo "Show Menu set to: ${SHOW_CONFIG_MENU}"
     echo ""
 
-    
-    if [[ $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
+    if [[ "$NEPI_MODE" == 'HOST' && $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
         echo "Configuring Setup Menu"
 
         echo ""
@@ -818,26 +817,10 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
             done
             echo ""
 
-    # elif [[ ${NEPI_MODE} == 'HOST' && "$NEPI_INSTALL" == 'LITE' && ${CURRENT_NEPI_SSH_KEY} == 'nepi_default_ssh_key' ]]; then
-    #     echo "Creating a Custom NEPI SSH KEY"
-    #     sudo rm /home/${CONFIG_USER}/.ssh/nepi_*
-    #     ret=$(create_ssh_key)
-    #     error=$?
-    #     echo "Got select SSH Key file error: ${error}"
-    #     key_file=$(echo $ret | awk '{print $NF}')
-    #     echo "Got select SSH Key file: ${key_file}"
-        
-    #     if [[ $error -eq 0 && -n key_file ]]; then
-    #         echo ''
-    #         echo "Created Custom NEPI SSH KEY: ${key_file}"
-    #         CURRENT_NEPI_SSH_KEY=$(basename $key_file)
-    #     else
-    #         echo "Failed to create Custom NEPI SSH KEY"
-    #     fi     
-
+        udpate_config_file
     fi
 
-    udpate_config_file
+  
 
       
     systemctl &> /dev/null
@@ -885,15 +868,15 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
 
 
-
-    #################################################
-    echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
-    source ${SYSTEM_ETC_PATH}/update_etc_files.sh
-    # if [ $? -eq 1 ]; then
-    #     echo "Failed to update ETC folder ${ETC_NEPI_PATH}"
-    #     exit 1
-    # fi
-
+    if [[ "$NEPI_MODE" == 'HOST' ]]; then
+        #################################################
+        echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
+        source ${SYSTEM_ETC_PATH}/update_etc_files.sh
+        # if [ $? -eq 1 ]; then
+        #     echo "Failed to update ETC folder ${ETC_NEPI_PATH}"
+        #     exit 1
+        # fi
+    fi
 
     ####################
     echo "Syncing NEPI CONFIG from ${SYSTEM_ETC_PATH}"
