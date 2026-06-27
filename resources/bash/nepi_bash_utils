@@ -5111,6 +5111,7 @@ source /home/${CONFIG_USER}/.bashrc
 
 function nepisetup_host() {
 sudo -v
+nepistop
 source $(NSETUP)/scripts/docker_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
 echo "Running NEPI Setup in NEPI_MODE: ${NEPI_MODE}"

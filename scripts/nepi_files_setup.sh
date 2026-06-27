@@ -71,6 +71,8 @@ sudo chmod 775 ${SOURCE_PATH}
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${UPDATE_PATH}
 sudo chmod 775 ${UPDATE_PATH}
 
+
+
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 SOURCE_PATH=/opt/nepi/etc
 UPDATE_PATH=/mnt/nepi_config/system_cfg/etc
@@ -78,9 +80,6 @@ CONFIG_FILENAME=nepi_system_config.yaml
 
 SOURCE_FILE=${SOURCE_PATH}/${CONFIG_FILENAME}
 UPDATE_FILE=${UPDATE_PATH}/${CONFIG_FILENAME}
-
-
-
 find $UPDATE_PATH -mindepth 1 -maxdepth 1 -type d -exec sudo rm -rf {} +
 echo "Syncing files from ${SOURCE_PATH} to ${UPDATE_PATH}"
 if [[ ! -f $UPDATE_FILE ]]; then
