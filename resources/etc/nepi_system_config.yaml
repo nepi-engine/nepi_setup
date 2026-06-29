@@ -63,6 +63,7 @@ NEPI_NTP_IP: 192.168.179.5
 # NOTE: If the subnet of your desired NTP source IP address is different then NEPI_STATIC_IP's subnet,
 #   you will need to add an IP address with the NTP source's IP subnet to NEPI_ALIAS_IPS with that
 #   subnet
+NEPI_VEHICLE_SUBNET: NONE
 NEPI_NAV_IP: NONE
 NEPI_NAV_IP_HNAV: NONE
 NEPI_NAV_PORT_HNAV: NONE
