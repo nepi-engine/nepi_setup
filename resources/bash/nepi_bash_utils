@@ -1850,8 +1850,26 @@ function netcreate_wired() {
                 echo "Setting auto-negotiate on ${net_name}"
                 cmd='sudo nmcli connection modify '${net_name}' connection.autoconnect yes 802-3-ethernet.auto-negotiate yes'
                 echo $cmd
-                eval "$cmd" 
+                eval "$cmd"
                 echo ""
+
+
+                echo "Reading hardware MAC for ${selected_hw}"
+                hw_mac=$(sudo ethtool -P "${selected_hw}" 2>/dev/null | awk '{print $NF}')
+                if [[ -z "$hw_mac" || "$hw_mac" == "00:00:00:00:00:00" ]]; then
+                    hw_mac=$(cat /sys/class/net/"${selected_hw}"/address 2>/dev/null)
+                fi
+                echo "Got hardware MAC ${hw_mac}"
+
+                if [[ -n "$hw_mac" && "$hw_mac" != "00:00:00:00:00:00" ]]; then
+                    echo "Pinning ${net_name} to hardware MAC ${hw_mac} on ${selected_hw}"
+                    cmd='sudo nmcli connection modify "'${net_name}'" 802-3-ethernet.mac-address '${hw_mac}
+                    echo $cmd
+                    eval "$cmd"
+                    echo ""
+                else
+                    echo "Could not read hardware MAC for ${selected_hw}; skipping MAC pinning"
+                fi
 
 
 
