@@ -271,6 +271,7 @@ else
         sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
     fi
 
+    sudo python3 -m pip install --force-reinstall --no-deps --no-input "onnxruntime==1.15.1" 
     #############
     # Other general python utilities
 
