@@ -388,23 +388,23 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
         echo "********************************"
 
     ##################################
-    elif [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
-        echo ""
-        echo "---------------------------------"
-        NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
-        echo "Got NEPI System Update Request"
-        if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
-                update_yaml_value "NEPI_UPDATING_CONFIG" 1 $DOCKER_CONFIG_FILE
-                echo "Updating NEPI System Config"
-                source $NEPI_CONFIG_UPDATE_FILE   
-        else
-            echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
-        fi
-        update_yaml_value "NEPI_UPDATING_CONFIG" 0 $DOCKER_CONFIG_FILE
-        update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
-        echo ""
-        echo "Returning to NEPI Service Monitoring"
-        echo "********************************"
+    # elif [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
+    #     echo ""
+    #     echo "---------------------------------"
+    #     NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
+    #     echo "Got NEPI System Update Request"
+    #     if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
+    #             update_yaml_value "NEPI_UPDATING_CONFIG" 1 $DOCKER_CONFIG_FILE
+    #             echo "Updating NEPI System Config"
+    #             source $NEPI_CONFIG_UPDATE_FILE   
+    #     else
+    #         echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
+    #     fi
+    #     update_yaml_value "NEPI_UPDATING_CONFIG" 0 $DOCKER_CONFIG_FILE
+    #     update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
+    #     echo ""
+    #     echo "Returning to NEPI Service Monitoring"
+    #     echo "********************************"
 
         
     else
