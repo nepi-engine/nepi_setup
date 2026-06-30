@@ -264,6 +264,8 @@ else
     
     sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input typing -y
 
+    sudo -H python${NEPI_PYTHON} -m pip uninstall --no-input astral suntime
+
     #sudo -H python${NEPI_PYTHON} -m pip install --no-input yap
     #sudo -H python${NEPI_PYTHON} -m pip install --no-input labelImg # For onboard training
 
@@ -271,7 +273,7 @@ else
         sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
     fi
 
-    sudo python3 -m pip install --force-reinstall --no-deps --no-input "onnxruntime==1.15.1" 
+    sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime==1.15.1" 
     #############
     # Other general python utilities
 

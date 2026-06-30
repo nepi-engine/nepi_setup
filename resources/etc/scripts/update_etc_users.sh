@@ -141,7 +141,9 @@ if [[ "$NEPI_MANAGES_USERS" -eq 1 || ${NEPI_USER} == 'nepi' ]]; then
         if change_password $NEPI_USER $NEPI_USER_PW ; then 
             nepi_user_pw_changed=$?
         fi
-        update_yaml_value "NEPI_USER_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+        if [[ "$CONFIG_USER" == "$NEPI_USER" ]]; then
+            update_yaml_value "NEPI_USER_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+        fi
 
     
         sudo chown ${NEPI_USER}:${NEPI_USER} /home/${NEPI_USER} >/dev/null 2>&1
@@ -153,7 +155,9 @@ if [[ "$NEPI_MANAGES_USERS" -eq 1 || ${NEPI_USER} == 'nepi' ]]; then
             if change_password $NEPI_HOST_USER $NEPI_HOST_PW; then 
                 nepi_host_user_pw_changed=$? 
             fi
-            update_yaml_value "NEPI_HOST_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+            if [[ "$CONFIG_USER" == "$NEPI_USER" ]]; then
+                update_yaml_value "NEPI_HOST_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+            fi
 
         sudo chown ${NEPI_HOST_USER}:${NEPI_HOST_USER} /home/${NEPI_HOST_USER} >/dev/null 2>&1
         sudo chmod 0755 /home/${NEPI_HOST_USER} >/dev/null 2>&1
@@ -164,7 +168,9 @@ if [[ "$NEPI_MANAGES_USERS" -eq 1 || ${NEPI_USER} == 'nepi' ]]; then
         if change_password $NEPI_ADMIN_USER $NEPI_ADMIN_PW; then 
             nepi_admin_user_pw_changed=$? 
         fi
-        update_yaml_value "NEPI_ADMIN_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+        if [[ "$CONFIG_USER" == "$NEPI_USER" ]]; then
+            update_yaml_value "NEPI_ADMIN_PW" "encrypted" $USER_CONFIG_FILE >/dev/null 2>&1
+        fi
 
         sudo chown ${NEPI_ADMIN_USER}:${NEPI_ADMIN_USER} /home/${NEPI_ADMIN_USER} >/dev/null 2>&1
         sudo chmod 0755 /home/${NEPI_ADMIN_USER} >/dev/null 2>&1
