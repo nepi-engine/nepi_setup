@@ -272,8 +272,14 @@ else
     if is_valid_jetson; then
         sudo -H python${NEPI_PYTHON} -m pip install --no-input jetson-stats
     fi
+    sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime -y
+    sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime-gpu -y
 
-    sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime==1.15.1" 
+    if is_valid_cuda; then
+        sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime==1.15.1" 
+    else
+        sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime-gpu==1.15.1"
+    fi
     #############
     # Other general python utilities
 
