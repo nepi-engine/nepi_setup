@@ -88,7 +88,7 @@ Scroll up through the process messages looking for any errors and correct.  Reru
 ################################################################
 ### NEPI Docker Config Setup
 
-This step will configure the NEPI Docker installation using the defualt settings. 
+This step will configure the NEPI Docker installation using the default settings. 
 You can change settings later in the 'NEPI Docker Customization' section.
 
 Log into the `nepihost` user using password  'nepi'
