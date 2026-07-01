@@ -102,7 +102,7 @@ function nepipush(){
   source ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $hub_tag
   # bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
-export -f nepipushc
+export -f nepipush
 
 
 
@@ -125,7 +125,18 @@ function nepistart(){
 export -f nepistart
 
 
+function nepistartc(){
+  sudo -v
+  echo "Stopping NEPI and NEPI Docker Service"
+  sudo systemctl stop nepi_docker
+  nepistop
+  echo "Cleaning NEPI SYSTEM SSH Folders"
+  system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
+  sudo rm -r $system_source_config
 
+  bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+}
+export -f nepistartc
 
 
 function nepilogin(){
@@ -475,6 +486,7 @@ HELPN="${HELPN}
 ## NEPI Docker Shortcut Functions ##
 ################################
 nepistart = Start the NEPI docker container.
+nepistartc = Clean SSH config and Start the NEPI docker containe
 nepidev = Start the NEPI docker container in a dev mode with no processes running, then logs in.
 nepistop = Stop the running NEPI docker container.
 nepilogin = Log into the running NEPI container as user 'nepi'.

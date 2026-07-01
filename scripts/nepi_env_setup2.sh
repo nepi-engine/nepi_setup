@@ -364,8 +364,8 @@ else
         source .venv/bin/activate
         sudo python${NEPI_PYTHON} -m pip install --upgrade pip setuptools wheel
         sudo python${NEPI_PYTHON} -m pip install numpy==1.24.4 protobuf packaging sympy flatbuffers coloredlogs
-        wget https://nvidia.box.com/shared/static/iizg3ggrtdkqawkmebbfixo7sce6j365.whl -O onnxruntime_gpu-1.16.0-cp38-cp38-linux_aarch64.whl
-        sudo python${NEPI_PYTHON} -m pip install ./onnxruntime_gpu-1.16.0-cp38-cp38-linux_aarch64.whl
+        wget https://nvidia.box.com/shared/static/mvdcltm9ewdy2d5nurkiqorofz1s53ww.whl -O onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
+        sudo python${NEPI_PYTHON} -m pip install ./onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
         deactivate
     else
         sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime-gpu==1.15.1"

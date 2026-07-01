@@ -89,6 +89,17 @@ function nepistart(){
 export -f nepistart
 
 
+function nepistartc(){
+    sudo -v
+    nepistop
+    echo "Cleaning NEPI SSH Folders"
+    system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
+    sudo rm -r $system_source_config
+    source ${NEPI_BASE}/scripts/nepi_engine_start
+}
+
+export -f nepistartc
+
 ## NEPI build shortcuts
 
 function nepibld(){
@@ -101,11 +112,11 @@ function nepibld(){
 
 function nepibldc(){
   sudo -v
+  nepistop
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
   sudo rm -r $system_source_config
   sudo rm -r /home/nepi/.ssh/*
-  nepistop
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
@@ -166,8 +177,9 @@ HELPN="${HELPN}
 ################################
 ### NEPI SYSTEM UTIL FUNCTIONS
 ################################
-nepihome = change to NEPI home dir
-nepistart = start the NEPI processes
+nepihome = Change to NEPI home dir
+nepistart = Start the NEPI processes
+nepistartc = Clear SSH folders and Start the NEPI processes
 nepistop = stop the NEPI processe
 nepibld = Build NEPI bash, config, code repos, and RUI
 nepibldc = Clear SSH folders and Build complete
