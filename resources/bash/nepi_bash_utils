@@ -5020,6 +5020,8 @@ function pulln {
 }
 
 export -f pulln
+
+
 function nepiclone {
   if is_valid_internet ; then
     cd ~/
@@ -5027,8 +5029,7 @@ function nepiclone {
     if [[ $? -eq 0 ]]; then
       cd ${NEPI_REPO_NAME}
       git checkout main
-      #git submodule update --init --recursive
-      pulln
+      git submodule update --init --recursive
     else
       echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
     fi
@@ -5044,8 +5045,7 @@ function nepiclonedev {
     if [[ $? -eq 0 ]]; then
       cd ${NEPI_REPO_NAME}
       git checkout develop
-      #git submodule update --init --recursive 
-      pulln
+      git submodule update --init --recursive 
     else
       echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
     fi
