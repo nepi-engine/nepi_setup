@@ -281,11 +281,11 @@ echo "LAUNCING NEPI CONTAINER"
 
 
 ########################
-# Update Docker Config
-echo ""
-echo "Syncing Docker Config Files"
-bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
-wait
+# Sync Docker Config
+# echo ""
+# echo "Syncing Docker Config Files"
+# bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
+# wait
 
 # ########################
 # # Update Docker Config
@@ -301,6 +301,7 @@ wait
 
 
 CONFIG_MODE=SYSTEM
+NEPI_FS_RESTART=1
 update_yaml_value "NEPI_FS_RESTART" 1 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
 
@@ -355,7 +356,7 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
 
     ########################
     # Load NEPI DOCKER CONFIG Updates
-    bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
+    #bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
     source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
     #echo "Got NEPI Config Update Value ${NEPI_UPDATE_CONFIG}"
 

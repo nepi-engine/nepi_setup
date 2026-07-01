@@ -65,6 +65,30 @@ function nepipull(){
 export -f nepipull
 
 
+function nepipullc(){
+  sudo -v
+  docker_link=$1
+  if pingi; then
+    echo "Cleaning and Restarting Docker"
+    nepistop
+    sleep 2
+    sudo systemctl stop docker
+    sudo rm -rf /var/lib/docker
+    sudo systemctl start docker
+    echo "Staring Import Process"
+    sleep 2
+    start_ids=$(echo $(sudo docker images -q))
+    bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
+    end_ids=$(echo $(sudo docker images -q))
+    if [[ ${start_ids} != ${end_ids} ]]; then
+      bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+    fi
+  fi
+}
+export -f nepipullc
+
+
+
 function nepipush(){
   sudo -v
   script_user=$(id -un)
@@ -78,7 +102,9 @@ function nepipush(){
   source ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $hub_tag
   # bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
 }
-export -f nepipull
+export -f nepipushc
+
+
 
 
 # NEPI stop and start shortcuts
@@ -456,6 +482,7 @@ nepiloginroot = Log into the running NEPI container as user 'root'.
 nepiswitch = Switch to Inactive NEPI container on next boot or reststat.
 nepicommit = Commit the running NEPI container wit provided COMMIT_DESCRIPTION, restarts nepi using new commit unless RESTART=0 is passed .
 nepipull = Download and install a NEPI Docker image from the provided link
+nepipullc = Clear and restart Docker before download and install a NEPI Docker image from the provided link
 nepiinit = Reset, clear, and import new NEPI Image.
 nepidownload = Download and install image from provided 'dropbox_shared_folder_link_address' in qoutes.
 nepiimport = Import a NEPI image .tar file. Optional: Enter a file name or full file path.
