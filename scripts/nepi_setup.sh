@@ -651,6 +651,15 @@ fi
 
                     echo "Configuring NetworkManager Service" 
 
+                    source_path=${SOURCE_ETC_PATH}/NetworkManager
+                    if [[ -d $source_path ]]; then
+                        echo "Copying NetworkManager conf files" 
+                        sudo cp -R $source_path/* /etc/NetworkManager/
+                        sudo chown -R root:root /etc/NetworkManager
+                        cat /etc/NetworkManager/NetworkManager.conf
+                    fi
+                    sleep 3
+
                     sudo systemctl enable NetworkManager >/dev/null 2>&1
                     sudo systemctl restart NetworkManager >/dev/null 2>&1
 
