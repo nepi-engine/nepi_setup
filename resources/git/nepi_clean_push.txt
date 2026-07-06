@@ -1,0 +1,20 @@
+# From PC
+nepidpl
+
+# From Host
+nepibldc
+nepistartc
+
+# From Container
+nepibldc
+nepistartc
+
+# From Host
+nepiexportc
+nepiimportc
+sudo su
+docker login
+# log into docker hub with hub password key
+nepipushc
+docker logout
+exit
