@@ -2425,7 +2425,7 @@ function netset_wired_ipn() {
                     # Reset Network
                     nnet
                     sleep 1
-                    ndhcp 2> /dev/null
+                    #ndhcp 2> /dev/null
             fi
         fi
     fi

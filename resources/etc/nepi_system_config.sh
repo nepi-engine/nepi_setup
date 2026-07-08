@@ -867,15 +867,17 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
     # fi
 
 
-
-    if [[ "$NEPI_MODE" == 'HOST' ]]; then
-        #################################################
-        echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
-        source ${SYSTEM_ETC_PATH}/update_etc_files.sh
-        # if [ $? -eq 1 ]; then
-        #     echo "Failed to update ETC folder ${ETC_NEPI_PATH}"
-        #     exit 1
-        # fi
+    systemctl &> /dev/null
+    if [[ "$?" -eq 0 ]]; then
+        if [[ "$NEPI_MODE" == 'HOST' ]]; then
+            #################################################
+            echo "Updating NEPI ETC files in ${SYSTEM_ETC_PATH}"
+            source ${SYSTEM_ETC_PATH}/update_etc_files.sh
+            # if [ $? -eq 1 ]; then
+            #     echo "Failed to update ETC folder ${ETC_NEPI_PATH}"
+            #     exit 1
+            # fi
+        fi
     fi
 
     ####################

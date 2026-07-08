@@ -88,7 +88,7 @@ echo "UPDATING ETC WIRED DHCP"
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_WIRED_DHCP_ENABLED" -eq 1 ]]; then
+    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 -eq 1 ]]; then
         ndhcp
     fi  
 
@@ -104,6 +104,7 @@ if [[ "$NEPI_IN_CONTAINER" -eq 1 ]]; then
         if [[ -f "$docker_config_file" ]]; then
             update_yaml_value $docker_config_setting $update_val $docker_config_file
         fi
+     
     elif [[ "$CONFIG_USER" == "$NEPI_HOST_USER" && "$NEPI_IN_CONTAINER" -eq 1 ]]; then
         update_val=0
         if [[ -f "$docker_config_file" ]]; then

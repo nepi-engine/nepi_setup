@@ -31,8 +31,8 @@ NEPI_NAV_PORT_HNAV: NONE
 NEPI_NAV_IP_NMEA: NONE
 NEPI_NAV_PORT_NMEA: NONE
 # NOTE: If enabled, the NEPI device will have internet connectiviy if connected to
-NEPI_WIRED_INTERNET_ENABLED: 1
-NEPI_WIRED_DHCP_ENABLED: 1
+NEPI_WIRED_INTERNET_ENABLED: 0
+NEPI_WIRED_DHCP_ENABLED: 0
 # NOTE: If set to "unknown", the first detected WiFi harware will be used
 NEPI_WIFI_INTERFACE: unknown
 NEPI_WIFI_ENABLED: 1
