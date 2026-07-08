@@ -1,0 +1,1 @@
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", ATTRS{manufacturer}=="Lord Microstrain", ATTRS{product}=="Lord Inertial Sensor", SYMLINK+="ttyACM_imu", GROUP="dialout", MODE="0660"
