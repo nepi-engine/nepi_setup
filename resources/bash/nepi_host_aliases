@@ -464,7 +464,7 @@ function nepibld(){
   nepistop
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
-  ninet
+  nnet
 }
 export -f nepibld
 
@@ -477,7 +477,7 @@ function nepibldc(){
   sudo rm -r ${NEPI_SYSTEM_CONFIG}/ssh_keys/*
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
-  ninet
+  nnet
 }
 export -f nepibldc
 
