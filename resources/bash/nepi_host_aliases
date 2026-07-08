@@ -461,6 +461,7 @@ export -f nepicreate
 function nepibld(){
   SHOW_CONFIG_MENU=$1
   sudo -v
+  nepistop
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
   ninet
@@ -471,6 +472,7 @@ export -f nepibld
 function nepibldc(){
   SHOW_CONFIG_MENU=$1
   sudo -v
+  nepistop
   sudo rm -r /home/${CONFIG_USER}/.ssh/*
   sudo rm -r ${NEPI_SYSTEM_CONFIG}/ssh_keys/*
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
