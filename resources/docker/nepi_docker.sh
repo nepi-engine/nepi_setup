@@ -93,6 +93,23 @@ function updatenetlist(){
 }
 
 
+function snnet(){
+    if ! pingn  >/dev/null 2>&1; then
+      echo "Restarting NetworkManager"
+      systemctl restart NetworkManager
+
+      # echo "Restarting Network"
+      # sudo systemctl restart networking
+      wait
+      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo "Failed to connect NEPI IP address: ${nepi_ip}"
+      fi
+    fi
+    
+}
+export -f snnet
+
 ####################################
 # Process Functions
 function NEPI_START_FUNCTION(){
@@ -256,7 +273,7 @@ nepi_recovery_ip=192.168.179.103/24
 #         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
 #         # sleep 2
 #         # if ! pingn; then
-#         #     nnet
+#         #     snnet
 #         # fi
 #     else
 #         echo "Failed to run recovery mode setup"
@@ -343,7 +360,7 @@ nepiload
 # if [[ $NEPI_WIRED_INTERNET_ENABLED -eq 1 ]]; then
 #     ninet
 # else
-#     nnet
+#     snnet
 # fi
 
 
@@ -358,7 +375,19 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
     # Load NEPI DOCKER CONFIG Updates
     #bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
     source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
-    #echo "Got NEPI Config Update Value ${NEPI_UPDATE_CONFIG}"
+    nepi_update_config=$NEPI_UPDATE_CONFIG
+    # echo "Got NEPI Config Update Value ${nepi_update_config}"
+    # echo "----------------"
+    # cat ${DOCKER_FOLDER}/nepi_docker_config.yaml
+    # echo "----------------"
+    source ${DOCKER_FOLDER}/load_docker_update_nosudo.sh > /dev/null 2>&1
+    source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
+
+    # echo "####################"
+    # cat ${DOCKER_FOLDER}/nepi_docker_config.yaml
+    # echo "####################"
+
+    update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
 
     ##################################
     if [[ "$NEPI_FS_RESTART" -eq 1 && "$NEPI_STARTING" -eq 0 ]]; then
@@ -381,31 +410,31 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
         if [[ $NEPI_WIRED_INTERNET_ENABLED -eq 1 ]]; then
             ninet
         else
-            nnet
+            snnet
         fi
 
         echo ""
         echo "Returning to NEPI Service Monitoring"
         echo "********************************"
 
-    ##################################
-    # elif [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
-    #     echo ""
-    #     echo "---------------------------------"
-    #     NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
-    #     echo "Got NEPI System Update Request"
-    #     if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
-    #             update_yaml_value "NEPI_UPDATING_CONFIG" 1 $DOCKER_CONFIG_FILE
-    #             echo "Updating NEPI System Config"
-    #             source $NEPI_CONFIG_UPDATE_FILE   
-    #     else
-    #         echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
-    #     fi
-    #     update_yaml_value "NEPI_UPDATING_CONFIG" 0 $DOCKER_CONFIG_FILE
-    #     update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
-    #     echo ""
-    #     echo "Returning to NEPI Service Monitoring"
-    #     echo "********************************"
+    #################################
+    elif [[ "$NEPI_UPDATE_CONFIG" -eq 1 ]]; then
+        echo ""
+        echo "---------------------------------"
+        NEPI_CONFIG_UPDATE_FILE=/mnt/nepi_config/system_cfg/etc/update_etc_files.sh
+        echo "Got NEPI System Update Request"
+        if [[ -f $NEPI_CONFIG_UPDATE_FILE ]]; then
+                update_yaml_value "NEPI_UPDATING_CONFIG" 1 $DOCKER_CONFIG_FILE
+                echo "Updating NEPI System Config"
+                source $NEPI_CONFIG_UPDATE_FILE   
+        else
+            echo "Failed to find ${NEPI_CONFIG_UPDATE_FILE}"
+        fi
+        update_yaml_value "NEPI_UPDATING_CONFIG" 0 $DOCKER_CONFIG_FILE
+        update_yaml_value "NEPI_UPDATE_CONFIG" 0 $DOCKER_CONFIG_FILE
+        echo ""
+        echo "Returning to NEPI Service Monitoring"
+        echo "********************************"
 
         
     else
@@ -518,13 +547,13 @@ SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
 
     fi
     
-    sleep 1
+    sleep 3
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
-        nnet
+        snnet
     fi
     updatenetlist
-    update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
+
 
     
 done
