@@ -502,7 +502,7 @@ netlist_str=''
 
     fi
     
-    sleep 3
+    sleep 1
 
     if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
         snnet
