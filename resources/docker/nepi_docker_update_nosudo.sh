@@ -63,31 +63,38 @@ fi
 
 
 
+
+# ###############################
+# # Load NEPI Config File
+# DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+# if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+#     echo "Running System Config Load Script: ${DOCKER_CONFIG_LOAD_FILE}"
+#     source ${DOCKER_CONFIG_LOAD_FILE}
+#     if [ $? -eq 1 ]; then
+#         echo "Failed to load ${DOCKER_CONFIG_LOAD_FILE}"
+#     fi
+# else
+#     echo "Failed to find ${DOCKER_CONFIG_LOAD_FILE}"
+# fi
+
 ########################
-# Load NEPI DOCKER
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_BLANK=${DOCKER_FOLDER}/nepi_docker_config.blank
-DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.tmp
-if [[ -f $DOCKER_CONFIG_BLANK ]]; then
-    if [[ ! -f $DOCKER_CONFIG_FILE ]]; then
-        cp $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_FILE
+DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
+
+# if [[ -f DOCKER_CONFIG_FILE ]]; then
+#     # Update Docker Config
+
+    if [[ -f $DOCKER_CONFIG_BLANK ]]; then
+        cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
+        ssync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
+    else
+        cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
     fi
-    sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_FILE 
-fi
-
-cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
-chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
+    chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
 
 
-
-
-
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
-source ${DOCKER_CONFIG_LOAD_FILE}
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${DOCKER_CONFIG_FILE}"
-else
 
     echo "Upating Docker Config File: ${DOCKER_CONFIG_TMP}"
     ##########################
@@ -419,8 +426,8 @@ else
 
     ###################
     # Clean Up
-    #sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
+    #ssync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
     cp $DOCKER_CONFIG_TMP $DOCKER_CONFIG_FILE 
     rm $DOCKER_CONFIG_TMP
     chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
-fi
+# fi

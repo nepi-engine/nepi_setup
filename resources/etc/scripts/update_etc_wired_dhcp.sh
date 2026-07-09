@@ -59,28 +59,6 @@ fi
 
 
 
-function nnet(){
-    sudo -v
-    nepi_ip=$(nipa)
-    if [[ -z "$nepi_ip" ]]; then
-      return 1
-    else
-      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        echo "Can't ping NEPI IP address: ${nepi_ip}"
-
-        echo "Restarting Network"
-        sudo systemctl restart networking
-        wait
-        ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-          echo "Failed to connect NEPI IP address: ${nepi_ip}"
-        fi
-      fi
-    fi
-}
-
-
 #################################
 echo ""
 echo "UPDATING ETC WIRED DHCP"
@@ -88,7 +66,7 @@ echo "UPDATING ETC WIRED DHCP"
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
 
-    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 -eq 1 ]]; then
+    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
         ndhcp
     fi  
 

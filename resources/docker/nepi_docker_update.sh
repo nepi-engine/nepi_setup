@@ -65,33 +65,43 @@ fi
 
 
 
+
+
+# ###############################
+# # Load NEPI Config File
+# DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+# if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
+#     echo "Running System Config Load Script: ${DOCKER_CONFIG_LOAD_FILE}"
+#     source ${DOCKER_CONFIG_LOAD_FILE}
+#     if [ $? -eq 1 ]; then
+#         echo "Failed to load ${DOCKER_CONFIG_LOAD_FILE}"
+#     fi
+# else
+#     echo "Failed to find ${DOCKER_CONFIG_LOAD_FILE}"
+# fi
+
 ########################
-# Load NEPI DOCKER
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_BLANK=${DOCKER_FOLDER}/nepi_docker_config.blank
 DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
-if [[ -f $DOCKER_CONFIG_BLANK ]]; then
-    if [[ ! -f $DOCKER_CONFIG_FILE ]]; then
-        sudo cp $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_FILE
+echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
+# if [[ ! -f DOCKER_CONFIG_FILE ]]; then
+#     echo "Failed to Find Docker Config File: ${DOCKER_CONFIG_FILE}"
+# else
+    # Update Docker Config
+    echo "Copying Docker Config File: ${DOCKER_CONFIG_FILE}"
+    if [[ -f $DOCKER_CONFIG_BLANK ]]; then
+        sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
+        sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
+    else
+        sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
     fi
-    sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_FILE 
-fi
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
 
-sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
-sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
+    echo "Upating Docker Config Temp File: ${DOCKER_CONFIG_TMP}"
 
-
-
-
-
-DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
-source ${DOCKER_CONFIG_LOAD_FILE}
-if [[ "$?" -eq 1 ]]; then
-    echo "Failed to load ${DOCKER_CONFIG_FILE}"
-else
-
-    echo "Upating Docker Config File: ${DOCKER_CONFIG_TMP}"
+    
     ##########################
     # Update FSA
         
@@ -425,4 +435,4 @@ else
     sudo cp $DOCKER_CONFIG_TMP $DOCKER_CONFIG_FILE 
     sudo rm $DOCKER_CONFIG_TMP
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
-fi
+# fi

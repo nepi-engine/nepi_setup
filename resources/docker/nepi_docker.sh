@@ -62,6 +62,9 @@ RETC_FOLDER=${NEPI_CONFIG}/recovery_cfg/etc
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
 DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+DOCKER_STOP_FILE=${DOCKER_FOLDER}/nepi_docker_stop.sh
+
+SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
 ########################
 # Redefine any nepi_bash_util functions that require without sudo
 ######################
@@ -236,9 +239,7 @@ echo "##########################"
 echo ""
 
 
-
-
-
+source DOCKER_STOP_FILE
 
 
 ####################################
@@ -292,38 +293,13 @@ echo ""
 echo "-----------------------------"
 echo "LAUNCING NEPI CONTAINER"
 
-# Define CONFIG FOLDERS
-
-
-
-
-########################
-# Sync Docker Config
-# echo ""
-# echo "Syncing Docker Config Files"
-# bash ${DOCKER_FOLDER}/nepi_docker_sync.sh
-# wait
-
-# ########################
-# # Update Docker Config
-# echo ""
-# echo "Updating Docker Config File"
-# bash ${DOCKER_FOLDER}/nepi_docker_update.sh
-# wait
-
-
-# source ${DOCKER_FOLDER}/load_docker_config.sh
-# #source ${SETC_FOLDER}/update_etc_files.sh
-
+update_yaml_value "NEPI_SERVICE_RUNNING" 0 $DOCKER_CONFIG_FILE
 
 
 CONFIG_MODE=SYSTEM
 NEPI_FS_RESTART=1
 update_yaml_value "NEPI_FS_RESTART" 1 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
-
-
-
 
 NEPI_FAIL_COUNT=-1
 NEPI_START_FUNCTION
@@ -342,44 +318,23 @@ fi
 echo "Loading NEPI System Config"
 nepiload
 
-###############################
-# Check for NEPI Config Changes
-
-# ssh_key_script=${SETC_FOLDER}/scripts/update_etc_ssh_keys.sh
-# echo "Calling NEPI SSH KEY update script ${ssh_key_script}"
-# source $ssh_key_script
-
-###############################
-
-# echo ""
-# echo "---------------------------------"
-# echo "Reseting Network Config"
-# echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
-# echo "DHCP ENABLED = ${NEPI_WIRED_INTERNET_ENABLED}"
-
-# if [[ $NEPI_WIRED_INTERNET_ENABLED -eq 1 ]]; then
-#     ninet
-# else
-#     snnet
-# fi
-
-
 netlist_str=''
 
-DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
-DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-SYSTEM_SCRIPTS_FOLDER=${SETC_FOLDER}/scripts
+
  while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
     ########################
     # Load NEPI DOCKER CONFIG Updates
     #bash ${DOCKER_FOLDER}/nepi_docker_sync_nosudo.sh > /dev/null 2>&1
+    update_yaml_value "NEPI_SERVICE_RUNNING" 1 $DOCKER_CONFIG_FILE
     source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
     nepi_update_config=$NEPI_UPDATE_CONFIG
+
     # echo "Got NEPI Config Update Value ${nepi_update_config}"
     # echo "----------------"
     # cat ${DOCKER_FOLDER}/nepi_docker_config.yaml
     # echo "----------------"
+
     source ${DOCKER_FOLDER}/load_docker_update_nosudo.sh > /dev/null 2>&1
     source ${DOCKER_FOLDER}/load_docker_config_nosudo.sh > /dev/null 2>&1
 

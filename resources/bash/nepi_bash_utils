@@ -958,7 +958,22 @@ function nnet(){
 }
 export -f nnet
 
+function snnet(){
+    if ! pingn; then
+      echo "Restarting NetworkManager"
+      systemctl restart NetworkManager
 
+      # echo "Restarting Network"
+      # sudo systemctl restart networking
+      wait
+      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+      if [ $? -ne 0 ]; then
+        echo "Failed to connect NEPI IP address: ${nepi_ip}"
+      fi
+    fi
+    
+}
+export -f snnet
 
 
 function ndhcp(){
@@ -2830,6 +2845,31 @@ function fix_path(){
 }
 export -f fix_path
 
+
+function sfix_path(){
+  if [[ ! -v "$1" && -n "$1" ]]; then
+      target_path=$1
+      if [[ ! -e "$target_path" ]]; then
+        mkdir -p $target_path
+        chmod 0664 ${target_path} > /dev/null 2>&1
+      elif is_nepi_path $target_path; then
+        echo "Fixing permissions for path: ${target_path}"
+        chown ${CONFIG_USER}:${CONFIG_USER} ${target_path} > /dev/null 2>&1
+        if [[ ! -v "$2" && "$2" =~ ^[0-7]{3,4}$ ]]; then
+          chmod ${2} ${target_path} > /dev/null 2>&1
+        fi
+
+      else
+          echo "NEPI Folder not found at ${target_path}"
+          return 1
+      fi
+  else
+    echo "No Path Provided"
+    return 1
+  fi
+}
+export -f sfix_path
+
 function fix_folder(){
   sudo -v
   if [[ ! -v "$1" && -n "$1" ]]; then
@@ -2901,6 +2941,19 @@ clean_yaml_file() {
     fi
 }
 export -f clean_yaml_file
+
+sclean_yaml_file() {
+    local input_file="$1"
+    if [[ -f "$input_file" ]]; then
+        grep -E '^.+:.+$' "$input_file" > "$input_file.clean" && sudo mv "$input_file.clean" "$input_file"
+        chown ${CONFIG_USER}:${CONFIG_USER} $input_file > /dev/null 2>&1
+        chmod +x $input_file > /dev/null 2>&1
+    else
+        echo "Error: File '$input_file' not found." >&2
+        return 1
+    fi
+}
+export -f sclean_yaml_file
 
 
 function update_yaml_value(){
@@ -2981,6 +3034,46 @@ function sync_yaml_files(){
 export -f sync_yaml_files
 
 
+function ssync_yaml_files(){
+    SOURCE_FILE=$1
+    TARGET_FILE=$2
+    REPLACE_ENTRIES=0
+    # if [[ -v "$3" ]]; then
+    #   REPLACE_ENTRIES=$3
+    # fi
+
+    if [[ ! -f "$SOURCE_FILE" ]]; then
+        echo "Source file does not exist: ${SOURCE_FILE}"
+        return 1
+    fi
+
+    if [[ ! -f "$TARGET_FILE" ]]; then
+        echo "Target file does not exist: ${TARGET_FILE}"
+        target_path=$(dirname $TARGET_FILE)
+        
+        if sfix_path $target_path; then
+            cp $SOURCE_FILE $TARGET_FILE
+            sfix_path $TARGET_FILE
+            return 0
+        elif [[ ! -d "$target_path" ]]; then
+          echo "Failed to create path: ${target_path}"
+          return 1
+        fi
+    fi
+
+    eval_cmd="success=$(python3 ${BASH_FOLDER}/nepi_utils/sync_yaml_files.py $SOURCE_FILE $TARGET_FILE $REPLACE_ENTRIES)"  #2>/dev/null"
+    eval "$eval_cmd" 
+    success=$(echo ${success})
+    
+
+    if [[ "$success" -ne 1 ]]; then
+        echo "Success = ${success}"
+        return 1
+    fi
+
+}
+export -f ssync_yaml_files
+
 function load_yaml_file(){
     yaml_file=$1
     #echo $yaml_file
@@ -3006,6 +3099,33 @@ function load_yaml_file(){
     fi
 }
 export -f load_yaml_file
+
+
+function sload_yaml_file(){
+    yaml_file=$1
+    #echo $yaml_file
+    if [ -f "$yaml_file" ]; then
+    
+      success=0
+      sclean_yaml_file $yaml_file
+      eval_cmd="load_vals=$(python3 ${BASH_FOLDER}/nepi_utils/load_yaml_file.py $yaml_file)"  #2>/dev/null"
+      eval "$eval_cmd"
+      
+      for entry in $load_vals; do
+         export ${entry} 2> /dev/null
+      done
+
+      if [[ "$success" -ne 1 ]]; then
+          echo "Success = ${success}"
+          return 1
+      fi
+
+    else
+        echo "Yaml file not found ${yaml_file}"
+        return 1
+    fi
+}
+export -f sload_yaml_file
 
 function print_yaml_file(){
     #echo $1
