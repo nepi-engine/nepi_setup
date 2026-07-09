@@ -5184,9 +5184,17 @@ export -f nepiclonedev
 
 
 ## NEPI deploy complete
-alias nepidpl="
+function nepidpl {
 cd $NEPI_REPO_FOLDER
-source ./deploy_nepi_complete.sh"
+source ./deploy_nepi_complete.sh
+}
+
+## NEPI deploy complete
+function nepidplc {
+cd $NEPI_REPO_FOLDER
+dclean=1
+source ./deploy_nepi_complete.sh $dclean
+}
 
 # NEPI deploy repos
 alias repodpl="

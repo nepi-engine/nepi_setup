@@ -104,7 +104,20 @@ function nepipush(){
 }
 export -f nepipush
 
+function nepipushc(){
+  sudo -v
+  script_user=$(id -un)
+  if [[ ${script_user} != 'root' ]]; then
+      echo "This script must be run as root. Type 'sudo su' before running this process."
+      return 1
+  fi
 
+  hub_tag=$1
+  echo "Pushing NEPI Docker Image"
+  source ${NEPI_DOCKER_CONFIG}/nepi_docker_push.sh $hub_tag
+  # bash ${NEPI_DOCKER_CONFIG}/nepi_docker_start.sh
+}
+export -f nepipushc
 
 
 # NEPI stop and start shortcuts
