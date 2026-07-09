@@ -239,7 +239,7 @@ echo "##########################"
 echo ""
 
 
-source DOCKER_STOP_FILE
+# source DOCKER_STOP_FILE
 
 
 ####################################
