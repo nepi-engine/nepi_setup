@@ -104,14 +104,17 @@ export -f nepistartc
 
 function nepibld(){
   sudo -v
+  run_folder=$(pwd)
   nepistop
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
+  cd $run_folder
 }
 
 function nepibldc(){
   sudo -v
+  run_folder=$(pwd)
   nepistop
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
@@ -120,21 +123,26 @@ function nepibldc(){
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
+  cd $run_folder
 }
 
 
 # NEPI build shortcuts
 function codebld(){
 sudo -v
+run_folder=$(pwd)
 cd $NEPI_BUILD_REPO_FOLDER
 source ./build_nepi_code.sh
+cd $run_folder
 }
 
 # NEPI build shortcuts
 function ruibld(){
   sudo -v
+  run_folder=$(pwd)
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_rui.sh
+  cd $run_folder
 }
 
 

@@ -5185,15 +5185,19 @@ export -f nepiclonedev
 
 ## NEPI deploy complete
 function nepidpl {
+run_folder=$(pwd)
 cd $NEPI_REPO_FOLDER
 source ./deploy_nepi_complete.sh
+cd $run_folder
 }
 
 ## NEPI deploy complete
 function nepidplc {
+run_folder=$(pwd)
 cd $NEPI_REPO_FOLDER
 dclean=1
 source ./deploy_nepi_complete.sh $dclean
+cd $run_folder
 }
 
 # NEPI deploy repos
