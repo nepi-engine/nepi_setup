@@ -232,6 +232,7 @@ export DRIVE="${NEPI_STORAGE}"
 
 export FCFG="${NEPI_FACTORY_CONFIG}"
 export SCFG="${NEPI_SYSTEM_CONFIG}"
+export DCFG="${NEPI_DOCKER_CONFIG}"
 export UCFG="${NEPI_STORAGE}/user_cfg"
 
 
@@ -270,6 +271,7 @@ alias drive="cd $DRIVE"
 
 alias fcfg="cd $FCFG"
 alias scfg="cd $SCFG"
+alias dcfg="cd $DCFG"
 alias ucfg="cd $UCFG"
 
 NFW=${NEPI_BASE}/nepi_engine/etc/fw_version.txt
@@ -318,6 +320,7 @@ drive = ${NEPI_STORAGE}
 
 fcfg = ${NEPI_FACTORY_CONFIG}
 scfg = ${NEPI_SYSTEM_CONFIG}
+dcfg = ${NEPI_DOCKER_CONFIG}
 ucfg = ${NEPI_STORAGE}/user_cfg
 
 nfws = Show Installed NEPI Firmware Version
