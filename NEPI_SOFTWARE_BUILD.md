@@ -119,20 +119,17 @@ Then rerun the "nepistart" command in your NEPI Host Device to retest in the con
 
 
 ################################################################
-### NEPI Container Create Process
+### NEPI Image Export/Import Process
 
 **RUN THESE STEPS IN THE NEPI HOST**
-Once you are happy with the NEPI Software changes, you can create, deploy, and import your new NEPI Docker Image (password is 'nepi'):
+Once you are happy with the NEPI Software changes, you can export and import the commits into a single NEPI Image (password is 'nepi'):
 
-    nepistart
-    dps # Show running NEPI container
+    nepiexport
+    nepiimportc
 
-Export and Import the new NEPI Docker Image from the running NEPI Container (password is 'nepi'):
 
-**NOTE** Unless your NEPI Host Device is configured with NEPI's AB File System enabled,
-the current NEPI Docker Image and all of it's commits will be replaced with the imported image.
 
-    nepicreate # OR 'nepiexport' to just export the new image without importing back in
+
 
 
 
