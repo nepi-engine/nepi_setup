@@ -96,22 +96,22 @@ function updatenetlist(){
 }
 
 
-function snnet(){
-    if ! pingn  >/dev/null 2>&1; then
-      echo "Restarting NetworkManager"
-      systemctl restart NetworkManager
+# function snnet(){
+#     if ! pingn  >/dev/null 2>&1; then
+#       echo "Restarting NetworkManager"
+#       systemctl restart NetworkManager
 
-      # echo "Restarting Network"
-      # sudo systemctl restart networking
-      wait
-      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        echo "Failed to connect NEPI IP address: ${nepi_ip}"
-      fi
-    fi
+#       # echo "Restarting Network"
+#       # sudo systemctl restart networking
+#       wait
+#       ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+#       if [ $? -ne 0 ]; then
+#         echo "Failed to connect NEPI IP address: ${nepi_ip}"
+#       fi
+#     fi
     
-}
-export -f snnet
+# }
+# export -f snnet
 
 ####################################
 # Process Functions

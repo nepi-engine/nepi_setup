@@ -959,7 +959,7 @@ function nnet(){
 export -f nnet
 
 function snnet(){
-    if ! pingn; then
+    if ! pingn  > /dev/null 2>&1; then
       echo "Restarting NetworkManager"
       systemctl restart NetworkManager
 
