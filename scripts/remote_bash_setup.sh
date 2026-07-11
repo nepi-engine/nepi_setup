@@ -295,10 +295,11 @@ fi
 
     echo " "
     echo "################################# "
-    echo "Clearing Known Hosts"
+    echo "Cleaning Known Host for IP ${nepi_ip}"
     echo ""
 
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
+    ssh-keygen -R $nepi_ip
+    # sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepi" >/dev/null 2>&1
     # ssh-keygen -f "/home/${CONFIG_USER}/.ssh/known_hosts" -R "nepihost" >/dev/null 2>&1
 
