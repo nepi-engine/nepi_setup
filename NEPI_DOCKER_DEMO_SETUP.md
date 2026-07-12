@@ -50,40 +50,9 @@ then
     exec su -l $CONFIG_USER
 
 
-Install the latest NEPI Docker Image for your device
 
-**For AMD64 NO GPU or RADEON GPU SUPPORT**
-
-    sudo docker pull numurusinc/nepi:latest-amd64
-Retag image as nepi:
-
-    sudo docker tag numurusinc/nepi:latest-amd64 nepi:latest
-    sudo docker rmi numurusinc/nepi:latest-amd64
-
-**For AMD64 NVIDIA GPU SUPPORT **
-
-    sudo docker pull numurusinc/nepi:latest-amd64-cuda
-
-Retag image as nepi:
-
-    sudo docker tag numurusinc/nepi:latest-amd64-cuda nepi:latest
-    sudo docker rmi numurusinc/nepi:latest-amd64-cuda
-
-
-**For NVIDIA JETSON GPU SUPPORT**
-
-
-    sudo docker pull numurusinc/nepi:latest-jetson
-
-Retag image as nepi:
-
-    sudo docker tag numurusinc/nepi:latest-jetson nepi:latest
-    sudo docker rmi numurusinc/nepi:latest-jetson
-
-
-
-**NOTE:** NEPI Docker images are large files and will take several minutes to download and install
-
+################################################################
+### NEPI Demo Files Installation
 
 Install the latest NEPI Storage Files which include sample Data, AI Model, and Configuration files:
 
@@ -104,12 +73,63 @@ then
 
 
 ################################################################
-### NEPI Docker Software Testing
-This section will start and test your NEPI Docker solution. 
+### NEPI Software Installation
+
+Download and install the latest NEPI Docker Image for your device
+
+
+**NOTE:** NEPI Docker images are large files and will take several minutes to download and install
+
+**For AMD64 NO GPU or AMD64 RADEON GPU**
+
+    sudo docker pull numurusinc/nepi:latest-amd64
+Retag image as nepi:
+
+    sudo docker tag numurusinc/nepi:latest-amd64 nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64
+
+**For AMD64 NVIDIA GPU**
+
+    sudo docker pull numurusinc/nepi:latest-amd64-cuda
+
+Retag image as nepi:
+
+    sudo docker tag numurusinc/nepi:latest-amd64-cuda nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-amd64-cuda
+
+
+**For JETSON GPU**
+
+
+    sudo docker pull numurusinc/nepi:latest-jetson
+
+Retag image as nepi:
+
+    sudo docker tag numurusinc/nepi:latest-jetson nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-jetson
+
+
+**For RPI5 NO GPU or RPI5 HAILO GPU**
+
+
+    sudo docker pull numurusinc/nepi:latest-rpi
+
+Retag image as nepi:
+
+    sudo docker tag numurusinc/nepi:latest-rpi nepi:latest
+    sudo docker rmi numurusinc/nepi:latest-rpi
+
+
+
+
+################################################################
+### NEPI Software Testing
+
+This section will start and test NEPI software. 
 
 Start your NEPI container running with the following command:
 
-**For NONE GPU or RADEON GPU SUPPORT**
+**For AMD64 N0 GPU**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
@@ -122,7 +142,20 @@ Start your NEPI container running with the following command:
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     nepi:latest /bin/bash -c '/nepi_start_all'
 
-**For NVIDIA GPU SUPPORT**
+**For AMD64 GPU RADEON GPU**
+
+    sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
+    --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
+    --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
+    --mount type=bind,source=/dev,target=/dev \
+    --mount type=bind,source=/etc/udev,target=/etc/udev \
+    --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
+    -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
+    nepi:latest /bin/bash -c '/nepi_start_all'
+
+**For AMD64 NVIDIA GPU**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
@@ -137,7 +170,7 @@ Start your NEPI container running with the following command:
     nepi:latest /bin/bash -c '/nepi_start_all'
 
 
-**For NVIDIA JETSON GPU SUPPORT**
+**For JETSON NVIDIA GPU**
 
     sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
     --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
@@ -149,8 +182,41 @@ Start your NEPI container running with the following command:
     --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
     -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
     --gpus all --runtime nvidia -v /tmp/.X11-unix/:/tmp/.X11-unix 
-    -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp 
-    -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp:/tmp \
+    -v /usr/bin/nvargus-daemon:/usr/bin/nvargus-daemon \
+    nepi:latest /bin/bash -c '/nepi_start_all'    
+
+
+
+**For RPI5 NO GPU**
+
+    sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
+    --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
+    --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
+    --mount type=bind,source=/dev,target=/dev \
+    --mount type=bind,source=/etc/udev,target=/etc/udev \
+    --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
+    -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
+    nepi:latest /bin/bash -c '/nepi_start_all'
+
+
+**For RPI5 HAILO GPU**
+
+    sudo docker run -d --privileged --rm -e UDEV=1 --ipc=host --user 0:0 \
+    --mount type=bind,source=/mnt/nepi_storage,target=/mnt/nepi_storage \
+    --mount type=bind,source=/mnt/nepi_config,target=/mnt/nepi_config \
+    --mount type=bind,source=/dev,target=/dev \
+    --mount type=bind,source=/etc/udev,target=/etc/udev \
+    --cap-add=SYS_TIME --volume=/var/empty:/var/empty \
+    -v /etc/ntpd.conf:/etc/ntpd.conf -e DISPLAY=:0 \
+    --net=host -p 9091:9091 -p 9092:9092 -p 11311:11311 \
+    -p 137:137/udp -p 138:138/udp -p 139:139/tcp -p 445:445/tcp \
+    --device=/dev/hailo0 \
+    -v /lib/firmware/hailo:/lib/firmware/hailo \
+    -v /tmp/hailort_uds.sock:/tmp/hailort_uds.sock"
     nepi:latest /bin/bash -c '/nepi_start_all'    
 
 

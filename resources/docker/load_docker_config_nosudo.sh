@@ -38,7 +38,7 @@ BACKUP_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml.bak
 if [[ -f "$LOAD_SCRIPT" ]]; then
     SETUP_FOLDER='nepi_setup'
     if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+        chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
         clean_yaml_file $DOCKER_CONFIG_FILE
         if [[ ! -f $BACKUP_FILE ]]; then
             cp $DOCKER_CONFIG_FILE $BACKUP_FILE
@@ -57,7 +57,7 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         #echo ${entry}
     done
 
-    echo "Finished Load Process"
+
     if [[ "$success" -ne 1 ]]; then
         #echo "Success = ${success}"
         echo "Docker Config File failed to load"
@@ -65,8 +65,8 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
 
         if [[ -f "$BACKUP_FILE" ]]; then
             echo "Backup File Exists Updating Config File"
-            sudo cp $BACKUP_FILE $DOCKER_CONFIG_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+            cp $BACKUP_FILE $DOCKER_CONFIG_FILE
+            chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
             success=0
             eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
             eval "$eval_cmd"
@@ -86,11 +86,11 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
     if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
         if [[ "$success" -eq 1 ]]; then
             echo "Backing Up Docker Config File..."
-            sudo cp $DOCKER_CONFIG_FILE $BACKUP_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
+            cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+            chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
         fi
 
-        sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+        chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
     fi
 
 else
