@@ -96,22 +96,22 @@ function updatenetlist(){
 }
 
 
-function snnet(){
-    if ! pingn  >/dev/null 2>&1; then
-      echo "Restarting NetworkManager"
-      systemctl restart NetworkManager
+# function snnet(){
+#     if ! pingn  >/dev/null 2>&1; then
+#       echo "Restarting NetworkManager"
+#       systemctl restart NetworkManager
 
-      # echo "Restarting Network"
-      # sudo systemctl restart networking
-      wait
-      ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
-      if [ $? -ne 0 ]; then
-        echo "Failed to connect NEPI IP address: ${nepi_ip}"
-      fi
-    fi
+#       # echo "Restarting Network"
+#       # sudo systemctl restart networking
+#       wait
+#       ping -c 1 -W 1 $nepi_ip > /dev/null 2>&1
+#       if [ $? -ne 0 ]; then
+#         echo "Failed to connect NEPI IP address: ${nepi_ip}"
+#       fi
+#     fi
     
-}
-export -f snnet
+# }
+# export -f snnet
 
 ####################################
 # Process Functions
@@ -391,7 +391,26 @@ netlist_str=''
         echo "Returning to NEPI Service Monitoring"
         echo "********************************"
 
-        
+    #################################
+    elif [[ "$NEPI_EXPAND_FS" -eq 1 ]]; then
+        echo ""
+        echo "---------------------------------"
+        NEPI_EXPAND_FS_FILE=${SYSTEM_SCRIPTS_FOLDER}/update_etc_expand_fs.sh
+        echo "Got NEPI Expand FS Request"
+        update_yaml_value "NEPI_EXPANDING_FS" 1 $DOCKER_CONFIG_FILE
+        if [[ -f $NEPI_EXPAND_FS_FILE ]]; then
+            echo "Expanding NEPI Storage Drive"
+            bash $NEPI_EXPAND_FS_FILE
+        else
+            echo "Failed to find ${NEPI_EXPAND_FS_FILE}"
+        fi
+        update_yaml_value "NEPI_EXPANDING_FS" 0 $DOCKER_CONFIG_FILE
+        update_yaml_value "NEPI_EXPAND_FS" 0 $DOCKER_CONFIG_FILE
+        echo ""
+        echo "Returning to NEPI Service Monitoring"
+        echo "********************************"
+
+
     else
         ##################################
         if [[ "$NEPI_FS_IMPORT" -eq 1 ]]; then
