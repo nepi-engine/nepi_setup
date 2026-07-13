@@ -141,7 +141,7 @@ if [[ ! -d $UPDATE_PATH ]]; then
 fi
 
 sudo rsync -ar --delete ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo cp ${SOURCE_PATH}/nepi_docker_config.yaml ${UPDATE_PATH}/nepi_docker_config.blank
+sudo cp ${SOURCE_PATH}/nepi_docker_config.yaml ${UPDATE_PATH}/nepi_docker_config.factory
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}
@@ -159,7 +159,6 @@ if [[ ! -d $UPDATE_PATH ]]; then
 fi
 
 sudo rsync -ar --delete ${SOURCE_PATH}/ ${UPDATE_PATH}/
-sudo cp ${SOURCE_PATH}/nepi_docker_config.yaml ${UPDATE_PATH}/nepi_docker_config.blank
 
 sudo chown ${CONFIG_USER}:${CONFIG_USER} ${SOURCE_PATH}
 sudo chmod 775 ${SOURCE_PATH}

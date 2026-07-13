@@ -83,19 +83,17 @@ fi
 ########################
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_BLANK=${DOCKER_FOLDER}/nepi_docker_config.blank
+DOCKER_CONFIG_FACTORY=${DOCKER_FOLDER}/nepi_docker_config.factory
 DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
 echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
 # if [[ ! -f DOCKER_CONFIG_FILE ]]; then
 #     echo "Failed to Find Docker Config File: ${DOCKER_CONFIG_FILE}"
 # else
     # Update Docker Config
-    echo "Copying Docker Config File: ${DOCKER_CONFIG_FILE}"
-    if [[ -f $DOCKER_CONFIG_BLANK ]]; then
-        sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
-        sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
-    else
-        sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
+    echo "Syncing Docker Config File: ${DOCKER_CONFIG_FILE}"
+    sudo cp $DOCKER_CONFIG_FILE $DOCKER_CONFIG_TMP 
+    if [[ -f $DOCKER_CONFIG_FACTORY ]]; then
+        sync_yaml_files $DOCKER_CONFIG_FACTORY $DOCKER_CONFIG_TMP       
     fi
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
 
@@ -216,7 +214,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
     NEW_FS=nepi_fs_b
     NEW_ID=($(sudo docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
     NEW_ID="${NEW_ID[0]}"
-    if [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
+    if [[ -n $NEW_ID && $NEPI_AB_FS -eq 1 ]]; then
         NEW_TAG=($(sudo docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
         NEW_TAG=${NEW_TAG[0]}
 
@@ -279,7 +277,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
             update_yaml_value "NEPI_FSB_SIZE_MB" "$NEW_SIZE" "${DOCKER_CONFIG_TMP}"; 
         fi
 
-    elif  [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
+    elif  [[ -n $NEW_ID && $NEPI_AB_FS -eq 1 ]]; then
 
         #echo "Clearing NEPI NEPI_FSB Config Info in ${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_FSB_TAG" "unknown" "${DOCKER_CONFIG_TMP}"
@@ -381,7 +379,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
     ##########################
     # Update Active and Inactive FS
 
-    if [[ "$NEPI_AB_FS" -ne 1 ]]; then
+    if [[ $NEPI_AB_FS -eq 1 ]]; then
         export NEPI_ACTIVE_FS=nepi_fs_a
         export NEPI_INACTIVE_FS=NONE
     elif [[ "$NEPI_ACTIVE_FS" == 'nepi_fs_a' ]]; then
@@ -431,7 +429,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
 
     ###################
     # Clean Up
-    #sync_yaml_files $DOCKER_CONFIG_BLANK $DOCKER_CONFIG_TMP 
+    #sync_yaml_files $DOCKER_CONFIG_FACTORY $DOCKER_CONFIG_TMP 
     sudo cp $DOCKER_CONFIG_TMP $DOCKER_CONFIG_FILE 
     sudo rm $DOCKER_CONFIG_TMP
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
