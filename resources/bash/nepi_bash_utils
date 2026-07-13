@@ -3666,9 +3666,10 @@ export -f get_hailo_hw_version
 
 function get_hailo_sw_version(){
         hailo_version=0
-        hailo_info=$(hailortcli -version >/dev/null 2>&1)
+        hailo_info=$(hailortcli -version 2> /dev/null )
         if [[ -n $hailo_info ]] ; then
           hailo_sw="${hailo_info##* }"
+          #hailo_sw=$(echo "$version_string" | awk '{print $NF}')
           if [[ -n hailo_sw ]]; then
             hailo_version=$hailo_sw
           fi

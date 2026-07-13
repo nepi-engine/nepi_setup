@@ -74,6 +74,7 @@ function nepipullc(){
     sleep 2
     sudo systemctl stop docker
     sudo rm -rf /var/lib/docker
+    sudo rm -rf /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs
     sudo systemctl start docker
     echo "Staring Import Process"
     sleep 2
@@ -358,6 +359,7 @@ export -f nepiexport
 
 function nepiexportc(){
   sudo -v
+  sudo rm -r /mnt/nepi_storage/nepi_images/*
   bash ${NEPI_DOCKER_CONFIG}/nepi_docker_export.sh 'clean'
 }
 export -f nepiexportc
