@@ -496,6 +496,7 @@ function nepibldc(){
   sudo rm -r /opt/nepi/etc/*
   sudo rm -r /opt/nepi/docker_cfg/*
   sudo rm -r /opt/nepi/docker
+  sudo rm -r /mnt/nepi_config/system_cfg/etc/*
   echo "Cleaning NEPI SSH Folders"
   sudo rm -r /home/${CONFIG_USER}/.ssh/*
   sudo rm -r ${NEPI_SYSTEM_CONFIG}/ssh_keys/*
