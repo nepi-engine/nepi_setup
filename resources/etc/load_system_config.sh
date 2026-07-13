@@ -113,6 +113,6 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
 
 
 else
-    echo "Load script not found ${LOAD_SCRIPT}"
+    #echo "Load script not found ${LOAD_SCRIPT}"
     return 1
 fi
