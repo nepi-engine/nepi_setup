@@ -78,13 +78,13 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         export ${entry}
     done
 
-    if [[ "$success" -ne 1 ]]; then
+    if [[ $success -ne 1 ]]; then
         #echo "Success = ${success}"
         echo "NEPI Config File failed to load"
         echo "Checking for Backup Config File..."
 
         if [[ -f "$BACKUP_FILE" ]]; then
-            echo "Backup File Exists Updating Config File"
+            #echo "Backup File Exists Updating Config File"
             sudo cp $BACKUP_FILE $NEPI_CONFIG_FILE  
             sudo chown 1000:1000 $NEPI_CONFIG_FILE
             success=0
@@ -98,20 +98,19 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
                 return 1
             fi
         else
-            echo "Backup File does not Exist"
+            #echo "Backup File does not Exist"
             return 1
         fi
     fi
 
-    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
-        if [[ "$success" -eq 1 ]]; then
-            echo "Backing Up NEPI Config File..."
-            sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
-            sudo chown 1000:1000 $BACKUP_FILE 2>/dev/null
-        fi
-
-        sudo chown 1000:1000 $NEPI_CONFIG_FILE
+    if [[ $success -eq 1 ]]; then
+        #echo "Backing Up NEPI Config File..."
+        sudo cp $NEPI_CONFIG_FILE $BACKUP_FILE
+        sudo chown 1000:1000 $BACKUP_FILE 2>/dev/null
     fi
+
+    sudo chown 1000:1000 $NEPI_CONFIG_FILE
+
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"

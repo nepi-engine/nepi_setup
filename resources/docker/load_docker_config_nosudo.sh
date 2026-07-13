@@ -51,14 +51,15 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
     eval_cmd="load_vals=$(python3 $LOAD_SCRIPT )"  #2>/dev/null"
     eval "$eval_cmd"
     #echo "${load_vals}"
-    
     for entry in $load_vals; do
         export ${entry}
         #echo ${entry}
     done
+    echo "Load returned success=${success}"
 
-
-    if [[ "$success" -ne 1 ]]; then
+    echo "Finished Load Process"
+    if [[ $success -ne 1 ]]; then
+        success=0
         #echo "Success = ${success}"
         echo "Docker Config File failed to load"
         echo "Checking for Backup Config File..."
@@ -73,6 +74,7 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
             for entry in $load_vals; do
                 export ${entry}
             done
+            echo "Backup Load returned success=${success}"
             if [[ "$success" -ne 1 ]]; then
                 echo "Failed to Load Config File from Backup"
                 exit
@@ -83,15 +85,13 @@ if [[ -f "$LOAD_SCRIPT" ]]; then
         fi
     fi
 
-    if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
-        if [[ "$success" -eq 1 ]]; then
-            echo "Backing Up Docker Config File..."
-            cp $DOCKER_CONFIG_FILE $BACKUP_FILE
-            chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
-        fi
-
-        chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+    if [[ $success -eq 1 ]]; then
+        echo "Backing Up Docker Config File..."
+        cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+        chown ${CONFIG_USER}:${CONFIG_USER} $BACKUP_FILE
     fi
+
+    chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
 
 else
     echo "Load script not found ${LOAD_SCRIPT}"

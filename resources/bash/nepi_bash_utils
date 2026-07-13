@@ -1068,13 +1068,21 @@ function ninet(){
   nnet
   ndhcp # Enable DHCP internet connection if needed
   if [[ $? -eq 0 ]]; then
-      sleep 4
+      sleep 2
       wait
       if ! pingi; then
-        return 1
+        sleep 2
+        wait
+        if ! pingi; then
+          sleep 2
+          wait
+          if ! pingi; then
+            return 1
+          fi
+        fi
       fi
       wait
-      sleep 1
+      sleep 2
   fi
   if ! nclock; then # Connect to NTP server
       return 1
