@@ -124,6 +124,7 @@ function nepibldc(){
   sudo rm -r /opt/nepi/etc/*
   sudo rm -r /opt/nepi/docker_cfg/*
   sudo rm -r /opt/nepi/docker
+  sudo rm -r /mnt/nepi_config/system_cfg/*
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
   sudo rm -r $system_source_config
