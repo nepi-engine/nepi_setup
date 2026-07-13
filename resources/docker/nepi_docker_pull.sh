@@ -122,7 +122,8 @@ else
                 success=0
                 ########################
                 # Determine target filesystem slot
-                if [[ "$NEPI_AB_FS" -eq 1 ]]; then
+                echo "GOT NEPI_AB_FS=${NEPI_AB_FS}"
+                if [[ $NEPI_AB_FS -eq 1 ]]; then
                     NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
                 else
                     NEPI_IMPORT_FS=nepi_fs_a

@@ -428,7 +428,7 @@ export -f nepienable
 
 function nepidisable(){
   sudo -v
-  nepistop
+  sudo systemctl stop nepi_docker
   wait
   sudo systemctl disable nepi_docker
   echo "NEPI Docker Service disabled on next boot"
@@ -475,6 +475,11 @@ function nepibld(){
   SHOW_CONFIG_MENU=$1
   sudo -v
   nepistop
+  sleep 2
+  echo "Cleaning NEPI ETC Folders"
+  sudo rm -r /opt/nepi/etc/*
+  sudo rm -r /opt/nepi/docker_cfg/*
+  sudo rm -r /opt/nepi/docker
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU
   sbrc
   nnet
@@ -486,6 +491,12 @@ function nepibldc(){
   SHOW_CONFIG_MENU=$1
   sudo -v
   nepistop
+  sleep 2
+  echo "Cleaning NEPI ETC Folders"
+  sudo rm -r /opt/nepi/etc/*
+  sudo rm -r /opt/nepi/docker_cfg/*
+  sudo rm -r /opt/nepi/docker
+  echo "Cleaning NEPI SSH Folders"
   sudo rm -r /home/${CONFIG_USER}/.ssh/*
   sudo rm -r ${NEPI_SYSTEM_CONFIG}/ssh_keys/*
   source $(NSETUP)/scripts/docker_config_setup.sh $SHOW_CONFIG_MENU

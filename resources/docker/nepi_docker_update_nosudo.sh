@@ -211,7 +211,7 @@ DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
     NEW_FS=nepi_fs_b
     NEW_ID=($(docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
     NEW_ID="${NEW_ID[0]}"
-    if [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
+    if [[ -n $NEW_ID && $NEPI_AB_FS -eq 1 ]]; then
         NEW_TAG=($(docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" | grep "${NEW_ID}" | awk '{print $2}'))
         NEW_TAG=${NEW_TAG[0]}
 
@@ -274,7 +274,7 @@ DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
             update_yaml_value "NEPI_FSB_SIZE_MB" "$NEW_SIZE" "${DOCKER_CONFIG_TMP}"; 
         fi
 
-    elif  [[ -n "$NEW_ID" && "$NEPI_AB_FS" -eq 1 ]]; then
+    elif  [[ -n $NEW_ID && $NEPI_AB_FS -ne 1 ]]; then
 
         #echo "Clearing NEPI NEPI_FSB Config Info in ${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_FSB_TAG" "unknown" "${DOCKER_CONFIG_TMP}"
@@ -376,7 +376,7 @@ DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
     ##########################
     # Update Active and Inactive FS
 
-    if [[ "$NEPI_AB_FS" -ne 1 ]]; then
+    if [[ $NEPI_AB_FS -ne 1 ]]; then
         export NEPI_ACTIVE_FS=nepi_fs_a
         export NEPI_INACTIVE_FS=NONE
     elif [[ "$NEPI_ACTIVE_FS" == 'nepi_fs_a' ]]; then

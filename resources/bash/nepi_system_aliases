@@ -106,6 +106,10 @@ function nepibld(){
   sudo -v
   run_folder=$(pwd)
   nepistop
+  echo "Cleaning NEPI ETC Folders"
+  sudo rm -r /opt/nepi/etc/*
+  sudo rm -r /opt/nepi/docker_cfg/*
+  sudo rm -r /opt/nepi/docker
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
@@ -116,6 +120,10 @@ function nepibldc(){
   sudo -v
   run_folder=$(pwd)
   nepistop
+  echo "Cleaning NEPI ETC Folders"
+  sudo rm -r /opt/nepi/etc/*
+  sudo rm -r /opt/nepi/docker_cfg/*
+  sudo rm -r /opt/nepi/docker
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
   sudo rm -r $system_source_config
