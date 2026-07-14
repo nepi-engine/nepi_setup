@@ -402,240 +402,241 @@ source  $NEPI_USER_CONFIG_SCRIPT
     #     sudo mkdir $shdrive
     # fi
     # sudo chown ${CONFIG_USER}:${CONFIG_USER} $shdrive
+systemctl&> /dev/null
+if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
+    if [[ $SKIP_SOFTWARE -eq 0 ]]; then
+        if [[ -n $DISPLAY ]]; then
+            #####################################
+            echo "########################"
+            echo "Installing Desktop Utility Apps"
+            echo ""
 
-if [[ $SKIP_SOFTWARE -eq 0 ]]; then
-    if [[ -n $DISPLAY ]]; then
-        #####################################
-        echo "########################"
-        echo "Installing Desktop Utility Apps"
-        echo ""
+            SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
 
-        SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
+            # sudo apt update
 
-        # sudo apt update
+            #######
+            echo ""
+            # if command -v mdview &>/dev/null; then
+            #     echo "mdview is installed."
+            # else
+            #     echo "Installing mdview"
+            #     sudo snap install mdview
+            # fi
 
-        #######
-        echo ""
-        # if command -v mdview &>/dev/null; then
-        #     echo "mdview is installed."
-        # else
-        #     echo "Installing mdview"
-        #     sudo snap install mdview
-        # fi
-
-        if command -v chromium-browser &>/dev/null; then
-            echo "Chromium is installed."
-        else
-            # Check for an alternative common name if the first one fails
-            if command -v chromium &>/dev/null; then
+            if command -v chromium-browser &>/dev/null; then
                 echo "Chromium is installed."
             else
-                echo "Installing Chromium Browser"
-                #sudo snap remove --purge chromium
-                sudo snap install chromium
-                #sudo apt install chromium-browser -y
-                #chromium-browser --disable-features=DnsOverHttps
-            fi
-        fi
-
-        if command -v code &> /dev/null; then
-            echo "Visual Studio Code is installed and accessible."
-        else
-            echo ""
-            echo "Installing visual code editor"
-            
-            if [[ "$NEPI_ARCH" == 'arm64' ]]; then
-                curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
-                sudo apt install ./code_arm64.deb
-                wait
-                sudo rm code_arm64.deb
-            elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
-                sudo snap install code --channel=edge --classic
-            fi
-        fi
-
-
-
-    #    echo "Configuring default code editor"
-    #     CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
-    #     if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
-    #         echo "VS Code is already the default code editor"
-    #     else
-    #         read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
-    #         if [[ "$response" =~ ^[Yy]$ ]]; then
-    #             sudo cp -r /home/${CONFIG_USER}/.config/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list.org
-    #             sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
-    #             echo "VS Code set as default code editor"
-    #         else
-    #             echo "Skipping VS Code default setup"
-    #         fi
-    #     fi
-
-    #     echo "Adding config and storage folders to files sidebar"
-    #     sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
-
-
-    #     CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
-    #     if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
-    #         echo "Adding Chromium to favourites"
-    #         NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
-    #         gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
-    #     else
-    #         echo "Chromium already in favourites"
-    #     fi
-        echo "Configuring default code editor"
-        MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
-        if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
-            echo "VS Code is already the default code editor"
-        else
-            read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
-            if [[ "$response" =~ ^[Yy]$ ]]; then
-                sudo mkdir -p /home/${CONFIG_USER}/.config
-                if ! sudo grep -q "\[Default Applications\]" "${MIMEAPPS}" 2>/dev/null; then
-                    echo "[Default Applications]" | sudo tee -a "${MIMEAPPS}" > /dev/null
+                # Check for an alternative common name if the first one fails
+                if command -v chromium &>/dev/null; then
+                    echo "Chromium is installed."
+                else
+                    echo "Installing Chromium Browser"
+                    #sudo snap remove --purge chromium
+                    sudo snap install chromium
+                    #sudo apt install chromium-browser -y
+                    #chromium-browser --disable-features=DnsOverHttps
                 fi
-                for mime in text/x-python text/plain text/x-shellscript application/x-shellscript text/x-csrc text/x-c++src text/x-yaml text/x-json; do
-                    if ! sudo grep -q "^${mime}=" "${MIMEAPPS}" 2>/dev/null; then
-                        sudo sed -i "/\[Default Applications\]/a ${mime}=code.desktop" "${MIMEAPPS}"
-                    fi
-                done
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} "${MIMEAPPS}"
-                echo "VS Code set as default code editor"
+            fi
+
+            if command -v code &> /dev/null; then
+                echo "Visual Studio Code is installed and accessible."
             else
-                echo "Skipping VS Code default setup"
-            fi
-        fi
-
-        echo "Adding config and storage folders to files sidebar"
-        sudo mkdir -p /home/${CONFIG_USER}/.config/gtk-3.0
-        sudo touch /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
-        while IFS= read -r bm; do
-            sudo grep -qxF "$bm" /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks || echo "$bm" | sudo tee -a /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks > /dev/null
-        done < ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks
-
-
-        CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
-        if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
-            echo "Adding Chromium to favourites"
-            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
-            gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
-        else
-            echo "Chromium already in favourites"
-        fi
-
-        #########################
-
-
-        function add_chromium_bookmark() {
-            local NAME="$1"
-            local URL="$2"
-            local BOOKMARKS_FILE="$3"
-            
-            # Check if jq is installed
-            if ! command -v jq &> /dev/null; then
-                echo "Error: 'jq' is not installed. Please install it first."
-                return 1
-            fi
-
-            # Check if file exists
-            if [ ! -f "$BOOKMARKS_FILE" ]; then
-                echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
-                return 1
-            fi
-            sudo chmod 0700 $BOOKMARKS_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-            # Create a temporary file to work on
-            local TEMP_FILE=$(mktemp)
-
-            # Use jq to append the new bookmark to the 'bookmark_bar' children array
-            jq --arg name "$NAME" --arg url "$URL" \
-            '.roots.bookmark_bar.children += [{
-                "date_added": (now * 1000000 | floor | tostring),
-                "id": (([.roots.bookmark_bar.children[].id | tonumber] | max + 1) | tostring),
-                "name": $name,
-                "type": "url",
-                "url": $url
-            }]' "$BOOKMARKS_FILE" > "$TEMP_FILE"
-
-            # Overwrite original file (keeping a backup is recommended)
-            cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
-            mv "$TEMP_FILE" "$BOOKMARKS_FILE"
-            sudo chmod 0700 $BOOKMARKS_FILE
-            sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-            
-            echo "Successfully added '$NAME' to Chromium bookmarks."
-        }
-
-        echo "Locating Chromium profile"
-        if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
-            CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
-        elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
-            CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}.config/chromium
-        else
-            CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
-            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
-            if [[ ! -d CHROMIUM_FOLDER ]]; then
-                sudo mkdir -p ${CHROMIUM_FOLDER}/Default
-            fi
-            if [[ -d CHROMIUM_FOLDER ]]; then
-                CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
-            fi
-            
-        fi
-
-        if [[ -n "$CHROMIUM_PROFILE" ]]; then
-
-            if [[ -d ${CHROMIUM_PROFILE} ]]; then
-                echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
-                sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
-                #sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
-
-                echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
-                #sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
-                CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
-                sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
-                # Copy only the Bookmarks file
-                BOOKMARKS_FILE=${CHROMIUM_DEFAULT}/Bookmarks
-                if [[ ! -f $BOOKMARKS_FILE ]]; then
-                    sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARKS_FILE
+                echo ""
+                echo "Installing visual code editor"
+                
+                if [[ "$NEPI_ARCH" == 'arm64' ]]; then
+                    curl -L https://aka.ms/linux-arm64-deb > code_arm64.deb
+                    sudo apt install ./code_arm64.deb
+                    wait
+                    sudo rm code_arm64.deb
+                elif [[ "$NEPI_ARCH" == 'amd64' ]]; then
+                    sudo snap install code --channel=edge --classic
                 fi
-                if [[ -f $BOOKMARKS_FILE ]]; then
-                    sudo chmod 0700 $BOOKMARKS_FILE
-                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-                    if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                        add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
-                        add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
-                        add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
+            fi
+
+
+
+        #    echo "Configuring default code editor"
+        #     CURRENT_DEFAULT=$(xdg-mime query default text/x-python 2>/dev/null)
+        #     if [[ "$CURRENT_DEFAULT" == *"code"* ]]; then
+        #         echo "VS Code is already the default code editor"
+        #     else
+        #         read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+        #         if [[ "$response" =~ ^[Yy]$ ]]; then
+        #             sudo cp -r /home/${CONFIG_USER}/.config/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list.org
+        #             sudo cp -rf ${SOURCE_ETC_PATH}/user/mimeapps.list /home/${CONFIG_USER}/.config/mimeapps.list
+        #             echo "VS Code set as default code editor"
+        #         else
+        #             echo "Skipping VS Code default setup"
+        #         fi
+        #     fi
+
+        #     echo "Adding config and storage folders to files sidebar"
+        #     sudo cp -rf ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks  /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+
+
+        #     CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+        #     if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+        #         echo "Adding Chromium to favourites"
+        #         NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+        #         gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+        #     else
+        #         echo "Chromium already in favourites"
+        #     fi
+            echo "Configuring default code editor"
+            MIMEAPPS="/home/${CONFIG_USER}/.config/mimeapps.list"
+            if sudo grep -q "text/x-python=.*code" "${MIMEAPPS}" 2>/dev/null; then
+                echo "VS Code is already the default code editor"
+            else
+                read -p "VS Code is not set as the default code editor. Set it now? [y/N] " response
+                if [[ "$response" =~ ^[Yy]$ ]]; then
+                    sudo mkdir -p /home/${CONFIG_USER}/.config
+                    if ! sudo grep -q "\[Default Applications\]" "${MIMEAPPS}" 2>/dev/null; then
+                        echo "[Default Applications]" | sudo tee -a "${MIMEAPPS}" > /dev/null
                     fi
-                    rui_ip=$nepi_ip
-                    sed -i "s/localhost/$rui_ip/g" $BOOKMARKS_FILE
-                    sudo chmod 0700 $BOOKMARKS_FILE
-                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-                    echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"
+                    for mime in text/x-python text/plain text/x-shellscript application/x-shellscript text/x-csrc text/x-c++src text/x-yaml text/x-json; do
+                        if ! sudo grep -q "^${mime}=" "${MIMEAPPS}" 2>/dev/null; then
+                            sudo sed -i "/\[Default Applications\]/a ${mime}=code.desktop" "${MIMEAPPS}"
+                        fi
+                    done
+                    sudo chown ${CONFIG_USER}:${CONFIG_USER} "${MIMEAPPS}"
+                    echo "VS Code set as default code editor"
+                else
+                    echo "Skipping VS Code default setup"
+                fi
+            fi
+
+            echo "Adding config and storage folders to files sidebar"
+            sudo mkdir -p /home/${CONFIG_USER}/.config/gtk-3.0
+            sudo touch /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks
+            while IFS= read -r bm; do
+                sudo grep -qxF "$bm" /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks || echo "$bm" | sudo tee -a /home/${CONFIG_USER}/.config/gtk-3.0/bookmarks > /dev/null
+            done < ${SOURCE_ETC_PATH}/user/config/gtk-3.0/bookmarks
+
+
+            CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
+            if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+                echo "Adding Chromium to favourites"
+                NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+                gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
+            else
+                echo "Chromium already in favourites"
+            fi
+
+            #########################
+
+
+            function add_chromium_bookmark() {
+                local NAME="$1"
+                local URL="$2"
+                local BOOKMARKS_FILE="$3"
+                
+                # Check if jq is installed
+                if ! command -v jq &> /dev/null; then
+                    echo "Error: 'jq' is not installed. Please install it first."
+                    return 1
                 fi
 
-                # Enable the Home button in Preferences without overwriting the whole file
-                PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"
-                if [[ ! -f $PREFS_FILE ]]; then
-                    sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Preferences" $PREFS_FILE
+                # Check if file exists
+                if [ ! -f "$BOOKMARKS_FILE" ]; then
+                    echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
+                    return 1
                 fi
-                if [[ -f $BOOKMARKS_FILE ]]; then
-                    sudo chmod 0700 $PREFS_FILE
-                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
-                    update_json_value "$PREFS_FILE" browser.show_home_button true
-                    update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
-                    sudo chmod 0700 $PREFS_FILE
-                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
-                    echo "Updated Chromiun Preferences in ${PREFS_FILE}"
+                sudo chmod 0700 $BOOKMARKS_FILE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                # Create a temporary file to work on
+                local TEMP_FILE=$(mktemp)
+
+                # Use jq to append the new bookmark to the 'bookmark_bar' children array
+                jq --arg name "$NAME" --arg url "$URL" \
+                '.roots.bookmark_bar.children += [{
+                    "date_added": (now * 1000000 | floor | tostring),
+                    "id": (([.roots.bookmark_bar.children[].id | tonumber] | max + 1) | tostring),
+                    "name": $name,
+                    "type": "url",
+                    "url": $url
+                }]' "$BOOKMARKS_FILE" > "$TEMP_FILE"
+
+                # Overwrite original file (keeping a backup is recommended)
+                cp "$BOOKMARKS_FILE" "${BOOKMARKS_FILE}.bak"
+                mv "$TEMP_FILE" "$BOOKMARKS_FILE"
+                sudo chmod 0700 $BOOKMARKS_FILE
+                sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                
+                echo "Successfully added '$NAME' to Chromium bookmarks."
+            }
+
+            echo "Locating Chromium profile"
+            if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
+                CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
+            elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
+                CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}.config/chromium
+            else
+                CHROMIUM_FOLDER="/home/${CONFIG_USER}/snap/chromium/common/chromium"
+                sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap
+                if [[ ! -d CHROMIUM_FOLDER ]]; then
+                    sudo mkdir -p ${CHROMIUM_FOLDER}/Default
+                fi
+                if [[ -d CHROMIUM_FOLDER ]]; then
+                    CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
+                fi
+                
+            fi
+
+            if [[ -n "$CHROMIUM_PROFILE" ]]; then
+
+                if [[ -d ${CHROMIUM_PROFILE} ]]; then
+                    echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
+                    sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
+                    #sudo rm -rf /home/${CONFIG_USER}/.cache/chromium > /dev/null 2>&1
+
+                    echo "Updating Chromiun Settings in ${CHROMIUM_PROFILE}"
+                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_PROFILE
+                    #sudo cp -r $CHROMIUM_PROFILE ${CHROMIUM_PROFILE}.org
+                    CHROMIUM_DEFAULT=${CHROMIUM_PROFILE}/Default
+                    sudo chown ${CONFIG_USER}:${CONFIG_USER} $CHROMIUM_DEFAULT
+                    # Copy only the Bookmarks file
+                    BOOKMARKS_FILE=${CHROMIUM_DEFAULT}/Bookmarks
+                    if [[ ! -f $BOOKMARKS_FILE ]]; then
+                        sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Bookmarks" $BOOKMARKS_FILE
+                    fi
+                    if [[ -f $BOOKMARKS_FILE ]]; then
+                        sudo chmod 0700 $BOOKMARKS_FILE
+                        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                        if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
+                            add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
+                            add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
+                            add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
+                        fi
+                        rui_ip=$nepi_ip
+                        sed -i "s/localhost/$rui_ip/g" $BOOKMARKS_FILE
+                        sudo chmod 0700 $BOOKMARKS_FILE
+                        sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
+                        echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"
+                    fi
+
+                    # Enable the Home button in Preferences without overwriting the whole file
+                    PREFS_FILE="$CHROMIUM_DEFAULT/Preferences"
+                    if [[ ! -f $PREFS_FILE ]]; then
+                        sudo cp -f "${SOURCE_ETC_PATH}/user/chromium/common/chromium/Default/Preferences" $PREFS_FILE
+                    fi
+                    if [[ -f $BOOKMARKS_FILE ]]; then
+                        sudo chmod 0700 $PREFS_FILE
+                        sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+                        update_json_value "$PREFS_FILE" browser.show_home_button true
+                        update_json_value "$PREFS_FILE" bookmark_bar.show_on_all_tabs true
+                        sudo chmod 0700 $PREFS_FILE
+                        sudo chown ${CONFIG_USER}:${CONFIG_USER} $PREFS_FILE
+                        echo "Updated Chromiun Preferences in ${PREFS_FILE}"
+                    fi
                 fi
             fi
         fi
     fi
 fi
-
 
 
     #####################################
