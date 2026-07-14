@@ -580,6 +580,11 @@ sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -
 }
 
 
+function sshnh(){
+  echo "You are Host. Nothing to do."
+}
+
+
 HELPN="${HELPN}
 ################################
 ### NEPI SSH UTIL FUNCTIONS
