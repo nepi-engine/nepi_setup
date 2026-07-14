@@ -5136,8 +5136,14 @@ function nepigithub {
 
 export -f nepigithub
 
-
-
+function nepigithubdev {
+  nepigithub
+  if [[ $? -eq 0 && -d /home/${CONFIG_USER}/nepi_engine_ws ]]; then
+    cd /home/${CONFIG_USER}/nepi_engine_ws
+    git checkout develop
+  fi
+}
+export -f nepigithubdev
 
 function pulln {
   if is_valid_internet ; then
@@ -5336,7 +5342,8 @@ nepisetkey = Set provided key name as NEPI device key
 nepisshkey = NEPI SSH key setup function
 nepiauthadd = Add provide key name to SSH authorized_key file
 nepiauthrm = Remove provide key name from SSH authorized_key file
-nepigithub = Check and Setup a GitHub SSH key for your GitHub account
+nepigithub = Check and Setup a GitHub SSH key for your GitHub account and clone the nepi main repo branch if successfull
+nepigithubdev = Check and Setup a GitHub SSH key for your GitHub account and clone the nepi develop repo branch if successfull
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
 pulln = Update to the latest NEPI source-code repo
