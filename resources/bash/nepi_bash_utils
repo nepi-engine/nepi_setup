@@ -4825,6 +4825,58 @@ export -f nepiauthadd
 
 
 
+function pulln {
+  if is_valid_internet ; then
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git pull --recurse-submodules
+      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+    fi
+  fi
+}
+
+export -f pulln
+
+
+function nepiclone {
+  if is_valid_internet ; then
+    cd ~/
+    git clone ${NEPI_REPO_ADDRESS} 
+    if [[ $? -eq 0 ]]; then
+      cd ${NEPI_REPO_NAME}
+      git checkout main
+      git submodule update --init --recursive
+      pulln
+    else
+      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
+    fi
+  fi
+}
+
+export -f nepiclone
+
+function nepiclonedev {
+  if is_valid_internet ; then
+    cd ~/
+    git clone ${NEPI_REPO_ADDRESS} 
+    if [[ $? -eq 0 ]]; then
+      cd ${NEPI_REPO_NAME}
+      git checkout develop
+      git submodule update --init --recursive 
+      pulln
+    else
+      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
+    fi
+  fi
+}
+
+export -f nepiclonedev
+
+
+
+
+
 function nepigithub {
     sudo -v
     key_folder="/home/${CONFIG_USER}/.ssh"
@@ -5141,57 +5193,10 @@ function nepigithubdev {
   if [[ $? -eq 0 && -d /home/${CONFIG_USER}/nepi_engine_ws ]]; then
     cd /home/${CONFIG_USER}/nepi_engine_ws
     git checkout develop
+    pulln
   fi
 }
 export -f nepigithubdev
-
-function pulln {
-  if is_valid_internet ; then
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git pull --recurse-submodules
-      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-    fi
-  fi
-}
-
-export -f pulln
-
-
-function nepiclone {
-  if is_valid_internet ; then
-    cd ~/
-    git clone ${NEPI_REPO_ADDRESS} 
-    if [[ $? -eq 0 ]]; then
-      cd ${NEPI_REPO_NAME}
-      git checkout main
-      git submodule update --init --recursive
-    else
-      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
-    fi
-  fi
-}
-
-export -f nepiclone
-
-function nepiclonedev {
-  if is_valid_internet ; then
-    cd ~/
-    git clone ${NEPI_REPO_ADDRESS} 
-    if [[ $? -eq 0 ]]; then
-      cd ${NEPI_REPO_NAME}
-      git checkout develop
-      git submodule update --init --recursive 
-    else
-      echo "Failed to clone NEPI Repo from ${NEPI_REPO_ADDRESS}"
-    fi
-  fi
-}
-
-export -f nepiclonedev
-
-
 
 
 
