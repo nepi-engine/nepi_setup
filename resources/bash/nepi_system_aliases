@@ -107,9 +107,9 @@ function nepibld(){
   run_folder=$(pwd)
   nepistop
   echo "Cleaning NEPI ETC Folders"
-  sudo rm -r /opt/nepi/etc/*
-  sudo rm -r /opt/nepi/docker_cfg/*
-  sudo rm -r /opt/nepi/docker
+  sudo rm -r ${NEPI_BASE}/etc/*
+  sudo rm -r ${NEPI_BASE}/docker_cfg/*
+  sudo rm -r ${NEPI_BASE}/docker
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
@@ -121,9 +121,13 @@ function nepibldc(){
   run_folder=$(pwd)
   nepistop
   echo "Cleaning NEPI ETC Folders"
-  sudo rm -r /opt/nepi/etc/*
-  sudo rm -r /opt/nepi/docker_cfg/*
-  sudo rm -r /opt/nepi/docker
+  sudo rm -r ${NEPI_BASE}/etc/*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/etc/*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/*
+  sudo rm -r ${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src/*
+  
+  sudo rm -r ${NEPI_BASE}/docker_cfg/*
+  sudo rm -r ${NEPI_BASE}/docker
   sudo rm -r /mnt/nepi_config/system_cfg/*
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
