@@ -47,7 +47,9 @@ CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd
 
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_system_config.py
 
+
 FACTORY_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.factory
+REMOTE_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
 NEPI_CONFIG_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_system_config.yaml.bak
 

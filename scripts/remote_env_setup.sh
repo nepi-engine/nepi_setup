@@ -414,15 +414,14 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             SOURCE_ETC_PATH=$RESOURCES_FOLDER/etc
 
             # sudo apt update
-
             #######
             echo ""
-            # if command -v mdview &>/dev/null; then
-            #     echo "mdview is installed."
-            # else
-            #     echo "Installing mdview"
-            #     sudo snap install mdview
-            # fi
+            if command -v nautilus &>/dev/null; then
+                echo "nautilus is installed."
+            else
+                echo "Installing nautilus"
+                sudo apt install nautilus -y
+            fi
 
             if command -v chromium-browser &>/dev/null; then
                 echo "Chromium is installed."

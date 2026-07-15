@@ -182,7 +182,8 @@ function update_current_config() {
     source ${SYSTEM_ETC_PATH}/load_system_config.sh
     if [[ "$NEPI_INSTALL" == 'LITE' || $LITE_INSTALL -eq 1 ]]; then
         echo "Updating Config Values for LITE Install"
-        host_id=${NEPI_STATIC_IP##*.}
+        host_ip="${NEPI_STATIC_IP%%/*}"
+        host_id=${host_ip##*.}
         export NEPI_STATIC_IP="127.0.0.${host_id}/24"
         echo "NEPI_STATIC_IP=${NEPI_STATIC_IP}"
         export NEPI_GATEWAY_IP="127.0.0.1"

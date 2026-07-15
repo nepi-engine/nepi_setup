@@ -34,10 +34,10 @@ if [[ ! -n $CONFIG_USER ]]; then
     id -nu 1000
 fi
 
-
+export NEPI_MODE='HOST'
 NEPI_UTILS_FILE=/home/${CONFIG_USER}/.nepi_bash_utils
 source $NEPI_UTILS_FILE
-
+export NEPI_MODE='HOST'
 
 ################################
 export NEPI_REMOTE_SETUP=0

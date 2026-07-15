@@ -20,7 +20,7 @@
 
 sudo -v
 
-
+export NEPI_MODE='SYSTEM'
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -360,5 +360,6 @@ cp /etc/skel/.profile /home/${CONFIG_USER}/
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.profile
 sudo chmod 0644 /home/${CONFIG_USER}/.profile
 
+export NEPI_MODE='SYSTEM'
 
 

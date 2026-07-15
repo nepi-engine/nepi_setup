@@ -50,7 +50,12 @@ export BASH_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 &
 ##### NEPI SETTINGS #####
 export NEPI_BASH_UTILS=${BASH_FOLDER}/.nepi_bash_utils
 
-export NEPI_MODE=SYSTEM
+if [[ ${NEPI_MODE} == 'SYSTEM' || ${NEPI_MODE} == 'HOST' || ${NEPI_MODE} == 'REMOTE' ]]; then
+  nepi_mode=$NEPI_MODE
+else
+  nepi_mode='SYSTEM'
+fi
+export NEPI_MODE=$nepi_mode
 
 export NEPI_USER=nepi
 export NEPI_ADMIN_USER=nepiadmin
@@ -912,19 +917,19 @@ source /home/${CONFIG_USER}/.bashrc"
 ## NEPI deploy complete
 function ubrc_remote() {
 sudo -v
-source $(NSETUP)/scripts/remote_bash_setup.sh $skip_software
+source $(NSETUP)/scripts/remote_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
 }
 
 function ubrc_host() {
 sudo -v
-source $(NSETUP)/scripts/docker_bash_setup.sh $skip_software
+source $(NSETUP)/scripts/docker_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
 }
 
 function ubrc_system() {
 sudo -v
-source $(NSETUP)/scripts/nepi_bash_setup.sh $skip_software
+source $(NSETUP)/scripts/nepi_bash_setup.sh
 source /home/${CONFIG_USER}/.bashrc
 }
 
@@ -4330,6 +4335,43 @@ function nepirui() {
 export -f nepirui
 
 
+function nepiengine() {
+  sudo -v
+  nepi_engine_default=/home/${CONFIG_USER}/nepi_engine_ws
+  nepi_engine_folder=''
+  if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    nepi_engine_folder=/home/${CONFIG_USER}/nepi_engine_ws
+  elif [[ ${NEPI_MODE} == 'HOST' ]]; then
+    nepi_engine_folder=/mnt/nepi_storage/nepi_src/nepi_engine_ws
+  elif [[ ${NEPI_MODE} == 'SYSTEM' ]]; then
+    nepi_engine_folder=/mnt/nepi_storage/nepi_src/nepi_engine_ws
+  fi
+  if [[ -n $nepi_engine_folder && -d $nepi_engine_folder ]]; then
+      cd $nepi_engine_folder
+      echo $nepi_engine_folder
+  elif [[ -d $nepi_engine_default ]]; then
+      cd $nepi_engine_default
+      echo $nepi_engine_folder
+  else
+      return 1
+  fi
+}
+export -f nepiengine
+
+function nepiengine_open() {
+  sudo -v
+  nepi_engine_folder=$(nepiengine)
+
+  if [[ -n $nepi_engine_folder && -d $nepi_engine_folder ]]; then
+      echo $nepi_engine_folder
+      nautilus $nepi_engine_folder
+  else
+      return 1
+  fi
+}
+
+export -f nepiengine_open
+
 function nepistorage() {
   sudo -v
   shfolder=nepi_storage
@@ -4393,9 +4435,11 @@ function nepistorage_open() {
         shdrive=/mnt/nepi_share_storage
         xdg-open $shdrive
       fi
-    else
+    elif [[ ${NEPI_MODE} == 'HOST' ]]; then
       shdrive=/mnt/nepi_storage
-      xdg-open $shdrive
+      nautilus $shdrive
+    else
+      echo "NEPI SYSTEM Does not have File Manager App"
     fi
       
   fi
@@ -4470,9 +4514,11 @@ function nepiconfig_open() {
         shdrive=/mnt/nepi_share_config
         xdg-open $shdrive
       fi
-    else
+    elif [[ ${NEPI_MODE} == 'HOST' ]]; then
       shdrive=/mnt/nepi_config
-      xdg-open $shdrive
+      nautilus $shdrive
+    else
+      echo "NEPI SYSTEM Does not have File Manager App"
     fi
 
       
@@ -5355,6 +5401,8 @@ nssh = Change Dir to the User .ssh folder folder
 nepirui = Open Chromium to RUI Dashboard page
 nepistorage = Change dir to NEPI shared Storage Drive if accessable
 nepistorage_open = Open file manager to NEPI shared Storage Drive if accessable
+nepiengine = Change dir to NEPI Source Code Folder if accessable
+nepiengine_open = Open file manager to NEPI Source Code Folder if accessable
 nepiconfig = Change dir to NEPI shared Config Drive if accessable
 nepiconfig_open = Open file manager to NEPI shared Config Drive if accessable
 nepisync = Sync NEPI SSH Key files

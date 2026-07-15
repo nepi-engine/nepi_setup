@@ -21,7 +21,7 @@
 
 sudo -v
 
-
+export NEPI_MODE='HOST'
 
 SCRIPT_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 LICENSE_CHECK_FILE=${SCRIPT_FOLDER}/nepi_license_check.sh
@@ -348,6 +348,7 @@ fi
 sudo chown ${CONFIG_USER}:${CONFIG_USER} /media/${CONFIG_USER}
 
 
+export NEPI_MODE='HOST'
 
 echo ""
 echo "########################"

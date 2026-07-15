@@ -19,6 +19,7 @@
 
 sudo -v
 
+export NEPI_MODE='REMOTE'
 skip_software=$1
 if [[ $skip_software -eq 1 ]]; then
     SKIP_SOFTWARE=1
@@ -55,12 +56,13 @@ fi
 
 NEPI_UTILS_SOURCE=${RESOURCES_FOLDER}/bash/nepi_bash_utils
 USER_UTILS_SOURCE=/home/${CONFIG_USER}/.nepi_bash_utils
+export NEPI_MODE='REMOTE'
 if [[ -f $USER_UTILS_SOURCE ]]; then
     source $USER_UTILS_SOURCE
 else
     source $NEPI_UTILS_SOURCE
 fi
-
+export NEPI_MODE='REMOTE'
 
 echo " "
 echo "################################# "
@@ -94,7 +96,7 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
-#NEPI_IP=${NEPI_STATIC_IP%%/*}
+NEPI_IP=${NEPI_STATIC_IP%%/*}
 
 if [[ -n $remote_ip ]]; then
     export REMOTE_IP=$remote_ip
@@ -305,6 +307,7 @@ fi
 
 
     #####################################
+    export NEPI_MODE='REMOTE'
     echo " "
     echo "################################# "
     echo "NEPI REMOTE BASH SETUP COMPLETE"
