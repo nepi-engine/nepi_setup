@@ -68,24 +68,21 @@ echo " "
 echo "################################# "
 echo "Updating NEPI Config Files"
 echo ""
+echo "NEPI_MODE at Start Config Update=${NEPI_MODE}"
 
 NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
 NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
-if [[ ! -f $NEPI_USER_CONFIG_SCRIPT ]]; then
-    cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
-fi
 
-NEPI_SETUP_CONFIG_PYTHON=${RESOURCES_FOLDER}/etc/load_system_config.py
-NEPI_USER_CONFIG_PYTHON=/home/${CONFIG_USER}/load_system_config.py
-if [[ ! -f $NEPI_USER_CONFIG_PYTHON ]]; then
-    cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
-fi
+cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
+cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
+
 
 NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
 NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
 if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
     cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
 fi
+sync_yaml_files $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
 
 if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
@@ -96,7 +93,10 @@ if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
     fi
 fi
 
+echo "NEPI_MODE after Sys Config Load=${NEPI_MODE}"
+
 NEPI_IP=${NEPI_STATIC_IP%%/*}
+echo "Got NEPI_IP=${NEPI_IP}"
 
 if [[ -n $remote_ip ]]; then
     export REMOTE_IP=$remote_ip
@@ -107,7 +107,7 @@ else
 fi
 
 
-
+echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
     #####################################
     echo " "
     echo "################################# "
