@@ -1086,19 +1086,7 @@ function ninet(){
   nnet
   ndhcp # Enable DHCP internet connection if needed
   if [[ $? -eq 0 ]]; then
-      sleep 2
-      wait
-      if ! pingi; then
-        sleep 2
-        wait
-        if ! pingi; then
-          sleep 2
-          wait
-          if ! pingi; then
-            return 1
-          fi
-        fi
-      fi
+      sleep 4
       wait
       sleep 2
   fi
