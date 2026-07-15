@@ -128,6 +128,9 @@ else
                 else
                     NEPI_IMPORT_FS=nepi_fs_a
                 fi
+                if [[ ${NEPI_IMPORT_FS} != 'nepi_fs_a' || ${NEPI_IMPORT_FS} != 'nepi_fs_b' ]]; then
+                    NEPI_IMPORT_FS=nepi_fs_a
+                fi
 
                 ########################
                 # Build NEPI-format local tag
@@ -202,7 +205,7 @@ else
                             echo $NEPI_IMPORT_FS
                             nepistop
                             wait
-                            Remove existing images in the target slot
+                            #Remove existing images in the target slot
                             
                             exist_ids=($(sudo docker images --filter "reference=${NEPI_IMPORT_FS}" --format "{{.ID}}"))
                             if [[ -n "${exist_ids[*]}" ]]; then

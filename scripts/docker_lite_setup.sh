@@ -85,7 +85,8 @@ elif [[ -f $NEPI_SETUP_CONFIG_FILE && $nepi_config_loaded -eq 0 ]]; then
     fi
 fi
 
-
+export LITE_INSTALL=1
+export NEPI_INSTALL='LITE'
 
 
 echo ""

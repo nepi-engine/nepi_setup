@@ -81,6 +81,18 @@ echo ""
 
     nepi_mode=HOST
     export NEPI_MODE=$nepi_mode
+    if [[ $LITE_INSTALL -eq 1 ]]; then
+        echo "Updating Config Values for LITE Install"
+        host_id=${NEPI_STATIC_IP##*.}
+        export NEPI_STATIC_IP="127.0.0.${host_id}/24"
+        echo "NEPI_STATIC_IP=${NEPI_STATIC_IP}"
+        export NEPI_GATEWAY_IP="127.0.0.1"
+        export NEPI_ALIAS_IP_1='NONE'
+        export NEPI_ALIAS_IP_2='NONE'
+        export NEPI_ALIAS_IP_3='NONE'
+        export NEPI_ROS_IP=$NEPI_STATIC_IP
+        export NEPI_NTP_IP='NONE'
+    fi
 
     sudo chown ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}
 
@@ -274,9 +286,10 @@ echo ""
 
     echo " "
     echo "################################# "
-    echo "Clearing Known Hosts"
+    echo "Clearing Known Host for NEPI ip: ${nepi_ip}"
     echo ""
-    sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
+    ssh-keygen -R $nepi_ip
+    #sudo rm -r /home/${CONFIG_USER}/.ssh/known_hosts* >/dev/null 2>&1
 
 
     echo " "

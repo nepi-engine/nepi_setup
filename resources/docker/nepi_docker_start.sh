@@ -110,6 +110,9 @@ else
     run_cmd="--rm"
 fi
 
+if [[ ! -d "/dev/bus/usb" ]]; then
+    sudo mkdir -p "/dev/bus/usb"
+fi
 
 ########
 # Initialize Run Command

@@ -147,12 +147,7 @@ if [ $? -eq 1 ]; then
     exit 1
 fi
 
-if [[ "$NEPI_INSTALL" == 'LITE' ]]; then
-    NEPI_STATIC_IP=127.0.0.103/24
-    NEPI_ALIAS_IP_1='NONE'
-    NEPI_ALIAS_IP_2='NONE'
-    NEPI_ALIAS_IP_3='NONE'
-fi
+
 NEPI_STATIC_IP_START=$NEPI_STATIC_IP
 NEPI_DEVICE_ID_START=$NEPI_DEVICE_ID
 
@@ -184,9 +179,20 @@ NEPI_VPN_ENABLED
 )
 
 function update_current_config() {
-    if [[ "$NEPI_INSTALL" == 'FULL' ]]; then
-        source ${SYSTEM_ETC_PATH}/load_system_config.sh
+    source ${SYSTEM_ETC_PATH}/load_system_config.sh
+    if [[ "$NEPI_INSTALL" == 'LITE' || $LITE_INSTALL -eq 1 ]]; then
+        echo "Updating Config Values for LITE Install"
+        host_id=${NEPI_STATIC_IP##*.}
+        export NEPI_STATIC_IP="127.0.0.${host_id}/24"
+        echo "NEPI_STATIC_IP=${NEPI_STATIC_IP}"
+        export NEPI_GATEWAY_IP="127.0.0.1"
+        export NEPI_ALIAS_IP_1='NONE'
+        export NEPI_ALIAS_IP_2='NONE'
+        export NEPI_ALIAS_IP_3='NONE'
+        export NEPI_ROS_IP=$NEPI_STATIC_IP
+        export NEPI_NTP_IP='NONE'
     fi
+
     CURRENT_NEPI_USER_PW="$NEPI_USER_PW"
     CURRENT_NEPI_HOST_PW="$NEPI_HOST_PW"
     CURRENT_NEPI_ADMIN_PW="$NEPI_ADMIN_PW"
@@ -517,7 +523,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
     echo ""
     echo "Running System Config in ${NEPI_INSTALL} mode"
-    echo "Show Menu set to: ${SHOW_CONFIG_MENU}"
+    #echo "Show Menu set to: ${SHOW_CONFIG_MENU}"
     echo ""
 
     if [[ "$NEPI_MODE" == 'HOST' && $SHOW_CONFIG_MENU -eq 1 && "$NEPI_INSTALL" == 'FULL' ]]; then
@@ -818,10 +824,8 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                     done
             done
             echo ""
-
-        udpate_config_file
     fi
-
+    udpate_config_file
   
 
       

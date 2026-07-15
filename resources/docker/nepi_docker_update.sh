@@ -378,10 +378,10 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
 
     ##########################
     # Update Active and Inactive FS
-
+    export NEPI_AB_FS=0 # UNTIL AB WORKING
     if [[ $NEPI_AB_FS -eq 1 ]]; then
         export NEPI_ACTIVE_FS=nepi_fs_a
-        export NEPI_INACTIVE_FS=NONE
+        export NEPI_INACTIVE_FS=nepi_fs_a
     elif [[ "$NEPI_ACTIVE_FS" == 'nepi_fs_a' ]]; then
         export NEPI_INACTIVE_FS=nepi_fs_b
     elif [[ "$NEPI_ACTIVE_FS" == 'nepi_fs_b' ]]; then
@@ -391,6 +391,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
         export NEPI_INACTIVE_FS=nepi_fs_b
     fi
         
+    update_yaml_value "NEPI_AB_FS" $NEPI_AB_FS "${DOCKER_CONFIG_TMP}"
     update_yaml_value "NEPI_ACTIVE_FS" $NEPI_ACTIVE_FS "${DOCKER_CONFIG_TMP}"
     update_yaml_value "NEPI_INACTIVE_FS" $NEPI_INACTIVE_FS "${DOCKER_CONFIG_TMP}"
     #echo "Updated FS Active and Inactive FS to: ${NEPI_ACTIVE_FS} ${NEPI_INACTIVE_FS}"

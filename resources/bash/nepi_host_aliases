@@ -569,14 +569,14 @@ fi
 
 # Setup Connection Shortcuts
 # Setup Connection Shortcuts
-alias sshn="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
-alias sshnv="ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
-alias scpn="scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
-alias sftpn="sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi"
+alias sshn="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_IP}"
+alias sshnv="ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_IP}"
+alias scpn="scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_IP}"
+alias sftpn="sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_IP}"
 
 
 function sftpnl(){
-sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@nepi:../.."$@"
+sftp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P $nepi_port -i $NEPI_SSH_KEY_PATH ${NEPI_USER}@${NEPI_IP}:../.."$@"
 }
 
 
