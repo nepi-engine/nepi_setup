@@ -5268,6 +5268,8 @@ function gitmain {
   git pull
 }
 
+
+
 function pushn(){
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
@@ -5291,11 +5293,9 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    echo -e "${GREEN}Clearing __pycache__ folders"
-    find ./ -type d -name "__pycache__" -exec rm -rf {} +
     if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
-        echo $(git push origin HEAD:develop)
+        git push origin HEAD:develop
 
     else
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head main"
@@ -5303,28 +5303,8 @@ function pushn(){
         #git checkout main
     fi
     if [ ! $? -eq 0 ]; then
-      echo -e "${WHITE}Push Failed. Will Attempt to Merge with Remote"
-      echo $(git pull --no-edit)
-      if [ ! $? -eq 0 ]; then
-        echo -e "${RED}Merge Failed"
-        return 1 # Failed
-      elif [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-          echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head develop"
-          echo $(git push origin HEAD:develop)
-
-      else
-          echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head main"
-          echo $(git push origin HEAD:main)
-          #git checkout main
-      fi
-      if [ ! $? -eq 0 ]; then
-        echo -e "${RED}Push Failed"
-        return 1 # Failed
-      fi
-
-
-
-
+      echo -e "${RED}Push Failed"
+      return 1 # Failed
     fi
     echo -e "${GREEN}Push Successfully"
   else
@@ -5333,30 +5313,110 @@ function pushn(){
 }
 
 
+
 function pulln {
   if is_valid_internet ; then
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    setup_folder=/home/${CONFIG_USER}/nepi_setup
-
-    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-    if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-          git pull --recurse-submodules
-          git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-      elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
-        git fetch origin
-        git reset --hard origin/main
-        git push origin main --force
-      else
-        git pull
-      fi
-    else
-      echo -e "${RED}Not in Git Repo"
+    if [[ -d ${repo_folder} ]]; then
+      cd $repo_folder
+      git pull --recurse-submodules
+      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
     fi
   fi
 }
 
 export -f pulln
+
+
+# function pushn(){
+#   cur_path=$(pwd)
+#   cur_folder=${PWD##*/}
+#   # IFS='/' read -r -a path_parts <<< "$cur_path"
+#   # if [[ ${#path_parts[@]} -lt 4 ]]; then
+#   #     echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+#   #     return 1
+#   # fi
+#   # third_folder="${path_parts[3]}"
+#   # if [[ ${third_folder} != ${NEPI_REPO_NAME} ]]; then
+#   #     echo "Current folder is not in the NEPI Repo folder: ${cur_path}"
+#   #     return 1
+#   # fi
+#   git add --all
+#   git commit -m "*$@*" 
+#   git push >/dev/null 2>&1
+
+#   par_path=$(dirname "$(pwd)")
+#   par_folder=$(basename "$par_path")
+#   #echo $cur_folder
+#   #echo $par_folder
+#   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+#   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+#     echo -e "${GREEN}Clearing __pycache__ folders"
+#     find ./ -type d -name "__pycache__" -exec rm -rf {} +
+#     if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+#         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
+#         git push origin HEAD:develop
+
+#     else
+#         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head main"
+#         git push origin HEAD:main
+#         #git checkout main
+#     fi
+#     if [ ! $? -eq 0 ]; then
+#       echo -e "${WHITE}Push Failed. Will Attempt to Merge with Remote"
+#       git pull --no-edit
+#       if [ ! $? -eq 0 ]; then
+#         echo -e "${RED}Merge Failed"
+#         return 1 # Failed
+#       elif [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+#           echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head develop"
+#           git push origin HEAD:develop
+
+#       else
+#           echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head main"
+#           git push origin HEAD:main
+#           #git checkout main
+#       fi
+#       if [ ! $? -eq 0 ]; then
+#         echo -e "${RED}Push Failed"
+#         return 1 # Failed
+#       fi
+
+
+
+
+#     fi
+#     echo -e "${GREEN}Push Successfully"
+#   else
+#     echo -e "${RED}Not in Git Repo"
+#   fi
+# }
+
+
+# function pulln {
+#   if is_valid_internet ; then
+#     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+#     setup_folder=/home/${CONFIG_USER}/nepi_setup
+
+#     head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+#     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+#       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+#           git pull --recurse-submodules
+#           git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+#       elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
+#         git fetch origin
+#         git reset --hard origin/main
+#         git push origin main --force
+#       else
+#         git pull
+#       fi
+#     else
+#       echo -e "${RED}Not in Git Repo"
+#     fi
+#   fi
+# }
+
+# export -f pulln
 
 ## NEPI deploy complete
 function nepisetup_remote() {
