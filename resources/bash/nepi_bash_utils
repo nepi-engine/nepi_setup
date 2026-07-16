@@ -5314,18 +5314,6 @@ function pushn(){
 
 
 
-function pulln {
-  if is_valid_internet ; then
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git pull --recurse-submodules
-      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-    fi
-  fi
-}
-
-export -f pulln
 
 
 # function pushn(){
@@ -5396,27 +5384,44 @@ export -f pulln
 # function pulln {
 #   if is_valid_internet ; then
 #     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-#     setup_folder=/home/${CONFIG_USER}/nepi_setup
-
-#     head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-#     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-#       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-#           git pull --recurse-submodules
-#           git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-#       elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
-#         git fetch origin
-#         git reset --hard origin/main
-#         git push origin main --force
-#       else
-#         git pull
-#       fi
-#     else
-#       echo -e "${RED}Not in Git Repo"
+#     if [[ -d ${repo_folder} ]]; then
+#       cd $repo_folder
+#       git pull --recurse-submodules
+#       git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
 #     fi
 #   fi
 # }
 
 # export -f pulln
+
+
+function pulln {
+  if is_valid_internet ; then
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    setup_folder=/home/${CONFIG_USER}/nepi_setup
+    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+    if [ "$?" -ne 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+      cd $repo_folder
+    fi
+    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+    if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+          git pull --recurse-submodules
+          git submodule foreach --recursive "pushn" 2> /dev/null
+      elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
+        git fetch origin
+        git reset --hard origin/main
+        git push origin main --force
+      else
+        pushn
+      fi
+    else
+      echo -e "${RED}Not in Git Repo"
+    fi
+  fi
+}
+
+export -f pulln
 
 ## NEPI deploy complete
 function nepisetup_remote() {
