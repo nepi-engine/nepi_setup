@@ -4276,8 +4276,9 @@ fi
 ###################################
 # NEPI Dev Functions
 ###################################
-
+WHITE='\033[0;37m'
 GREEN='\033[0;32m'
+YELLOW='\033[33m'
 RED='\033[0;31m'
 
 alias nepihome="
@@ -5306,7 +5307,7 @@ function pushn(){
     find ./ -type d -name "__pycache__" -exec rm -rf {} +
     if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
-        git push origin HEAD:develop
+        echo $(git push origin HEAD:develop)
 
     else
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head main"
@@ -5314,8 +5315,28 @@ function pushn(){
         #git checkout main
     fi
     if [ ! $? -eq 0 ]; then
-      echo -e "${RED}Push Failed"
-      return 1 # Failed
+      echo -e "${WHITE}Push Failed. Will Attempt to Merge with Remote"
+      echo $(git pull --no-edit)
+      if [ ! $? -eq 0 ]; then
+        echo -e "${RED}Merge Failed"
+        return 1 # Failed
+      elif [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+          echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head develop"
+          echo $(git push origin HEAD:develop)
+
+      else
+          echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head main"
+          echo $(git push origin HEAD:main)
+          #git checkout main
+      fi
+      if [ ! $? -eq 0 ]; then
+        echo -e "${RED}Push Failed"
+        return 1 # Failed
+      fi
+
+
+
+
     fi
     echo -e "${GREEN}Push Successfully"
   else
