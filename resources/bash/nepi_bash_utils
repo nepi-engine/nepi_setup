@@ -4875,18 +4875,6 @@ export -f nepiauthadd
 
 
 
-function pulln {
-  if is_valid_internet ; then
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    if [[ -d ${repo_folder} ]]; then
-      cd $repo_folder
-      git pull --recurse-submodules
-      git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-    fi
-  fi
-}
-
-export -f pulln
 
 
 function nepiclone {
@@ -5345,6 +5333,31 @@ function pushn(){
 }
 
 
+function pulln {
+  if is_valid_internet ; then
+    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+    setup_folder=/home/${CONFIG_USER}/nepi_setup
+
+    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+    if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+          git pull --recurse-submodules
+          git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+      elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
+        git fetch origin
+        git reset --hard origin/main
+        git push origin main --force
+      else
+        git pull
+      fi
+    else
+      echo -e "${RED}Not in Git Repo"
+    fi
+  fi
+}
+
+export -f pulln
+
 ## NEPI deploy complete
 function nepisetup_remote() {
 sudo -v
@@ -5423,9 +5436,9 @@ nepigithub = Check and Setup a GitHub SSH key for your GitHub account and clone 
 nepigithubdev = Check and Setup a GitHub SSH key for your GitHub account and clone the nepi develop repo branch if successfull
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
-pulln = Update to the latest NEPI source-code repo
 nepidpl = Deploy nepi complete to nepi device
 gitmain = Change to main branch in current repo or submodule folder
+pulln = Update to the latest NEPI source-code repo
 pushn = Add,commit,push repo changes with optional comment msg in current repo or submodule folder"
 
 
