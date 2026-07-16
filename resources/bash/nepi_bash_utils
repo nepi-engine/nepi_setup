@@ -5407,7 +5407,8 @@ function pulln {
     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
           git pull --recurse-submodules
-          git submodule foreach --recursive "pushn" 2> /dev/null
+          git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+          #git submodule foreach --recursive "git add --all &&  git commit -m '' &&  git push >/dev/null 2>&1 && git checkout main && git pull origin main &&  git push >/dev/null 2>&1" 2> /dev/null
       elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
         git fetch origin
         git reset --hard origin/main
