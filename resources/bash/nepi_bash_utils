@@ -4325,7 +4325,6 @@ export -f nepirui
 
 
 function nepiengine() {
-  sudo -v
   nepi_engine_default=/home/${CONFIG_USER}/nepi_engine_ws
   nepi_engine_folder=''
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
@@ -4348,7 +4347,6 @@ function nepiengine() {
 export -f nepiengine
 
 function nepiengine_open() {
-  sudo -v
   nepi_engine_folder=$(nepiengine)
 
   if [[ -n $nepi_engine_folder && -d $nepi_engine_folder ]]; then
@@ -4362,9 +4360,10 @@ function nepiengine_open() {
 export -f nepiengine_open
 
 function nepistorage() {
-  sudo -v
+
   shfolder=nepi_storage
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    sudo -v
     if pingn; then
       
       shdrive=/mnt/nepi_share_storage
@@ -4417,9 +4416,10 @@ function nepistorage() {
 export -f nepistorage
 
 function nepistorage_open() {
-  sudo -v
+
   if nepistorage; then
     if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+      sudo -v
       if pingn; then
         shdrive=/mnt/nepi_share_storage
         xdg-open $shdrive
@@ -4438,9 +4438,10 @@ export -f nepistorage_open
 
 
 function nepiconfig() {
-  sudo -v
+
   shfolder=nepi_config
   if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+    sudo -v
     if pingn; then
 
       shdrive=/mnt/nepi_share_config
@@ -4496,9 +4497,10 @@ function nepiconfig() {
 export -f nepiconfig
 
 function nepiconfig_open() {
-  sudo -v
+
   if nepiconfig; then
     if [[ ${NEPI_MODE} == 'REMOTE' ]]; then
+      sudo -v
       if pingn; then
         shdrive=/mnt/nepi_share_config
         xdg-open $shdrive
@@ -5293,6 +5295,8 @@ function pushn(){
   #echo $par_folder
   head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+    echo -e "${GREEN}Clearing __pycache__ folders"
+    find ./ -type d -name "__pycache__" -exec rm -rf {} +
     if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
         echo -e "${GREEN}Pushing to repo ${PWD##*/} Head develop"
         git push origin HEAD:develop
@@ -5303,8 +5307,16 @@ function pushn(){
         #git checkout main
     fi
     if [ ! $? -eq 0 ]; then
-      echo -e "${RED}Push Failed"
-      return 1 # Failed
+      git pull --no-edit
+      if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Pushing Merged repo ${PWD##*/} Head main"
+        git push origin HEAD:main
+        if [ ! $? -eq 0 ]; then
+          echo -e "${RED}Push Failed"
+          return 1 # Failed
+        fi
+      fi
+
     fi
     echo -e "${GREEN}Push Successfully"
   else
@@ -5405,6 +5417,8 @@ function pulln {
     fi
     head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+      echo -e "${GREEN}Clearing __pycache__ folders"
+      find ./ -type d -name "__pycache__" -exec rm -rf {} +
       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
           git pull --recurse-submodules
           git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
