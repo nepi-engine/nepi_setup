@@ -100,14 +100,14 @@ else
                         
 
             ###########
-            if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
-                NEPI_IMPORT_FS=$2
-            elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
-                NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
-            else
-                NEPI_IMPORT_FS=nepi_fs_a
-            fi
-
+            # if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
+            #     NEPI_IMPORT_FS=$2
+            # elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
+            #     NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
+            # else
+            #     NEPI_IMPORT_FS=nepi_fs_a
+            # fi
+            NEPI_IMPORT_FS=nepi_fs_a
             if [[ "$NEPI_IMPORT_FS" == "$NEPI_ACTIVE_FS" ]]; then
                 bash ${DOCKER_FOLDER}/nepi_docker_stop.sh
             fi

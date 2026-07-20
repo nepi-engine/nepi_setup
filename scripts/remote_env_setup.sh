@@ -244,6 +244,36 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                     echo "Syncing NEPI Configs"
                     nepisync
                     echo ""
+
+                    # echo " "
+                    # echo "################################# "
+                    # echo "Updating NEPI Config Files"
+                    # echo ""
+                    # echo "NEPI_MODE at Start Config Update=${NEPI_MODE}"
+
+                    # NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
+                    # NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
+
+                    # cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
+                    # cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
+
+
+                    # NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
+                    # NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
+                    # if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
+                    #     cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
+                    # fi
+                    # sync_yaml_files $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
+
+                    # if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
+                    #     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
+                    #     source ${NEPI_USER_CONFIG_SCRIPT}
+                    #     if [ $? -eq 1 ]; then
+                    #         echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
+                    #         exit
+                    #     fi
+                    # fi
+
                     echo "Syncing NEPI Configs"
                     nepisshkey
                 ;;
@@ -326,9 +356,7 @@ if [[ ${nepi_ip} != ${NEPI_IP_START} ]]; then
                         echo "Updated Static IPs"
                         netlist_wired
                         sleep 3
-                        # echo ""
-                        # echo "Syncing NEPI Configs"
-                        # nepisync
+
                     fi  
                     echo ""  
                 fi
