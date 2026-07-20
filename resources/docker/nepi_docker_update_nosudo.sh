@@ -94,12 +94,13 @@ DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
     fi
     chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
 
-
+    export NEPI_AB_FS=0
 
     echo "Upating Docker Config File: ${DOCKER_CONFIG_TMP}"
     ##########################
     # Update FSA
         
+
         NEW_FS=nepi_fs_a
         NEW_ID=($(docker images --filter "reference=${NEW_FS}" --format "{{.ID}}"))
         NEW_ID="${NEW_ID[0]}"

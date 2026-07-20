@@ -97,6 +97,8 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
     fi
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_TMP
 
+    export NEPI_AB_FS=0
+
     echo "Upating Docker Config Temp File: ${DOCKER_CONFIG_TMP}"
 
     

@@ -122,15 +122,14 @@ else
                 success=0
                 ########################
                 # Determine target filesystem slot
-                echo "GOT NEPI_AB_FS=${NEPI_AB_FS}"
-                if [[ $NEPI_AB_FS -eq 1 ]]; then
-                    NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
-                else
-                    NEPI_IMPORT_FS=nepi_fs_a
-                fi
-                if [[ ${NEPI_IMPORT_FS} != 'nepi_fs_a' || ${NEPI_IMPORT_FS} != 'nepi_fs_b' ]]; then
-                    NEPI_IMPORT_FS=nepi_fs_a
-                fi
+                # if [[ -n "$2" && ( "$2" == 'nepi_fs_a' ||  "$2" == 'nepi_fs_b' ) ]]; then
+                #     NEPI_IMPORT_FS=$2
+                # elif [[ "$NEPI_AB_FS" -eq 1 ]]; then
+                #     NEPI_IMPORT_FS=$NEPI_INACTIVE_FS
+                # else
+                #     NEPI_IMPORT_FS=nepi_fs_a
+                # fi
+                NEPI_IMPORT_FS=nepi_fs_a
 
                 ########################
                 # Build NEPI-format local tag
