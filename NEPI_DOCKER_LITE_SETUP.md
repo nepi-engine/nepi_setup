@@ -156,48 +156,30 @@ the default admin password is: **nepiadmin**
 see the debugging steps in the "NEPI Docker Debugging" section at the end of this document.
 
 ################################################################
-### NEPI Docker Host Config Setup
+### NEPI Remote PC Connection
 
-While most NEPI device settings like static, alias, and ntp IP addresses are configurable real-time through the RUI (Resident User Interface),
-some settings such as User Password, Folders, and SSH Keys must be configured prior to run-time.  You may also want to Factory Reset a NEPI Docker
-configuration.
+The NEPI Lite Installation does not support a shared network drive or SSH connection to the container. However, you can still connect to the RUI remotely over Ethernet by configuring your PC's network adapter with a static IP on the same subnet as the NEPI device.
 
-Run the NEPI Docker Host configuration script by typing:
+NEPI devices ship with a factory-set base Ethernet address of 192.168.179.103. To connect:
 
-    nepisetup
+1) Connect an Ethernet cable directly from your NEPI device to your PC's Ethernet port (or through a LAN switch).
 
-Make any changes you want using the menu options presented, then choose the 'APPLY SETTINGS' to apply changes, or 'FACTORY RESET' to factory reset your installation.
+2) Set your PC's Ethernet adapter to the following static IPv4 address on the same subnet:
 
-**NOTE:** The NEPI System Configuration file is located at '/mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml'.
-For production environments, you can just replace this file with a production ready file, or create a custom production script that make any required changes.
+    - IP Address: 192.168.179.5
+    - Netmask: 255.255.255.0
 
-**NOTE:** If you want to setup your Device to support both NEPI Docker Host mode and NEPI Remote Dev System modes, you can switch between these modes
-by typing nepisetup_remote and nepisetup_host respectfully.
+3) Confirm the connection by pinging the device:
 
-################################################################
-### NEPI Software Tutorials
+        pingn
 
-Learn more about using and configuring the NEPI software, as well as building and deploying 
-custom AI Models at nepi.com.
+4) Once the ping succeeds, open Chromium and enter the device's IP in the address bar to reach the RUI:
 
-See the documentation, tuturials, videos, and community forum available at NEPI.com:
-[NEPI Website](https://www.nepi.com)
+        http://192.168.179.103:5003/
 
-################################################################
-### NEPI Software Customization
+**NOTE:** If you can't connect, double check your PC's Ethernet adapter is on the 192.168.179.0/24 subnet and try the ping test again before troubleshooting further (see "NEPI Docker Debugging" below).
 
-You can update or custimize the NEPI software running in a NEPI Docker Container from source-code,
-then export it as a new sharable NEPI Docker Container:
-
-See NEPI Software Build and Customize instructions at [NEPI_SOFTWARE_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_SOFTWARE_BUILD.md)
-
-################################################################
-### NEPI Container Build
-
-If you need to build a NEPI Docker Container from scratch for a particular installation environment,
-you can do so starting with a sutable Ubuntu container for the device's environment:
-
-See NEPI Container Build instructions at [NEPI_CONTAINER_BUILD](https://github.com/nepi-engine/nepi_setup/blob/main/NEPI_CONTAINER_BUILD.md)
+If you are running on an embedded device and want to use shared network drives and an SSH connection, follow the NEPI Full Setup instructions instead. Those enable the additional remote management features (SSH access, shared drives, and remote OS-level control). Do not follow the NEPI Full Setup on your personal or general-purpose computer, as it takes over system-level services such as networking, SSH, and storage.
 
 ################################################################
 ### NEPI DOCKER INSTALLATION COMPLETE
