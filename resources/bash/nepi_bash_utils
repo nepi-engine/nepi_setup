@@ -5468,7 +5468,56 @@ fi
 }
 
 
+## NEPI deploy complete
+function nepisetupc_remote() {
+sudo -v
+echo "Clearing NEPI Config Files in: /home/${CONFIG_USER}"
+sudo rm -r /home/${CONFIG_USER}/nepi_system_config.yaml* 2> /dev/null
+echo "Clearing NEPI SSH Keys in: /home/${CONFIG_USER}.ssh"
+sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_* 2> /dev/null
+nepisetup_remote
+}
 
+function nepisetupc_host() {
+sudo -v
+nepistop
+echo "Clearing NEPI Config Files in: /mnt/nepi_config/system_cfg/etc"
+sudo rm -r /mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml* 2> /dev/null
+echo "Clearing NEPI Config Files in: /opt/nepi/etc"
+sudo rm -r /opt/nepi/etc/nepi_system_config.yaml* 2> /dev/null
+echo "Clearing NEPI SSH Keys in: /mnt/nepi_config/system_cfg/ssh_keys"
+sudo rm -r /mnt/nepi_config/system_cfg/ssh_keys/* 2> /dev/null
+echo "Clearing NEPI SSH Keys in: /home/${CONFIG_USER}.ssh"
+sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_* 2> /dev/null
+nepisetup_host
+}
+
+function nepisetupc_system() {
+sudo -v
+echo "Clearing NEPI Config Files in: /mnt/nepi_config/system_cfg/etc"
+sudo rm -r /mnt/nepi_config/system_cfg/etc/nepi_system_config.yaml* 2> /dev/null
+echo "Clearing NEPI Config Files in: /opt/nepi/etc"
+sudo rm -r /opt/nepi/etc/nepi_system_config.yaml* 2> /dev/null
+echo "Clearing NEPI SSH Keys in: /mnt/nepi_config/system_cfg/ssh_keys"
+sudo rm -r /mnt/nepi_config/system_cfg/ssh_keys/* 2> /dev/null
+echo "Clearing NEPI SSH Keys in: /home/${CONFIG_USER}.ssh"
+sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_* 2> /dev/null
+nepisetup_system
+}
+
+
+function nepisetupc() {
+sudo -v
+nepi_mode=${NEPI_MODE}
+echo "NEPI_MODE: ${nepi_mode}"
+if [[ ${nepi_mode} == 'REMOTE' ]]; then 
+  nepisetupc_remote
+elif [[ ${nepi_mode} == 'HOST' ]]; then 
+  nepisetupc_host
+elif [[ ${nepi_mode} == 'SYSTEM' ]]; then 
+  nepisetupc_system
+fi
+}
 
 
 
@@ -5476,11 +5525,15 @@ utilsn="${utilsn}
 ################################
 ### NEPI Dev FUNCTIONS
 ################################
-nepisetup_remote = Setup the current NEPI environment MODE as REMOTE
-nepisetup_host = Setup the current NEPI environment MODE as HOST
-nepisetup_system = Setup the current NEPI environment MODE as SYSTEM
-nepimode = Echo the current NEPI environment MODE
-nepisetup = Run the environment setup script for the current NEPI environment MODE
+nepisetup_remote = Setup the current NEPI environment NEPI_MODE as REMOTE
+nepisetupc_remote = Clear Configs and SSH keys. Setup the current NEPI environment NEPI_MODE as REMOTE
+nepisetup_host = Setup the current NEPI environment NEPI_MODE as HOST
+nepisetupc_host = Clear Configs and SSH keys. Setup the current NEPI environment NEPI_MODE as HOST
+nepisetup_system = Setup the current NEPI environment NEPI_MODE as SYSTEM
+nepisetupc_system = Clear Configs and SSH keys. Setup the current NEPI environment NEPI_MODE as SYSTEM
+nepisetup = Run the environment setup script for the current NEPI environment NEPI_MODE
+nepisetupc= Clear Configs and SSH keys. Run the environment setup script for the current NEPI environment NEPI_MODE
+nepimode = Echo the current NEPI environment NEPI_MODE
 nepihome = Change to users home folder
 nepirui = Open Chromium to NEPI RUI Dashboard page
 nsetup = Change Dir to the NEPI setup scripts folder
