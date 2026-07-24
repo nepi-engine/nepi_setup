@@ -57,36 +57,37 @@ else
 fi
 
 
-# Load System Config File
-#echo "Loading NEPI SYSTEM CONFIG"
-#echo "Loading NEPI SYSTEM CONFIG"
-NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
-NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
-if [[ ! -f $NEPI_USER_CONFIG_SCRIPT ]]; then
-    cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
-fi
-
-NEPI_SETUP_CONFIG_PYTHON=${RESOURCES_FOLDER}/etc/load_system_config.py
-NEPI_USER_CONFIG_PYTHON=/home/${CONFIG_USER}/load_system_config.py
-if [[ ! -f $NEPI_USER_CONFIG_PYTHON ]]; then
-    cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
-fi
-
-NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
-NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
-if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
-    cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
-fi
-
-if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
-    echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
-    source ${NEPI_USER_CONFIG_SCRIPT}
-    if [ $? -eq 1 ]; then
-        echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
-        exit
+function update_from_system_config() {
+    echo "Updating NEPI SYSTEM CONFIG"
+    NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
+    NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
+    if [[ ! -f $NEPI_USER_CONFIG_SCRIPT ]]; then
+        cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
     fi
-fi
 
+    NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
+    NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
+    if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
+        cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
+    fi
+    sync_yaml_files $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
+
+    if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
+        echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
+        source ${NEPI_USER_CONFIG_SCRIPT}
+        if [ $? -eq 1 ]; then
+            echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
+        fi
+    fi
+
+
+}
+
+update_from_system_config
+
+if [[ -n $NEPI_STATIC_IP ]]; then
+    NEPI_IP=${NEPI_STATIC_IP%%/*}
+fi
 NEPI_IP_START=${NEPI_IP%%/*}
 echo "Got Starting NEPI IP: ${NEPI_IP_START}"
 
@@ -177,17 +178,21 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
     function udpate_config_file(){
         config_file=$1
         update_text_value $config_file "export NEPI_IP=" "export NEPI_IP=${NEPI_IP}"
+        update_yaml_value "NEPI_STATIC_IP" ${NEPI_IP}/24 $NEPI_USER_CONFIG_FILE
         export NEPI_IP="${NEPI_IP}"
         update_text_value $config_file "export NEPI_DEVICE_ID=" "export NEPI_DEVICE_ID=${NEPI_DEVICE_ID}"
+        update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $NEPI_USER_CONFIG_FILE
         export NEPI_DEVICE_ID=$NEPI_DEVICE_ID
         update_text_value $config_file "export NEPI_HOST_USER=" "export NEPI_HOST_USER=${NEPI_HOST_USER}"
+        update_yaml_value "NEPI_HOST_USER" $NEPI_HOST_USER $NEPI_USER_CONFIG_FILE
         export NEPI_HOST_USER=$NEPI_HOST_USER
-        # update_text_value $config_file "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY}"
-        # export NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
+        update_text_value $config_file "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY}"
+        update_yaml_value "NEPI_SSH_KEY" $NEPI_SSH_KEY $NEPI_USER_CONFIG_FILE
+        export NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
 
     }
     
-    echo "Bringin Up NEPI Configuration Menu"
+    echo "Bringing Up NEPI Configuration Menu"
 
     #####################################
     # Update NEPI System Config if needed
@@ -245,34 +250,7 @@ echo "Starting NEPI Configuration for user ${CONFIG_USER}"
                     nepisync
                     echo ""
 
-                    # echo " "
-                    # echo "################################# "
-                    # echo "Updating NEPI Config Files"
-                    # echo ""
-                    # echo "NEPI_MODE at Start Config Update=${NEPI_MODE}"
-
-                    # NEPI_SETUP_CONFIG_SCRIPT=${RESOURCES_FOLDER}/etc/load_system_config.sh
-                    # NEPI_USER_CONFIG_SCRIPT=/home/${CONFIG_USER}/load_system_config.sh
-
-                    # cp $NEPI_SETUP_CONFIG_SCRIPT $NEPI_USER_CONFIG_SCRIPT
-                    # cp $NEPI_SETUP_CONFIG_PYTHON $NEPI_USER_CONFIG_PYTHON
-
-
-                    # NEPI_SETUP_CONFIG_FILE=${RESOURCES_FOLDER}/etc/nepi_system_config.yaml
-                    # NEPI_USER_CONFIG_FILE=/home/${CONFIG_USER}/nepi_system_config.yaml
-                    # if [[ ! -f $NEPI_USER_CONFIG_FILE ]]; then
-                    #     cp $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
-                    # fi
-                    # sync_yaml_files $NEPI_SETUP_CONFIG_FILE $NEPI_USER_CONFIG_FILE
-
-                    # if [[ -f $NEPI_USER_CONFIG_SCRIPT ]]; then
-                    #     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_USER_CONFIG_SCRIPT}"
-                    #     source ${NEPI_USER_CONFIG_SCRIPT}
-                    #     if [ $? -eq 1 ]; then
-                    #         echo "Failed to load ${NEPI_USER_CONFIG_SCRIPT}"
-                    #         exit
-                    #     fi
-                    # fi
+                    update_from_system_config
 
                     echo "Syncing NEPI Configs"
                     nepisshkey
