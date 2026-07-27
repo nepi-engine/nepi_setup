@@ -182,13 +182,15 @@ echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
 
 
 
-        
-
     echo " "
     echo "################################# "
     echo "Updating SSH Keys"
     echo ""
 
+    if [[ ! -n $NEPI_SSH_KEY_FILE ]]; then
+        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+    fi
+    echo "Using NEPI_SSH_KEY ${NEPI_SSH_KEY}"
     
     if [[ -n $NEPI_SSH_KEY ]]; then
         NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
@@ -200,7 +202,6 @@ echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
     else
         NEPI_SSH_KEY_FILE=nepi_default_ssh_key
     fi    
-    echo "Using NEPI_SSH_KEY ${NEPI_SSH_KEY}"
     NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY_FILE}
     NEPI_SSH_KEY_PUB=$(cat $NEPI_SSH_KEY_PATH)
     NEPI_SSH_KEY_EMAIL="${NEPI_SSH_KEY_PUB##* }"
@@ -212,7 +213,9 @@ echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
 
     nepisetkey $NEPI_SSH_KEY_FILE
 
-    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_SSH_KEY_FILE=" "export NEPI_SSH_KEY_FILE=${NEPI_SSH_KEY_FILE}"       
+
+
 
 
     echo " "

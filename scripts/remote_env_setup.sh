@@ -83,13 +83,13 @@ function update_from_system_config() {
 
 }
 
-update_from_system_config
 
-if [[ -n $NEPI_STATIC_IP ]]; then
-    NEPI_IP=${NEPI_STATIC_IP%%/*}
-fi
-NEPI_IP_START=${NEPI_IP%%/*}
-echo "Got Starting NEPI IP: ${NEPI_IP_START}"
+
+# This file sets up nepi bash aliases and util functions
+echo "########################"
+echo "NEPI REMOTE DEV SETUP"
+echo "########################"
+
 
 ##########################
 NEPI_ARCH=unknown
@@ -107,10 +107,68 @@ else
     return 
 fi
 
-# This file sets up nepi bash aliases and util functions
-echo "########################"
-echo "NEPI REMOTE DEV SETUP"
-echo "########################"
+
+echo " "
+echo "################################# "
+echo "Updating IP Address"
+echo ""
+
+update_from_system_config
+
+if [[ -n $NEPI_STATIC_IP ]]; then
+    NEPI_IP=${NEPI_STATIC_IP%%/*}
+fi
+NEPI_IP_START=${NEPI_IP%%/*}
+echo "Got Starting NEPI IP: ${NEPI_IP_START}"
+
+
+
+echo " "
+echo "################################# "
+echo "Updating SSH Keys"
+echo ""
+
+NEPI_SSH_KEYS_SOURCE=${RESOURCES_FOLDER}/etc/ssh/ssh_keys
+NEPI_SSH_KEYS_DEST=/home/${CONFIG_USER}/.ssh
+
+
+if [[ ! -d "$NEPI_SSH_KEYS_DEST" ]]; then
+    mkdir -p $NEPI_SSH_KEYS_DEST
+fi
+# Sync keys with nepi system config key folder
+
+
+
+if [ -d $NEPI_SSH_KEYS_SOURCE ]; then
+    echo "Copying NEPI SSH Keys from: ${NEPI_SSH_KEYS_SOURCE} to ${NEPI_SSH_KEYS_DEST}"
+    sudo cp -p ${NEPI_SSH_KEYS_SOURCE}/*nepi_* ${NEPI_SSH_KEYS_DEST}/
+fi
+
+if [[ -d $NEPI_SSH_KEYS_DEST && -n $NEPI_SSH_KEYS_DEST ]]; then   
+    sudo chmod 0700 $NEPI_SSH_KEYS_DEST
+    sudo chmod  0600 $NEPI_SSH_KEYS_DEST/*
+    sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $NEPI_SSH_KEYS_DEST
+fi
+
+
+if [[ ! -n $NEPI_SSH_KEY_FILE ]]; then
+    NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+fi
+
+
+if [[ -n $NEPI_SSH_KEY ]]; then
+    NEPI_SSH_KEY_PATH=/home/${CONFIG_USER}/.ssh/${NEPI_SSH_KEY}
+    if [[ -f $NEPI_SSH_KEY_PATH ]]; then
+        NEPI_SSH_KEY_FILE=$NEPI_SSH_KEY
+    else
+        NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+    fi
+else
+    NEPI_SSH_KEY_FILE=nepi_default_ssh_key
+fi    
+echo "Got Starting NEPI_SSH_KEY ${NEPI_SSH_KEY}"
+
+
 
 if [[ $SKIP_SOFTWARE -eq 0 ]]; then
     echo " "
