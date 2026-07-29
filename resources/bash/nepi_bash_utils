@@ -5366,23 +5366,33 @@ function pulln {
   if is_valid_internet ; then
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     setup_folder=/home/${CONFIG_USER}/nepi_setup
-    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-    if [ "$?" -ne 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-      cd $repo_folder
-    fi
+
+    cd $repo_folder
     head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
           git pull --recurse-submodules
           git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
-          #git submodule foreach --recursive "git add --all &&  git commit -m '' &&  git push >/dev/null 2>&1 && git checkout main && git pull origin main &&  git push >/dev/null 2>&1" 2> /dev/null
-      elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
-        git fetch origin
-        git reset --hard origin/main
-        git push origin main --force
-      else
-        pushn
       fi
+    fi
+
+    # head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+    # if [ "$?" -ne 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+    #   cd $repo_folder
+    # fi
+    # head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+    # if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+    #   if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+    #       git pull --recurse-submodules
+    #       git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+    #       #git submodule foreach --recursive "git add --all &&  git commit -m '' &&  git push >/dev/null 2>&1 && git checkout main && git pull origin main &&  git push >/dev/null 2>&1" 2> /dev/null
+    #   elif [[ "$(pwd)" == "${setup_folder}"  ]]; then
+    #     git fetch origin
+    #     git reset --hard origin/main
+    #     git push origin main --force
+    #   else
+    #     pushn
+    #   fi
     else
       echo -e "${RED}Not in Git Repo"
     fi
