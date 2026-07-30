@@ -5393,9 +5393,9 @@ function pulln {
     #   else
     #     pushn
     #   fi
-    else
-      echo -e "${RED}Not in Git Repo"
-    fi
+    # else
+    #   echo -e "${RED}Not in Git Repo"
+    # fi
   fi
 }
 
