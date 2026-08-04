@@ -309,8 +309,8 @@ else
     # Uninstall Problem Packages
     sudo python${NEPI_PYTHON} -m pip uninstall typing
 
-    sudo python3 -m pip uninstall --upgrade torch
-    sudo python3 -m pip uninstall --upgrade torchvision
+    sudo python3 -m pip install --upgrade torch
+    sudo python3 -m pip install --upgrade torchvision
     sudo python3 -m pip install --upgrade pip
     sudo python3 -m pip install --ignore-installed ultralytics
 
@@ -371,6 +371,10 @@ else
         sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime-gpu==1.15.1"
     fi
 
+    ### RERUN IN CASE SOMETHING CHANGED
+    sudo python3 -m pip install --upgrade torch
+    sudo python3 -m pip install --upgrade torchvisionnepi
+    sudo python3 -m pip install --upgrade ultralytics
 
     #################################
     # Install Hailo Software
