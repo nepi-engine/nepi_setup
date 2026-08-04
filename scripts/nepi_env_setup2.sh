@@ -312,7 +312,7 @@ else
     sudo python3 -m pip install --upgrade torch
     sudo python3 -m pip install --upgrade torchvision
     sudo python3 -m pip install --upgrade pip
-    sudo python3 -m pip install --ignore-installed ultralytics
+    sudo python3 -m pip install --upgrade --ignore-installed ultralytics
 
 
 
@@ -373,8 +373,9 @@ else
 
     ### RERUN IN CASE SOMETHING CHANGED
     sudo python3 -m pip install --upgrade torch
-    sudo python3 -m pip install --upgrade torchvisionnepi
-    sudo python3 -m pip install --upgrade ultralytics
+    sudo python3 -m pip install --upgrade torchvision
+    sudo python3 -m pip install --upgrade --ignore-installed ultralytics
+
 
     #################################
     # Install Hailo Software
