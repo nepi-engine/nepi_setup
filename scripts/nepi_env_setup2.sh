@@ -371,10 +371,10 @@ else
         sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime-gpu==1.15.1"
     fi
 
-    ### RERUN IN CASE SOMETHING CHANGED
-    sudo python3 -m pip install --upgrade torch
-    sudo python3 -m pip install --upgrade torchvision
-    sudo python3 -m pip install --upgrade --ignore-installed ultralytics
+    # ### RERUN IN CASE SOMETHING CHANGED
+    # sudo python3 -m pip install --upgrade torch
+    # sudo python3 -m pip install --upgrade torchvision
+    # sudo python3 -m pip install --upgrade --ignore-installed ultralytics
 
 
     #################################
