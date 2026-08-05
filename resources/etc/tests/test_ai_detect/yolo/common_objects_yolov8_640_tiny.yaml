@@ -4,8 +4,10 @@ ai_model:
     name: yolov8
   type:
     name: detection
+  display_name:
+    name: common_obj_v8t
   description:
-    name: Common object detector fast
+    name: Common object detector YoloV8 tiny
   weight_file:
     name: common_objects_yolov8_640_tiny.pt
   image_size:

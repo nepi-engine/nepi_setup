@@ -411,6 +411,8 @@ if is_valid_cuda; then
             nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container-tools=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
             libnvidia-container1=${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+
+        sudo apt install -y nvidia-driver-535
     fi
 
 fi

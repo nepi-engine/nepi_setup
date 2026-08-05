@@ -23,11 +23,12 @@ print('-------------------------')
 print('')
 print("Importing packages")
 
+
+import torch
 import os
 import time
 import copy
 import sys
-import torch
 import cv2
 import random
 from pathlib import Path
@@ -41,10 +42,10 @@ script_dir = os.path.dirname(__file__)
 
 
 
-NUM_TESTS=100
+NUM_TESTS=10
 IMAGES_DIR=os.path.join(script_dir, '..', 'images')
 WEIGHT_FILE="common_objects_yolov8_640_tiny.pt"
-THRESHOLD=0.3
+THRESHOLD=0.01
 
 
 IMAGE_FILE_TYPES = ['jpg','JPG','jpeg','png','PNG']
@@ -110,8 +111,29 @@ if __name__ == '__main__':
                 device = 'cuda'
 
         print("Loading model: " + str(weight_file_path))
-        ai_model = YOLO(weight_file_path)
-        ai_model.conf = THRESHOLD  # Confidence threshold (0-1)
+        # self.msg_if.pub_warn("Loading model: " + self.node_name)
+        # self.onnx_file_path = self.weight_file_path.replace('.pt','.onnx')
+        # # self.msg_if.pub_warn("Looking for optimized onnx model: " + self.onnx_file_path)
+        # # if os.path.exists(self.onnx_file_path) == False:
+        # #     self.msg_if.pub_warn("Creating for optimized onnx model: " + self.onnx_file_path)
+        # #     model = YOLO(self.weight_file_path)
+        # #     # Export the model specifying half precision and dynamic axes
+        # #     model.export(format='engine', half=True, dynamic=True)
+        # if os.path.exists(self.onnx_file_path) == True:
+        #     self.msg_if.pub_warn("Found optimized onnx model " + str(os.path.basename(self.onnx_file_path)))
+        #     self.model = YOLO(self.onnx_file_path)
+        #     self.msg_if.pub_warn("Loaded optimized engine model")
+        # else:
+        #     self.msg_if.pub_warn("Optimized engine model not found")
+        #     self.model = YOLO(self.weight_file_path)
+        #     self.msg_if.pub_warn("Using non optimized engine model " + str(os.path.basename(self.weight_file_path)))
+
+
+
+
+
+
+        model.conf = THRESHOLD  # Confidence threshold (0-1)
 
 
         ###########################
@@ -124,17 +146,65 @@ if __name__ == '__main__':
             print("Failed to import img file " + str(image_file))
         else:
             if is_gray(cv2_img):
-                cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2BGR)
+                cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2RGB)
             else:
                 cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
 
             ###########################
+            img_shape = cv2_img.shape
             print('')
-            print("Priming the Model")
+            print("Priming the Model with image " + str(image_file))
+            print("with shape " + str(img_shape))
+            ids = []
+            boxes = []
+            confs = []
+            detect_dict_list = []
             try:
-                results = ai_model(cv2_img, conf=THRESHOLD, verbose=False, device=device)            
+                results = model(cv2_img, conf=THRESHOLD, verbose=False, device=device) #, device=self.device)    
+                ids = results[0].boxes.cls.to('cpu').tolist()
+                boxes = results[0].boxes.xyxy.to('cpu').tolist()
+                confs = results[0].boxes.conf.to('cpu').tolist()       
             except Exception as e:
                 print("Failed to process detection with exception: " + str(e))
+
+            ######################
+            # Process Results
+            rescale_ratio = 1
+
+            cv2_img_shape = cv2_img.shape
+            cv2_img_width = cv2_img_shape[1]
+            cv2_img_height = cv2_img_shape[0]
+            cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
+            #print("image size: " + str(cv2_img.shape))
+            
+            for i, idf in enumerate(ids):
+                id = int(idf)
+                det_name = self.classes[id]
+                det_id = id
+                det_prob = confs[i]
+                det_box = boxes[i]
+                det_area = (det_box[2] - det_box[0]) * (det_box[3] - det_box[1])
+                detect_dict = {
+                    'name': det_name, # Class String Name
+                    'id': det_id, # Class Index from Classes List
+                    'uid': '', # Reserved for unique tracking by downstream applications
+                    'prob': det_prob, # Probability of detection
+                    'xmin': int(det_box[0] ),
+                    'ymin': int(det_box[1] ) ,
+                    'xmax': int(det_box[2] ),
+                    'ymax': int(det_box[3]),
+                    'area_pixels': int(det_area),
+                    'area_ratio': det_area / cv2_img_area
+                }
+                # Rescale to orig image size
+                detect_dict['xmin'] = int(detect_dict['xmin'] * rescale_ratio)
+                detect_dict['ymin'] = int(detect_dict['ymin'] * rescale_ratio)
+                detect_dict['xmax'] = int(detect_dict['xmax'] * rescale_ratio)
+                detect_dict['ymax'] = int(detect_dict['ymax'] * rescale_ratio)
+                detect_dict_list.append(detect_dict)
+
+
+            print("Got detect dict list count: " + str(len(detect_dict_list)))
 
 
             ###########################
@@ -142,23 +212,32 @@ if __name__ == '__main__':
             print('')
             print("Running Detection Speed Test with " + str(NUM_TESTS) + " Detections")
             elapsed_time=0
+            detect_dict_list = []
             for i in range(1, NUM_TESTS):
 
                 random_int = random.randint(1, num_files)-1
-                image_file=os.path.join(IMAGES_DIR, image_files[random_int])
+                image_name = image_files[random_int]
+                image_file=os.path.join(IMAGES_DIR, image_name)
                 cv2_img = cv2.imread(image_file)
                 if cv2_img is None:
                     print("Failed to import img file " + str(image_file))
                 else:
+
+                    img_shape = cv2_img.shape
+                    # print("Processing image " + str(image_file))
+                    # print("with shape " + str(img_shape))
                     if is_gray(cv2_img):
-                        cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2BGR)
+                        cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_GRAY2RGB)
                     else:
                         cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
                     
                     start_time = time.time()
+                    ids = []
+                    boxes = []
+                    confs = []
                     try:
                         # Inference
-                        results = ai_model(cv2_img, conf=THRESHOLD, verbose=False, device=device)
+                        results = model(cv2_img, conf=THRESHOLD, verbose=False, device=device) #, device=self.device)  
                         ids = results[0].boxes.cls.to('cpu').tolist()
                         boxes = results[0].boxes.xyxy.to('cpu').tolist()
                         confs = results[0].boxes.conf.to('cpu').tolist()
@@ -166,58 +245,51 @@ if __name__ == '__main__':
                         print("Failed to process detection with exception: " + str(e))
                     end_time = time.time()
 
-
                     detect_time = end_time - start_time
                     elapsed_time = elapsed_time + detect_time
 
-            if results is None:
-                print ("FAIL TO GET RESULTS FROM DETECTON PROCESS")
-            else:
-                ######################
-                # Print Results
-                rescale_ratio = 1
+                    ######################
+                    # Process Results
+                    rescale_ratio = 1
 
-                cv2_img_shape = cv2_img.shape
-                cv2_img_width = cv2_img_shape[1]
-                cv2_img_height = cv2_img_shape[0]
-                cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
-                #print("image size: " + str(cv2_img.shape))
-
-
-                detect_dict_list = []
-                for i, idf in enumerate(ids):
-                    id = int(idf)
-                    det_name = id #classes[id]
-                    det_id = id
-                    det_prob = confs[i]
-                    det_box = boxes[i]
-                    det_area = (det_box[2] - det_box[0]) * (det_box[3] - det_box[1])
-                    detect_dict = {
-                        'name': det_name, # Class String Name
-                        'id': det_id, # Class Index from Classes List
-                        'uid': '', # Reserved for unique tracking by downstream applications
-                        'prob': det_prob, # Probability of detection
-                        'xmin': int(det_box[0] ),
-                        'ymin': int(det_box[1] ) ,
-                        'xmax': int(det_box[2] ),
-                        'ymax': int(det_box[3]),
-                        'area_pixels': int(det_area),
-                        'area_ratio': det_area / cv2_img_area
-                    }
-
-                    # Rescale to orig image size
+                    cv2_img_shape = cv2_img.shape
+                    cv2_img_width = cv2_img_shape[1]
+                    cv2_img_height = cv2_img_shape[0]
+                    cv2_img_area = cv2_img_shape[0] * cv2_img_shape[1]
+                    #print("image size: " + str(cv2_img.shape))
                     
-                    detect_dict['xmin'] = int(detect_dict['xmin'] * rescale_ratio)
-                    detect_dict['ymin'] = int(detect_dict['ymin'] * rescale_ratio)
-                    detect_dict['xmax'] = int(detect_dict['xmax'] * rescale_ratio)
-                    detect_dict['ymax'] = int(detect_dict['ymax'] * rescale_ratio)
-                    detect_dict_list.append(detect_dict)
+                    for i, idf in enumerate(ids):
+                        id = int(idf)
+                        det_name = self.classes[id]
+                        det_id = id
+                        det_prob = confs[i]
+                        det_box = boxes[i]
+                        det_area = (det_box[2] - det_box[0]) * (det_box[3] - det_box[1])
+                        detect_dict = {
+                            'name': det_name, # Class String Name
+                            'id': det_id, # Class Index from Classes List
+                            'uid': '', # Reserved for unique tracking by downstream applications
+                            'prob': det_prob, # Probability of detection
+                            'xmin': int(det_box[0] ),
+                            'ymin': int(det_box[1] ) ,
+                            'xmax': int(det_box[2] ),
+                            'ymax': int(det_box[3]),
+                            'area_pixels': int(det_area),
+                            'area_ratio': det_area / cv2_img_area
+                        }
+                        # Rescale to orig image size
+                        detect_dict['xmin'] = int(detect_dict['xmin'] * rescale_ratio)
+                        detect_dict['ymin'] = int(detect_dict['ymin'] * rescale_ratio)
+                        detect_dict['xmax'] = int(detect_dict['xmax'] * rescale_ratio)
+                        detect_dict['ymax'] = int(detect_dict['ymax'] * rescale_ratio)
+                        detect_dict_list.append(detect_dict)
 
-                print("Got detect dict list: " + str(detect_dict_list))
+
+            
                 
-                drate=float(1.0)/elapsed_time * NUM_TESTS
-                print("")
-                print("")
-                print(f"Ran 100 detections in: {elapsed_time:.6f} seconds")
-                print(f"Average detection rate: {drate:.2f} hz")
+            drate=float(1.0)/elapsed_time * NUM_TESTS
+            print("")
+            print("Got detect count: " + str(len(detect_dict_list)))
+            print(f"Ran {NUM_TESTS} detections in: {elapsed_time:.6f} seconds")
+            print(f"Average detection rate: {drate:.2f} hz")
 

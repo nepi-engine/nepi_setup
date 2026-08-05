@@ -312,7 +312,7 @@ else
     sudo python3 -m pip install --upgrade torch
     sudo python3 -m pip install --upgrade torchvision
     sudo python3 -m pip install --upgrade pip
-    sudo python3 -m pip install --upgrade --ignore-installed ultralytics
+    sudo python3 -m pip install --ignore-installed ultralytics
 
 
 
@@ -355,21 +355,28 @@ else
         sudo dpkg --configure -a
     fi
 
-    # #################################
-    # # Install onnxruntime Software
-    # sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime -y
-    # sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime-gpu -y
-    # if is_valid_cuda; then
-    #     sudo python${NEPI_PYTHON} -m venv --system-site-packages .venv
-    #     source .venv/bin/activate
-    #     sudo python${NEPI_PYTHON} -m pip install --upgrade pip setuptools wheel
-    #     sudo python${NEPI_PYTHON} -m pip install numpy==1.24.4 protobuf packaging sympy flatbuffers coloredlogs
-    #     wget https://nvidia.box.com/shared/static/mvdcltm9ewdy2d5nurkiqorofz1s53ww.whl -O onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
-    #     sudo python${NEPI_PYTHON} -m pip install ./onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
-    #     deactivate
-    # else
-    #     sudo python${NEPI_PYTHON} -m pip install --force-reinstall --no-deps --no-input "onnxruntime-gpu==1.15.1"
-    # fi
+    #################################
+    # Install onnxruntime Software
+    if is_valid_cuda; then
+        # sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime -y
+        # sudo python${NEPI_PYTHON} -m pip uninstall --no-input onnxruntime-gpu -y
+        if is_valid_arm64; then
+            sudo python${NEPI_PYTHON} -m venv --system-site-packages .venv
+            source .venv/bin/activate
+            sudo python${NEPI_PYTHON} -m pip install --upgrade pip setuptools wheel
+            sudo python${NEPI_PYTHON} -m pip install numpy==1.24.4 protobuf packaging sympy flatbuffers coloredlogs
+            sudo wget https://nvidia.box.com/shared/static/mvdcltm9ewdy2d5nurkiqorofz1s53ww.whl -O onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
+            sudo python${NEPI_PYTHON} -m pip install --force-reinstall --ignore-installed --no-deps --no-input ./onnxruntime_gpu-1.15.1-cp38-cp38-linux_aarch64.whl
+            deactivate
+        else
+            sudo python${NEPI_PYTHON} -m pip install --force-reinstall --ignore-installed --no-deps --no-input "onnxruntime-gpu==1.15.1"
+        fi
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo apt update
+        sudo apt install -y libstdc++6
+    fi
+
+
 
     # ### RERUN IN CASE SOMETHING CHANGED
     # sudo python3 -m pip install --upgrade torch
