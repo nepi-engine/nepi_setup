@@ -27,13 +27,29 @@ export CONFIG_USER=$CONFIG_USER
 
 CONFIG_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 
+SETUP_FOLDER='nepi_setup'
 LOAD_SCRIPT=${CONFIG_FOLDER}/load_docker_config.py
 
 DOCKER_CONFIG_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml
 BACKUP_FILE=${CONFIG_FOLDER}/nepi_docker_config.yaml.bak
+FACTORY_CONFIG_FILE=${CONFIG_FOLDER}/nepi_docker_config.blank
 # 
 
 #echo "Starting Load Script with config folder: " ${CONFIG_FOLDER}
+
+
+if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
+    sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+    clean_yaml_file $DOCKER_CONFIG_FILE
+    if [[ ! -f $BACKUP_FILE ]]; then
+        cp $DOCKER_CONFIG_FILE $BACKUP_FILE
+    fi
+    clean_yaml_file $BACKUP_FILE
+fi
+
+if [[ -f $FACTORY_CONFIG_FILE ]]; then
+    sync_yaml_files $FACTORY_CONFIG_FILE $DOCKER_CONFIG_FILE       
+fi
 
 if [[ -f "$LOAD_SCRIPT" ]]; then
     SETUP_FOLDER='nepi_setup'

@@ -64,6 +64,7 @@ if [[ -f $NEPI_SYSTEM_CONFIG_FILE ]]; then
 elif [[ -f $NEPI_SETUP_CONFIG_FILE && $nepi_config_loaded -eq 0 ]]; then
     echo "Loading NEPI SYSTEM CONFIG from: ${NEPI_SETUP_CONFIG_FILE}"
     source ${NEPI_SETUP_CONFIG_FILE}  >/dev/null 2>&1
+    NEPI_INSTALL=
     if [ $? -eq 1 ]; then
         echo "Failed to load ${NEPI_SETUP_CONFIG_FILE}"
     fi
@@ -81,7 +82,7 @@ echo ""
 
     nepi_mode=HOST
     export NEPI_MODE=$nepi_mode
-    if [[ $LITE_INSTALL -eq 1 ]]; then
+    if [[ $LITE_INSTALL -eq 1 || ${NEPI_INSTALL} != 'FULL' ]]; then
         echo "Updating Config Values for LITE Install"
         host_id=${NEPI_STATIC_IP##*.}
         export NEPI_STATIC_IP="127.0.0.${host_id}/24"
