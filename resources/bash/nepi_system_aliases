@@ -124,7 +124,10 @@ function nepibldc(){
   echo "Cleaning NEPI ETC Folders"
   sudo rm -r ${NEPI_BASE}/etc/*
   sudo rm -r ${NEPI_BASE}/nepi_engine/etc/*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/nepi_*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/share/nepi_*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api/nepi_*
   sudo rm -r ${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src/*
   
   sudo rm -r ${NEPI_BASE}/docker_cfg/*
