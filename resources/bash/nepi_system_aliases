@@ -136,7 +136,7 @@ function nepibldc(){
   echo "Cleaning NEPI SSH Folders"
   system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
   sudo rm -r $system_source_config
-  sudo rm -r /home/nepi/.ssh/*
+  sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_*
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
