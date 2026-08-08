@@ -53,7 +53,7 @@ HELPN="${UTILSN}"
 function nepipull(){
   sudo -v
   docker_link=$1
-  if pingi; then
+  if is_valid_internet ; then
     start_ids=$(echo $(sudo docker images -q))
     bash ${NEPI_DOCKER_CONFIG}/nepi_docker_pull.sh $docker_link
     end_ids=$(echo $(sudo docker images -q))
@@ -68,7 +68,7 @@ export -f nepipull
 function nepipullc(){
   sudo -v
   docker_link=$1
-  if pingi; then
+  if is_valid_internet ; then
     echo "Cleaning and Restarting Docker"
     nepistop
     sleep 2
