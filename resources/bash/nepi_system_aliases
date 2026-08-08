@@ -121,22 +121,22 @@ function nepibldc(){
   sudo -v
   run_folder=$(pwd)
   nepistop
-  echo "Cleaning NEPI ETC Folders"
+  echo "Cleaning NEPI System Folders"
   sudo rm -r ${NEPI_BASE}/etc/*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/etc/*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/nepi_*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/share/nepi_*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_*
-  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api/nepi_*
-  sudo rm -r ${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src/*
+  sudo rm -r ${NEPI_BASE}/nepi_engine/etc/*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/nepi_*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/nepi_engine/share/nepi_*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/nepi_engine/lib/python3/dist-packages/nepi_api/*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/nepi_rui/src/rui_webserver/rui-app/src/*  2>/dev/null
   
-  sudo rm -r ${NEPI_BASE}/docker_cfg/*
-  sudo rm -r ${NEPI_BASE}/docker
-  sudo rm -r /mnt/nepi_config/system_cfg/*
+  sudo rm -r ${NEPI_BASE}/docker_cfg/*  2>/dev/null
+  sudo rm -r ${NEPI_BASE}/docker  2>/dev/null
+  sudo rm -r /mnt/nepi_config/system_cfg/*  2>/dev/null
   echo "Cleaning NEPI SSH Folders"
-  system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys"
-  sudo rm -r $system_source_config
-  sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_*
+  system_source_config="${NEPI_SYSTEM_CONFIG}/ssh_keys" 
+  sudo rm -r $system_source_config  2>/dev/null
+  sudo rm -r /home/${CONFIG_USER}/.ssh/nepi_*  2>/dev/null
   cd $NEPI_BUILD_REPO_FOLDER
   source ./build_nepi_complete.sh
   sbrc
