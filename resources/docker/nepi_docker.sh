@@ -91,9 +91,11 @@ function updatenetlist(){
     netlist_last=$netlist_str
     netlist_str=$(netlist)
     if [[ "$netlist_str" != '$netlist_last' || ! -f $NETLIST_FILE ]]; then
-        netlist > $NETLIST_FILE
+        netlist > ${NETLIST_FILE}.tmp
         gateway=$(ip route show default | awk '{print $3}')
-        echo "Gateway: ${gateway}" >> $NETLIST_FILE
+        #echo "Gateway: ${gateway}" >> ${NETLIST_FILE}.tmp
+        echo "end_file" >> ${NETLIST_FILE}.tmp
+        mv ${NETLIST_FILE}.tmp $NETLIST_FILE
     fi
 }
 
