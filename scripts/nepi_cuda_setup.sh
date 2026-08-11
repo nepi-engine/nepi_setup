@@ -333,6 +333,60 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 # echo "######################################"
 # #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
 
+# ### AMD ###
+
+# sudo pip3 install "cmake<4"
+# cmake --version   # confirm it now shows 3.x
+
+# cd /mnt/nepi_storage/tmp
+# sudo rm -rf Open3D Open3D-for-Jetson   
+# git clone --recursive https://github.com/isl-org/Open3D
+# cd Open3D
+# git checkout v0.18.0    
+# git submodule update --init --recursive
+
+# util/install_deps_ubuntu.sh
+
+# apt-cache rdepends libc++-7-dev libomp-7-dev 2>/dev/null | grep -i ros
+
+# dpkg -l | grep -E 'clang-10|libc\+\+-10|libomp-10'
+
+# which nvcc
+
+# mkdir build && cd build
+
+# sudo CUDACXX=$(which nvcc) cmake \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DBUILD_SHARED_LIBS=ON \
+#     -DBUILD_CUDA_MODULE=ON \
+#     -DBUILD_GUI=ON \
+#     -DENABLE_HEADLESS_RENDERING=OFF \
+#     -DUSE_SYSTEM_GLEW=OFF \
+#     -DUSE_SYSTEM_GLFW=OFF \
+#     -DBUILD_TENSORFLOW_OPS=OFF \
+#     -DBUILD_PYTORCH_OPS=OFF \
+#     -DBUILD_UNIT_TESTS=OFF \
+#     -DPYTHON_EXECUTABLE=$(which python3) \
+#     ..
+
+# sudo make -j$(nproc)
+
+# sudo python3 -m pip uninstall open3d
+
+# sudo make install
+# sudo make install-pip-package -j$(nproc)
+
+# sudo python3 -m pip install --upgrade pip
+
+# find /mnt/nepi_storage/tmp/Open3D/build -name "*.whl"
+# # Then
+# sudo python3 -m pip install --force-reinstall <path-to-the-.whl>
+# #Test
+# sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+# sudo python3 -c "from open3d.visualization import rendering"
+
+
+### JETSON ###
 
 # sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
 # sudo apt-get install libosmesa6-dev -y
