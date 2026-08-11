@@ -149,14 +149,13 @@ if [[ "$?" -eq 0 ]]; then
 
 
             nepi_gateway_ip=NONE
-            # nepi_gateway_ip=$NEPI_GATEWAY_IP
-            # if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-            #     nepi_gateway_ip=NONE
-            #     export NEPI_GATEWAY_IP=$nepi_gateway_ip
-            #     needs_update=1
+            if is_valid_ipv4 $NEPI_GATEWAY_IP >/dev/null 2>&1; then
+                nepi_gateway_ip=NONE
+                export NEPI_GATEWAY_IP=$nepi_gateway_ip
+                needs_update=1
 
-            # fi
-            # echo "Using Gateway ${nepi_gateway_ip}"
+            fi
+            echo "Using Gateway ${nepi_gateway_ip}"
 
             if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
                 update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE

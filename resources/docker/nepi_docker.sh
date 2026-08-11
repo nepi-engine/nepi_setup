@@ -92,6 +92,8 @@ function updatenetlist(){
     netlist_str=$(netlist)
     if [[ "$netlist_str" != '$netlist_last' || ! -f $NETLIST_FILE ]]; then
         netlist > $NETLIST_FILE
+        gateway=$(ip route show default | awk '{print $3}')
+        echo "Gateway: ${gateway}" >> $NETLIST_FILE
     fi
 }
 
@@ -464,6 +466,15 @@ netlist_str=''
         if [[ "$NEPI_ETC_WIRED_DHCP_UPDATE" -eq 1 ]]; then
             echo "Calling: update_etc_wired_dhcp"
             source ${SYSTEM_SCRIPTS_FOLDER}/update_etc_wired_dhcp.sh
+            echo ""
+            echo "Returning to NEPI Service Monitoring"
+            echo "********************************"
+        fi
+
+        if [[ "$NEPI_ETC_INTERNET_UPDATE" -eq 1 ]]; then
+            echo "Restarting DHCP Internet server"
+            ninet
+            update_yaml_value "NEPI_ETC_INTERNET_UPDATE" 0 $DOCKER_CONFIG_FILE
             echo ""
             echo "Returning to NEPI Service Monitoring"
             echo "********************************"

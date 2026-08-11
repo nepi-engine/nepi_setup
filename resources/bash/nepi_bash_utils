@@ -1734,7 +1734,7 @@ function netcreate_wired() {
     selected_hw="$2"
     ip_netmask="$3"
     ip_netmask=$(fix_ipv4_netmask $ip_netmask)
-    # gateway="$4"
+    gateway="$4"
     
 
     if ! systemctl is-active --quiet NetworkManager; then
@@ -1856,11 +1856,19 @@ function netcreate_wired() {
                         # fi
                         # echo "Using Gateway ${gateway}"
 
-                        cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
-                            con-name "'${net_name}'" \
-                            ipv4.address '${nepi_static_ip}' \
-                            ipv4.method manual \
-                            # ipv4.gateway '${gateway}
+                        if ! is_valid_ipv4 $gateway; then
+                          cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
+                              con-name "'${net_name}'" \
+                              ipv4.address '${nepi_static_ip}' \
+                              ipv4.method manual '
+                        else
+                          echo "Using gateway to ${gateway}"
+                          cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
+                              con-name "'${net_name}'" \
+                              ipv4.address '${nepi_static_ip}' \
+                              ipv4.method manual \
+                              ipv4.gateway '${gateway}
+                        fi
                         echo $cmd
                         eval "$cmd"     
                         echo ""
