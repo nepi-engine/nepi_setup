@@ -80,6 +80,7 @@ NEPI_IN_CONTAINER: 1
 NEPI_GB_CONTAINER: 30
 # Note: If NEPI_RECOVERY_ENABLED enabled and NEPI_STATIC_IP is not 192.168.179.103,
 NEPI_RECOVERY_ENABLED: 1
+NEPI_RECOVERY_SEC: 10
 # NOTE: This is the time NEPI Docker service will
 # NOTE:  This time may vary on different hardware configurations,
 NEPI_BOOT_TIME: 60

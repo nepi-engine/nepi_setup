@@ -132,9 +132,11 @@ if [[ "$?" -eq 0 ]]; then
             for alias_ip in $purge_aliases; do
                 alias_ipn=$(fix_ipv4_netmask $alias_ip)
                 if is_valid_ipv4_netmask $alias_ipn; then
-                    echo "Removing Alias IP Address ${alias_ipn}"
-                    if netremove_ipn_alias $nepi_wired_interface $alias_ipn $skip_udpate; then
-                        do_update=1
+                    if [[ "$alias_ipn" != "$NEPI_STATIC_IP" ]]; then
+                        echo "Removing Alias IP Address ${alias_ipn}"
+                        if netremove_ipn_alias $nepi_wired_interface $alias_ipn $skip_udpate; then
+                            do_update=1
+                        fi
                     fi
                 fi
             done

@@ -90,6 +90,7 @@ if [[ "$?" -eq 0 ]]; then
             sudo usermod -aG netdev ${CONFIG_USER} >/dev/null 2>&1
 
 
+        
             echo "#########"
             echo "UPDATING WIRED INTERFACE SETTINGS"
             echo ""
@@ -127,6 +128,19 @@ if [[ "$?" -eq 0 ]]; then
             echo "Using Wired Interface ${nepi_wired_interface}"
 
 
+            nepi_rec_name="NEPI_RECOVERY"
+            nepi_rec_ipn=192.168.179.103/24
+            if netget_hw  ${nepi_rec_name}; then
+                echo "NEPI Recovery Connection exists at ${nepi_rec_ipn}"
+            else
+                echo "Setting up NEPI Recovery Connection at ${nepi_rec_ipn}"
+                while netget_hw  ${NEPI_WIRED_NAME}; do
+                    net_hw=$(netget_hw  ${NEPI_WIRED_NAME})
+                    echo "Deleting existing connection for ${NEPI_WIRED_NAME} on ${selected_hw}"
+                    sudo nmcli connection delete $NEPI_WIRED_NAME
+                done
+                netcreate_wired ${nepi_rec_name} ${nepi_wired_interface} ${nepi_rec_ipn}
+            fi
 
             internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
             if [[ -z $internet_enabled ]]; then

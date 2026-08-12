@@ -236,18 +236,17 @@ function NEPI_START_FUNCTION(){
 #####################################
 
 
+
 echo ""
 echo "##########################"
-echo "*** NEPI DOCKER SERVICE ***"
+echo "***STARTING NEPI DOCKER SERVICE ***"
 echo "##########################"
+
 echo ""
+echo "Loading NEPI System Config"
+nepiload
 
 
-# source DOCKER_STOP_FILE
-
-
-####################################
-# Run in Recovery Mode if Needed
 
 if [[ ! -n "$NEPI_STATIC_IP" ]]; then
     NEPI_STATIC_IP=192.168.179.103/24
@@ -256,34 +255,109 @@ fi
 nepi_static_ip=$NEPI_STATIC_IP
 nepi_recovery_ip=192.168.179.103/24
 
-# if [[ "$NEPI_MANAGES_NETWORK" -eq 1 && "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi_static_ip" != "$nepi_recovery_ip" ]]; then
 
-#     echo "##########################"
-#     echo "Starting Recovery Mode"
-#     echo "##########################"
-#     echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
-#     echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - ${nepi_recovery_ip}"
+##########################
+# SETUP Check
+##########################
+echo ""
+echo "---------------------------------"
+echo "Running Setup Check"
+echo ""
 
-#     # Load NEPI FACTORY CONFIG
-#     echo "Setting Static IP to ${nepi_recovery_ip}"
-#     # Load NEPI FACTORY CONFIG
-#     export NEPI_STATIC_IP=nepi_recovery_ip
-#     LOAD_NEPI_CONFIG=0
-#     source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG $nepi_recovery_ip
-#     if [[ "$?" -eq 0 ]]; then
-#         echo "Sleeping for 10 seconds"
-#         sleep 10
-#         export NEPI_STATIC_IP=nepi_static_ip
-#         LOAD_NEPI_CONFIG=1
-#         source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
-#         # sleep 2
-#         # if ! pingn; then
-#         #     snnet
-#         # fi
-#     else
-#         echo "Failed to run recovery mode setup"
-#     fi
-# fi
+needs_setup=0
+if ! pingn  >/dev/null 2>&1; then
+    if [[ "$NEPI_MANAGES_NETWORK" -eq 1 ]]; then
+        echo "Pingn FAILED"
+        needs_setup=1
+    fi
+fi
+auth_file=/home/${CONFIG_USER}/.ssh/authorized_keys
+if [[ "$NEPI_MANAGES_SSH" -eq 1 ]]; then
+    if cat $auth_file; then
+        auth_str=$(cat $auth_file) 
+        if [[ ! -n $auth_str ]] ; then
+            echo "SSH Autherized File Empty"
+            needs_setup=1
+        fi
+    else
+        echo "SSH Autherized File Not Found at ${auth_file}"
+        needs_setup=1
+    fi
+fi
+
+if [[ $needs_setup -eq 1 ]]; then
+        echo ""
+        echo "Setup Check FAILED, Running NEPI Setup"
+        SHOW_CONFIG_MENU=0
+        NEPI_CONFIG_SETUP_FILE=/mnt/nepi_config/system_cfg/etc/nepi_system_config.sh
+        if [[ -f $NEPI_CONFIG_SETUP_FILE ]]; then
+                echo "##########################"
+                echo "***STARTING NEPI CONFIG ***"
+                echo "##########################"
+                source $NEPI_CONFIG_SETUP_FILE  $SHOW_CONFIG_MENU
+                sleep 3
+        else
+            echo "Failed to find ${NEPI_CONFIG_SETUP_FILE}"
+        fi
+else
+    echo "Setup Check PASSED"
+fi
+
+##########################
+# Recovery Check
+##########################
+echo ""
+echo "---------------------------------"
+echo "Running Recovery Check"
+echo ""
+needs_recovery=0
+setup_good=1
+if ! pingn  >/dev/null 2>&1; then
+    echo "Recovery Check pingn FAILED"
+    setup_good=0
+    needs_recovery=1
+elif [[ "$NEPI_RECOVERY_ENABLED" -eq 1  && "$nepi_static_ip" != "$nepi_recovery_ip" ]]; then
+    echo "Recovery Check static ip FAILED"
+    needs_recovery=1
+fi
+if [[ "$NEPI_MANAGES_NETWORK" -eq 1 &&  $needs_recovery -eq 1 ]]; then
+    recovery_sec=10
+    if [[ "$NEPI_RECOVERY_SEC" =~ ^-?[0-9]+$ ]]; then
+        if [[ $NEPI_RECOVERY_SEC -gt 9 ]]; then
+            recovery_sec=$NEPI_RECOVERY_SEC
+        fi
+    fi
+    echo "Starting Recovery Mode"
+    echo "Got NEPI_STATIC_IP = ${NEPI_STATIC_IP}"
+    echo "Starting NEPI Recovery Mode for 10 seconds using NEPI Factory IP - ${nepi_recovery_ip}"
+
+    # Load NEPI FACTORY CONFIG
+    echo "Setting Static IP to ${nepi_recovery_ip}"
+    # Load NEPI FACTORY CONFIG
+    export NEPI_STATIC_IP=nepi_recovery_ip
+    LOAD_NEPI_CONFIG=0
+    source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG $nepi_recovery_ip
+    if [[ "$?" -eq 0 ]]; then
+        echo "In recovery IP address"
+    else
+        echo "Failed to run recovery IP address setup"
+    fi
+
+    if [[ $setup_good -eq 1 ]]; then
+        echo "Sleeping for 10 seconds"
+        sleep $recovery_sec
+        echo "Reseting to config IP address"
+        export NEPI_STATIC_IP=nepi_static_ip
+        LOAD_NEPI_CONFIG=1
+        source  ${SETC_FOLDER}/scripts/update_etc_wired_static.sh $LOAD_NEPI_CONFIG
+        # sleep 2
+        # if ! pingn; then
+        #     snnet
+        # fi
+    fi
+else
+    echo "Recovery Check PASSED"
+fi
 
 
 
@@ -293,9 +367,14 @@ nepi_recovery_ip=192.168.179.103/24
 
 #####################################
 # Start NEPI
+
 echo ""
-echo "-----------------------------"
-echo "LAUNCING NEPI CONTAINER"
+echo "##########################"
+echo "Starting NEPI Launch and Monitoring Services"
+echo "##########################"
+echo ""
+echo "Loading NEPI System Config"
+nepiload
 
 update_yaml_value "NEPI_SERVICE_RUNNING" 0 $DOCKER_CONFIG_FILE
 
@@ -312,15 +391,10 @@ if [[ ! "$?" -eq 0 ]]; then
     CONFIG_MODE=STOP
 fi
 
-#####################################
-# Run Monitoring and Upadate Loop
- echo ""
- echo "Starting NEPI Service Monitoring"
- echo "********************************"
 
 
-echo "Loading NEPI System Config"
-nepiload
+
+
 
 netlist_str=''
 
