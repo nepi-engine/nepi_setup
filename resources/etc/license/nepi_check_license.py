@@ -16,7 +16,8 @@ import subprocess
 
 NEPI_LICENSE_USER_FOLDER = "/mnt/nepi_storage/license"
 NEPI_LICENSE_SYS_FOLDER = "/mnt/nepi_config/system_cfg/license"
-NEPI_LICENSE_FOLDERS = [NEPI_LICENSE_USER_FOLDER,NEPI_LICENSE_SYS_FOLDER]
+NEPI_LICENSE_CFG_FOLDER = "/mnt/nepi_config/license"
+NEPI_LICENSE_FOLDERS = [NEPI_LICENSE_USER_FOLDER,NEPI_LICENSE_SYS_FOLDER,NEPI_LICENSE_CFG_FOLDER]
 NEPI_LICENSE_BASENAME = "/nepi_license_"
 NEPI_LICENSE_EXTENSION = ".gpg"
 NEPI_LICENSE_REQUEST = "/nepi_license_request_"
@@ -213,27 +214,28 @@ def checkLicense():
 
         dst_directory = 'None'
         if license_folder == NEPI_LICENSE_USER_FOLDER:
-            dst_directory = NEPI_LICENSE_SYS_FOLDER
+            dst_directory = NEPI_LICENSE_CFG_FOLDER
         elif license_folder == NEPI_LICENSE_SYS_FOLDER:
-            dst_directory = NEPI_LICENSE_USER_FOLDER
+            dst_directory = NEPI_LICENSE_CFG_FOLDER
         print("Backing Up License File to Folder: " + dst_directory)
 
         # Ensure the destination directory exists (optional, shutil.copy will create the file if the directory exists)
-        if not os.path.exists(dst_directory):
-            os.makedirs(dst_directory)
+        if dst_directory != 'None':
+            if not os.path.exists(dst_directory):
+                os.makedirs(dst_directory)
 
-        try:
-            # Copy the file to the destination directory
-            destination_path = shutil.copy(license_key_file, dst_directory)
-            print(f"File successfully copied to: {destination_path}")
-            destination_path = shutil.copy(license_info_file, dst_directory)
-            print(f"File successfully copied to: {destination_path}")
-        except shutil.SameFileError:
-            print("Source and destination represent the same file.")
-        except PermissionError:
-            print("Permission denied.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+            try:
+                # Copy the file to the destination directory
+                destination_path = shutil.copy(license_key_file, dst_directory)
+                print(f"File successfully copied to: {destination_path}")
+                destination_path = shutil.copy(license_info_file, dst_directory)
+                print(f"File successfully copied to: {destination_path}")
+            except shutil.SameFileError:
+                print("Source and destination represent the same file.")
+            except PermissionError:
+                print("Permission denied.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
             
 
 

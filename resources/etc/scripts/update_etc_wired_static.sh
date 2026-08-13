@@ -162,12 +162,12 @@ if [[ "$?" -eq 0 ]]; then
             echo "Using Static IP Address ${nepi_static_ip}"
 
 
+
             nepi_gateway_ip=$NEPI_GATEWAY_IP
             if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
                 nepi_gateway_ip=NONE
                 export NEPI_GATEWAY_IP=$nepi_gateway_ip
                 needs_update=1
-
             fi
             echo "Using Gateway ${nepi_gateway_ip}"
 
@@ -178,9 +178,9 @@ if [[ "$?" -eq 0 ]]; then
                 update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
                 update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
             fi
-                            
 
             if netget_info $nepi_wired_interface; then
+
 
                 # if ! netget_hw $nepi_wired_name; then
                 #     echo "Network ${nepi_wired_name} not configured"
@@ -198,6 +198,28 @@ if [[ "$?" -eq 0 ]]; then
                 # fi
 
                 netcreate_wired ${nepi_wired_name} ${nepi_wired_interface} ${nepi_static_ip} ${nepi_gateway_ip} 
+
+                dhcp_override_file="/etc/dhcp/dhclient-enter-hooks.d/override-gateway"
+                sudo rm $dhcp_override_file 2> /dev/null
+                if is_valid_ipv4 $NEPI_GATEWAY_IP >/dev/null 2>&1; then
+                    echo ""
+                    echo "Got Valid Gateway ${NEPI_GATEWAY_IP}"
+                    echo "Updating dhcp override file ${dhcp_override_file}"
+                    sudo touch $dhcp_override_file
+                    echo '##### DHCP Gateway IP Address #####' | sudo tee -a $dhcp_override_file
+                    echo 'if [ "$interface" = "'${NEPI_WIRED_INTERFACE}'" ]; then' | sudo tee -a $dhcp_override_file
+                    echo '    new_routers="'${NEPI_GATEWAY_IP}'"' | sudo tee -a $dhcp_override_file
+                    echo 'fi' | sudo tee -a $dhcp_override_file  
+                    cat $dhcp_override_file
+                    echo ""
+                    sudo chown root:root $dhcp_override_file
+                    sudo chmod 755 $dhcp_override_file
+                    sleep 1
+                    ndhcp
+                fi
+                
+
+
             else
                 echo "Skipping Network update ${nepi_wired_name} on ${nepi_wired_interface}"
             fi        
