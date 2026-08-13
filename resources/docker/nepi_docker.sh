@@ -201,19 +201,19 @@ function NEPI_START_FUNCTION(){
             source ${DOCKER_FOLDER}/nepi_docker_update.sh
             wait
             echo "Got NEPI Running = ${NEPI_RUNNING}"
-            # if [[ "$NEPI_RUNNING" -eq 1 ]]; then
-            #     #Wait for NEPI to start and try to reset fail count
+            if [[ "$NEPI_RUNNING" -eq 1 ]]; then
+                #Wait for NEPI to start and try to reset fail count
 
 
-            #     TIMEOUT_SECONDS=90
-            #     SECONDS=0
-            #     echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
-            #     while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
-            #         source ${DOCKER_FOLDER}/nepi_docker_update.sh > /dev/null 2>&1
-            #         sleep 2 # Check every 2 seconds
-            #     done                
+                TIMEOUT_SECONDS=90
+                SECONDS=0
+                echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
+                while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
+                    source ${DOCKER_FOLDER}/nepi_docker_update.sh > /dev/null 2>&1
+                    sleep 2 # Check every 2 seconds
+                done                
 
-            # fi
+            fi
 
         else
             echo "##########################"
@@ -386,22 +386,9 @@ NEPI_FS_RESTART=1
 update_yaml_value "NEPI_FS_RESTART" 1 $DOCKER_CONFIG_FILE
 update_yaml_value "NEPI_STARTING" 0 $DOCKER_CONFIG_FILE
 
-NEPI_FAIL_COUNT=-1
-NEPI_START_FUNCTION
-if [[ ! "$?" -eq 0 ]]; then
-    echo " Restart Process Failed. Will Stop Trying"
-    CONFIG_MODE=STOP
-fi
-
-
-
-
-
-
 netlist_str=''
 
-
- while [[ "$CONFIG_MODE" != "STOP" ]]; do
+while [[ "$CONFIG_MODE" != "STOP" ]]; do
 
     ########################
     # Load NEPI DOCKER CONFIG Updates
@@ -428,13 +415,18 @@ netlist_str=''
     if [[ "$NEPI_FS_RESTART" -eq 1 && "$NEPI_STARTING" -eq 0 ]]; then
         update_yaml_value "NEPI_FS_RESTART" 0 $DOCKER_CONFIG_FILE
         echo "NEPI RESTARTING"
-        CONFIG_MODE=SYSTEM
-        NEPI_FAIL_COUNT=-1
-        NEPI_START_FUNCTION
-        if [[ ! "$?" -eq 0 ]]; then
-            echo " Container Start Process Failed. Will Stop Trying"
-            CONFIG_MODE=STOP
-        fi
+        # CONFIG_MODE=SYSTEM
+        # NEPI_FAIL_COUNT=-1
+        # NEPI_START_FUNCTION
+        # if [[ ! "$?" -eq 0 ]]; then
+        #     echo " Container Start Process Failed. Will Stop Trying"
+        #     CONFIG_MODE=STOP
+        # fi
+        echo ""
+        echo "##########################"
+        echo "Calling NEPI Docker Start Script with ${CONFIG_MODE} Config"
+        ####  START NEPI USING SET CONFIG MODE
+        bash ${DOCKER_FOLDER}/nepi_docker_start.sh
 
         echo ""
         echo "---------------------------------"
