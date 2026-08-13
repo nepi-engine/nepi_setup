@@ -123,7 +123,7 @@ DOCKER_RUN_COMMAND="sudo docker run -d --privileged ${run_cmd} -e UDEV=1 --ipc=h
 --mount type=bind,source=/etc/udev,target=/etc/udev \
 --mount type=bind,source=/dev/bus/usb,target=/dev/bus/usb \
 --cap-add=SYS_TIME --volume=/var/empty:/var/empty -v /etc/ntpd.conf:/etc/ntpd.conf \
--e DISPLAY=$DISPLAY \
+-e DISPLAY=${DISPLAY:-:0} \
 --net=host \
 -p 2222:22 \
 -p 9091:9091 \
@@ -142,9 +142,10 @@ if is_valid_cuda; then
 DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} \
 --gpus all \
 --runtime nvidia \
+-e NVIDIA_DRIVER_CAPABILITIES=all \
 -v /tmp/.X11-unix/:/tmp/.X11-unix "
 
-fi 
+fi
 
 
 # Set jetson support if needed
@@ -290,5 +291,3 @@ else
     update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_FILE}"
     update_yaml_value "NEPI_SERVICE_RUNNING" 0 "${DOCKER_CONFIG_FILE}"
 fi
-
-
