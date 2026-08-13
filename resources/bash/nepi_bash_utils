@@ -296,7 +296,7 @@ function is_valid_ipv4() {
 
     # Check if the format matches a general IP pattern (e.g., 1.2.3.4)
     if ! [[ $input =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        echo "Not a valid IP Address format #.#.#.#"
+        echo "Not a valid IP Address format #.#.#.# : ${input}"
         return 1 # Invalid format
     fi
 
@@ -1842,7 +1842,7 @@ function netcreate_wired() {
                         if [[ ${ip_netmask} != 'auto' ]]; then
                           ip_netmask=$(fix_ipv4_netmask $ip_netmask)
                           if ! is_valid_ipv4_netmask $ip_netmask; then
-                            echo "Invalid Address/Netmask Combination ${selected_hw}"
+                            echo "Invalid Address/Netmask ${ip_netmask}"
                             return 1
                           fi
                         fi
@@ -1855,8 +1855,9 @@ function netcreate_wired() {
                         #     disable_dns=1
                         # fi
                         # echo "Using Gateway ${gateway}"
-
+                        echo "got gateway ${gateway}"
                         if ! is_valid_ipv4 $gateway; then
+                          echo "Ignoring invalid gateway ${gateway}"
                           cmd='sudo nmcli connection add type ethernet ifname '${selected_hw}' \
                               con-name "'${net_name}'" \
                               ipv4.address '${nepi_static_ip}' \

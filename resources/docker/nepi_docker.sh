@@ -90,11 +90,13 @@ NETLIST_FILE=${SETC_FOLDER}/netlist.txt
 function updatenetlist(){
     netlist_last=$netlist_str
     netlist_str=$(netlist)
-    if [[ "$netlist_str" != '$netlist_last' || ! -f $NETLIST_FILE ]]; then
-        netlist > ${NETLIST_FILE}.tmp
-        gateway=$(ip route show default | awk '{print $3}')
-        #echo "Gateway: ${gateway}" >> ${NETLIST_FILE}.tmp
-        echo "end_file" >> ${NETLIST_FILE}.tmp
+    netlist > ${NETLIST_FILE}.tmp
+    gateway=$(ip route show default | awk '{print $3}')
+    echo "Gateways: ${gateway}" >> ${NETLIST_FILE}.tmp
+    route=$(netget_router_ip)
+    echo "Route: ${route}" >> ${NETLIST_FILE}.tmp
+    echo "end_file" >> ${NETLIST_FILE}.tmp
+    if ! diff "${NETLIST_FILE}" "${NETLIST_FILE}.tmp" > /dev/null; then
         mv ${NETLIST_FILE}.tmp $NETLIST_FILE
     fi
 }
@@ -199,19 +201,19 @@ function NEPI_START_FUNCTION(){
             source ${DOCKER_FOLDER}/nepi_docker_update.sh
             wait
             echo "Got NEPI Running = ${NEPI_RUNNING}"
-            if [[ "$NEPI_RUNNING" -eq 1 ]]; then
-                #Wait for NEPI to start and try to reset fail count
+            # if [[ "$NEPI_RUNNING" -eq 1 ]]; then
+            #     #Wait for NEPI to start and try to reset fail count
 
 
-                TIMEOUT_SECONDS=90
-                SECONDS=0
-                echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
-                while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
-                    source ${DOCKER_FOLDER}/nepi_docker_update.sh > /dev/null 2>&1
-                    sleep 2 # Check every 2 seconds
-                done                
+            #     TIMEOUT_SECONDS=90
+            #     SECONDS=0
+            #     echo "Waiting up to ${TIMEOUT_SECONDS} seconds for NEPI Engine to boot successfully"
+            #     while [[ "$NEPI_FAIL_COUNT" -ne 0 ]]  && [[ $SECONDS -lt $TIMEOUT_SECONDS ]]; do
+            #         source ${DOCKER_FOLDER}/nepi_docker_update.sh > /dev/null 2>&1
+            #         sleep 2 # Check every 2 seconds
+            #     done                
 
-            fi
+            # fi
 
         else
             echo "##########################"

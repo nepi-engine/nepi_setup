@@ -72,9 +72,6 @@ echo "########################"
 
 
 
-
-
-
 ######################################
 # echo ""
 # echo "########################"
@@ -125,19 +122,17 @@ echo "########################"
 # Define Folders
 NEPI_CONFIG_PATH=/opt/nepi
 NEPI_ETC_PATH=${NEPI_CONFIG_PATH}/etc
-SYSTEM_SYS_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
-
+NEPI_CONFIG_FILE=${NEPI_ETC_PATH}/nepi_system_config.yaml
 
 FACTORY_CONFIG_PATH=/mnt/nepi_config/factory_cfg
 FACTORY_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
 
 SYSTEM_CONFIG_PATH=/mnt/nepi_config/system_cfg
 SYSTEM_ETC_PATH=${SYSTEM_CONFIG_PATH}/etc
-
 SYSTEM_SYS_CONFIG_FILE=${SYSTEM_ETC_PATH}/nepi_system_config.yaml
+SYSTEM_SYS_CONFIG_LOAD_FILE=${SYSTEM_ETC_PATH}/load_system_config.yaml
 SYSTEM_SYS_CONFIG_UPDATE_FILE=${SYSTEM_ETC_PATH}/nepi_system_config.sh
 SYSTEM_USER_CONFIG_FILE=${SYSTEM_ETC_PATH}/user/user_config.yaml
-
 
 
 # Load System Config File
@@ -186,7 +181,7 @@ function update_current_config() {
         host_id=${host_ip##*.}
         export NEPI_STATIC_IP="127.0.0.${host_id}/24"
         echo "NEPI_STATIC_IP=${NEPI_STATIC_IP}"
-        export NEPI_GATEWAY_IP="127.0.0.1"
+        export NEPI_GATEWAY_IP='NONE'
         export NEPI_ALIAS_IP_1='NONE'
         export NEPI_ALIAS_IP_2='NONE'
         export NEPI_ALIAS_IP_3='NONE'
@@ -300,10 +295,7 @@ function udpate_config_file(){
 #####################################
 
 if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
-    update_current_config
-
-
-
+    source ${SYSTEM_ETC_PATH}/load_system_config.sh
     # ########################################
     # # Update NEPI Network Config
     echo ""
@@ -353,7 +345,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         echo "Using Wired Interface ${nepi_wired_interface}"
 
 
-
         internet_enabled=$NEPI_WIRED_INTERNET_ENABLED
         if [[ -z $internet_enabled ]]; then
             internet_enabled=1
@@ -363,61 +354,35 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         echo "Using Internet Enabled ${internet_enabled}"
 
         nepi_static_ip=$NEPI_STATIC_IP
+        echo "Got Static IP Address ${nepi_static_ip}"
         if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
             nepi_static_ip=$(fix_ipv4_netmask "$NEPI_STATIC_IP")
             if ! is_valid_ipv4_netmask $nepi_static_ip >/dev/null 2>&1; then
                 nepi_static_ip=192.168.179.103/24
             fi
-            export NEPI_STATIC_IP=$nepi_static_ip
             needs_update=1
         fi
+        export NEPI_STATIC_IP=$nepi_static_ip
         echo "Using Static IP Address ${nepi_static_ip}"
 
 
 
+
         nepi_gateway_ip=$NEPI_GATEWAY_IP
+        echo "Got Gateway IP Address ${nepi_gateway_ip}"
         if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-            if [[ $internet_enabled -eq 1 ]]; then
-                nepi_gateway_ip=$(netget_router_ip)
-                if [[ -z $nepi_gateway_ip ]]; then
-                    nepi_gateway_ip=10.0.0.1
-                fi
-            fi
-            if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
-                new_ip="${nepi_static_ip%%/*}"
-                new_octet=1
-                nepi_gateway_ip="${new_ip%.*}.${new_octet}"
-            fi
-            export NEPI_GATEWAY_IP=$nepi_gateway_ip
+            NEPI_GATEWAY_IP='NONE'
             needs_update=1
-
         fi
-        echo "Using Gateway ${nepi_gateway_ip}"
+        export NEPI_STATIC_IP=$nepi_static_ip
+        echo "Using Gateway ${NEPI_GATEWAY_IP}"
 
-        if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
-            update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
-            update_yaml_value "NEPI_WIRED_INTERFACE" $NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
-            update_yaml_value "NEPI_WIRED_INTERNET_ENABLED" $NEPI_WIRED_INTERNET_ENABLED $SYSTEM_SYS_CONFIG_FILE
-            update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
-            update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
-        fi
-
-    fi
-
-
-
-
-
-
-    
-    systemctl &> /dev/null
-    if [[ "$?" -eq 0 ]]; then
 
         echo "#########"
         echo "UPDATING WIFI INTERFACE SETTINGS"
         echo ""
         needs_update=0
-        echo "Starting with WiFi Interface ${NEPI_WIFI_INTERFACE}"
+        echo "Got WiFi Interface ${NEPI_WIFI_INTERFACE}"
         nepi_wifi_interface="unknown"
         if [[ -n $NEPI_WIFI_INTERFACE && "$NEPI_WIFI_INTERFACE" != 'NONE' ]]; then
             nepi_wifi_interface=$NEPI_WIFI_INTERFACE
@@ -439,7 +404,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                 fi
             fi
         fi
-
         echo "Using Wifi Interface ${nepi_wifi_interface}"
 
 
@@ -453,11 +417,17 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         echo "Using Wifi Enabled ${wifi_enabled}"
 
         if [[ -f "$SYSTEM_SYS_CONFIG_FILE" && $needs_update -eq 1 ]]; then 
+            update_yaml_value "NEPI_WIRED_NAME" $NEPI_WIRED_NAME $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_WIRED_INTERFACE" $NEPI_WIRED_INTERFACE $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_WIRED_INTERNET_ENABLED" $NEPI_WIRED_INTERNET_ENABLED $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_STATIC_IP" $NEPI_STATIC_IP $SYSTEM_SYS_CONFIG_FILE
+            update_yaml_value "NEPI_GATEWAY_IP" $NEPI_GATEWAY_IP $SYSTEM_SYS_CONFIG_FILE
             update_yaml_value "NEPI_WIFI_INTERFACE" $NEPI_WIFI_INTERFACE $SYSTEM_SYS_CONFIG_FILE
             update_yaml_value "NEPI_WIFI_ENABLED" $NEPI_WIFI_ENABLED $SYSTEM_SYS_CONFIG_FILE
         fi
     fi
 
+    update_current_config
 
     #########################
     needs_update=0
@@ -1000,7 +970,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
             fi
     fi
 else
-    echo "${SYSTEM_ETC_PATH} Does not exist"
+    echo "${SYSTEM_SYS_CONFIG_FILE} Does not exist"
     echo ""
     echo "rebuild NEPI System Config using the command: nepibld"
     echo "then rerun the setup process using the command: nepisetup"

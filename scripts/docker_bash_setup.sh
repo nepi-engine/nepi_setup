@@ -87,7 +87,7 @@ echo ""
         host_id=${NEPI_STATIC_IP##*.}
         export NEPI_STATIC_IP="127.0.0.${host_id}/24"
         echo "NEPI_STATIC_IP=${NEPI_STATIC_IP}"
-        export NEPI_GATEWAY_IP="127.0.0.1"
+        export NEPI_GATEWAY_IP='NONE'
         export NEPI_ALIAS_IP_1='NONE'
         export NEPI_ALIAS_IP_2='NONE'
         export NEPI_ALIAS_IP_3='NONE'

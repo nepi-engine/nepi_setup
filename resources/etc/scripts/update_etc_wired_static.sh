@@ -162,8 +162,8 @@ if [[ "$?" -eq 0 ]]; then
             echo "Using Static IP Address ${nepi_static_ip}"
 
 
-            nepi_gateway_ip=NONE
-            if is_valid_ipv4 $NEPI_GATEWAY_IP >/dev/null 2>&1; then
+            nepi_gateway_ip=$NEPI_GATEWAY_IP
+            if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
                 nepi_gateway_ip=NONE
                 export NEPI_GATEWAY_IP=$nepi_gateway_ip
                 needs_update=1
