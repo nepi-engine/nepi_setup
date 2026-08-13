@@ -460,7 +460,7 @@ function nepiprint(){
   echo ""
   echo "NEPI SYSTEM SETTINGS"
   echo "--------------------"
-  print_yaml_file ${NEPI_DOCKER_CONFIG}/nepi_docker_config.yaml
+  print_yaml_file ${NEPI_SYSTEM_CONFIG}/etc/nepi_system_config.yaml
 }
 export -f nepiprint
 
