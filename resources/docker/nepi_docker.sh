@@ -91,7 +91,7 @@ function updatenetlist(){
     netlist_last=$netlist_str
     netlist_str=$(netlist)
     netlist > ${NETLIST_FILE}.tmp
-    gateway=$(ip route show default | awk '{print $3}')
+    gateway=$(route -n | grep 'UG' | awk '{print $2}')
     echo "Gateways: ${gateway}" >> ${NETLIST_FILE}.tmp
     route=$(netget_router_ip)
     echo "Route: ${route}" >> ${NETLIST_FILE}.tmp
