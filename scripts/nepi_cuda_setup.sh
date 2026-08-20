@@ -335,7 +335,7 @@ echo "######################################"
 
 cuda_ver=$(get_cuda_version)
 cupy_ver=${cuda_ver%%.*}
-sudo pip install cupy-cuda${cupy_ver}xx
+sudo pip install cupy-cuda${cupy_ver}x
 
 
 # #################################
@@ -457,11 +457,20 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     sudo python3 -m pip uninstall open3d
 
-    sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-    sudo apt-get install libosmesa6-dev -y
+
 
     python3.8 -m venv open3d_venv
 
+    cd /mnt/nepi_storage/tmp
+    source open3d_venv/bin/activate
+
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+    sudo apt update
+    sudo apt install gcc-13 g++-13 -y
+    sudo apt install libstdc++-13-dev -y
+
+    sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
+    sudo apt-get install libosmesa6-dev -y
     ##########
     # c)
 
@@ -483,8 +492,6 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     ##########
     # e) Build Open3D cpp and python modules
 
-    cd /mnt/nepi_storage/tmp
-    source open3d_venv/bin/activate
 
     cd Open3D
     util/install_deps_ubuntu.sh
@@ -506,24 +513,29 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         -DPYTHON_EXECUTABLE=$(which python3) \
         ..
 
+    # RUN AND IGNORE ERRORS
     sudo make -j$(nproc)
-    # RUN AGAIN TO CATCH ANY ERRORS
-    sudo make -j$(nproc)
-    # IGNORE ERRORS
     sudo make install
+    # RUN AGAIN TO CATCH FIX ERRORS
+    sudo make -j$(nproc)
+    sudo make install
+    # FIX ANY ERRORS AN KEEP TRYING
+
+
     sudo make install-pip-package -j$(nproc)
 
     deactivate
 
     sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
     sudo python3 -c "from open3d.visualization import rendering"
+
     # f) RUN WITH DEVICE DISPLAY/KEYBOARD/MOUSE 
     # test the install. Run Open3D GUI (optional, available on when -DBUILD_GUI=ON)
     # ./Open3D/Open3D
 
 
     ##########
-    # e) For headless rendering, remake with the following options. Takes about 30min to rebuild.
+    ####### For headless rendering, remake with the following options. Takes about 30min to rebuild.
 
     # cd /mnt/nepi_storage/tmp
     # source open3d_venv/bin/activate
