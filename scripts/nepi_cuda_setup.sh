@@ -328,10 +328,24 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 # #################################
 # # Install open3d with cuda support
 # ##################################
-# echo "######################################"
-# echo 'Installing Open3d with Cuda Support'
-# echo "######################################"
+
+echo "######################################"
+echo 'Installing CUPY'
+echo "######################################"
+
+cuda_ver=$(get_cuda_version)
+cupy_ver=${cuda_ver%%.*}
+sudo pip install cupy-cuda${cupy_ver}xx
+
+
+# #################################
+# # Install open3d with cuda support
+# ##################################
 # #https://github.com/devshank3/JetScan/blob/master/Software_O3D/README.md
+
+echo "######################################"
+echo 'Installing Open3d with Cuda Support'
+echo "######################################"
 
 # ### AMD ###
 
@@ -493,7 +507,9 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         ..
 
     sudo make -j$(nproc)
-
+    # RUN AGAIN TO CATCH ANY ERRORS
+    sudo make -j$(nproc)
+    # IGNORE ERRORS
     sudo make install
     sudo make install-pip-package -j$(nproc)
 
