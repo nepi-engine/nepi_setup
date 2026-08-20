@@ -335,208 +335,211 @@ sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 
 # ### AMD ###
 
-# sudo pip3 install "cmake<4"
-# cmake --version   # confirm it now shows 3.x
 
-# cd /mnt/nepi_storage/tmp
-# sudo rm -rf Open3D Open3D-for-Jetson   
-# git clone --recursive https://github.com/isl-org/Open3D
-# cd Open3D
-# git checkout v0.18.0    
-# git submodule update --init --recursive
+if [[ ${NEPI_ARCH} == 'amd64' ]]; then
+    sudo pip3 install "cmake<4"
+    cmake --version   # confirm it now shows 3.x
 
-# util/install_deps_ubuntu.sh
+    cd /mnt/nepi_storage/tmp
+    sudo rm -rf Open3D Open3D-for-Jetson   
+    git clone --recursive https://github.com/isl-org/Open3D
+    cd Open3D
+    git checkout v0.18.0    
+    git submodule update --init --recursive
 
-# apt-cache rdepends libc++-7-dev libomp-7-dev 2>/dev/null | grep -i ros
+    util/install_deps_ubuntu.sh
 
-# dpkg -l | grep -E 'clang-10|libc\+\+-10|libomp-10'
+    apt-cache rdepends libc++-7-dev libomp-7-dev 2>/dev/null | grep -i ros
 
-# which nvcc
+    dpkg -l | grep -E 'clang-10|libc\+\+-10|libomp-10'
 
-# mkdir build && cd build
+    which nvcc
 
-# sudo CUDACXX=$(which nvcc) cmake \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DBUILD_SHARED_LIBS=ON \
-#     -DBUILD_CUDA_MODULE=ON \
-#     -DBUILD_GUI=ON \
-#     -DENABLE_HEADLESS_RENDERING=OFF \
-#     -DUSE_SYSTEM_GLEW=OFF \
-#     -DUSE_SYSTEM_GLFW=OFF \
-#     -DBUILD_TENSORFLOW_OPS=OFF \
-#     -DBUILD_PYTORCH_OPS=OFF \
-#     -DBUILD_UNIT_TESTS=OFF \
-#     -DPYTHON_EXECUTABLE=$(which python3) \
-#     ..
+    mkdir build && cd build
 
-# sudo make -j$(nproc)
+    sudo CUDACXX=$(which nvcc) cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_CUDA_MODULE=ON \
+        -DBUILD_GUI=ON \
+        -DENABLE_HEADLESS_RENDERING=OFF \
+        -DUSE_SYSTEM_GLEW=OFF \
+        -DUSE_SYSTEM_GLFW=OFF \
+        -DBUILD_TENSORFLOW_OPS=OFF \
+        -DBUILD_PYTORCH_OPS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DPYTHON_EXECUTABLE=$(which python3) \
+        ..
 
-# sudo python3 -m pip uninstall open3d
+    sudo make -j$(nproc)
 
-# sudo make install
-# sudo make install-pip-package -j$(nproc)
+    sudo python3 -m pip uninstall open3d
 
-# sudo python3 -m pip install --upgrade pip
+    sudo make install
+    sudo make install-pip-package -j$(nproc)
 
-# find /mnt/nepi_storage/tmp/Open3D/build -name "*.whl"
-# # Then
-# sudo python3 -m pip install --force-reinstall <path-to-the-.whl>
-# #Test
-# sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
-# sudo python3 -c "from open3d.visualization import rendering"
+    sudo python3 -m pip install --upgrade pip
+
+    find /mnt/nepi_storage/tmp/Open3D/build -name "*.whl"
+    # Then
+    sudo python3 -m pip install --force-reinstall <path-to-the-.whl>
+    #Test
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    sudo python3 -c "from open3d.visualization import rendering"
+
+fi
+
+### JETSON and ARM ###
+if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
+    # sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
+    # sudo apt-get install libosmesa6-dev -y
+    # 4) Build Open3D in a virtual python environment. 
+    # NOTE: **The make process below took over an 5 hours to run. Maybe faster with rosstop
+    # Ref https://www.open3d.org/docs/0.13.0/arm.html
+    # Ref https://www.open3d.org/docs/0.11.0/compilation.html
+    # Ref https://www.open3d.org/docs/latest/tutorial/Advanced/headless_rendering.html
 
 
-### JETSON ###
+    ###############
+    # SSH INTO NEPI and STOP NEPI
+    nepistop
 
-# sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-# sudo apt-get install libosmesa6-dev -y
-# 4) Build Open3D in a virtual python environment. 
-# NOTE: **The make process below took over an 5 hours to run. Maybe faster with rosstop
-# Ref https://www.open3d.org/docs/0.13.0/arm.html
-# Ref https://www.open3d.org/docs/0.11.0/compilation.html
-# Ref https://www.open3d.org/docs/latest/tutorial/Advanced/headless_rendering.html
+    ##########
+    # a) CHECK Cuda Min version 11.5
+
+    cuda_req=11.5
+    cuda_cur=$(get_cuda_version)
+    if awk "BEGIN {exit !($cuda_cur < $cuda_req)}"; then
+        
+        # CUDA 11.5.2 from
+        # https://developer.download.nvidia.com/compute/cuda/opensource/
+
+        cd /mnt/nepi_storage/tmp
+
+        sudo apt update && sudo apt install texinfo bison flex -y
+
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
+        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/11.5.2/local_installers/cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
+        sudo dpkg -i cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
+        sudo apt-key add /var/cuda-repo-ubuntu2004-11-5-local/7fa2af80.pub
+        sudo apt-get update
+        sudo apt-get -y install cuda
+        sudo update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.5 1150
+
+        get_cuda_version
+        file="/home/nepi/.nepi_bash_utils"
+        sed -i 's/11.4/11.5/g' $file
+        sbrc
+        get_cuda_version
+    fi
 
 
-###############
-# SSH INTO NEPI and STOP NEPI
-nepistop
-
-##########
-# a) CHECK Cuda Min version 11.5
-
-cuda_req=11.5
-cuda_cur=$(get_cuda_version)
-if awk "BEGIN {exit !($cuda_cur < $cuda_req)}"; then
-    
-    # CUDA 11.5.2 from
-    # https://developer.download.nvidia.com/compute/cuda/opensource/
+    ##########
+    # b) Setup python virtual environment. SSH into your NEPI device and type the following
+    # Just run once, then use the source and deactivate to enter/exit venv
 
     cd /mnt/nepi_storage/tmp
 
-    sudo apt update && sudo apt install texinfo bison flex -y
+    sudo python3 -m pip uninstall open3d
 
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
-    sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-    wget https://developer.download.nvidia.com/compute/cuda/11.5.2/local_installers/cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
-    sudo dpkg -i cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
-    sudo apt-key add /var/cuda-repo-ubuntu2004-11-5-local/7fa2af80.pub
-    sudo apt-get update
-    sudo apt-get -y install cuda
-    sudo update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.5 1150
+    sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
+    sudo apt-get install libosmesa6-dev -y
 
-    get_cuda_version
-    file="/home/nepi/.nepi_bash_utils"
-    sed -i 's/11.4/11.5/g' $file
-    sbrc
-    get_cuda_version
+    python3.8 -m venv open3d_venv
+
+    ##########
+    # c)
+
+    git clone --recursive https://github.com/intel-isl/Open3D
+    cd Open3D
+    git submodule update --init --recursive
+    mkdir build
+
+
+    ##########
+    # # d)Edit the CMakeLists.txt 
+    # line 396. Change "find_package(Python3 3.6" line to
+    # find_package(Python3 X.X EXACT COMPONENTS
+
+    python_version=$(get_python_version)
+    file=$(pwd)/CMakeLists.txt
+    update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
+
+    ##########
+    # e) Build Open3D cpp and python modules
+
+    cd /mnt/nepi_storage/tmp
+    source open3d_venv/bin/activate
+
+    cd Open3D
+    util/install_deps_ubuntu.sh
+
+    cd build
+    cuda_version=$(get_cuda_version)
+    sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_CUDA_MODULE=ON \
+        -DBUILD_GUI=ON \
+        -DENABLE_HEADLESS_RENDERING=OFF \
+        -DUSE_SYSTEM_GLEW=OFF \
+        -DUSE_SYSTEM_GLFW=OFF \
+        -DBUILD_TENSORFLOW_OPS=OFF \
+        -DBUILD_PYTORCH_OPS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DPYTHON_EXECUTABLE=$(which python3) \
+        ..
+
+    sudo make -j$(nproc)
+
+    sudo make install
+    sudo make install-pip-package -j$(nproc)
+
+    deactivate
+
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    sudo python3 -c "from open3d.visualization import rendering"
+    # f) RUN WITH DEVICE DISPLAY/KEYBOARD/MOUSE 
+    # test the install. Run Open3D GUI (optional, available on when -DBUILD_GUI=ON)
+    # ./Open3D/Open3D
+
+
+    ##########
+    # e) For headless rendering, remake with the following options. Takes about 30min to rebuild.
+
+    # cd /mnt/nepi_storage/tmp
+    # source open3d_venv/bin/activate
+
+    # cd Open3D
+    # util/install_deps_ubuntu.sh
+
+    # cuda_version=$(get_cuda_version)
+    # sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
+    #     -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
+    #     -DCMAKE_BUILD_TYPE=Release \
+    #     -DBUILD_SHARED_LIBS=ON \
+    #     -DBUILD_CUDA_MODULE=ON \
+    #     -DBUILD_GUI=OFF \
+    #     -DENABLE_HEADLESS_RENDERING=ON \
+    #     -DUSE_SYSTEM_GLEW=OFF \
+    #     -DUSE_SYSTEM_GLFW=OFF \
+    #     -DBUILD_TENSORFLOW_OPS=OFF \
+    #     -DBUILD_PYTORCH_OPS=OFF \
+    #     -DBUILD_UNIT_TESTS=OFF \
+    #     -DPYTHON_EXECUTABLE=$(which python3) \
+    #     ..
+
+    # sudo make -j$(nproc)
+    # sudo make install
+    # sudo make install-pip-package -j$(nproc)
+
+    # deactivate
+
+
+    # sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
 fi
-
-
-##########
-# b) Setup python virtual environment. SSH into your NEPI device and type the following
-# Just run once, then use the source and deactivate to enter/exit venv
-
-cd /mnt/nepi_storage/tmp
-
-sudo python3 -m pip uninstall open3d
-
-sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-sudo apt-get install libosmesa6-dev -y
-
-python3.8 -m venv open3d_venv
-
-##########
-# c)
-
-git clone --recursive https://github.com/intel-isl/Open3D
-cd Open3D
-git submodule update --init --recursive
-mkdir build
-
-
-##########
-# # d)Edit the CMakeLists.txt 
-# line 396. Change "find_package(Python3 3.6" line to
-# find_package(Python3 X.X EXACT COMPONENTS
-
-python_version=$(get_python_version)
-file=$(pwd)/CMakeLists.txt
-update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
-
-##########
-# e) Build Open3D cpp and python modules
-
-cd /mnt/nepi_storage/tmp
-source open3d_venv/bin/activate
-
-cd Open3D
-util/install_deps_ubuntu.sh
-
-cd build
-cuda_version=$(get_cuda_version)
-sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
-    -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_SHARED_LIBS=ON \
-    -DBUILD_CUDA_MODULE=ON \
-    -DBUILD_GUI=ON \
-    -DENABLE_HEADLESS_RENDERING=OFF \
-    -DUSE_SYSTEM_GLEW=OFF \
-    -DUSE_SYSTEM_GLFW=OFF \
-    -DBUILD_TENSORFLOW_OPS=OFF \
-    -DBUILD_PYTORCH_OPS=OFF \
-    -DBUILD_UNIT_TESTS=OFF \
-    -DPYTHON_EXECUTABLE=$(which python3) \
-    ..
-
-sudo make -j$(nproc)
-
-sudo make install
-sudo make install-pip-package -j$(nproc)
-
-deactivate
-
-sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
-
-# f) RUN WITH DEVICE DISPLAY/KEYBOARD/MOUSE 
-# test the install. Run Open3D GUI (optional, available on when -DBUILD_GUI=ON)
-./Open3D/Open3D
-
-
-##########
-# e) For headless rendering, remake with the following options. Takes about 30min to rebuild.
-
-# cd /mnt/nepi_storage/tmp
-# source open3d_venv/bin/activate
-
-# cd Open3D
-# util/install_deps_ubuntu.sh
-
-# cuda_version=$(get_cuda_version)
-# sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
-#     -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DBUILD_SHARED_LIBS=ON \
-#     -DBUILD_CUDA_MODULE=ON \
-#     -DBUILD_GUI=OFF \
-#     -DENABLE_HEADLESS_RENDERING=ON \
-#     -DUSE_SYSTEM_GLEW=OFF \
-#     -DUSE_SYSTEM_GLFW=OFF \
-#     -DBUILD_TENSORFLOW_OPS=OFF \
-#     -DBUILD_PYTORCH_OPS=OFF \
-#     -DBUILD_UNIT_TESTS=OFF \
-#     -DPYTHON_EXECUTABLE=$(which python3) \
-#     ..
-
-# sudo make -j$(nproc)
-# sudo make install
-# sudo make install-pip-package -j$(nproc)
-
-# deactivate
-
-
-# sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
-
 
 # ############################################
 # # Install cv2 with cuda support
