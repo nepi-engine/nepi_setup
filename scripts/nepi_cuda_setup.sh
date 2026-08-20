@@ -429,7 +429,7 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         # https://developer.download.nvidia.com/compute/cuda/opensource/
 
         cd /mnt/nepi_storage/tmp
-
+        sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils -y
         sudo apt update && sudo apt install texinfo bison flex -y
 
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
@@ -440,12 +440,14 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         sudo apt-get update
         sudo apt-get -y install cuda
         sudo update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.5 1150
-
+        
         get_cuda_version
         file="/home/nepi/.nepi_bash_utils"
         sed -i 's/11.4/11.5/g' $file
         sbrc
         get_cuda_version
+
+        sudo rm -r /usr/local/cuda-${cuda_cur}
     fi
 
 
@@ -463,14 +465,17 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     cd /mnt/nepi_storage/tmp
     source open3d_venv/bin/activate
+    
 
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt update
     sudo apt install gcc-13 g++-13 -y
     sudo apt install libstdc++-13-dev -y
 
+    sudo apt install build-essential -y
     sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-    sudo apt-get install libosmesa6-dev -y
+    sudo apt-get install libx11-dev libosmesa6-dev -y
+    
     ##########
     # c)
 
@@ -486,7 +491,7 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     # find_package(Python3 X.X EXACT COMPONENTS
 
     python_version=$(get_python_version)
-    file=$(pwd)/CMakeLists.txt
+    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
     update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
 
     ##########
@@ -497,7 +502,13 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     util/install_deps_ubuntu.sh
 
     cd build
+
+    #######################################
+    # BUILD WITH GUI (WILL FAIL AT SOME POINT IF IN CONTAINER WITH NO DISPLAY)
     cuda_version=$(get_cuda_version)
+    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
+    update_text_value $file "option(BUILD_GUI" "option(BUILD_GUI                  "Builds new GUI"                           ON )"
+    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" "option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        OFF)"
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
         -DCMAKE_BUILD_TYPE=Release \
@@ -519,54 +530,61 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     # RUN AGAIN TO CATCH FIX ERRORS
     sudo make -j$(nproc)
     sudo make install
-    # FIX ANY ERRORS AN KEEP TRYING
+    # IGNORE ERRORS AND CONTINUE
 
+    ########################
+    # BUILD WITH NO GUI
+    cuda_version=$(get_cuda_version)
+    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
+    update_text_value $file "option(BUILD_GUI" "option(BUILD_GUI                  "Builds new GUI"                           OFF )"
+    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" "option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        ON)"
+
+    sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_CUDA_MODULE=ON \
+        -DBUILD_GUI=OFF \
+        -DENABLE_HEADLESS_RENDERING=ON \
+        -DUSE_SYSTEM_GLEW=OFF \
+        -DUSE_SYSTEM_GLFW=OFF \
+        -DBUILD_TENSORFLOW_OPS=OFF \
+        -DBUILD_PYTORCH_OPS=OFF \
+        -DBUILD_UNIT_TESTS=OFF \
+        -DPYTHON_EXECUTABLE=$(which python3) \
+        ..
+
+    # RUN AND IGNORE ERRORS
+    sudo make -j$(nproc)
+    sudo make install
+    # RUN AGAIN TO TRY AND FIX ERRORS
+    sudo make -j$(nproc)
+    sudo make install
+    # IGNORE ERRORS AND CONTINUE
 
     sudo make install-pip-package -j$(nproc)
 
-    deactivate
-
+    # RUN TESTS
     sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
     sudo python3 -c "from open3d.visualization import rendering"
 
-    # f) RUN WITH DEVICE DISPLAY/KEYBOARD/MOUSE 
-    # test the install. Run Open3D GUI (optional, available on when -DBUILD_GUI=ON)
-    # ./Open3D/Open3D
+    cd /mnt/nepi_storage/tmp/Open3D/examples/python/Advanced
+    python headless_rendering.py
 
 
-    ##########
-    ####### For headless rendering, remake with the following options. Takes about 30min to rebuild.
-
-    # cd /mnt/nepi_storage/tmp
-    # source open3d_venv/bin/activate
-
-    # cd Open3D
-    # util/install_deps_ubuntu.sh
-
-    # cuda_version=$(get_cuda_version)
-    # sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
-    #     -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
-    #     -DCMAKE_BUILD_TYPE=Release \
-    #     -DBUILD_SHARED_LIBS=ON \
-    #     -DBUILD_CUDA_MODULE=ON \
-    #     -DBUILD_GUI=OFF \
-    #     -DENABLE_HEADLESS_RENDERING=ON \
-    #     -DUSE_SYSTEM_GLEW=OFF \
-    #     -DUSE_SYSTEM_GLFW=OFF \
-    #     -DBUILD_TENSORFLOW_OPS=OFF \
-    #     -DBUILD_PYTORCH_OPS=OFF \
-    #     -DBUILD_UNIT_TESTS=OFF \
-    #     -DPYTHON_EXECUTABLE=$(which python3) \
-    #     ..
-
-    # sudo make -j$(nproc)
-    # sudo make install
-    # sudo make install-pip-package -j$(nproc)
-
-    # deactivate
+    # DEACTIVATE VENV
+    deactivate
 
 
-    # sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    # RUN TESTS
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    sudo python3 -c "from open3d.visualization import rendering"
+
+    cd /mnt/nepi_storage/tmp/Open3D/examples/python/Advanced
+    python headless_rendering.py
+
+
+
 fi
 
 # ############################################
