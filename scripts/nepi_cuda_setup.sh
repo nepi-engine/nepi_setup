@@ -495,19 +495,11 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     source open3d_venv/bin/activate
     
     export DISPLAY=:1
-    sudo apt update && sudo apt install texinfo bison flex -y
-    sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils -y
-    
-    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    sudo apt update
-    sudo apt install gcc-13 g++-13 -y
-    sudo apt install libstdc++-13-dev -y
-
+    #sudo apt update && sudo apt install texinfo bison flex -y
+    #sudo python3 -m pip install pybind11-stubgen
     sudo apt install build-essential -y
-    sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
-    sudo apt-get install libx11-dev libosmesa6-dev -y
-    
-    sudo python3 -m pip install pybind11-stubgen
+    sudo ninja-build libx11-dev libxi-dev libxcomposite-dev libxxf86vm-dev -y
+    sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils libosmesa6-dev -y
 
     cd /mnt/nepi_storage/tmp/Open3D
     util/install_deps_ubuntu.sh
