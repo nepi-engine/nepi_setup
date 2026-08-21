@@ -398,7 +398,8 @@ if [[ ${NEPI_ARCH} == 'amd64' ]]; then
     # Then
     sudo python3 -m pip install --force-reinstall <path-to-the-.whl>
     #Test
-    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config;print(open3d.__version__) ;print(_build_config)"
     sudo python3 -c "from open3d.visualization import rendering"
 
 fi
@@ -429,8 +430,7 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         # https://developer.download.nvidia.com/compute/cuda/opensource/
 
         cd /mnt/nepi_storage/tmp
-        sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils -y
-        sudo apt update && sudo apt install texinfo bison flex -y
+        
 
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
         sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
@@ -446,12 +446,17 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         sed -i 's/11.4/11.5/g' $file
         sbrc
         get_cuda_version
-
+        
         sudo rm -r /usr/local/cuda-${cuda_cur}
     fi
 
-
+    ######
+    #### RUN NEPISTART then COMMIT NEPI CONTAINER #####
+    ######
     ##########
+
+
+
     # b) Setup python virtual environment. SSH into your NEPI device and type the following
     # Just run once, then use the source and deactivate to enter/exit venv
 
@@ -459,14 +464,15 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     sudo python3 -m pip uninstall open3d
 
-
-
     python3.8 -m venv open3d_venv
 
     cd /mnt/nepi_storage/tmp
     source open3d_venv/bin/activate
     
-
+    export DISPLAY=:1
+    sudo apt update && sudo apt install texinfo bison flex -y
+    sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils -y
+    
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt update
     sudo apt install gcc-13 g++-13 -y
@@ -476,11 +482,12 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     sudo apt install clang-7 libglu1-mesa-dev libc++-7-dev libc++abi-7-dev ninja-build libxi-dev libxcomposite-dev libxxf86vm-dev -y
     sudo apt-get install libx11-dev libosmesa6-dev -y
     
+    sudo python3 -m pip install pybind11-stubgen
     ##########
     # c)
 
     git clone --recursive https://github.com/intel-isl/Open3D
-    cd Open3D
+    cd /mnt/nepi_storage/tmp/Open3D
     git submodule update --init --recursive
     mkdir build
 
@@ -492,23 +499,26 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     python_version=$(get_python_version)
     file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
+    cp $file ${file}.bak
     update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
 
     ##########
     # e) Build Open3D cpp and python modules
 
 
-    cd Open3D
+    cd /mnt/nepi_storage/tmp/Open3D
     util/install_deps_ubuntu.sh
 
-    cd build
+
 
     #######################################
     # BUILD WITH GUI (WILL FAIL AT SOME POINT IF IN CONTAINER WITH NO DISPLAY)
     cuda_version=$(get_cuda_version)
     file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
-    update_text_value $file "option(BUILD_GUI" "option(BUILD_GUI                  "Builds new GUI"                           ON )"
-    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" "option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        OFF)"
+    APPEND=0
+    update_text_value $file "option(BUILD_GUI" 'option(BUILD_GUI                  "Builds new GUI"                           ON )' $APPEND
+    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" 'option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        OFF)' $APPEND
+    cd /mnt/nepi_storage/tmp/Open3D/build
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
         -DCMAKE_BUILD_TYPE=Release \
@@ -524,21 +534,18 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         -DPYTHON_EXECUTABLE=$(which python3) \
         ..
 
-    # RUN AND IGNORE ERRORS
+    # RERUN UNTIL COMPLETES WITH NO ERRORS
     sudo make -j$(nproc)
-    sudo make install
-    # RUN AGAIN TO CATCH FIX ERRORS
-    sudo make -j$(nproc)
-    sudo make install
-    # IGNORE ERRORS AND CONTINUE
-
+   
+   
     ########################
     # BUILD WITH NO GUI
     cuda_version=$(get_cuda_version)
     file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
-    update_text_value $file "option(BUILD_GUI" "option(BUILD_GUI                  "Builds new GUI"                           OFF )"
-    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" "option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        ON)"
-
+    APPEND=0
+    update_text_value $file "option(BUILD_GUI" 'option(BUILD_GUI                  "Builds new GUI"                           OFF )' $APPEND
+    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" 'option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        ON)' $APPEND
+    cd /mnt/nepi_storage/tmp/Open3D/build
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
         -DCMAKE_BUILD_TYPE=Release \
@@ -556,12 +563,25 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     # RUN AND IGNORE ERRORS
     sudo make -j$(nproc)
-    sudo make install
-    # RUN AGAIN TO TRY AND FIX ERRORS
-    sudo make -j$(nproc)
-    sudo make install
-    # IGNORE ERRORS AND CONTINUE
 
+    #########################
+    # REPEAT GUI AND HEADLESS MAKES Until BUILD WITH NO ERRORS
+    #######################################
+  
+    # MAKE INSTALLS
+    sudo make install
+    sudo make install-pip-package -j$(nproc)
+
+    # RUN TESTS
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    sudo python3 -c "from open3d.visualization import rendering"
+
+    cd /mnt/nepi_storage/tmp/Open3D/examples/python/Advanced
+    python headless_rendering.py
+
+
+    ##################################
+    # INSTALL PYTHON BYNDINGS
     sudo make install-pip-package -j$(nproc)
 
     # RUN TESTS

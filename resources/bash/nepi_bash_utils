@@ -2828,10 +2828,14 @@ function update_text_value(){
   FILE=$1
   KEY=$2
   UPDATE=$3
+  APPEND=$4
+  if [[ -z $APPEND ]]; then
+    APPEND=1
+  fi
   if [ -f "$FILE" ]; then
     if grep -q "$KEY" "$FILE"; then
       sed -i "/^$KEY/c\\$UPDATE" "$FILE"
-    else
+    elif [[ $APPEND -eq 1 ]]; then
       echo -e "$UPDATE" | sudo tee -a $FILE
     fi
   else
