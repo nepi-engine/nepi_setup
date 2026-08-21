@@ -461,11 +461,33 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     # Just run once, then use the source and deactivate to enter/exit venv
 
     cd /mnt/nepi_storage/tmp
-
-    sudo python3 -m pip uninstall open3d
-
     python3.8 -m venv open3d_venv
 
+ 
+    ##########
+    # c)
+
+    # USE 18.0 Commit
+    git clone --branch v0.18.0 --depth 1 https://github.com/intel-isl/Open3D
+    #git clone --recursive https://github.com/intel-isl/Open3D
+    cd /mnt/nepi_storage/tmp/Open3D
+    git submodule update --init --recursive
+    mkdir build
+
+
+    ##########
+    # # d)Edit the CMakeLists.txt 
+    # line 328. Change "find_package(Python3 3.6" line to
+    # find_package(Python3 X.X EXACT COMPONENTS
+
+    python_version=$(get_python_version)
+    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
+    cp $file ${file}.bak
+    update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
+
+    ##########
+    # e) Build Open3D cpp and python modules
+    sudo python3 -m pip uninstall open3d
     cd /mnt/nepi_storage/tmp
     source open3d_venv/bin/activate
     
@@ -483,28 +505,6 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     sudo apt-get install libx11-dev libosmesa6-dev -y
     
     sudo python3 -m pip install pybind11-stubgen
-    ##########
-    # c)
-
-    git clone --recursive https://github.com/intel-isl/Open3D
-    cd /mnt/nepi_storage/tmp/Open3D
-    git submodule update --init --recursive
-    mkdir build
-
-
-    ##########
-    # # d)Edit the CMakeLists.txt 
-    # line 396. Change "find_package(Python3 3.6" line to
-    # find_package(Python3 X.X EXACT COMPONENTS
-
-    python_version=$(get_python_version)
-    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
-    cp $file ${file}.bak
-    update_text_value $file "find_package(Python3" "find_package(Python3 ${python_version} EXACT COMPONENTS"
-
-    ##########
-    # e) Build Open3D cpp and python modules
-
 
     cd /mnt/nepi_storage/tmp/Open3D
     util/install_deps_ubuntu.sh
@@ -799,26 +799,11 @@ fi
 # sudo python${NEPI_PYTHON} -m pip uninstall torchvision
 # python3 -m pip uninstall torchvision
 
-# python3 -m pip uninstall setuptools
-# sudo python${NEPI_PYTHON} -m pip uninstall setuptools
-# sudo python${NEPI_PYTHON} -m pip install setuptools==49.4.0
-# sudo python${NEPI_PYTHON} -c "import setuptools; print(setuptools.__version__)"
-
 
 # # uninstall old version if present
 # sudo python${NEPI_PYTHON} -m pip uninstall typing
 # python3 -m pip uninstall typing
 
-
-
-# # Switch to CUDA 11.4 during install
-# #MAYBE? Move cuda-11.8 folder somewhere during install
-# CUDA_HOME=/usr/local/cuda-11.4
-# export CUDA_PATH=${CUDA_HOME} 
-# export CUDA_HOME=${CUDA_HOME} 
-# export CUPY_NVCC_GENERATE_CODE=current
-# export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${CUDA_HOME}/targets/aarch64-linux/lib:$LD_LIBRARY_PATH
-# export PATH=:${CUDA_HOME}/bin:${PATH}
 
 # ####### Install Torchvision
 
@@ -845,6 +830,8 @@ fi
 # for torch 2.0
 # wget https://github.com/pytorch/vision/archive/refs/tags/v0.16.2.tar.gz
 
+# for torch 2.4
+# wget https://github.com/pytorch/vision/archive/refs/tags/v0.19.1.tar.gz
 
 # c. copy to your /mnt/nepi_storage/tmp/ folder and unzip 
 # connect NEPI to internet
@@ -854,6 +841,11 @@ fi
 # sudo apt-get install libjpeg-dev zlib1g-dev libpython3-dev libopenblas-dev libavcodec-dev libavformat-dev libswscale-dev
 # cd /mnt/nepi_storage/tmp/
 
+cd /mnt/nepi_storage/tmp
+python3.8 -m venv torchv_venv
+source torchv_venv/bin/activate
+sudo python${NEPI_PYTHON} -m pip install setuptools==49.4.0
+
 # Example
 # sudo chmod +x v0.14.0.tar.gz
 # tar -xvzf v0.14.0.tar.gz
@@ -862,13 +854,21 @@ fi
 # export BUILD_VERSION=0.14.0
 # sudo python${NEPI_PYTHON} setup.py install
 
-# tar -xvzf vision-0.16.2.tar.gz
-# sudo chown -R nepi:nepi vision-0.16.2
+# sudo chmod +x v0.16.2.tar.gz
+# tar -xvzf v0.16.2.tar.gz
 # cd vision-0.16.2
 # export BUILD_VERSION=0.16.2
 # sudo python${NEPI_PYTHON} setup.py install
 
 
+sudo chmod +x v0.19.1.tar.gz
+tar -xvzf v0.19.1.tar.gz
+sudo chown -R nepi:nepi vision-0.19.1
+cd vision-0.19.1
+export BUILD_VERSION=0.19.1
+sudo python${NEPI_PYTHON} setup.py install
+
+deactivate
 # #Check Installed
 # sudo python${NEPI_PYTHON} -c "import torchvision; print(torchvision.__version__)"
 
