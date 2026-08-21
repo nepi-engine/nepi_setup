@@ -324,18 +324,50 @@ CUDA_ARCH="${cur_cuda_version%%.*}"
 sudo -H python${NEPI_PYTHON} -m pip install cupy-cuda${CUDA_ARCH}x
 
 
+    ##########
+    # a) CHECK Cuda Min version 11.5
+
+    cuda_req=11.5
+    cuda_cur=$(get_cuda_version)
+    if awk "BEGIN {exit !($cuda_cur < $cuda_req)}"; then
+        
+        # CUDA 11.5.2 from
+        # https://developer.download.nvidia.com/compute/cuda/opensource/
+
+        cd /mnt/nepi_storage/tmp
+        
+
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
+        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        wget https://developer.download.nvidia.com/compute/cuda/11.5.2/local_installers/cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
+        sudo dpkg -i cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
+        sudo apt-key add /var/cuda-repo-ubuntu2004-11-5-local/7fa2af80.pub
+        sudo apt-get update
+        sudo apt-get -y install cuda
+        sudo update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.5 1150
+        
+        get_cuda_version
+        file="/home/nepi/.nepi_bash_utils"
+        sed -i 's/11.4/11.5/g' $file
+        sbrc
+        get_cuda_version
+        
+        sudo rm -r /usr/local/cuda-${cuda_cur}
+    fi
+
+
 
 # #################################
 # # Install open3d with cuda support
 # ##################################
 
-echo "######################################"
-echo 'Installing CUPY'
-echo "######################################"
+# echo "######################################"
+# echo 'Installing CUPY'
+# echo "######################################"
 
-cuda_ver=$(get_cuda_version)
-cupy_ver=${cuda_ver%%.*}
-sudo pip install cupy-cuda${cupy_ver}x
+# cuda_ver=$(get_cuda_version)
+# cupy_ver=${cuda_ver%%.*}
+# sudo pip install cupy-cuda${cupy_ver}x
 
 
 # #################################
@@ -351,6 +383,11 @@ echo "######################################"
 
 
 if [[ ${NEPI_ARCH} == 'amd64' ]]; then
+
+    cuda_ver=$(get_cuda_version)
+    cupy_ver=${cuda_ver%%.*}
+    sudo pip install cupy-cuda${cupy_ver}x
+
     sudo pip3 install "cmake<4"
     cmake --version   # confirm it now shows 3.x
 
@@ -419,43 +456,6 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     # SSH INTO NEPI and STOP NEPI
     nepistop
 
-    ##########
-    # a) CHECK Cuda Min version 11.5
-
-    cuda_req=11.5
-    cuda_cur=$(get_cuda_version)
-    if awk "BEGIN {exit !($cuda_cur < $cuda_req)}"; then
-        
-        # CUDA 11.5.2 from
-        # https://developer.download.nvidia.com/compute/cuda/opensource/
-
-        cd /mnt/nepi_storage/tmp
-        
-
-        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/sbsa/cuda-ubuntu2004.pin
-        sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-        wget https://developer.download.nvidia.com/compute/cuda/11.5.2/local_installers/cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
-        sudo dpkg -i cuda-repo-ubuntu2004-11-5-local_11.5.2-495.29.05-1_arm64.deb
-        sudo apt-key add /var/cuda-repo-ubuntu2004-11-5-local/7fa2af80.pub
-        sudo apt-get update
-        sudo apt-get -y install cuda
-        sudo update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.5 1150
-        
-        get_cuda_version
-        file="/home/nepi/.nepi_bash_utils"
-        sed -i 's/11.4/11.5/g' $file
-        sbrc
-        get_cuda_version
-        
-        sudo rm -r /usr/local/cuda-${cuda_cur}
-    fi
-
-    ######
-    #### RUN NEPISTART then COMMIT NEPI CONTAINER #####
-    ######
-    ##########
-
-
 
     # b) Setup python virtual environment. SSH into your NEPI device and type the following
     # Just run once, then use the source and deactivate to enter/exit venv
@@ -463,6 +463,9 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     cd /mnt/nepi_storage/tmp
     python3.8 -m venv open3d_venv
 
+    cuda_ver=$(get_cuda_version)
+    cupy_ver=${cuda_ver%%.*}
+    sudo pip install cupy-cuda${cupy_ver}x
  
     ##########
     # c)
@@ -510,14 +513,17 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     util/install_deps_ubuntu.sh
 
 
+    ###########################################
+    #
+    #
+    # FIX/UPDATE CMAKE Min in all CMakelist.txt files
+    #
+    #
+    ##########################################
 
     #######################################
     # BUILD WITH GUI (WILL FAIL AT SOME POINT IF IN CONTAINER WITH NO DISPLAY)
     cuda_version=$(get_cuda_version)
-    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
-    APPEND=0
-    update_text_value $file "option(BUILD_GUI" 'option(BUILD_GUI                  "Builds new GUI"                           ON )' $APPEND
-    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" 'option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        OFF)' $APPEND
     cd /mnt/nepi_storage/tmp/Open3D/build
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
@@ -537,14 +543,16 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     # RERUN UNTIL COMPLETES WITH NO ERRORS
     sudo make -j$(nproc)
    
+    ##################################
+    # INSTALL PYTHON BYNDINGS
+    sudo make install-pip-package -j$(nproc)
+
+    # RUN TESTS
+    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
    
     ########################
     # BUILD WITH NO GUI
     cuda_version=$(get_cuda_version)
-    file=/mnt/nepi_storage/tmp/Open3D/CMakeLists.txt
-    APPEND=0
-    update_text_value $file "option(BUILD_GUI" 'option(BUILD_GUI                  "Builds new GUI"                           OFF )' $APPEND
-    update_text_value $file "option(ENABLE_HEADLESS_RENDERING" 'option(ENABLE_HEADLESS_RENDERING  "Use OSMesa for headless rendering"        ON)' $APPEND
     cd /mnt/nepi_storage/tmp/Open3D/build
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
         -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
@@ -563,21 +571,6 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
 
     # RUN AND IGNORE ERRORS
     sudo make -j$(nproc)
-
-    #########################
-    # REPEAT GUI AND HEADLESS MAKES Until BUILD WITH NO ERRORS
-    #######################################
-  
-    # MAKE INSTALLS
-    sudo make install
-    sudo make install-pip-package -j$(nproc)
-
-    # RUN TESTS
-    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
-    sudo python3 -c "from open3d.visualization import rendering"
-
-    cd /mnt/nepi_storage/tmp/Open3D/examples/python/Advanced
-    python headless_rendering.py
 
 
     ##################################
@@ -841,10 +834,10 @@ fi
 # sudo apt-get install libjpeg-dev zlib1g-dev libpython3-dev libopenblas-dev libavcodec-dev libavformat-dev libswscale-dev
 # cd /mnt/nepi_storage/tmp/
 
-cd /mnt/nepi_storage/tmp
-python3.8 -m venv torchv_venv
-source torchv_venv/bin/activate
-sudo python${NEPI_PYTHON} -m pip install setuptools==49.4.0
+# cd /mnt/nepi_storage/tmp
+# python3.8 -m venv torchv_venv
+# source torchv_venv/bin/activate
+# sudo python${NEPI_PYTHON} -m pip install setuptools==49.4.0
 
 # Example
 # sudo chmod +x v0.14.0.tar.gz
@@ -861,15 +854,15 @@ sudo python${NEPI_PYTHON} -m pip install setuptools==49.4.0
 # sudo python${NEPI_PYTHON} setup.py install
 
 
-sudo chmod +x v0.19.1.tar.gz
-tar -xvzf v0.19.1.tar.gz
-sudo chown -R nepi:nepi vision-0.19.1
-cd vision-0.19.1
-export BUILD_VERSION=0.19.1
-sudo python${NEPI_PYTHON} setup.py install
+# sudo chmod +x v0.19.1.tar.gz
+# tar -xvzf v0.19.1.tar.gz
+# sudo chown -R nepi:nepi vision-0.19.1
+# cd vision-0.19.1
+# export BUILD_VERSION=0.19.1
+# sudo python${NEPI_PYTHON} setup.py install
 
-deactivate
-# #Check Installed
+# deactivate
+# # #Check Installed
 # sudo python${NEPI_PYTHON} -c "import torchvision; print(torchvision.__version__)"
 
 
