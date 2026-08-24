@@ -1966,7 +1966,7 @@ function netconnect_wifi() {
     ##############
     wifi_list=$(netget_wifi_networks)
 
-    if [[ -z wifi_list ]]; then
+    if [[ -z $wifi_list ]]; then
       echo "No Available WiFi Networks"
       return 1
     fi
@@ -1985,7 +1985,7 @@ function netconnect_wifi() {
 
     echo "Selected Network ${wifi_ssid}"
 
-    if [[ -z wifi_ssid ]]; then
+    if [[ -z $wifi_ssid ]]; then
       echo "WiFi SSID empty"
       return 1
     fi
@@ -2026,7 +2026,7 @@ function netconnect_wifi() {
         wifi_hw=$NEPI_WIFI_INTERFACE
       else
         wifis=$(netlist_wifi)
-        if [[ -n wifis ]]; then
+        if [[ -n $wifis ]]; then
           first_line="${wifis%%$'\n'*}"
           read -r first_word _ <<< "$first_line"
           wifi_hw=$first_word
@@ -2067,17 +2067,39 @@ function netconnect_wifi() {
         sleep 1
       fi
       #sudo nmcli connection delete "$wifi_ssid" 2> /dev/null
-      echo "Connecting to WiFi SSID ${wifi_ssid} with password ${wifi_pw} on ${wifi_hw}"
-      if sudo nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_pw" ifname $wifi_hw; then        
-        sleep 3
-        # Reset Network
-        nnet
-        sleep 1
-        ndhcp 2> /dev/null
-        echo $wifi_ssid
+
+     
+      wifi_sec=$(sudo nmcli -t -f SSID,SECURITY device wifi list ifname $wifi_hw --rescan yes | grep -F -m1 "${wifi_ssid}:")
+      wifi_sec="${wifi_sec##*:}"
+      if [[ "$wifi_sec" == *"WPA3"* || "$wifi_sec" == *"SAE"* ]]; then
+        wifi_key_mgmt=sae
       else
-       return 2
+        wifi_key_mgmt=wpa-psk
       fi
+
+      echo "Connecting to WiFi SSID ${wifi_ssid} on ${wifi_hw} using ${wifi_key_mgmt}"
+      sudo nmcli connection delete "$wifi_ssid" 2> /dev/null
+      if ! sudo nmcli connection add type wifi con-name "$wifi_ssid" ifname $wifi_hw ssid "$wifi_ssid" \
+              -- wifi-sec.key-mgmt $wifi_key_mgmt wifi-sec.psk "$wifi_pw" > /dev/null; then
+        echo "Failed to create WiFi connection for ${wifi_ssid}"
+        return 2
+      fi
+      if ! sudo nmcli --wait 30 connection up "$wifi_ssid" ifname $wifi_hw; then
+        echo "Failed to connect to WiFi SSID ${wifi_ssid}"
+        sudo nmcli connection delete "$wifi_ssid" 2> /dev/null
+        return 2
+      fi
+      ninet
+      # if sudo nmcli --wait 30 device wifi connect "$wifi_ssid" password "$wifi_pw" ifname $wifi_hw; then        
+      #   sleep 3
+      #   # Reset Network
+      #   nnet
+      #   sleep 1
+      #   ndhcp 2> /dev/null
+      #   echo $wifi_ssid
+      # else
+      #  return 2
+      # fi
      
     fi
     
