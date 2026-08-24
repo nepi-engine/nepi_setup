@@ -67,25 +67,29 @@ fi
 
 
 
-# ###############################
-# # Load NEPI Config File
-# DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
-# if [[ -f "$NEPI_CONFIG_LOAD_FILE" ]]; then
-#     echo "Running System Config Load Script: ${DOCKER_CONFIG_LOAD_FILE}"
-#     source ${DOCKER_CONFIG_LOAD_FILE}
-#     if [ $? -eq 1 ]; then
-#         echo "Failed to load ${DOCKER_CONFIG_LOAD_FILE}"
-#     fi
-# else
-#     echo "Failed to find ${DOCKER_CONFIG_LOAD_FILE}"
-# fi
+
 
 ########################
 DOCKER_FOLDER=$(cd -P "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)
 DOCKER_CONFIG_FILE=${DOCKER_FOLDER}/nepi_docker_config.yaml
-DOCKER_CONFIG_FACTORY=${DOCKER_FOLDER}/nepi_docker_config.factory
+DOCKER_CONFIG_FACTORY=${DOCKER_FOLDER}/nepi_docker_config.blank
 DOCKER_CONFIG_TMP=${DOCKER_FOLDER}/nepi_docker_config.update
 echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
+
+
+###############################
+# Load NEPI Config File
+DOCKER_CONFIG_LOAD_FILE=${DOCKER_FOLDER}/load_docker_config.sh
+if [[ -f "$DOCKER_CONFIG_LOAD_FILE" ]]; then
+    echo "Running System Config Load Script: ${DOCKER_CONFIG_LOAD_FILE}"
+    source ${DOCKER_CONFIG_LOAD_FILE}
+    if [ $? -eq 1 ]; then
+        echo "Failed to load ${DOCKER_CONFIG_LOAD_FILE}"
+    fi
+else
+    echo "Failed to find ${DOCKER_CONFIG_LOAD_FILE}"
+fi
+
 # if [[ ! -f DOCKER_CONFIG_FILE ]]; then
 #     echo "Failed to Find Docker Config File: ${DOCKER_CONFIG_FILE}"
 # else
@@ -357,8 +361,8 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RUNNING_ID" $RUN_ID "${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_RUNNING_SIZE_GB" $RUN_SIZE_GB "${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_RUNNING_TIME" $RUN_TIME "${DOCKER_CONFIG_TMP}"
-        update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_TMP}"
-        update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_TMP}"
+        # update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_TMP}"
+        # update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_TMP}"
 
     else 
        
@@ -371,8 +375,8 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
         update_yaml_value "NEPI_RUNNING_ID" "unknown" "${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_RUNNING_SIZE_GB" 0 "${DOCKER_CONFIG_TMP}"
         update_yaml_value "NEPI_RUNNING_LAUNCH_TIME" "0:0:0" "${DOCKER_CONFIG_TMP}"
-        update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_TMP}"
-        update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_TMP}"
+        # update_yaml_value "NEPI_FS_RESTART" 0 "${DOCKER_CONFIG_TMP}"
+        # update_yaml_value "NEPI_RESTARTING" 0 "${DOCKER_CONFIG_TMP}"
 
     fi
 
@@ -432,6 +436,7 @@ echo "Looking for Docker Config File: ${DOCKER_CONFIG_FILE}"
     ###################
     # Clean Up
     #sync_yaml_files $DOCKER_CONFIG_FACTORY $DOCKER_CONFIG_TMP 
+    echo "Copying Temp File to ${DOCKER_CONFIG_FILE}"
     sudo cp $DOCKER_CONFIG_TMP $DOCKER_CONFIG_FILE 
     sudo rm $DOCKER_CONFIG_TMP
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE

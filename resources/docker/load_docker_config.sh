@@ -37,9 +37,10 @@ FACTORY_CONFIG_FILE=${CONFIG_FOLDER}/nepi_docker_config.blank
 
 #echo "Starting Load Script with config folder: " ${CONFIG_FOLDER}
 
-
+echo "Loading config file ${DOCKER_CONFIG_FILE}"
 if [[ ":$CONFIG_FOLDER:" != *":$SETUP_FOLDER:"* ]]; then
     sudo chown ${CONFIG_USER}:${CONFIG_USER} $DOCKER_CONFIG_FILE
+    echo "Cleaning config file ${DOCKER_CONFIG_FILE}"
     clean_yaml_file $DOCKER_CONFIG_FILE
     if [[ ! -f $BACKUP_FILE ]]; then
         cp $DOCKER_CONFIG_FILE $BACKUP_FILE
