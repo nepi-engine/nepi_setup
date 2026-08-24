@@ -87,6 +87,8 @@ else
             exit 0
         fi
 
+        load_yaml_file $DOCKER_CONFIG_FILE
+
         if [[ ${NEPI_RUNNING_FS} == 'unknown' ]]; then
             nepistart
             nepiupdate
@@ -97,10 +99,13 @@ else
             fi
         fi
 
+        load_yaml_file $DOCKER_CONFIG_FILE
 
         if [[ ${NEPI_RUNNING_FS} != 'unknown' ]]; then
 
             ########################
+            hub_tag=""
+            platform=""
             if is_valid_amd64; then
                 if [[ "$NEPI_RUNNING_TAG" == *"cuda"* ]]; then
                         hub_tag="latest-amd64-cuda"
@@ -125,9 +130,22 @@ else
                 platform=linux/arm64
             fi
 
+            alias_tag=$hub_tag
             got_tag=$1
-            if [[ -n $got_tag ]]; then
+            if [[ "$got_tag" == '--keep-tag' ]]; then
+                if [[ -z "$NEPI_RUNNING_TAG" || "$NEPI_RUNNING_TAG" == 'unknown' ]]; then
+                    echo "Cannot push with original tag: running image tag is unknown"
+                    return 1
+                fi
+                hub_tag=$NEPI_RUNNING_TAG
+            elif [[ -n $got_tag ]]; then
                 hub_tag=$got_tag
+            fi
+
+            if [[ -z "$hub_tag" ]]; then
+                echo "Could not determine a docker hub tag for this platform."
+                echo "Rerun with an explicit tag, eg: nepipush latest-myplatform"
+                return 1
             fi
 
             nepistop
@@ -135,6 +153,14 @@ else
             echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${hub_tag}"
             docker push ${docker_hub_account}/nepi:${hub_tag}
             sudo docker rmi ${docker_hub_account}/nepi:${hub_tag}
+
+            # Also push the moving platform alias when keeping the original tag
+            if [[ "$got_tag" == '--keep-tag' && -n "$alias_tag" && "$alias_tag" != "$hub_tag" ]]; then
+                sudo docker tag ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} ${docker_hub_account}/nepi:${alias_tag}
+                echo "Pushing ${NEPI_RUNNING_FS}:${NEPI_RUNNING_TAG} to docker hub tag ${alias_tag}"
+                docker push ${docker_hub_account}/nepi:${alias_tag}
+                sudo docker rmi ${docker_hub_account}/nepi:${alias_tag}
+            fi
             #cd $TMP
             #docker_file=$(pwd)/Dockerfile
             #if [[ -f $docker_file ]]; then sudo rm $docker_file; fi

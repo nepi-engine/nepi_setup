@@ -498,56 +498,55 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
     #sudo apt update && sudo apt install texinfo bison flex -y
     #sudo python3 -m pip install pybind11-stubgen
     sudo apt install build-essential -y
-    sudo ninja-build libx11-dev libxi-dev libxcomposite-dev libxxf86vm-dev -y
+    sudo apt install ninja-build libx11-dev libxi-dev libxcomposite-dev libxxf86vm-dev -y
     sudo apt install libgl1-mesa-dri libgl1-mesa-glx mesa-utils libosmesa6-dev -y
 
     cd /mnt/nepi_storage/tmp/Open3D
     util/install_deps_ubuntu.sh
 
+    ##########
+    # e.5) Pin CMake to 3.x -- Open3D 0.18.0 predates CMake 4 and its policy changes.
+    # Must be a system (sudo) install: `sudo cmake` below ignores the venv's PATH.
+    sudo python3 -m pip install "cmake<4"
+    sudo cmake --version        # must report 3.31.x -- check it under sudo, not bare
 
-    ###########################################
-    #
-    #
-    # FIX/UPDATE CMAKE Min in all CMakelist.txt files
-    #
-    #
-    ##########################################
 
-    #######################################
-    # BUILD WITH GUI (WILL FAIL AT SOME POINT IF IN CONTAINER WITH NO DISPLAY)
-    cuda_version=$(get_cuda_version)
-    cd /mnt/nepi_storage/tmp/Open3D/build
-    sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DBUILD_SHARED_LIBS=ON \
-        -DBUILD_CUDA_MODULE=ON \
-        -DBUILD_GUI=ON \
-        -DENABLE_HEADLESS_RENDERING=OFF \
-        -DUSE_SYSTEM_GLEW=OFF \
-        -DUSE_SYSTEM_GLFW=OFF \
-        -DBUILD_TENSORFLOW_OPS=OFF \
-        -DBUILD_PYTORCH_OPS=OFF \
-        -DBUILD_UNIT_TESTS=OFF \
-        -DPYTHON_EXECUTABLE=$(which python3) \
-        ..
 
-    # RERUN UNTIL COMPLETES WITH NO ERRORS
-    sudo make -j$(nproc)
+
+    # #######################################
+    # # BUILD WITH GUI (WILL FAIL AT SOME POINT IF IN CONTAINER WITH NO DISPLAY)
+    # cuda_version=$(get_cuda_version)
+    # cd /mnt/nepi_storage/tmp/Open3D/build
+    # sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
+    #     -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
+    #     -DCMAKE_BUILD_TYPE=Release \
+    #     -DBUILD_SHARED_LIBS=ON \
+    #     -DBUILD_CUDA_MODULE=ON \
+    #     -DBUILD_GUI=ON \
+    #     -DENABLE_HEADLESS_RENDERING=OFF \
+    #     -DUSE_SYSTEM_GLEW=OFF \
+    #     -DUSE_SYSTEM_GLFW=OFF \
+    #     -DBUILD_TENSORFLOW_OPS=OFF \
+    #     -DBUILD_PYTORCH_OPS=OFF \
+    #     -DBUILD_UNIT_TESTS=OFF \
+    #     -DPYTHON_EXECUTABLE=$(which python3) \
+    #     ..
+
+    # # RERUN UNTIL COMPLETES WITH NO ERRORS
+    # sudo make -j$(nproc)
    
-    ##################################
-    # INSTALL PYTHON BYNDINGS
-    sudo make install-pip-package -j$(nproc)
+    # ##################################
+    # # INSTALL PYTHON BYNDINGS
+    # sudo make install-pip-package -j$(nproc)
 
-    # RUN TESTS
-    sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
+    # # RUN TESTS
+    # sudo python3 -c "import open3d; from open3d._build_config import _build_config; print(_build_config)"
    
     ########################
     # BUILD WITH NO GUI
     cuda_version=$(get_cuda_version)
     cd /mnt/nepi_storage/tmp/Open3D/build
     sudo CUDACXX=/usr/local/cuda-${cuda_version}/bin/nvcc cmake \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_CUDA_MODULE=ON \
@@ -560,6 +559,47 @@ if [[ ${NEPI_ARCH} == 'arm64' || ${NEPI_ARCH} == 'jetson' ]]; then
         -DBUILD_UNIT_TESTS=OFF \
         -DPYTHON_EXECUTABLE=$(which python3) \
         ..
+
+        # -DCMAKE_POLICY_VERSION_MINIMUM=3.6 \
+
+    ###########################################
+    #
+    #
+    # FIX/UPDATE CMAKE Min in all CMakelist.txt files
+    #
+    #
+    # ./3rdparty/glew/CMakeLists.txt:cmake_minimum_required(VERSION 3.0.0)
+    # ./3rdparty/tinyfiledialogs/CMakeLists.txt:cmake_minimum_required(VERSION 3.0.0)
+    # ./3rdparty/mkl/0001-Allow-selecttion-of-static-dynamic-MSVC-runtime.patch: cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+    # ./3rdparty/glfw/CMakeLists.txt:cmake_minimum_required(VERSION 3.0.0)
+    # ./3rdparty/librealsense/libusb-CMakeLists.txt:cmake_minimum_required(VERSION 2.8.3)
+    # ./3rdparty/webrtc/CMakeLists.txt:cmake_minimum_required(VERSION 3.18)
+    # ./3rdparty/ippicv/CMakeLists.txt:cmake_minimum_required(VERSION 3.0)
+    # ./3rdparty/vtk/CMakeLists.txt:cmake_minimum_required(VERSION 3.19.2)
+
+    # ./build/_deps/ext_pybind11-src/docs/advanced/embedding.rst:    cmake_minimum_required(VERSION 3.5...3.26)
+    # ./build/_deps/ext_pybind11-src/docs/compiling.rst:    cmake_minimum_required(VERSION 3.5...3.26)
+    # ./build/_deps/ext_pybind11-src/docs/compiling.rst:    cmake_minimum_required(VERSION 3.4...3.18)
+    # ./build/_deps/ext_pybind11-src/docs/compiling.rst:    cmake_minimum_required(VERSION 3.15...3.22)
+    # ./build/_deps/ext_pybind11-src/docs/compiling.rst:    cmake_minimum_required(VERSION 3.5...3.26)
+    # ./build/_deps/ext_pybind11-src/docs/compiling.rst:    cmake_minimum_required(VERSION 3.5...3.26)
+    # ./build/_deps/ext_pybind11-src/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    #     if(${CMAKE_VERSION} VERSION_LESS 3.26)
+    #     # The CMake required
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/installed_embed/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/subdirectory_embed/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/installed_function/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/installed_target/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/subdirectory_function/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/test_cmake_build/subdirectory_target/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+    # ./build/_deps/ext_pybind11-src/tests/CMakeLists.txt:# The `cmake_minimum_required(VERSION 3.5...3.26)` syntax does not work with
+
+    # ./cmake/ispc_isas/CMakeLists.txt:cmake_minimum_required(VERSION 3.19.2)
+    # ./CMakeLists.txt:cmake_minimum_required(VERSION 3.20)
+    # ./CMakeLists.txt.bak:cmake_minimum_required(VERSION 3.20)
+
+
+    ##########################################
 
     # RUN AND IGNORE ERRORS
     sudo make -j$(nproc)
