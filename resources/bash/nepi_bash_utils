@@ -1715,11 +1715,14 @@ function netdelete() {
 
       if systemctl is-active --quiet NetworkManager; then
 
-          echo "Deleting Network ${selected_net}"
+          connection_name=$(netget_name $selected_net)
+          if [[ -n $connection_name ]]; then
+            echo "Deleting Connection ${connection_name} on ${selected_net}"
 
-          cmd='sudo nmcli connection delete "'${selected_net}'"'
-          #echo $cmd
-          eval "$cmd"     
+            cmd='sudo nmcli connection delete "'${connection_name}'"'
+            #echo $cmd
+            eval "$cmd"     
+          fi
 
       fi
   fi
