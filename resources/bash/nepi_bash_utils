@@ -4237,6 +4237,15 @@ if [ 1 ]; then # [[ -z "$HAS_ROS" ]]; then
     rostopic list
     }
 
+       # Function to listen to topic
+    function itopic(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rostopic info "$@" 
+    }
+
     # Function to listen to topic
     function etopic(){
     if [ "$NEEDS_ROS" -eq 1 ]; then
@@ -4244,6 +4253,15 @@ if [ 1 ]; then # [[ -z "$HAS_ROS" ]]; then
       wait
     fi
     rostopic echo "$@" 
+    }
+
+        # Function to listen to topic
+    function htopic(){
+    if [ "$NEEDS_ROS" -eq 1 ]; then
+      sleep 1 & sros
+      wait
+    fi
+    rostopic hz "$@" 
     }
 
     # Function to search for service containing string
@@ -4281,7 +4299,9 @@ sros = source ros bash setup
 snros = source nepi ros bash setup
 ltopics = List all active topics
 ftopic = Find topics containing provided string
-etopic = Echo to provided topic
+itopic = Info for provided topic
+etopic = Echo provided topic
+htopic = Hz for provided topic
 lservices = List all active services
 fservice = Find services containing provided string
 cservice = Call service"
