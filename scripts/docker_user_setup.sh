@@ -141,7 +141,7 @@ echo ""
 if id -u "$CONFIG_USER" >/dev/null 2>&1; then
     echo "User $CONFIG_USER exists."
     
-else
+elif [[ $LITE_INSTALL == 0 ]]; then
     echo "User $CONFIG_USER does not exist, creating"
     #sudo useradd -m -s /bin/bash -p "$(openssl passwd -1 ${CONFIG_USER_PW})" ${CONFIG_USER}
     #sudo useradd $CONFIG_USER -s /bin/bash -g sudo -
