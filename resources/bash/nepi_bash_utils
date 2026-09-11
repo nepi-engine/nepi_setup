@@ -2665,6 +2665,9 @@ server ${ntp_ip} iburst minpoll 2"
 function check_password() {
     local username=$1
     local pcheck=$2
+    if [[ "$pcheck" == 'encrypted' ]]; then
+        return 1
+    fi
     echo "$pcheck" | su -c true "$username" >/dev/null 2>&1
     local error=$?
     if [[ $error -eq 0 ]]; then

@@ -154,9 +154,9 @@ if [[ -z $NEPI_VPN_ENABLED ]]; then
 fi
 
 NEPI_USER_CONFIGS=(
-# NEPI_USER_PW \
-# NEPI_HOST_PW \
-# NEPI_ADMIN_PW \
+NEPI_USER_PW \
+NEPI_HOST_PW \
+NEPI_ADMIN_PW \
 NEPI_STATIC_IP_INTERFACE \
 NEPI_DEVICE_ID \
 NEPI_DEVICE_MD \
@@ -189,9 +189,9 @@ function update_current_config() {
         export NEPI_NTP_IP='NONE'
     fi
 
-    # CURRENT_NEPI_USER_PW="$NEPI_USER_PW"
-    # CURRENT_NEPI_HOST_PW="$NEPI_HOST_PW"
-    # CURRENT_NEPI_ADMIN_PW="$NEPI_ADMIN_PW"
+    CURRENT_NEPI_USER_PW="$NEPI_USER_PW"
+    CURRENT_NEPI_HOST_PW="$NEPI_HOST_PW"
+    CURRENT_NEPI_ADMIN_PW="$NEPI_ADMIN_PW"
     CURRENT_NEPI_DEVICE_ID="$NEPI_DEVICE_ID"
     CURRENT_NEPI_DEVICE_MD="$NEPI_DEVICE_MD"
     CURRENT_NEPI_DEVICE_SN="$NEPI_DEVICE_SN"
@@ -239,9 +239,9 @@ function print_current_config(){
     echo "######################"
     echo "Current Settings"
     echo "######################"
-    # echo "NEPI_USER_PW: ${CURRENT_NEPI_USER_PW}"
-    # echo "NEPI_HOST_PW: ${CURRENT_NEPI_HOST_PW}"
-    # echo "NEPI_ADMIN_PW: ${CURRENT_NEPI_ADMIN_PW}"
+    echo "NEPI_USER_PW: ${CURRENT_NEPI_USER_PW}"
+    echo "NEPI_HOST_PW: ${CURRENT_NEPI_HOST_PW}"
+    echo "NEPI_ADMIN_PW: ${CURRENT_NEPI_ADMIN_PW}"
     echo "NEPI_DEVICE_ID: ${CURRENT_NEPI_DEVICE_ID}"
     echo "NEPI_DEVICE_MD: ${CURRENT_NEPI_DEVICE_MD}"
     echo "NEPI_DEVICE_SN: ${CURRENT_NEPI_DEVICE_SN}"
@@ -264,9 +264,10 @@ function print_current_config(){
 
 function udpate_config_file(){
     echo "Updating nepi system config values in file ${SYSTEM_SYS_CONFIG_FILE}"
-    # update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_SYS_CONFIG_FILE
-    # update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
-    # update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
+    echo ""
+    update_yaml_value "NEPI_USER_PW" $CURRENT_NEPI_USER_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HOST_PW" $CURRENT_NEPI_HOST_PW $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ADMIN_PW" $CURRENT_NEPI_ADMIN_PW $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_ID" $CURRENT_NEPI_DEVICE_ID $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_MD" $CURRENT_NEPI_DEVICE_MD $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_DEVICE_SN" $CURRENT_NEPI_DEVICE_SN $SYSTEM_SYS_CONFIG_FILE
@@ -498,7 +499,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
 
         echo ""
         PS3=$'\n'"Please enter your choice by NUMBER: "
-        options=(   "VIEW ALL SETTINGS" \
+        options=(   "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                             "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
                             "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
@@ -519,6 +520,47 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 print_yaml_file $SYSTEM_SYS_CONFIG_FILE
                                 break # Exit the select statement, re-display menu
                                 ;;
+                            "Update NEPI_USER_PW")
+                                read -p $'\n'"Enter a new password for 'nepi' user: " USER_INPUT
+                                if [[ "$USER_INPUT" == '' ]]; then
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                elif is_valid_pw "$USER_INPUT"; then
+                                    CURRENT_NEPI_USER_PW=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                
+                                else
+                                    echo "Not A Valid Password"
+                                fi           
+
+                            ;;
+                            "Update NEPI_HOST_PW")
+                                read -p $'\n'"Enter a new password for 'nepihost' user: " USER_INPUT
+                                if [[ "$USER_INPUT" == '' ]]; then
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                elif is_valid_pw "$USER_INPUT"; then
+                                    CURRENT_NEPI_HOST_PW=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                else
+                                    echo "Not A Valid Password"
+                                fi           
+                            ;;
+                            "Update NEPI_ADMIN_PW")
+                                read -p $'\n'"Enter a new password for 'nepiadmin' user: " USER_INPUT
+                                if [[ "$USER_INPUT" == '' ]]; then
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                elif is_valid_pw "$USER_INPUT"; then
+                                    CURRENT_NEPI_HOST_PW=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                else
+                                    echo "Not A Valid Password"
+                                fi           
+                            ;;
                             "Update NEPI_DEVICE_ID")
                                 read -p $'\n'"Enter a new Device ID Name: " USER_INPUT
                                 if [[ "$USER_INPUT" == '' ]]; then
@@ -765,6 +807,9 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         update_yaml_value "NEPI_VPN_VERSION" $vpn_version $SYSTEM_SYS_CONFIG_FILE
     fi
 
+
+    echo "Running NEPI System Config with Config Settings:"
+    echo ""
     print_yaml_file $SYSTEM_SYS_CONFIG_FILE
 
 
@@ -830,7 +875,11 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         
     fi
 
-
+    ####################
+    echo "Setting nepi user Passwords to Encrypted in config file "
+    update_yaml_value "NEPI_USER_PW" 'encrypted' $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_HOST_PW" 'encrypted' $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ADMIN_PW" 'encrypted' $SYSTEM_SYS_CONFIG_FILE
 
 
     echo ""
