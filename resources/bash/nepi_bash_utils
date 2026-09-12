@@ -5378,18 +5378,19 @@ function pushr(){
   git commit -m "*$@*" >/dev/null 2>&1
 
   if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
-      git push origin HEAD:develop
+      git checkout develop
   else
-      git push origin HEAD:main
+      git checkout  main
       #git checkout main
   fi
 
-  git push --dry-run >/dev/null 2>&1
-  if [[ ! $? -eq 0 ]]; then
-    echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
-    echo -e "${WHITE}"
-    return 1
-  fi
+
+  # git push --dry-run >/dev/null 2>&1
+  # if [[ ! $? -eq 0 ]]; then
+  #   echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
+  #   echo -e "${WHITE}"
+  #   return 1
+  # fi
 
   find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
@@ -5577,38 +5578,51 @@ function pulln {
       echo -e "${RED}NEPI Repo Folder not found at: ${repo_folder}"
       echo -e "${WHITE}"
       return 1
-    else
+    fi
 
+    success=0
+    cd "${repo_folder}/nepi_setup"
+    pullr
+    if [[ $? -eq 0 ]]; then
+      shopt -s nullglob
+      for dir in "$repo_folder"/src/*/ ; do
+          #echo "Processing Repo: $dir"
+          cd $dir
+          pullr
+      done
+      cd $repo_folder
+      pullr
 
-      git add --all >/dev/null 2>&1
-      git commit -m "*$@*" >/dev/null 2>&1
-
-      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
-          git push origin HEAD:develop
-      else
-          git push origin HEAD:main
-          #git checkout main
-      fi
-
-      git push --dry-run >/dev/null 2>&1
       if [[ $? -eq 0 ]]; then
-          # git pull --recurse-submodules
-          # git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
-          # #git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push && git checkout main && git push && git pull origin main" #2> /dev/null
-          pushn
-      else
-          pullrc
-      fi
-          
-      if [[ $? -eq 0 ]]; then
+        success=1
         ubrc >/dev/null 2>&1
-        echo -e "${GREEN}NEPI Pull Successfull"
-        echo -e "${WHITE}"
-      else
-        echo -e "${RED}NEPI Pull Failed"
-        echo -e "${WHITE}"
       fi
     fi
+ 
+
+      # git add --all >/dev/null 2>&1
+      # git commit -m "*$@*" >/dev/null 2>&1
+
+      # git push --dry-run >/dev/null 2>&1
+      # if [[ $? -eq 0 ]]; then
+      #     # git pull --recurse-submodules
+      #     # git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
+      #     # #git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push && git checkout main && git push && git pull origin main" #2> /dev/null
+      #     pushn
+      # else
+      #     pullrc
+      # fi
+          
+      
+    if [[ $success -eq 1 ]]; then
+      ubrc >/dev/null 2>&1
+      echo -e "${GREEN}NEPI Pull Successfull"
+      echo -e "${WHITE}"
+    else
+      echo -e "${RED}NEPI Pull Failed"
+      echo -e "${WHITE}"
+    fi
+
 }
 export -f pulln
 
@@ -5653,7 +5667,6 @@ function pullnc {
 
 }
 export -f pullnc
-
 
 ## NEPI deploy complete
 function nepisetup_remote() {
