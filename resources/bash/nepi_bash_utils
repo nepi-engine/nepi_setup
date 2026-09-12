@@ -5540,8 +5540,9 @@ function pulln {
               ssh -T git@github.com >/dev/null 2>&1
               if [[ "$?" -lt 2 ]]; then
                   git pull --recurse-submodules
-                  git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
-                  #git submodule foreach --recursive "git checkout main && git add --all && git commit -m "*$@*" &&  git push  && git push && git pull origin main" #2> /dev/null
+                  #git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
+                  git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push && git checkout main && git push && git pull origin main" #2> /dev/null
+                  git pushr
               else
                   git pull --recurse-submodules
                   git submodule foreach --recursive "git checkout main && git reset --hard HEAD && git clean -fd"
