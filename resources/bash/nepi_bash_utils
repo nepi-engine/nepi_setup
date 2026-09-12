@@ -5482,11 +5482,23 @@ function pullr {
 
   git push --dry-run >/dev/null 2>&1
   if [ $? -eq 0 ]; then
-    pushr
+    if [ -n "$(git status --porcelain)" ]; then
+      echo -e "${GREEN}Pushing Changes First"
+      echo -e "${WHITE}"
+      pushr
+    else
+      git pull
+    fi
   else
     git pull
   fi  
-
+  if [[ $? -eq 0 ]]; then
+    echo -e "${GREEN}Pull Successfull"
+    echo -e "${WHITE}"
+  else
+    echo -e "${RED}Pull Failed"
+    echo -e "${WHITE}"
+  fi
    
 }
 export -f pullr
