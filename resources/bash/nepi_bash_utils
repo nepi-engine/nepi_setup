@@ -5404,14 +5404,13 @@ function pushr(){
   if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
     #echo -e "${GREEN}Clearing __pycache__ folders"
     echo -e "${WHITE}#######################"
-    git add --all
-    git commit -m "*$@*" 
+    echo -e "${WHITE}Pushing to repo ${PWD##*/}"
+    git add --all >/dev/null 2>&1
+    git commit -m "*$@*"  >/dev/null 2>&1
     find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
-    if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-        echo -e "${WHITE}Pushing to repo ${PWD##*/}"
+    if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
         git push origin HEAD:develop
     else
-        echo -e "${WHITE}Pushing to repo ${PWD##*/}"
         git push origin HEAD:main
         #git checkout main
     fi
