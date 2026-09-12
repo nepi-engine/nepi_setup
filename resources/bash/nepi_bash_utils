@@ -5480,18 +5480,21 @@ function pullr {
     return 1
   fi
 
-  git push --dry-run >/dev/null 2>&1
-  if [ $? -eq 0 ]; then
-    if [ -n "$(git status --porcelain)" ]; then
-      echo -e "${GREEN}Pushing Changes First"
+  if [ -n "$(git status --porcelain)" ]; then
+    git push --dry-run >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      echo -e "${YELLOW}Pushing Uncommited Changes First"
       echo -e "${WHITE}"
       pushr
     else
-      git pull
+      echo -e "${RED}Repo Has Uncommited Changes. Pull Failed"
+      echo -e "${WHITE}"
+      return 1
     fi
   else
     git pull
-  fi  
+  fi
+  
   if [[ $? -eq 0 ]]; then
     echo -e "${GREEN}Pull Successfull"
     echo -e "${WHITE}"
