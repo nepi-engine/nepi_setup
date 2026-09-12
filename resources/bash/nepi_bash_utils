@@ -3607,7 +3607,8 @@ export -f clean_version_string
 
 function dev_version_string(){
   dstring=$(clean_version_string $1)
-  dstring=${dstring}-$(date +%Y%m%d-%H%M)
+  #dstring=${dstring}-$(date +%Y%m%d-%H%M)
+  dstring=${dstring}-$(date +%Y%m%d)
   echo $dstring
 }
 export -f dev_version_string
@@ -5432,17 +5433,25 @@ export -f pushn
 
 function pulln {
   if is_valid_internet ; then
-    repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
-    setup_folder=/home/${CONFIG_USER}/nepi_setup
 
-    cd $repo_folder
-    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-    if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-          git pull --recurse-submodules
-          git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+    ssh -T git@github.com >/dev/null 2>&1
+    if [[ "$?" -lt 2 ]]; then
+
+        repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
+        setup_folder=/home/${CONFIG_USER}/nepi_setup
+
+        cd $repo_folder
+        head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+        if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+          if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
+              git pull --recurse-submodules
+              git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+          fi
+          ubrc >/dev/null 2>&1
+        fi
       fi
-    fi
+  else
+    pullnc
   fi
 }
 export -f pulln
@@ -5455,13 +5464,16 @@ function pullnc {
     cd $repo_folder
     head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
     if [ "$?" -eq 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+    
       if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
           git submodule foreach --recursive "git reset --hard HEAD && git clean -fd"
           git submodule update --init --recursive --force
-          # git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+          git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
       fi
+      ubrc >/dev/null 2>&1
     fi
   fi
+
 }
 export -f pullnc
 
