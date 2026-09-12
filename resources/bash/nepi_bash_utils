@@ -5372,15 +5372,17 @@ function pushr(){
   echo -e "${WHITE}Pushing to repo ${PWD##*/}"
   echo -e "${WHITE}#######################"
 
+
+
+  git add --all >/dev/null 2>&1
+  git commit -m "*$@*" >/dev/null 2>&1
+
   if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
       git push origin HEAD:develop
   else
       git push origin HEAD:main
       #git checkout main
   fi
-
-  git add --all >/dev/null 2>&1
-  git commit -m "*$@*" >/dev/null 2>&1
 
   git push --dry-run >/dev/null 2>&1
   if [[ ! $? -eq 0 ]]; then
