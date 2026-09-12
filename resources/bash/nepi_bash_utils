@@ -5541,7 +5541,7 @@ function pulln {
               if [[ "$?" -lt 2 ]]; then
                   git pull --recurse-submodules
                   #git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
-                  git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push >/dev/null && git checkout main && git push && git pull origin main" 2> /dev/null
+                  git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push >/dev/null && git checkout main && git push && git pull origin main" #2> /dev/null
               else
                   git pull --recurse-submodules
                   git submodule foreach --recursive "git checkout main && git reset --hard HEAD && git clean -fd"
