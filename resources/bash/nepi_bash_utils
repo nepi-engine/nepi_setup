@@ -5414,6 +5414,7 @@ function pushr(){
 export -f pushr
 
 function pullr {
+  echo -e "${WHITE}Pulling repo ${PWD##*/}"
   if ! is_valid_internet >/dev/null 2>&1; then
     echo -e "${RED}Internet Not Connected"
     echo -e "${WHITE}"
