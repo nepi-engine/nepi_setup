@@ -5479,8 +5479,14 @@ function pullr {
     echo -e "${WHITE}"
     return 1
   fi
-  
-  git pull
+
+  git push --dry-run >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    pushr
+  else
+    git pull
+  fi  
+
    
 }
 export -f pullr
@@ -5530,6 +5536,9 @@ function pushn {
       echo -e "${WHITE}"
       return 1
     fi
+
+
+
 
     git push --dry-run >/dev/null 2>&1
     if [ ! $? -eq 0 ]; then
