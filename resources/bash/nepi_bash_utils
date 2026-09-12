@@ -5120,10 +5120,11 @@ function nepigithub {
                             NAME=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
 
                             echo 'Host github.com' | sudo tee -a $config_file
-                            echo '   AddKeysToAgent yes' | sudo tee -a $config_file
+                            echo '   HostName github.com' | sudo tee -a $config_file
+                            echo '   User git' | sudo tee -a $config_file
                             echo '   IdentityFile '${key_path} | sudo tee -a $config_file
+                            echo '   IdentitiesOnly yes' | sudo tee -a $config_file
                             echo ''
-
 
                         fi
 
@@ -5540,13 +5541,14 @@ function pulln {
               ssh -T git@github.com >/dev/null 2>&1
               if [[ "$?" -lt 2 ]]; then
                   git pull --recurse-submodules
-                  git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
-                  #git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push && git checkout main && git push && git pull origin main" #2> /dev/null
+                  #git submodule foreach --recursive "git checkout main && git push && git pull origin main" 2> /dev/null
+                  git submodule foreach --recursive "git add --all && git commit -m "*$@*" &&  git push && git checkout main && git push && git pull origin main" #2> /dev/null
               else
-                  git pull --recurse-submodules
-                  git submodule foreach --recursive "git checkout main && git reset --hard HEAD && git clean -fd"
-                  git submodule update --init --recursive --force
-                  #git submodule foreach --recursive "git checkout main && git pull origin main" 2> /dev/null
+                  echo "Pulling NEPI Clean"
+                  # git pull --recurse-submodules
+                  # git submodule foreach --recursive "git checkout main && git reset --hard HEAD && git clean -fd"
+                  # git submodule update --init --recursive --force
+
               fi
           fi
           ubrc >/dev/null 2>&1
