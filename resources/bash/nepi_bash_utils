@@ -5379,13 +5379,16 @@ function pushr(){
     fi
   fi
 
+
+  git add --all >/dev/null 2>&1
+  git commit -m "*$@*" >/dev/null 2>&1
+
+
   current_branch=$(git branch --show-current)
-  git status --porcelain
   repo_status=$(git status --porcelain)
   if [[ -n $repo_status || -z $current_branch ]]; then
 
-    git add --all >/dev/null 2>&1
-    git commit -m "*$@*" >/dev/null 2>&1
+
 
     
     if git symbolic-ref -q HEAD >/dev/null; then
