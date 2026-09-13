@@ -5547,7 +5547,10 @@ function pullr {
       fi
     fi
 
-    current_branch=$(git branch --show-current)
+  current_branch=$(git branch --show-current)
+  repo_status=$(git status --porcelain)
+  if [[ -n $repo_status || -z $current_branch ]]; then
+
     if git symbolic-ref -q HEAD >/dev/null; then
         current_branch=$(git branch --show-current)
     else
@@ -5566,7 +5569,6 @@ function pullr {
       return 1
     fi
 
-  if [ -n "$(git status --porcelain)" ]; then
     echo -e "${ORANGE}Repo Has Uncommited Changes"
     pushr 0 >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
@@ -5616,12 +5618,14 @@ function pushn {
 
     success=1
     cd "${repo_folder}/nepi_setup"
+    echo -e "${WHITE}#########"
     pushr 0
     if [[ $? -eq 0 ]]; then
       shopt -s nullglob
       for dir in "$repo_folder"/src/*/ ; do
           #echo "Processing Repo: $dir"
           cd $dir
+          echo -e "${WHITE}#########"
           pushr 0
           if [[ $? -ne 0 ]]; then
             success=0
@@ -5630,6 +5634,7 @@ function pushn {
       done
       if [[ $success -eq 1 ]]; then
         cd $repo_folder
+        echo -e "${WHITE}#########"
         pushr 0
         if [[ $? -ne 0 ]]; then
           success=0
@@ -5637,7 +5642,7 @@ function pushn {
       fi
     fi
   
-
+    echo -e "${WHITE}#######################"
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Push Successfull"
