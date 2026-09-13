@@ -5412,8 +5412,8 @@ function pushr(){
 
   find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
-  git pull --no-edit
-  if [ ! $? -eq 0 ]; then
+
+  if [ -n "$(git status --porcelain)" ]; then
     echo -e "${WHITE}Pushing Merged repo ${PWD##*/}"
     git push origin HEAD:$current_branch
     if [ ! $? -eq 0 ]; then
@@ -5427,9 +5427,9 @@ function pushr(){
       fi
     fi
   fi
-
   echo -e "${GREEN}Push Successfully"
   echo -e "${WHITE}"
+
 }
 export -f pushr
 
