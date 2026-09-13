@@ -5497,10 +5497,9 @@ function pullrc {
 
     if [[ $? -eq 0 ]]; then
       echo -e "${GREEN}Pull Successfull"
-      echo -e "${WHITE}"
     else
       echo -e "${RED}Pull Failed"
-      echo -e "${WHITE}"
+      return 1
     fi
 
 }
@@ -5563,17 +5562,14 @@ function pullr {
     fi
 
   if [ -n "$(git status --porcelain)" ]; then
-    pushr 0
+    echo -e "${ORANGE}Repo Has Uncommited Changes"
+    pushr 0 >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
-      echo -e "${ORANGE}Repo Has Uncommited Changes"
-      echo -e "${GREEN}Pushed Uncommited Changes First"
-      echo -e "${WHITE}"
+      echo -e "${GREEN}Pushed Uncommited Changes"
       git pull
     else
-      echo -e "${RED}Repo Has Uncommited Changes. Pull Failed"
-      echo -e "${WHITE}"
+      echo -e "${RED}Pull Failed"
       echo -e "${ORANGE} -- Call 'pullrc' to force pull of latest remote repo"
-      echo -e "${WHITE}"
       return 1
     fi
   else
@@ -5582,10 +5578,9 @@ function pullr {
 
   if [[ $? -eq 0 ]]; then
     echo -e "${GREEN}Pull Successfull"
-    echo -e "${WHITE}"
   else
     echo -e "${RED}Pull Failed"
-    echo -e "${WHITE}"
+    return 1
   fi
    
 }
@@ -5643,10 +5638,10 @@ function pushn {
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Push Successfull"
-      echo -e "${WHITE}"
+      echo -e "${WHITE}
     else
       echo -e "${RED}NEPI Push Failed"
-      echo -e "${WHITE}"
+      echo -e "${WHITE}
       return 1
     fi
 
@@ -5727,6 +5722,7 @@ function pulln {
     else
       echo -e "${RED}NEPI Pull Failed"
       echo -e "${WHITE}"
+      return 1
     fi
 
 }
@@ -5768,6 +5764,7 @@ function pullnc {
       else
         echo -e "${RED}NEPI Pull Failed"
         echo -e "${WHITE}"
+        return 1
       fi
     fi
 
