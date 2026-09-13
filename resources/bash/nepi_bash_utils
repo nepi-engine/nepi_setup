@@ -4341,6 +4341,7 @@ fi
 WHITE='\033[0;37m'
 GREEN='\033[0;32m'
 YELLOW='\033[33m'
+ORANGE='\033[0;33m'
 RED='\033[0;31m'
 
 alias nepihome="
@@ -5343,125 +5344,17 @@ function gitmain {
 
 
 function pushr(){
+
+  do_checks=$1
+  if [[ -z $do_checks ]]; then
+    do_checks=1
+  fi
+
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
 
-  if ! is_valid_internet >/dev/null 2>&1; then
-    echo -e "${RED}Internet Not Connected"
-    echo -e "${WHITE}"
-    return 1
-  fi
 
-  head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-  if [ "$?" -gt 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    echo -e "${RED}Not a Git Repo $(pwd)"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-  ssh -T git@github.com >/dev/null 2>&1
-  if [[ "$?" -gt 1 ]]; then
-    echo -e "${RED}Git SSH Credentials Failed"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-
-
-  #echo -e "${GREEN}Clearing __pycache__ folders"
-  echo -e "${WHITE}Pushing to repo ${PWD##*/}"
-  echo -e "${WHITE}#######################"
-
-
-
-  git add --all >/dev/null 2>&1
-  git commit -m "*$@*" >/dev/null 2>&1
-
-  if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
-      git checkout develop
-  else
-      git checkout  main
-      #git checkout main
-  fi
-
-
-  # git push --dry-run >/dev/null 2>&1
-  # if [[ ! $? -eq 0 ]]; then
-  #   echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
-  #   echo -e "${WHITE}"
-  #   return 1
-  # fi
-
-  find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
-
-  git pull --no-edit
-  if [ $? -eq 0 ]; then
-    echo -e "${WHITE}Pushing Merged repo ${PWD##*/}"
-    git push origin HEAD:main
-    if [ ! $? -eq 0 ]; then
-      echo -e "${WHITE}#######################"
-      echo -e "${RED}Push Failed"
-      echo -e "${WHITE}"
-      return 1 # Failed
-    fi
-  fi
-
-
-  echo -e "${WHITE}#######################"
-  echo -e "${GREEN}Push Successfully"
-  echo -e "${WHITE}"
-}
-export -f pushr
-
-function pullr {
-  echo -e "${WHITE}Pulling repo ${PWD##*/}"
-  if ! is_valid_internet >/dev/null 2>&1; then
-    echo -e "${RED}Internet Not Connected"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-  head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-  if [[ "$?" -gt 0 ]]; then #$(is_git_repo $PWD) -eq 1 ]; then
-    echo -e "${RED}Not a Git Repo $(pwd)"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-  ssh -T git@github.com >/dev/null 2>&1
-  if [[ "$?" -gt 1 ]]; then
-    echo -e "${RED}Git SSH Credentials Failed"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-  if [ -n "$(git status --porcelain)" ]; then
-    git push --dry-run >/dev/null 2>&1
-    if [[ ! $? -eq 0 ]]; then
-      echo -e "${YELLOW}Pushing Uncommited Changes First"
-      echo -e "${WHITE}"
-      pushr
-    else
-      echo -e "${RED}Repo Has Uncommited Changes. Pull Failed"
-      echo -e "${WHITE}"
-      return 1
-    fi
-  else
-    git pull
-  fi
-
-  if [[ $? -eq 0 ]]; then
-    echo -e "${GREEN}Pull Successfull"
-    echo -e "${WHITE}"
-  else
-    echo -e "${RED}Pull Failed"
-    echo -e "${WHITE}"
-  fi
-   
-}
-export -f pullr
-
-function pullrc {
+  if [[ $do_checks -eq 1 ]]; then
     if ! is_valid_internet >/dev/null 2>&1; then
       echo -e "${RED}Internet Not Connected"
       echo -e "${WHITE}"
@@ -5478,6 +5371,120 @@ function pullrc {
     ssh -T git@github.com >/dev/null 2>&1
     if [[ "$?" -gt 1 ]]; then
       echo -e "${RED}Git SSH Credentials Failed"
+      echo -e "${WHITE}"
+      return 1
+    fi
+  fi
+
+  #echo -e "${GREEN}Clearing __pycache__ folders"
+  echo -e "${WHITE}Pushing to repo ${PWD##*/}"
+  echo -e "${WHITE}#######################"
+
+
+
+  git add --all >/dev/null 2>&1
+  git commit -m "*$@*" >/dev/null 2>&1
+
+  current_branch=$(git branch --show-current)
+  if git symbolic-ref -q HEAD >/dev/null; then
+      current_branch=$(git branch --show-current)
+  else
+      #echo "HEAD is DETACHED!"
+      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+          git checkout develop
+      else
+          git checkout main
+      fi
+      current_branch=$(git branch --show-current)
+  fi
+
+  if [[ -z $current_branch ]]; then
+    echo -e "${RED}Git Repo not on branch. Pull Failed"
+    echo -e "${WHITE}"
+    return 1
+  fi 
+
+
+  # git push --dry-run >/dev/null 2>&1
+  # if [[ ! $? -eq 0 ]]; then
+  #   echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
+  #   echo -e "${WHITE}"
+  #   return 1
+  # fi
+
+  find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
+
+  git pull --no-edit
+  if [ $? -eq 0 ]; then
+    echo -e "${WHITE}Pushing Merged repo ${PWD##*/}"
+    git push origin HEAD:$current_branch
+    if [ ! $? -eq 0 ]; then
+      if [[ $do_checks -eq 1 ]]; then
+        echo -e "${WHITE}#######################"
+        echo -e "${RED}Push Failed"
+        echo -e "${WHITE}"
+        return 2 # Failed
+      else
+        pullrc 0
+        return $?
+      fi
+    fi
+  fi
+
+  echo -e "${WHITE}#######################"
+  echo -e "${GREEN}Push Successfully"
+  echo -e "${WHITE}"
+}
+export -f pushr
+
+function pullrc {
+
+    do_checks=$1
+    if [[ -z $do_checks ]]; then
+      do_checks=1
+    fi
+
+    cur_path=$(pwd)
+    cur_folder=${PWD##*/}
+
+
+    if [[ $do_checks -eq 1 ]]; then
+      if ! is_valid_internet >/dev/null 2>&1; then
+        echo -e "${RED}Internet Not Connected"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+      if [ "$?" -gt 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+        echo -e "${RED}Not a Git Repo $(pwd)"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      ssh -T git@github.com >/dev/null 2>&1
+      if [[ "$?" -gt 1 ]]; then
+        echo -e "${RED}Git SSH Credentials Failed"
+        echo -e "${WHITE}"
+        return 1
+      fi
+    fi
+
+    current_branch=$(git branch --show-current)
+    if git symbolic-ref -q HEAD >/dev/null; then
+        current_branch=$(git branch --show-current)
+    else
+        #echo "HEAD is DETACHED!"
+        if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+            git checkout develop
+        else
+            git checkout  main
+        fi
+        current_branch=$(git branch --show-current)
+    fi
+
+    if [[ -z $current_branch ]]; then
+      echo -e "${RED}Git Repo not on brach. Pull Failed"
       echo -e "${WHITE}"
       return 1
     fi
@@ -5502,6 +5509,91 @@ function pullrc {
 export -f pullrc
 
 
+
+function pullr {
+
+    do_checks=$1
+    if [[ -z $do_checks ]]; then
+      do_checks=1
+    fi
+
+    cur_path=$(pwd)
+    cur_folder=${PWD##*/}
+
+
+    if [[ $do_checks -eq 1 ]]; then
+      if ! is_valid_internet >/dev/null 2>&1; then
+        echo -e "${RED}Internet Not Connected"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+      if [ "$?" -gt 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+        echo -e "${RED}Not a Git Repo $(pwd)"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      ssh -T git@github.com >/dev/null 2>&1
+      if [[ "$?" -gt 1 ]]; then
+        echo -e "${RED}Git SSH Credentials Failed"
+        echo -e "${WHITE}"
+        return 1
+      fi
+    fi
+
+    current_branch=$(git branch --show-current)
+    if git symbolic-ref -q HEAD >/dev/null; then
+        current_branch=$(git branch --show-current)
+    else
+        #echo "HEAD is DETACHED!"
+        if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+            git checkout develop
+        else
+            git checkout  main
+        fi
+        current_branch=$(git branch --show-current)
+    fi
+
+    if [[ -z $current_branch ]]; then
+      echo -e "${RED}Git Repo not on brach. Pull Failed"
+      echo -e "${WHITE}"
+      return 1
+    fi
+
+
+
+  echo -e "${WHITE}Pulling repo ${PWD##*/}"
+  if [ -n "$(git status --porcelain)" ]; then
+    pushr 0 >/dev/null 2>&1
+    if [[ ! $? -eq 0 ]]; then
+      echo -e "${GREEN}Pushed Uncommited Changes First"
+      echo -e "${WHITE}"
+      git pull
+    else
+      echo -e "${RED}Repo Has Uncommited Changes. Pull Failed"
+      echo -e "${WHITE}"
+      echo -e "${ORANGE} -- Call 'pullrc' to force pull of latest remote repo"
+      echo -e "${WHITE}"
+      return 1
+    fi
+  else
+    git pull
+  fi
+
+  if [[ $? -eq 0 ]]; then
+    echo -e "${GREEN}Pull Successfull"
+    echo -e "${WHITE}"
+  else
+    echo -e "${RED}Pull Failed"
+    echo -e "${WHITE}"
+  fi
+   
+}
+export -f pullr
+
+
 function pushn {
     if ! is_valid_internet >/dev/null 2>&1; then
       echo -e "${RED}Internet Not Connected"
@@ -5518,39 +5610,46 @@ function pushn {
 
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     setup_folder=/home/${CONFIG_USER}/nepi_setup
-    
-    success=0
     cd $repo_folder      
     if [[ $? -gt 0 ]]; then
       echo -e "${RED}NEPI Repo Folder not found at: ${repo_folder}"
       echo -e "${WHITE}"
       return 1
-    else
+    fi
 
-      cd "${repo_folder}/nepi_setup"
-      pushr
-      if [[ $? -eq 0 ]]; then
-        shopt -s nullglob
-        for dir in "$repo_folder"/src/*/ ; do
-            #echo "Processing Repo: $dir"
-            cd $dir
-            pushr
-        done
+
+    success=1
+    cd "${repo_folder}/nepi_setup"
+    pushr 0
+    if [[ $? -eq 0 ]]; then
+      shopt -s nullglob
+      for dir in "$repo_folder"/src/*/ ; do
+          #echo "Processing Repo: $dir"
+          cd $dir
+          pushr 0
+          if [[ $? -ne 0 ]]; then
+            success=0
+            break
+          fi
+      done
+      if [[ $success -eq 1 ]]; then
         cd $repo_folder
-        pushr
-        if [[ $? -eq 0 ]]; then
-          success=1
-          ubrc >/dev/null 2>&1
+        pushr 0
+        if [[ $? -ne 0 ]]; then
+          success=0
         fi
       fi
     fi
+  
 
     if [[ $success -eq 1 ]]; then
-      echo -e "${GREEN}NEPI Pull Successfull"
+      ubrc >/dev/null 2>&1
+      echo -e "${GREEN}NEPI Push Successfull"
       echo -e "${WHITE}"
     else
-      echo -e "${RED}NEPI Pull Failed"
+      echo -e "${RED}NEPI Push Failed"
       echo -e "${WHITE}"
+      return 1
     fi
 
 }
@@ -5571,9 +5670,9 @@ function pulln {
       return 1
     fi
 
+
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     setup_folder=/home/${CONFIG_USER}/nepi_setup
-
     cd $repo_folder      
     if [[ $? -gt 0 ]]; then
       echo -e "${RED}NEPI Repo Folder not found at: ${repo_folder}"
@@ -5581,25 +5680,30 @@ function pulln {
       return 1
     fi
 
-    success=0
+
+    success=1
     cd "${repo_folder}/nepi_setup"
-    pullr
+    pullr 0
     if [[ $? -eq 0 ]]; then
       shopt -s nullglob
       for dir in "$repo_folder"/src/*/ ; do
           #echo "Processing Repo: $dir"
           cd $dir
-          pullr
+          pullr 0
+          if [[ $? -ne 0 ]]; then
+            success=0
+            break
+          fi
       done
-      cd $repo_folder
-      pullr
-
-      if [[ $? -eq 0 ]]; then
-        success=1
-        ubrc >/dev/null 2>&1
+      if [[ $success -eq 1 ]]; then
+        cd $repo_folder
+        pullr 0
+        if [[ $? -ne 0 ]]; then
+          success=0
+        fi
       fi
     fi
- 
+  
 
       # git add --all >/dev/null 2>&1
       # git commit -m "*$@*" >/dev/null 2>&1
