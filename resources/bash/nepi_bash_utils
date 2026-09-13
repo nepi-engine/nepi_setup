@@ -5496,9 +5496,9 @@ function pullrc {
     git submodule foreach --recursive 'git clean -ffdx'
 
     if [[ $? -eq 0 ]]; then
-      echo -e "${GREEN}Pull Successfull"
+      echo -e "${GREEN}Pull Clean Successfull"
     else
-      echo -e "${RED}Pull Failed"
+      echo -e "${RED}Pull Clean Failed"
       return 1
     fi
 
@@ -5566,7 +5566,6 @@ function pullr {
     pushr 0 >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
       echo -e "${GREEN}Pushed Uncommited Changes"
-      git pull
     else
       echo -e "${RED}Pull Failed"
       echo -e "${ORANGE} -- Call 'pullrc' to force pull of latest remote repo"
