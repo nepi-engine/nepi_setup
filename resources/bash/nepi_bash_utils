@@ -5413,7 +5413,7 @@ function pushr(){
   find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
   git pull --no-edit
-  if [ $? -eq 0 ]; then
+  if [ ! $? -eq 0 ]; then
     echo -e "${WHITE}Pushing Merged repo ${PWD##*/}"
     git push origin HEAD:$current_branch
     if [ ! $? -eq 0 ]; then
@@ -5568,7 +5568,7 @@ function pullr {
       echo -e "${GREEN}Pushed Uncommited Changes"
     else
       echo -e "${RED}Pull Failed"
-      echo -e "${ORANGE} -- Call 'pullrc' to force pull of latest remote repo"
+      echo -e "${ORANGE} -- Call 'pullrc' to force pull of latest git repo"
       return 1
     fi
   else
@@ -5718,7 +5718,8 @@ function pulln {
       echo -e "${GREEN}NEPI Pull Successfull"
       echo -e "${WHITE}"
     else
-      echo -e "${RED}NEPI Pull Failed"
+      echo -e "${RED}Pull Failed"
+      echo -e "${ORANGE} -- Call 'pullnc' to force pull of latest nepi get repo"
       echo -e "${WHITE}"
       return 1
     fi
@@ -5741,29 +5742,52 @@ function pullnc {
       return 1
     fi
 
+
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     setup_folder=/home/${CONFIG_USER}/nepi_setup
-
     cd $repo_folder      
     if [[ $? -gt 0 ]]; then
       echo -e "${RED}NEPI Repo Folder not found at: ${repo_folder}"
       echo -e "${WHITE}"
       return 1
-    else
+    fi
 
 
-      pullrc
-
-          
-      if [[ $? -eq 0 ]]; then
-        ubrc >/dev/null 2>&1
-        echo -e "${GREEN}NEPI Pull Successfull"
-        echo -e "${WHITE}"
-      else
-        echo -e "${RED}NEPI Pull Failed"
-        echo -e "${WHITE}"
-        return 1
+    success=1
+    cd "${repo_folder}/nepi_setup"
+    echo -e "${WHITE}#########"
+    pullrc 0
+    if [[ $? -eq 0 ]]; then
+      shopt -s nullglob
+      for dir in "$repo_folder"/src/*/ ; do
+          #echo "Processing Repo: $dir"
+          cd $dir
+          echo -e "${WHITE}#########"
+          pullrc 0
+          if [[ $? -ne 0 ]]; then
+            success=0
+            break
+          fi
+      done
+      if [[ $success -eq 1 ]]; then
+        cd $repo_folder
+        echo -e "${WHITE}#########"
+        pullrc 0
+        if [[ $? -ne 0 ]]; then
+          success=0
+        fi
       fi
+    fi
+  
+    echo -e "${WHITE}#######################"
+    if [[ $success -eq 1 ]]; then
+      ubrc >/dev/null 2>&1
+      echo -e "${GREEN}NEPI Pull Clean Successfull"
+      echo -e "${WHITE}"
+    else
+      echo -e "${RED}NEPI Pull Clean Failed"
+      echo -e "${WHITE}"
+      return 1
     fi
 
 }
