@@ -5350,6 +5350,9 @@ function pushr(){
     do_checks=1
   fi
 
+
+  echo -e "${WHITE}Pushing to repo ${PWD##*/}"
+
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
 
@@ -5375,11 +5378,6 @@ function pushr(){
       return 1
     fi
   fi
-
-  #echo -e "${GREEN}Clearing __pycache__ folders"
-  echo -e "${WHITE}Pushing to repo ${PWD##*/}"
-  echo -e "${WHITE}#######################"
-
 
 
   git add --all >/dev/null 2>&1
@@ -5438,6 +5436,8 @@ function pushr(){
 export -f pushr
 
 function pullrc {
+
+    echo -e "${WHITE}Pulling repo CLEAN ${PWD##*/}"
 
     do_checks=$1
     if [[ -z $do_checks ]]; then
@@ -5517,6 +5517,8 @@ function pullr {
       do_checks=1
     fi
 
+    echo -e "${WHITE}Pulling repo ${PWD##*/}"
+
     cur_path=$(pwd)
     cur_folder=${PWD##*/}
 
@@ -5562,11 +5564,8 @@ function pullr {
       return 1
     fi
 
-
-
-  echo -e "${WHITE}Pulling repo ${PWD##*/}"
   if [ -n "$(git status --porcelain)" ]; then
-    pushr 0 >/dev/null 2>&1
+    pushr 0
     if [[ ! $? -eq 0 ]]; then
       echo -e "${GREEN}Pushed Uncommited Changes First"
       echo -e "${WHITE}"
