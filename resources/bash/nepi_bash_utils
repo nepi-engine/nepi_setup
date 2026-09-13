@@ -5351,7 +5351,7 @@ function pushr(){
   fi
 
 
-  echo -e "${WHITE}Pushing to repo ${PWD##*/}"
+  echo -e "${WHITE}Pushing repo ${PWD##*/}"
 
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
@@ -5566,7 +5566,8 @@ function pullr {
 
   if [ -n "$(git status --porcelain)" ]; then
     pushr 0
-    if [[ ! $? -eq 0 ]]; then
+    if [[ $? -eq 0 ]]; then
+      echo -e "${ORANGE}Repo Has Uncommited Changes. Pull Failed"
       echo -e "${GREEN}Pushed Uncommited Changes First"
       echo -e "${WHITE}"
       git pull
