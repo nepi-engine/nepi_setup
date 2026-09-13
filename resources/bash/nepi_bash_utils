@@ -5610,7 +5610,6 @@ function pushn {
       return 1
     fi
 
-
     success=1
     cd "${repo_folder}/nepi_setup"
     pushr 0
