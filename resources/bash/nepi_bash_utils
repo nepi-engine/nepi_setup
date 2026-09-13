@@ -5418,15 +5418,17 @@ function pushr(){
 
     find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
-    echo -e "${YELLOW}Pushing Merged repo ${PWD##*/}"
     echo -e "${WHITE}${repo_status}"
-    git push origin HEAD:$current_branch
-    if [ ! $? -eq 0 ]; then
+    git push >/dev/null 2>&1 #origin HEAD:$current_branch
+    if [[  $? -eq 0 ]]; then
+        echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
+    else
       if [[ $do_checks -eq 1 ]]; then
         echo -e "${RED}Push Failed"
         echo -e "${WHITE}"
         return 2 # Failed
       else
+        echo -e "${YELLOW}Pulling Clean from"
         pullrc 0
         return $?
       fi
