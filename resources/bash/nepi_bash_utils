@@ -5342,7 +5342,7 @@ function pushr(){
 
 
     git add --all >/dev/null 2>&1
-    git commit -m "*$@*" >/dev/null 2>&1
+    git commit -m "${CONFIG_USER}" >/dev/null 2>&1
 
 
     if git symbolic-ref -q HEAD >/dev/null; then
