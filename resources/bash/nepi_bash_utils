@@ -5225,29 +5225,29 @@ function nepigithub {
 
           ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
           if [[ "$?" -gt 1 ]]; then
+              echo ""
+              echo -e "${ORANGE}*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
+              echo -e "${ORANGE}"
+              echo -e "${ORANGE}1) Log Into Your GitHub Account at www.github.com"
+              echo -e "${ORANGE}2) Click on your User Icon, and select 'Settings"
+              echo -e "${ORANGE}3) Select 'SSH and GPG keys' from the left sidebar menu"
+              echo -e "${ORANGE}4) Click the 'New SSH key' button in the top right"
+              echo -e "${ORANGE}5) Enter the following information in the boxes provided,"
+              echo -e "${ORANGE}   Then click the 'Add SSH key' button"
+              echo -e "${WHITE}"
+              echo -e "${GREEN}<< TITLE >>"
+              echo -e "${WHITE}${key_name}"
+              echo -e "${WHITE}"
+              echo -e "${GREEN}<< KEY_TYPE >>"
+              echo -e "${WHITE}Authentication Key"
+              echo -e "${WHITE}"
+              echo -e "${GREEN}<< KEY >>"
+              echo -e "${WHITE}$(sudo cat ${key_path}.pub)"
+              echo -e "${WHITE}"
 
-              echo "*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
-              echo ""
-              echo "1) Log Into Your GitHub Account at www.github.com"
-              echo "2) Click on your User Icon, and select 'Settings"
-              echo "3) Select 'SSH and GPG keys' from the left sidebar menu"
-              echo "4) Click the 'New SSH key' button in the top right"
-              echo "5) Enter the following information in the boxes provided,"
-              echo "   Then click the 'Add SSH key' button"
-              echo ""
-              echo "<< TITLE >>"
-              echo ${key_name}
-              echo ""
-              echo "<< KEY_TYPE >>"
-              echo "Authentication Key"
-              echo ""
-              echo "<< KEY >>"
-              echo $(sudo cat ${key_path}.pub)
-              echo ""
-              echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
-
-              echo ""
+              echo -e "${ORANGE}"
               read -p "Press enter after configuring your GitHub account with new ssh key"
+              echo -e "${WHITE}"
 
         fi
 
