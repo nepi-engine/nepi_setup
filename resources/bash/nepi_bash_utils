@@ -3939,6 +3939,7 @@ export -f add_ssh_key
 function select_ssh_key {
         sudo -v
         key_folder=$1
+        key_ignore=$2
         if [[ -z $key_folder ]]; then
           key_folder="/home/${CONFIG_USER}/.ssh"
         fi
@@ -3965,7 +3966,7 @@ function select_ssh_key {
                     #echo "Looking for public key file: ${pub_file}"
                     filename=$(basename "$file")
                     if [[ -f "$file" ]]; then # Check if the item is a regular file
-                        if [[ -f $pub_file ]]; then
+                        if [[ -f $pub_file && ${filename} != ${key_ignore} ]]; then
                           files+=( "$filename" ) # Add it to the array
                           echo $filename
                         fi
@@ -5041,7 +5042,7 @@ function nepigithub {
                       case $opt in
                          
                           "Select SSH Key")
-                              ret=$(select_ssh_key $key_folder)
+                              ret=$(select_ssh_key $key_folder $NEPI_SSH_KEY_FILE)
                               sel_error=$?
                               sel_file=$(echo $ret | awk '{print $NF}')
                               #echo "Got select SSH Key file error: ${sel_error}"
