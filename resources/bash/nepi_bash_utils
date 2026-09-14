@@ -79,6 +79,7 @@ export NEPI_DOCKER_CONFIG='/mnt/nepi_config/docker_cfg'
 export NEPI_SSH_FOLDER="/home/${CONFIG_USER}/.ssh"
 export SSH_ENV="$HOME/.ssh/environment"
 export NEPI_SSH_ENV="${NEPI_SSH_FOLDER}/environment"
+export NEPI_SSH_KEY_DEFAULT=nepi_default_ssh_key
 export NEPI_SSH_KEY_FILE=nepi_default_ssh_key
 export NEPI_SSH_KEY_PATH="${NEPI_SSH_FOLDER}/${NEPI_SSH_KEY_FILE}"
 
@@ -5014,7 +5015,9 @@ function nepigithub {
       key_path="${key_folder}/${NEPI_GITHUB_SSH_KEY}"
     fi
 
-    if [[ -n $key_path && -f $key_path ]]; then
+    if [[ ${key_name} == ${NEPI_SSH_KEY_DEFAULT} ]]; then
+      needs_key=1
+    elif [[ -n $key_path && -f $key_path ]]; then
       ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
       if [[ $? -lt 2 ]]; then
           needs_key=0
@@ -5042,12 +5045,12 @@ function nepigithub {
                       case $opt in
                          
                           "Select SSH Key")
-                              ret=$(select_ssh_key $key_folder $NEPI_SSH_KEY_FILE)
+                              ret=$(select_ssh_key $key_folder $NEPI_SSH_KEY_DEFAULT)
                               sel_error=$?
                               sel_file=$(echo $ret | awk '{print $NF}')
                               #echo "Got select SSH Key file error: ${sel_error}"
                               if [[ $sel_error -eq 0 && -n $sel_file ]]; then
-                                if [[ ${sel_file} == *"${NEPI_SSH_KEY_FILE}"* ]]; then
+                                if [[ ${sel_file} == *"${NEPI_SSH_KEY_DEFAULT}"* ]]; then
                                   echo ''
                                   echo -e "${RED}  NEPI SSH KEY NOT PERMITTED AS GITHUB SSH KEY ${sel_file}"
                                   echo -e "${WHITE}"
