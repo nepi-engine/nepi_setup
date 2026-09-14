@@ -100,6 +100,7 @@ export NEPI_REPO_ADDRESS_DEFAULT='git@github.com:nepi-engine/nepi_engine_ws.git'
 export NEPI_REPO_ADDRESS='git@github.com:nepi-engine/nepi_engine_ws.git'
 export NEPI_REPO_NAME=$(basename "${NEPI_REPO_ADDRESS%.*}")
 export NEPI_REPO_FOLDER="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
+export NEPI_GITHUB_SSH_KEY=''
 
 
 export NEPI_BUILD_REPO_NAME=${NEPI_REPO_NAME}
@@ -4742,7 +4743,6 @@ function nepisshkey {
                       echo ''
                       echo "Got selected SSH Key file: ${sel_file}"
                       key_path=$sel_file
-                      exist_key='yes'
                       break 2 # Exit both the select and the while loop
                     else
                       echo ''
@@ -4992,47 +4992,40 @@ function nepigithub {
       echo -e "${WHITE}"
       return 1
     fi
+  
+    echo "Checking Github SSH Key"
 
-    key_path=''
-    if [[ -n $key_name ]]; then
-      key_path="${key_folder}/${key_name}"
-      #echo "Using GITHUB SSH KEY ${key_path}"
-    fi
+    needs_key=1
+    new_key=0
+    ghub_email=''
 
     if [[ ! -d $key_folder ]]; then
       sudo mkdir -p $key_folder
-    fi    
-      echo "Checking Github SSH Key"
+    fi         
 
 
+    if [[ -n $key_name ]]; then
+      key_path="${key_folder}/${key_path}"
+      needs_key=0
+      new_key=1
+    else 
+      key_name=$NEPI_GITHUB_SSH_KEY
+      key_path="${key_folder}/${NEPI_GITHUB_SSH_KEY}"
+    fi
 
-      needs_key='yes'
-      exist_key='no'
-      add_key='no'
-      new_key=0
-      ghub_email=''
-
-
-
-      config_file=/home/${CONFIG_USER}/.ssh/config
-      if [[ ! -f $config_file ]]; then  
-          needs_key='yes'
-      elif ! grep -qnw $config_file -e "github.com"; then
-          needs_key='yes'
-      else
-        ssh -T git@github.com >/dev/null 2>&1
-        if [[ "$?" -lt 2 ]]; then
-            key_path=$(ssh -G git@github.com 2>/dev/null | grep -im1 '^IdentityFile' | cut -d' ' -f2) >/dev/null
-            key_name=$(basename "$key_path")
-            needs_key='no'
+    if [[ -n $key_path && -f $key_path ]]; then
+      ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
+      if [[ $? -lt 2 ]]; then
+          needs_key=0
       fi
-      fi
+    fi
 
 
-      while [[ "$needs_key" == 'yes' ]]; do
+
+      while [[ $needs_key -eq 1 ]]; do
 
           if [[ -n $key_name && -f $key_path ]]; then
-              needs_key='no'
+              needs_key=0
           else
 
               key_path=''
@@ -5062,7 +5055,7 @@ function nepigithub {
                                   echo ''
                                   echo "Got selected SSH Key file: ${sel_file}"
                                   key_path=$sel_file
-                                  needs_key='no'
+                                  needs_key=0
                                   new_key=1
                                   break 2 # Exit both the select and the while loop
                                 fi
@@ -5103,7 +5096,7 @@ function nepigithub {
                                 echo ''
                                 echo "Created SSH Key file: ${sel_file}"
                                 key_path=$sel_file
-                                needs_key='no'
+                                needs_key=0
                                 new_key=1
                                 break 2 # Exit both the select and the while loop
                               elif [[ $? -eq 1 ]]; then
@@ -5112,7 +5105,7 @@ function nepigithub {
                                 check_key=$(ask_yes_no "Do you want to use this key?")
                                 if [[ ${check_key} == 'yes' ]]; then
                                   key_path=$sel_file
-                                  needs_key='no'
+                                  needs_key=0
                                   new_key=1
                                   break 2 # Exit both the select and the while loop
                                 fi
@@ -5135,139 +5128,117 @@ function nepigithub {
       done
 
 
+    github_key_link="${key_folder}/.github_key_link"
+    if [[ ! -L $github_key_link || $new_key -eq 1 ]]; then
+      sudo ln -sf $key_path $github_key_link
+      sudo chmod  0600 $github_key_link
+    fi
 
-      if [[ -n $key_path ]]; then
-            echo -e "${WHITE}Configuring GITHUB SSH KEY ${key_path}"
-            if [[ -d $key_folder && -n $key_folder ]]; then   
-              sudo chmod 0700 $key_folder
-              sudo chmod  0600 $key_folder/*
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-            fi
 
-            echo "Checking config file ${config_file}"
-            touch ${config_file}
-            if grep -qnw $config_file -e ${key_name}; then
-                : #echo "Already Done"
-            else
+    if [[ -n $key_path && -f $key_path ]]; then
+        ############################
+        # UPDATE SSH CONFIG FILE
+
+
+        config_file=/home/${CONFIG_USER}/.ssh/config
+        if [[ ! -f $config_file ]]; then  
+                  sudo chmod 0700 $key_folder
+                  sudo chmod  0600 $key_folder/*
+                  sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+                  touch ${config_file}
+        fi
+
+
+        if [[ -f $config_file ]]; then  
+          if ! grep -qnw $config_file -e "github.com"; then
+            NAME=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
+
+            echo 'Host github.com' | sudo tee -a $config_file
+            echo '   HostName github.com' | sudo tee -a $config_file
+            echo '   User git' | sudo tee -a $config_file
+            echo '   IdentityFile '${github_key_link} | sudo tee -a $config_file
+            echo '   IdentitiesOnly yes' | sudo tee -a $config_file
+            echo ''
+
+            sudo chmod 0700 $key_folder
+            sudo chmod  0600 $key_folder/*
+            sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
+
+          fi
+       
+
+        fi
+    fi
+
+
+
+
+      
+      if [[ -f $key_path && $new_key -eq 1 ]]; then
+
+          ssh -o IdentitiesOnly=yes -T git@github.com >/dev/null 2>&1
+          if [[ $? -gt 1 ]]; then
+
+              g_email=$(git config user.email)
+              g_name=$(git config user.name)
+
+              if [[ -z $g_email || -z $g_name ]]; then
+                if [[ -z $ghub_email ]]; then
+                                    while [[ -z "$ghub_email" ]]; do
+                                        read -p "Enter your GitHub email address: " USER_INPUT
+                                        if is_valid_email "$USER_INPUT"; then
+                                            echo "Using email ${USER_INPUT}"
+                                            ghub_email=$USER_INPUT
+                                        else
+                                            echo "Not A Valid Email"
+                                            return 1
+                                        fi  
+                                    done   
+                fi
+
+                if [[ -n $ghub_email ]]; then
+                        ghub_name=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
+                        git config --global user.email "$ghub_email"
+                        git config --global user.name "$ghub_name"
                 
-                NAME=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
-
-                echo 'Host github.com' | sudo tee -a $config_file
-                echo '   HostName github.com' | sudo tee -a $config_file
-                echo '   User git' | sudo tee -a $config_file
-                echo '   IdentityFile '${key_path} | sudo tee -a $config_file
-                echo '   IdentitiesOnly yes' | sudo tee -a $config_file
-                echo ''
-
-            fi
-
-            if [[ -d $key_folder && -n $key_folder ]]; then   
-              sudo chmod 0700 $key_folder
-              sudo chmod  0600 $key_folder/*
-              sudo chown -R ${CONFIG_USER}:${CONFIG_USER} $key_folder
-            fi
-            needs_key='no'
-            add_key='yes'
-                  
-      fi
-
-
-
-
-      if [[ -n $key_path && ${add_key} == 'yes' && $new_key -eq 1 ]]; then
-          key_name=$(basename "${key_path}")
-
-          ssh -T git@github.com >/dev/null 2>&1
-          if [[ "$?" -gt 2 ]]; then
-
-              echo -e "${ORANGE}*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
-              echo -e "${ORANGE}"
-              echo -e "${ORANGE}1) Log Into Your GitHub Account at www.github.com"
-              echo -e "${ORANGE}2) Click on your User Icon, and select 'Settings"
-              echo -e "${ORANGE}3) Select 'SSH and GPG keys' from the left sidebar menu"
-              echo -e "${ORANGE}4) Click the 'New SSH key' button in the top right"
-              echo -e "${ORANGE}5) Enter the following information in the boxes provided,"
-              echo -e "${ORANGE}   Then click the 'Add SSH key' button"
-              echo -e "${WHITE}"
-              echo -e "${GREEN}<< TITLE >>"
-              echo -e "${WHITE}${key_name}"
-              echo -e "${WHITE}"
-              echo -e "${GREEN}<< KEY_TYPE >>"
-              echo -e "${WHITE}Authentication Key"
-              echo -e "${WHITE}"
-              echo -e "${GREEN}<< KEY >>"
-              echo -e "${WHITE}$(sudo cat ${key_path}.pub)"
-              echo -e "${WHITE}"
-              read -p "Press enter after configuring your GitHub account with new ssh key"
-
-          fi
-  
-      fi
-
-      g_email=$(git config user.email)
-      g_name=$(git config user.name)
-
-      if [[ -z $g_email || -z $g_name ]]; then
-        if [[ -z $ghub_email ]]; then
-                            while [[ -z "$ghub_email" ]]; do
-                                read -p "Enter your GitHub email address: " USER_INPUT
-                                if is_valid_email "$USER_INPUT"; then
-                                    echo "Using email ${USER_INPUT}"
-                                    ghub_email=$USER_INPUT
-                                else
-                                    echo "Not A Valid Email"
-                                    return 1
-                                fi  
-                            done   
-        fi
-
-        if [[ -n $ghub_email ]]; then
-                ghub_name=$(echo "$ghub_email" | sed -E 's/"?([^"]+)"? <.*>/\1/')
-                git config --global user.email "$ghub_email"
-                git config --global user.name "$ghub_name"
-        
-        fi
-      fi
-
-
-
-      ssh -T git@github.com >/dev/null 2>&1
-      if [[ "$?" -lt 2 ]]; then
-
-          echo -e "${WHITE}GitHub SSH Key authenticated with key file ${key_path}"
-          nepi_repo_name=$(basename "${NEPI_REPO_ADDRESS%.*}")
-          nepi_key_file=$(basename "${key_path%.*}")
-          if [[ -n $NEPI_REPO_ADDRESS && -n $nepi_repo_name ]]; then
-            export NEPI_REPO_ADDRESS=$NEPI_REPO_ADDRESS
-            export NEPI_REPO_NAME=$nepi_repo_name
-
-
-            update_text_value $NEPI_BASH_UTILS "export NEPI_REPO_ADDRESS=" "export NEPI_REPO_ADDRESS=${NEPI_REPO_ADDRESS}"
-
-            #echo "Using NEPI Repo ${nepi_repo_name}"
-
-            nepi_repo_folder="/home/${CONFIG_USER}/${nepi_repo_name}"
-            if [[ ! -d $nepi_repo_folder ]]; then
-              echo "Cloning NEPI Repo to ${nepi_repo_folder}"
-              echo "" 
-              nepiclone
-            fi
-
+                fi
+              fi
           fi
 
-        if [[  $new_key -eq 1 ]]; then
-         echo -e "${GREEN}NEPI GITHUB SETUP COMPLETE"
-         echo -e "${WHITE}"
-        fi
+          ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
+          if [[ "$?" -lt 2 ]]; then
+
+              echo -e "${WHITE}GitHub SSH Key authenticated with key file ${key_path}"
+              key_name=$(basename "${key_path}")
+
+              export NEPI_GITHUB_SSH_KEY=$key_name
+              update_text_value $NEPI_BASH_UTILS "export NEPI_GITHUB_SSH_KEY=" "export NEPI_GITHUB_SSH_KEY=${NEPI_GITHUB_SSH_KEY}"
+              
+              echo "Using NEPI Github Key ${key_name}"
+
+              nepi_repo_folder="/home/${CONFIG_USER}/${NEPI_REPO_NAME}"
+              if [[ ! -d $nepi_repo_folder ]]; then
+                echo "Cloning NEPI Repo to ${nepi_repo_folder}"
+                echo "" 
+                cd "/home/${CONFIG_USER}"
+                nepiclone
+              fi
+
+              echo -e "${GREEN}NEPI GITHUB SETUP COMPLETE"
+              echo -e "${WHITE}"
+
+          else
+              echo -e "${RED}GitHub SSH Key NOT AUTHENTICATED"
+              echo -e "${YELLOW}Fix errors and try again"
+              echo -e "${WHITE}"
+              return 1
+          fi
 
 
 
-      else
-          echo -e "${RED}GitHub SSH Key NOT AUTHENTICATED"
-          echo -e "${YELLOW}Fix errors and try again"
-          echo -e "${WHITE}"
-          return 1
-      fi
+    fi
+
+
 
 
 

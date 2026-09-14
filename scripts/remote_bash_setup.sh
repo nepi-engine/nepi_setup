@@ -77,6 +77,8 @@ else
 fi
 
 
+echo "Got NEPI_GITHUB_KEY=${NEPI_GITHUB_SSH_KEY}"
+
 echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
     #####################################
     echo " "
@@ -120,6 +122,7 @@ echo "NEPI_MODE at Bash Update=${NEPI_MODE}"
 
     update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_IN_CONTAINER=" "export NEPI_IN_CONTAINER=${NEPI_IN_CONTAINER}"
 
+    update_text_value $NEPI_UTILS_FILE_DEST "export NEPI_GITHUB_SSH_KEY=" "export NEPI_GITHUB_SSH_KEY=${NEPI_GITHUB_SSH_KEY}"
 
     ##############
     echo "Installing NEPI Remote Dev Aliases file"
