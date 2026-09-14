@@ -5582,7 +5582,10 @@ function pushn {
         echo -e "${WHITE}#########"
         pushr 0
         if [[ $? -ne 0 ]]; then
-          success=0
+          pushr 0
+          if [[ $? -ne 0 ]]; then
+            success=0
+          fi
         fi
       fi
     fi
