@@ -5414,7 +5414,7 @@ function pushr(){
     find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
     echo -e "${WHITE}${repo_status}"
-    git push >/dev/null 2>&1 #origin HEAD:$current_branch
+    git push #origin HEAD:$current_branch
     if [[  $? -eq 0 ]]; then
         echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
     else
