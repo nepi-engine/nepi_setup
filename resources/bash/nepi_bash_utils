@@ -5587,10 +5587,10 @@ function pushn {
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Push Successfull"
-      echo -e "${WHITE}
+      echo -e "${WHITE}"
     else
       echo -e "${RED}NEPI Push Failed"
-      echo -e "${WHITE}
+      echo -e "${WHITE}"
       return 1
     fi
 
