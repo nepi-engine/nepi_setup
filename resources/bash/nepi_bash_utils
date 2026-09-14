@@ -5401,15 +5401,9 @@ function pushr(){
     if [[  $? -eq 0 ]]; then
         echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
     else
-      if [[ $do_checks -eq 1 ]]; then
         echo -e "${RED}Push Failed"
         echo -e "${WHITE}"
         return 2 # Failed
-      else
-        echo -e "${YELLOW}Pulling Clean from"
-        pullrc 0
-        return $?
-      fi
     fi
   fi
   echo -e "${WHITE}Push Successfully"
