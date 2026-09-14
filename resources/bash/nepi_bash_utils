@@ -5374,8 +5374,13 @@ function pushr(){
         echo -e "${WHITE}"
         return 2 # Failed
     fi
+    echo -e "${WHITE}Push Successfully"
+    return 0
+  else
+    echo -e "${WHITE}No Changes to Push"
+    return 0
   fi
-  echo -e "${WHITE}Push Successfully"
+
 
 }
 export -f pushr
