@@ -5580,7 +5580,7 @@ function pushn {
       if [[ $success -eq 1 ]]; then
         cd $repo_folder
         echo -e "${WHITE}#########"
-        pushr 0
+        pushr 0 >/dev/null 2>&1
         if [[ $? -ne 0 ]]; then
           pushr 0
           if [[ $? -ne 0 ]]; then
