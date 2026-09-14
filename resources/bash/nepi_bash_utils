@@ -5591,7 +5591,6 @@ function pushn {
       fi
     fi
   
-    echo -e "${WHITE}#######################"
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Push Successfull"
@@ -5652,7 +5651,7 @@ function pulln {
         echo -e "${WHITE}#########"
         pullr 0 >/dev/null 2>&1
         if [[ $? -ne 0 ]]; then
-          pullr 0
+          pullr 0 
           if [[ $? -ne 0 ]]; then
             success=0
           fi
@@ -5674,7 +5673,6 @@ function pulln {
       #     pullrc
       # fi
           
-    echo -e "${WHITE}#######################"
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Pull Successfull"
@@ -5744,7 +5742,6 @@ function pullnc {
       fi
     fi
   
-    echo -e "${WHITE}#######################"
     if [[ $success -eq 1 ]]; then
       ubrc >/dev/null 2>&1
       echo -e "${GREEN}NEPI Pull Clean Successfull"
