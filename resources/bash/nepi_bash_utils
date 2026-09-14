@@ -4999,6 +4999,7 @@ function nepigithub {
 
     needs_key=1
     new_key=0
+    add_key=0
     ghub_email=''
 
     if [[ ! -d $key_folder ]]; then
@@ -5218,7 +5219,38 @@ function nepigithub {
             fi
           fi
          
-          
+
+
+          ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
+          if [[ "$?" -gt 1 ]]; then
+
+              echo "*** ADD YOUR NEW NEPI GITHUB SSH KEY TO YOUR GITHUB ACCOUNT BEFORE PROCEEDING ***"
+              echo ""
+              echo "1) Log Into Your GitHub Account at www.github.com"
+              echo "2) Click on your User Icon, and select 'Settings"
+              echo "3) Select 'SSH and GPG keys' from the left sidebar menu"
+              echo "4) Click the 'New SSH key' button in the top right"
+              echo "5) Enter the following information in the boxes provided,"
+              echo "   Then click the 'Add SSH key' button"
+              echo ""
+              echo "<< TITLE >>"
+              echo ${key_name}
+              echo ""
+              echo "<< KEY_TYPE >>"
+              echo "Authentication Key"
+              echo ""
+              echo "<< KEY >>"
+              echo $(sudo cat ${key_path}.pub)
+              echo ""
+              echo "6) Rerun this script to test that your GitHub SSH Key Authenticates"
+
+              echo ""
+              read -p "Press enter after configuring your GitHub account with new ssh key"
+
+        fi
+
+
+
           key_name=$(basename "${key_path}")
           ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
           if [[ "$?" -lt 2 ]]; then
