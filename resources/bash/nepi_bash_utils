@@ -5036,7 +5036,7 @@ function nepigithub {
           else
 
               key_path=''
-              echo "GITHUB SSH KEY NOT CONFIGURED"
+              echo -e "${ORANGE}GITHUB SSH KEY NOT CONFIGURED"
 
               PS3=$'\n'"Please enter your choice by NUMBER: "
               options=(  "Create SSH Key", "Quit")
@@ -5129,7 +5129,7 @@ function nepigithub {
 
 
       if [[ -n $key_path ]]; then
-            echo "Configuring GITHUB SSH KEY ${key_path}"
+            echo -e "${WHITE}Configuring GITHUB SSH KEY ${key_path}"
             if [[ -d $key_folder && -n $key_folder ]]; then   
               sudo chmod 0700 $key_folder
               sudo chmod  0600 $key_folder/*
@@ -5256,6 +5256,7 @@ function nepigithub {
       else
           echo -e "${RED}GitHub SSH Key NOT AUTHENTICATED"
           echo -e "${YELLOW}Fix errors and try again"
+          return 1
       fi
 
 
@@ -5345,15 +5346,9 @@ function pushr(){
       return 1
     fi
 
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -gt 2 ]]; then
-      echo -e "${YELLOW}Git SSH Credentials Not Configured"
-      echo -e "${WHITE}"
-      nepigithub
-      if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Git SSH Credentials Failed"
-        return 1
-      fi
+    if ! nepigithub; then
+      echo -e "${RED}Git SSH Credentials Failed"
+      return 1
     fi
   fi
 
@@ -5438,15 +5433,9 @@ function pullrc {
         return 1
       fi
 
-      ssh -T git@github.com >/dev/null 2>&1
-      if [[ "$?" -gt 2 ]]; then
-        echo -e "${YELLOW}Git SSH Credentials Not Configured"
-        echo -e "${WHITE}"
-        nepigithub
-        if [[ $? -ne 0 ]]; then
-          echo -e "${RED}Git SSH Credentials Failed"
-          return 1
-        fi
+      if ! nepigithub; then
+        echo -e "${RED}Git SSH Credentials Failed"
+        return 1
       fi
     fi
 
@@ -5517,15 +5506,9 @@ function pullr {
         return 1
       fi
 
-      ssh -T git@github.com >/dev/null 2>&1
-      if [[ "$?" -gt 2 ]]; then
-        echo -e "${YELLOW}Git SSH Credentials Not Configured"
-        echo -e "${WHITE}"
-        nepigithub
-        if [[ $? -ne 0 ]]; then
-          echo -e "${RED}Git SSH Credentials Failed"
-          return 1
-        fi
+      if ! nepigithub; then
+        echo -e "${RED}Git SSH Credentials Failed"
+        return 1
       fi
     fi
 
@@ -5581,16 +5564,11 @@ function pushn {
       return 1
     fi
 
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -gt 2 ]]; then
-      echo -e "${YELLOW}Git SSH Credentials Not Configured"
-      echo -e "${WHITE}"
-      nepigithub
-      if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Git SSH Credentials Failed"
-        return 1
-      fi
+    if ! nepigithub; then
+      echo -e "${RED}Git SSH Credentials Failed"
+      return 1
     fi
+
 
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
     setup_folder=/home/${CONFIG_USER}/nepi_setup
@@ -5601,13 +5579,14 @@ function pushn {
       return 1
     fi
 
-    success=1
+    success=0
     cd "${repo_folder}/nepi_setup"
     echo -e "${WHITE}#########"
     pushr 0
     if [[ $? -eq 0 ]]; then
       shopt -s nullglob
       for dir in "$repo_folder"/src/*/ ; do
+          success=1
           #echo "Processing Repo: $dir"
           cd $dir
           echo -e "${WHITE}#########"
@@ -5649,16 +5628,11 @@ function pulln {
       return 1
     fi
 
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -gt 2 ]]; then
-      echo -e "${YELLOW}Git SSH Credentials Not Configured"
-      echo -e "${WHITE}"
-      nepigithub
-      if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Git SSH Credentials Failed"
-        return 1
-      fi
+    if ! nepigithub; then
+      echo -e "${RED}Git SSH Credentials Failed"
+      return 1
     fi
+
 
 
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
@@ -5671,13 +5645,14 @@ function pulln {
     fi
 
 
-    success=1
+    success=0
     cd "${repo_folder}/nepi_setup"
     echo -e "${WHITE}#########"
     pullr 0
     if [[ $? -eq 0 ]]; then
       shopt -s nullglob
       for dir in "$repo_folder"/src/*/ ; do
+          success=1
           #echo "Processing Repo: $dir"
           cd $dir
           echo -e "${WHITE}#########"
@@ -5734,16 +5709,11 @@ function pullnc {
       return 1
     fi
 
-    ssh -T git@github.com >/dev/null 2>&1
-    if [[ "$?" -gt 2 ]]; then
-      echo -e "${YELLOW}Git SSH Credentials Not Configured"
-      echo -e "${WHITE}"
-      nepigithub
-      if [[ $? -ne 0 ]]; then
-        echo -e "${RED}Git SSH Credentials Failed"
-        return 1
-      fi
+    if ! nepigithub; then
+      echo -e "${RED}Git SSH Credentials Failed"
+      return 1
     fi
+
 
 
     repo_folder=/home/${CONFIG_USER}/${NEPI_REPO_NAME}
@@ -5756,13 +5726,14 @@ function pullnc {
     fi
 
 
-    success=1
+    success=0
     cd "${repo_folder}/nepi_setup"
     echo -e "${WHITE}#########"
     pullrc 0
     if [[ $? -eq 0 ]]; then
       shopt -s nullglob
       for dir in "$repo_folder"/src/*/ ; do
+          success=1
           #echo "Processing Repo: $dir"
           cd $dir
           echo -e "${WHITE}#########"
