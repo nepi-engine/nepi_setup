@@ -5234,16 +5234,7 @@ function nepigithub {
               echo -e "${WHITE}"
               return 1
           fi
-
-
-
     fi
-
-
-
-
-
-
 
 }
 
@@ -5341,8 +5332,9 @@ function pushr(){
   if [[ -n $repo_status || -z $current_branch ]]; then
 
 
+    g_name=$(git config user.name)
     git add --all >/dev/null 2>&1
-    git commit -m "${CONFIG_USER}" >/dev/null 2>&1
+    git commit -m "${g_name} >/dev/null 2>&1
 
 
     if git symbolic-ref -q HEAD >/dev/null; then
