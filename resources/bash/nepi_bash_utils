@@ -5095,7 +5095,7 @@ function nepigithub {
                               ret=$(create_ssh_key $key_folder $key_name $ghub_email)
                               sel_error=$?
                               sel_file=$(echo $ret | awk '{print $NF}')
-                              #echo "Got select SSH Key file error: ${sel_error}"
+                              echo "Got create SSH Key file : ${sel_file}"
                               
                               if [[ $? -eq 0 && -n $sel_file ]]; then
                                 echo ''
@@ -5114,6 +5114,8 @@ function nepigithub {
                                   new_key=1
                                   break 2 # Exit both the select and the while loop
                                 fi
+                              else
+                                echo "Got create SSH Key file error: ${sel_error}"
                               fi
                               break # Exit the select statement
                               ;;
