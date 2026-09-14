@@ -5131,6 +5131,9 @@ function nepigithub {
 
       done
 
+      key_name=$(basename "${key_path}")
+      echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
+
 
     github_key_link="${key_folder}/.github_key_link"
     if [[ ! -L $github_key_link || $new_key -eq 1 ]]; then
@@ -5177,10 +5180,20 @@ function nepigithub {
 
 
 
+
+      key_name=$(basename "${key_path}")
+      echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
       
       if [[ -f $key_path && $new_key -eq 1 ]]; then
-
-          ssh -o IdentitiesOnly=yes -T git@github.com >/dev/null 2>&1
+          eval "$(ssh-agent -s)"
+          if ssh-add ${key_path} > /dev/null; then
+            echo "Added key: ${key_file}"
+            cat ${key_path}.pub
+            echo "NEPI SSH Key updated to key file ${key_name}"
+          else
+            echo "Failed to add SSH key: ${key_file}"
+          fi
+          ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
           if [[ $? -gt 1 ]]; then
 
               g_email=$(git config user.email)
@@ -5208,12 +5221,14 @@ function nepigithub {
                 fi
               fi
           fi
-
+          
+          key_name=$(basename "${key_path}")
+          echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
           ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
           if [[ "$?" -lt 2 ]]; then
 
               echo -e "${WHITE}GitHub SSH Key authenticated with key file ${key_path}"
-              key_name=$(basename "${key_path}")
+              
 
               export NEPI_GITHUB_SSH_KEY=$key_name
               update_text_value $NEPI_BASH_UTILS "export NEPI_GITHUB_SSH_KEY=" "export NEPI_GITHUB_SSH_KEY=${NEPI_GITHUB_SSH_KEY}"
