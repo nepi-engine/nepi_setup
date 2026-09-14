@@ -4738,7 +4738,7 @@ function nepisshkey {
                     sel_error=$?
                     sel_file=$(echo $ret | awk '{print $NF}')
                     #echo "Got select SSH Key file error: ${sel_error}"
-                    if [[ $sel_error -eq 0 && -n sel_file ]]; then
+                    if [[ $sel_error -eq 0 && -n $sel_file ]]; then
                       echo ''
                       echo "Got selected SSH Key file: ${sel_file}"
                       key_path=$sel_file
@@ -4772,7 +4772,7 @@ function nepisshkey {
                     sel_file=$(echo $ret | awk '{print $NF}')
                     #echo "Got select SSH Key file error: ${sel_error}"
                     
-                    if [[ $? -eq 0 && -n sel_file ]]; then
+                    if [[ $? -eq 0 && -n $sel_file ]]; then
                       echo ''
                       echo "Got New SSH Key file: ${sel_file}"
                       key_path=$sel_file
@@ -5037,9 +5037,9 @@ function nepigithub {
 
               key_path=''
               echo -e "${ORANGE}GITHUB SSH KEY NOT CONFIGURED"
-
-              PS3=$'\n'"Please enter your choice by NUMBER: "
-              options=(  "Create SSH Key", "Quit")
+              echo -e "${WHITE}"
+              PS3=$'\n' "Please enter your choice by NUMBER: "
+              options=(  "Select SSH Key" "Create SSH Key" "Skip")
               while true; do
                   #clear # Optional: Clear the screen before displaying the menu
 
@@ -5047,24 +5047,32 @@ function nepigithub {
                   select opt in "${options[@]}" ; do
                       case $opt in
                          
-                          # "Select SSH Key")
-                          #     ret=$(select_ssh_key $key_folder)
-                          #     sel_error=$?
-                          #     sel_file=$(echo $ret | awk '{print $NF}')
-                          #     #echo "Got select SSH Key file error: ${sel_error}"
-                          #     if [[ $sel_error -eq 0 && -n sel_file ]]; then
-                          #       echo ''
-                          #       echo "Got selected SSH Key file: ${sel_file}"
-                          #       key_path=$sel_file
-                          #       exist_key='yes'
-                          #       break 2 # Exit both the select and the while loop
-                          #     else
-                          #       echo ''
-                          #       echo "No SSH Key files found in folder: ${key_folder}"
-                          #       echo ''
-                          #     fi     
-                          #     break # Exit the select statement
-                          #     ;;
+                          "Select SSH Key")
+                              ret=$(select_ssh_key $key_folder)
+                              sel_error=$?
+                              sel_file=$(echo $ret | awk '{print $NF}')
+                              #echo "Got select SSH Key file error: ${sel_error}"
+                              if [[ $sel_error -eq 0 && -n $sel_file ]]; then
+                                if [[ ${sel_file} == *"${NEPI_SSH_KEY_FILE}"* ]]; then
+                                  echo ''
+                                  echo -e "${RED}  NEPI SSH KEY NOT PERMITTED AS GITHUB SSH KEY ${sel_file}"
+                                  echo -e "${WHITE}"
+                                  break
+                                else
+                                  echo ''
+                                  echo "Got selected SSH Key file: ${sel_file}"
+                                  key_path=$sel_file
+                                  needs_key='no'
+                                  new_key=1
+                                  break 2 # Exit both the select and the while loop
+                                fi
+                              else
+                                echo ''
+                                echo "No SSH Key files found in folder: ${key_folder}"
+                                echo ''
+                              fi     
+                              break # Exit the select statement
+                              ;;
                           "Create SSH Key")
                               key_path=''
                               key_name="$(hostname)_${CONFIG_USER}_github"
@@ -5091,7 +5099,7 @@ function nepigithub {
                               sel_file=$(echo $ret | awk '{print $NF}')
                               #echo "Got select SSH Key file error: ${sel_error}"
                               
-                              if [[ $? -eq 0 && -n sel_file ]]; then
+                              if [[ $? -eq 0 && -n $sel_file ]]; then
                                 echo ''
                                 echo "Created SSH Key file: ${sel_file}"
                                 key_path=$sel_file
@@ -5111,7 +5119,7 @@ function nepigithub {
                               fi
                               break # Exit the select statement
                               ;;
-                          "Quit")
+                          "Skip")
                               return 1
                               ;;
                           *)
@@ -5226,7 +5234,7 @@ function nepigithub {
       ssh -T git@github.com >/dev/null 2>&1
       if [[ "$?" -lt 2 ]]; then
 
-          echo "GitHub SSH Key authenticated with key file ${key_path}"
+          echo -e "${WHITE}GitHub SSH Key authenticated with key file ${key_path}"
           nepi_repo_name=$(basename "${NEPI_REPO_ADDRESS%.*}")
           nepi_key_file=$(basename "${key_path%.*}")
           if [[ -n $NEPI_REPO_ADDRESS && -n $nepi_repo_name ]]; then
@@ -5249,6 +5257,7 @@ function nepigithub {
 
         if [[  $new_key -eq 1 ]]; then
          echo -e "${GREEN}NEPI GITHUB SETUP COMPLETE"
+         echo -e "${WHITE}"
         fi
 
 
@@ -5256,6 +5265,7 @@ function nepigithub {
       else
           echo -e "${RED}GitHub SSH Key NOT AUTHENTICATED"
           echo -e "${YELLOW}Fix errors and try again"
+          echo -e "${WHITE}"
           return 1
       fi
 
