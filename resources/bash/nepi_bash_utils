@@ -5132,7 +5132,6 @@ function nepigithub {
       done
 
       key_name=$(basename "${key_path}")
-      echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
 
 
     github_key_link="${key_folder}/.github_key_link"
@@ -5182,11 +5181,9 @@ function nepigithub {
 
 
       key_name=$(basename "${key_path}")
-      echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
       
       if [[ -f $key_path && $new_key -eq 1 ]]; then
-          eval "$(ssh-agent -s)"
-          if ssh-add ${key_path} > /dev/null; then
+          if ssh-add ${key_path} ; then
             echo "Added key: ${key_file}"
             cat ${key_path}.pub
             echo "NEPI SSH Key updated to key file ${key_name}"
@@ -5223,7 +5220,6 @@ function nepigithub {
           fi
           
           key_name=$(basename "${key_path}")
-          echo -e "${WHITE}Testing GitHub SSH Key key file ${key_name}"
           ssh -o IdentitiesOnly=yes -i $key_path -T git@github.com >/dev/null 2>&1
           if [[ "$?" -lt 2 ]]; then
 
