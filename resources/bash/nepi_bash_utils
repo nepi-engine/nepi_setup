@@ -5352,6 +5352,31 @@ function pushr(){
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
 
+  # Check 1: folder holds no content of its own, so git resolves to the PARENT
+  #         repo and a push here would push the superproject under this
+  #         folder's name. Ask git what it tracks here rather than looking at
+  #         the folder, so a stray .DS_Store or .gitignore cannot defeat it.
+  #         Mode 160000 is a gitlink (unpopulated submodule), not content.
+  #         A populated repo root never reaches this test.
+  repo_top=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [[ -n $repo_top && "$repo_top" != "$(pwd -P)" ]] \
+     && [[ -z $(git ls-files --stage -- . 2>/dev/null | awk '$1 != "160000"' | head -1) ]]; then
+    echo -e "${RED}No repo content here, not a populated repo: ${cur_path}"
+    echo -e "${WHITE} -- Refusing to push. Git here resolves to ${repo_top}"
+    echo -e "${WHITE}"
+    return 1
+  fi
+
+  # Check 2: every tracked file has been deleted, so add/commit/push would
+  #         replace good remote content with an empty tree.
+  tracked_total=$(git ls-files 2>/dev/null | wc -l)
+  tracked_gone=$(git ls-files --deleted 2>/dev/null | wc -l)
+  if [[ $tracked_total -gt 0 && $tracked_gone -ge $tracked_total ]]; then
+    echo -e "${RED}Repo is EMPTY: all ${tracked_total} tracked files are missing from ${cur_path}"
+    echo -e "${WHITE} -- Refusing to commit and push an empty repo"
+    echo -e "${WHITE}"
+    return 1
+  fi
 
   if [[ $do_checks -eq 1 ]]; then
     if ! is_valid_internet >/dev/null 2>&1; then
