@@ -93,7 +93,7 @@ else
 fi
 
 
-export NEPI_TARGet_wired_ip=$NEPI_IP
+export NEPI_TARGET_WIRED_IP=$NEPI_IP
 export NEPI_TARGET_USERNAME=$NEPI_USER
 export NEPI_TARGET_SRC_DIR=${NEPI_STORAGE}/nepi_src
 
@@ -5400,41 +5400,33 @@ function pushr(){
 
 
 
-  # Get onto a branch BEFORE committing anything. Committing first while HEAD is
-  # detached puts the commit on no branch, and the checkout below then walks away
-  # from it -- git reports "you are leaving 1 commit behind" and the work looks
-  # deleted. Uncommitted changes carry across a checkout, so doing it in this
-  # order is safe; if git refuses the checkout because it would clobber local
-  # edits, current_branch stays empty and the guard below catches it.
-  if ! git symbolic-ref -q HEAD >/dev/null; then
-      #echo "HEAD is DETACHED!"
-      if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
-          git checkout develop
-      else
-          git checkout main
-      fi
-  fi
   current_branch=$(git branch --show-current)
-
-  if [[ -z $current_branch ]]; then
-    echo -e "${RED}Git Repo not on branch. Push Failed"
-    echo -e "${WHITE}"
-    return 1
-  fi
-
-  # Push when the tree is dirty OR when commits are already made but unpushed.
-  # Testing only for a dirty tree silently skips a repo whose work is committed
-  # but not yet published -- and in a submodule that is how the superproject ends
-  # up pushing a gitlink to a commit the remote does not have, which breaks every
-  # other clone with "fatal: reference is not a tree".
   repo_status=$(git status --porcelain)
-  unpushed=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
-  if [[ -n $repo_status || $unpushed -gt 0 ]]; then
+  if [[ -n $repo_status || -z $current_branch ]]; then
 
 
     g_name=$(git config user.name)
     git add --all >/dev/null 2>&1
-    git commit -m "${CONFIG_USER}" >/dev/null 2>&1 
+    git commit -m "${CONFIG_USER}" >/dev/null 2>&1
+
+
+    if git symbolic-ref -q HEAD >/dev/null; then
+        current_branch=$(git branch --show-current)
+    else
+        #echo "HEAD is DETACHED!"
+        if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+            git checkout develop
+        else
+            git checkout main
+        fi
+        current_branch=$(git branch --show-current)
+    fi
+
+    if [[ -z $current_branch ]]; then
+      echo -e "${RED}Git Repo not on branch. Pull Failed"
+      echo -e "${WHITE}"
+      return 1
+    fi 
 
 
     # git push --dry-run >/dev/null 2>&1

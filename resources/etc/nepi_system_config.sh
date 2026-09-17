@@ -364,8 +364,6 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         echo "Using Static IP Address ${nepi_static_ip}"
 
 
-
-
         nepi_gateway_ip=$NEPI_GATEWAY_IP
         echo "Got Gateway IP Address ${nepi_gateway_ip}"
         if ! is_valid_ipv4 $nepi_gateway_ip >/dev/null 2>&1; then
@@ -621,6 +619,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "$USER_INPUT" == '' ]]; then
                                     echo ""
                                     break # Exit the select statement, re-display menu
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 elif is_valid_ipv4_netmask "$USER_INPUT"; then
                                     CURRENT_NEPI_STATIC_IP=$USER_INPUT
                                     CURRENT_NEPI_ROS_IP=${CURRENT_NEPI_STATIC_IP%%/*}
@@ -638,6 +637,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "$USER_INPUT" == '' ]]; then
                                     echo ""
                                     break # Exit the select statement, re-display menu
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 elif is_valid_ipv4 "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_GATEWAY_IP=$USER_INPUT
                                     echo ""
@@ -651,6 +651,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "${USER_INPUT}" == "" ]]; then
                                     USER_INPUT=None
                                 fi
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_ALIAS_IP_1=$USER_INPUT
                                     echo ""
@@ -664,6 +665,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "${USER_INPUT}" == "" ]]; then
                                     USER_INPUT=None
                                 fi
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_ALIAS_IP_2=$USER_INPUT
                                     echo ""
@@ -677,6 +679,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "${USER_INPUT}" == "" ]]; then
                                     USER_INPUT=None
                                 fi
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_ALIAS_IP_3=$USER_INPUT
                                     echo ""
@@ -690,6 +693,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 if [[ "${USER_INPUT}" == "" ]]; then
                                     USER_INPUT=None
                                 fi
+                                USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 if is_valid_ipv4 "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_NTP_IP=$USER_INPUT
                                     echo ""
