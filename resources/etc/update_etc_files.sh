@@ -106,7 +106,7 @@ LOAD_NEPI_CONFIG=0
 
 ###########################################
 # USER PASSWORD UPDATES
-if [[ ${CONFIG_USER} == 'nepi' || ${CONFIG_USER} == 'nepihost']]; then
+if [[ ${CONFIG_USER} == 'nepi' || ${CONFIG_USER} == 'nepihost' ]]; then
     source ${ETC_FOLDER}/scripts/update_etc_users.sh $LOAD_NEPI_CONFIG
 fi
 
