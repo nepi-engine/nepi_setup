@@ -93,9 +93,11 @@ function sshnhc(){
 
 # Setup Connection Shortcuts
 function sshnh(){
+  echo "Upating Host Clock"
   ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 -i $NEPI_SSH_KEY_PATH -t ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s); exec bash -l"
 }
 function sshnhv(){
+  echo "Upating Host Clock"
   ssh -vvv -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 -i $NEPI_SSH_KEY_PATH -t ${NEPI_HOST_USER}@nepihost "sudo -S date --set=@$(date +%s); exec bash -l"
 }
 

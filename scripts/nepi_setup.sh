@@ -836,12 +836,13 @@ if [[ "$?" -eq 0 ]]; then
             echo "Updating Samba Passwords"
             samba_user=$NEPI_USER
             samba_pw=$NEPI_USER_PW
+            echo "Got Samba User ${samba_user}:${samba_pw}"
             sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
             pw_valid=1
             if check_password $samba_user $samba_pw; then
                 pw_valid=0
             fi
-            if [[ -n $samba_pw && $pw_valid == 1 && ${samba_pw} != 'encrypted' ]]; then
+            if [[ -n $samba_pw && ${samba_pw} != 'encrypted' ]]; then
                 echo "Updating Samba User ${samba_user}"
                 echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
             fi
@@ -850,25 +851,27 @@ if [[ "$?" -eq 0 ]]; then
 
             samba_user=$NEPI_HOST_USER
             samba_pw=$NEPI_HOST_PW
+            echo "Got Samba User ${samba_user}:${samba_pw}"
             sudo usermod -a -G $NEPI_HOST_USER $NEPI_USER > /dev/null
             pw_valid=1
             if check_password $samba_user $samba_pw; then
                 pw_valid=0
             fi
-            if [[ -n $samba_pw && $pw_valid == 1 && ${samba_pw} != 'encrypted' ]]; then
+            if [[ -n $samba_pw && ${samba_pw} != 'encrypted' ]]; then
                 echo "Updating Samba User ${samba_user}"
                 echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
             fi
             
 
             samba_user=$NEPI_ADMIN_USER
-            nepi_pw=$NEPI_ADMIN_PW
+            samba_pw=$NEPI_ADMIN_PW
+            echo "Got Samba User ${samba_user}:${samba_pw}"
             sudo usermod -a -G $NEPI_HOST_USER $NEPI_ADMIN_USER > /dev/null
             pw_valid=1
             if check_password $samba_user $samba_pw; then
                 pw_valid=0
             fi
-            if [[ -n $samba_pw && $pw_valid == 1 && ${samba_pw} != 'encrypted' ]]; then
+            if [[ -n $samba_pw  && ${samba_pw} != 'encrypted' ]]; then
                 echo "Updating Samba User ${samba_user}"
                 echo -e "$samba_pw\n$samba_pw" | sudo smbpasswd -a -s "$samba_user" > /dev/null
             fi
