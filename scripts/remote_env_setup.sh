@@ -606,6 +606,16 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                     echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
                     return 1
                 fi
+
+                # Skip if the URL is already bookmarked (Chromium stores http://host/, callers pass host or http://host)
+                if jq -e --arg url "$URL" \
+                    'def norm: sub("^https?://"; "") | rtrimstr("/");
+                    any(.. | objects | select(.type? == "url") | .url; norm == ($url | norm))' \
+                    "$BOOKMARKS_FILE" > /dev/null; then
+                    echo "Chromium bookmark for '$URL' already exists."
+                    return 0
+                fi
+
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 # Create a temporary file to work on
@@ -669,13 +679,12 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
                     if [[ -f $BOOKMARKS_FILE ]]; then
                         sudo chmod 0700 $BOOKMARKS_FILE
                         sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-                        if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                            add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
-                            add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
-                            add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
-                        fi
+                        # Point the template's localhost RUI bookmark at the device before checking for existing bookmarks
                         rui_ip=$nepi_ip
                         sed -i "s/localhost/$rui_ip/g" $BOOKMARKS_FILE
+                        add_chromium_bookmark "RUI-App" "192.168.179.103:5003" $BOOKMARKS_FILE
+                        add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
+                        add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                         sudo chmod 0700 $BOOKMARKS_FILE
                         sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                         echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"

@@ -1,4 +1,4 @@
-F#!/bin/bash
+#!/bin/bash
 
 ##
 ## Copyright (c) 2024 Numurus <https://www.numurus.com>.
@@ -130,7 +130,6 @@ fi
 
 #################################
 # Disable Apport Error Messaging
-F
 systemctl&> /dev/null
 if [[ "$?" -eq 0 ]]; then
     SYSTEMD_SERVICE_PATH=/etc/systemd/system
@@ -175,8 +174,9 @@ sudo apt install apt-utils jq git gitk htop  ncdu curl gparted \
     python-is-python3 python3-venv python3-pip nmap trash-cli nano \
     rsync usbutils fswebcam -y
 
-sudo apt install snap -y  2>/dev/null 
-if is_valid_jetson; then
+sudo apt install snap -y  2>/dev/null
+# JetPack 6+ installs desktop apps with flatpak, so it skips the snapd pin
+if is_valid_jetson && ! is_jetpack6_or_later; then
     snap download snapd --revision=24724
     sudo snap ack snapd_24724.assert
     sudo snap install snapd_24724.snap
@@ -465,7 +465,19 @@ if [[ -n "$DISPLAY" ]]; then
         sudo apt install nautilus -y
     fi
 
-    if command -v chromium-browser &>/dev/null; then
+    if is_jetpack6_or_later; then
+        # Snap apps fail to launch on JetPack 6 (snap-confine lacks cap_dac_override), so use flatpak
+        # Flatpak apps can't load the L4T GL driver, so browsers render on the CPU
+        if flatpak info org.chromium.Chromium &>/dev/null; then
+            echo "Chromium is installed."
+        else
+            echo "Installing Chromium Browser (flatpak)"
+            sudo apt install flatpak -y
+            sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+            sudo flatpak install -y flathub org.chromium.Chromium
+            echo "Log out and back in for flatpak apps to appear in the app menu"
+        fi
+    elif command -v chromium-browser &>/dev/null; then
         echo "Chromium is installed."
     else
         if is_valid_rpi; then

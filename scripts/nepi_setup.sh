@@ -1069,6 +1069,15 @@ source $config_update_file
 systemctl&> /dev/null
 if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
+    # Flatpak Chromium (JetPack 6+) uses a different app id and profile folder than snap Chromium
+    if flatpak info org.chromium.Chromium &>/dev/null; then
+        CHROMIUM_FLATPAK=1
+        CHROMIUM_DESKTOP=org.chromium.Chromium.desktop
+    else
+        CHROMIUM_FLATPAK=0
+        CHROMIUM_DESKTOP=chromium_chromium.desktop
+    fi
+
     if [[ $LITE_INSTALL -eq 0 ]]; then
         echo ""
         echo "########################"
@@ -1114,7 +1123,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             sudo cp -rf ${SOURCE_ETC_PATH}/user/nepi_wallpaper.png  /home/${CONFIG_USER}/
             gsettings set org.gnome.desktop.background picture-uri file:////home/${CONFIG_USER}/nepi_wallpaper.png
 
-            gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'chromium_chromium.desktop', \
+            gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', '${CHROMIUM_DESKTOP}', \
             'org.gnome.Terminal.desktop', 'code.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Screenshot.desktop', \
             'gnome-control-center.desktop']"
 
@@ -1154,7 +1163,11 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
         echo "Killing any running Chromium processes"
         sudo pkill -f chromium
         echo "Setting Chromium as Defualt Browser"
-        xdg-settings set default-web-browser chromium-browser.desktop
+        if [[ $CHROMIUM_FLATPAK -eq 1 ]]; then
+            xdg-settings set default-web-browser ${CHROMIUM_DESKTOP}
+        else
+            xdg-settings set default-web-browser chromium-browser.desktop
+        fi
 
 
 
@@ -1207,9 +1220,9 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
 
 
         CURRENT_FAVS=$(sudo -u ${CONFIG_USER} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u ${CONFIG_USER})/bus" gsettings get org.gnome.shell favorite-apps 2>/dev/null || echo "[]")
-        if [[ "$CURRENT_FAVS" != *"chromium"* ]]; then
+        if [[ "$CURRENT_FAVS" != *"${CHROMIUM_DESKTOP}"* ]]; then
             echo "Adding Chromium to favourites"
-            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, 'chromium_chromium.desktop']/")
+            NEW_FAVS=$(echo "$CURRENT_FAVS" | sed "s/\]$/, '${CHROMIUM_DESKTOP}']/")
             gsettings set org.gnome.shell favorite-apps "$NEW_FAVS"
         else
             echo "Chromium already in favourites"
@@ -1235,6 +1248,16 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             echo "Error: Chromium bookmarks file not found at $BOOKMARKS_FILE"
             return 1
         fi
+
+        # Skip if the URL is already bookmarked (Chromium stores http://host/, callers pass host or http://host)
+        if jq -e --arg url "$URL" \
+            'def norm: sub("^https?://"; "") | rtrimstr("/");
+            any(.. | objects | select(.type? == "url") | .url; norm == ($url | norm))' \
+            "$BOOKMARKS_FILE" > /dev/null; then
+            echo "Chromium bookmark for '$URL' already exists."
+            return 0
+        fi
+
         sudo chmod 0700 $BOOKMARKS_FILE
         sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
         # Create a temporary file to work on
@@ -1260,7 +1283,15 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
     }
 
     echo "Locating Chromium profile"
-    if [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
+    if [[ $CHROMIUM_FLATPAK -eq 1 ]]; then
+        CHROMIUM_FOLDER="/home/${CONFIG_USER}/.var/app/org.chromium.Chromium/config/chromium"
+        if [[ ! -d $CHROMIUM_FOLDER ]]; then
+            sudo mkdir -p ${CHROMIUM_FOLDER}/Default
+        fi
+        if [[ -d $CHROMIUM_FOLDER ]]; then
+            CHROMIUM_PROFILE="${CHROMIUM_FOLDER}"
+        fi
+    elif [[ -d "/home/${CONFIG_USER}/snap/chromium/common/chromium" ]]; then
         CHROMIUM_PROFILE="/home/${CONFIG_USER}/snap/chromium/common/chromium"
     elif [[ -d "/home/${CONFIG_USER}/.config/chromium" ]]; then
         CHROMIUM_PROFILE="/home/${CONFIG_USER}/.config/chromium"
@@ -1278,6 +1309,7 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
     if [[ -n "$CHROMIUM_PROFILE" ]]; then
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/snap  > /dev/null 2>&1
         sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.config/chromium  > /dev/null 2>&1
+        sudo chown -R ${CONFIG_USER}:${CONFIG_USER} /home/${CONFIG_USER}/.var  > /dev/null 2>&1
         if [[ -d ${CHROMIUM_PROFILE} ]]; then
             echo "Cleaning Chromium Profile ${CHROMIUM_PROFILE}"
             sudo rm -rf ${CHROMIUM_PROFILE}/Singleton* > /dev/null 2>&1
@@ -1296,11 +1328,9 @@ if [[ "$?" -eq 0 && -n $DISPLAY ]]; then
             if [[ -f $BOOKMARKS_FILE ]]; then
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
-                if ! grep -qnw $BOOKMARKS_FILE -e "RUI-App" ; then
-                    add_chromium_bookmark "RUI-App" "http://localhost:5003" $BOOKMARKS_FILE
-                    add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
-                    add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
-                fi
+                add_chromium_bookmark "RUI-App" "http://localhost:5003" $BOOKMARKS_FILE
+                add_chromium_bookmark "NEPI-Home" "https://nepi.com" $BOOKMARKS_FILE
+                add_chromium_bookmark "NEPI-GITHUB" "https://github.com/nepi-engine" $BOOKMARKS_FILE
                 sudo chmod 0700 $BOOKMARKS_FILE
                 sudo chown ${CONFIG_USER}:${CONFIG_USER} $BOOKMARKS_FILE
                 echo "Updated Chromiun Bookmarks in ${BOOKMARKS_FILE}"
