@@ -5369,108 +5369,98 @@ function pushr(){
   cur_path=$(pwd)
   cur_folder=${PWD##*/}
 
-  # Check 1: folder holds no content of its own, so git resolves to the PARENT
-  #         repo and a push here would push the superproject under this
-  #         folder's name. Ask git what it tracks here rather than looking at
-  #         the folder, so a stray .DS_Store or .gitignore cannot defeat it.
-  #         Mode 160000 is a gitlink (unpopulated submodule), not content.
-  #         A populated repo root never reaches this test.
+  # Guard A: refuse unless this folder is the root of its own repo. An
+  #          unpopulated submodule folder resolves to the parent repo, and a
+  #          push from there would push the superproject instead.
   repo_top=$(git rev-parse --show-toplevel 2>/dev/null)
-  if [[ -n $repo_top && "$repo_top" != "$(pwd -P)" ]] \
-     && [[ -z $(git ls-files --stage -- . 2>/dev/null | awk '$1 != "160000"' | head -1) ]]; then
-    echo -e "${RED}No repo content here, not a populated repo: ${cur_path}"
-    echo -e "${WHITE} -- Refusing to push. Git here resolves to ${repo_top}"
+  if [[ -z $repo_top || "$repo_top" != "$(pwd -P)" ]]; then
+    echo -e "${RED}Not a repo root: ${cur_path} (git resolves to ${repo_top:-nothing})"
+    echo -e "${WHITE} -- Refusing to push"
     echo -e "${WHITE}"
     return 1
   fi
 
-  # Check 2: every tracked file has been deleted, so add/commit/push would
-  #         replace good remote content with an empty tree.
-  tracked_total=$(git ls-files 2>/dev/null | wc -l)
-  tracked_gone=$(git ls-files --deleted 2>/dev/null | wc -l)
-  if [[ $tracked_total -gt 0 && $tracked_gone -ge $tracked_total ]]; then
-    echo -e "${RED}Repo is EMPTY: all ${tracked_total} tracked files are missing from ${cur_path}"
-    echo -e "${WHITE} -- Refusing to commit and push an empty repo"
-    echo -e "${WHITE}"
+  if [ -z "$(ls ${cur_path})" ]; then
+    echo -e "${RED}Repo is EMPTY"
     return 1
-  fi
-
-  if [[ $do_checks -eq 1 ]]; then
-    if ! is_valid_internet >/dev/null 2>&1; then
-      echo -e "${RED}Internet Not Connected"
-      echo -e "${WHITE}"
-      return 1
-    fi
-
-    head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
-    if [ "$?" -gt 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
-      echo -e "${RED}Not a Git Repo $(pwd)"
-      echo -e "${WHITE}"
-      return 1
-    fi
-
-    if ! nepigithub; then
-      echo -e "${RED}Git SSH Credentials Failed"
-      return 1
-    fi
-  fi
-
-
-
-  current_branch=$(git branch --show-current)
-  repo_status=$(git status --porcelain)
-  if [[ -n $repo_status || -z $current_branch ]]; then
-
-
-    g_name=$(git config user.name)
-    git add --all >/dev/null 2>&1
-    git commit -m "${CONFIG_USER}" >/dev/null 2>&1
-
-
-    if git symbolic-ref -q HEAD >/dev/null; then
-        current_branch=$(git branch --show-current)
-    else
-        #echo "HEAD is DETACHED!"
-        if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
-            git checkout develop
-        else
-            git checkout main
-        fi
-        current_branch=$(git branch --show-current)
-    fi
-
-    if [[ -z $current_branch ]]; then
-      echo -e "${RED}Git Repo not on branch. Pull Failed"
-      echo -e "${WHITE}"
-      return 1
-    fi 
-
-
-    # git push --dry-run >/dev/null 2>&1
-    # if [[ ! $? -eq 0 ]]; then
-    #   echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
-    #   echo -e "${WHITE}"
-    #   return 1
-    # fi
-
-    find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
-
-    echo -e "${WHITE}${repo_status}"
-    git push #origin HEAD:$current_branch
-    if [[  $? -eq 0 ]]; then
-        echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
-    else
-        echo -e "${RED}Push Failed"
-        echo -e "${WHITE}"
-        return 2 # Failed
-    fi
-    echo -e "${WHITE}Push Successfully"
-    return 0
   else
-    echo -e "${WHITE}No Changes to Push"
-    return 0
-  fi
 
+    if [[ $do_checks -eq 1 ]]; then
+      if ! is_valid_internet >/dev/null 2>&1; then
+        echo -e "${RED}Internet Not Connected"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      head_name=$(git rev-parse --abbrev-ref HEAD >/dev/null 2>&1)
+      if [ "$?" -gt 0 ]; then #$(is_git_repo $PWD) -eq 1 ]; then
+        echo -e "${RED}Not a Git Repo $(pwd)"
+        echo -e "${WHITE}"
+        return 1
+      fi
+
+      if ! nepigithub; then
+        echo -e "${RED}Git SSH Credentials Failed"
+        return 1
+      fi
+    fi
+
+
+    current_branch=$(git branch --show-current)
+    repo_status=$(git status --porcelain)
+    if [[ -n $repo_status || -z $current_branch ]]; then
+
+
+      g_name=$(git config user.name)
+      git add --all >/dev/null 2>&1
+      git commit -m "${CONFIG_USER}" >/dev/null 2>&1
+
+
+      if git symbolic-ref -q HEAD >/dev/null; then
+          current_branch=$(git branch --show-current)
+      else
+          #echo "HEAD is DETACHED!"
+          if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+              git checkout develop
+          else
+              git checkout main
+          fi
+          current_branch=$(git branch --show-current)
+      fi
+
+      if [[ -z $current_branch ]]; then
+        echo -e "${RED}Git Repo not on branch. Pull Failed"
+        echo -e "${WHITE}"
+        return 1
+      fi 
+
+
+      # git push --dry-run >/dev/null 2>&1
+      # if [[ ! $? -eq 0 ]]; then
+      #   echo -e "${RED}Push Failed: You Don't have Push Credentials $(pwd)"
+      #   echo -e "${WHITE}"
+      #   return 1
+      # fi
+
+      find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
+
+      echo -e "${WHITE}${repo_status}"
+      git push #origin HEAD:$current_branch
+      if [[  $? -eq 0 ]]; then
+          echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
+      else
+          echo -e "${RED}Push Failed"
+          echo -e "${WHITE}"
+          return 2 # Failed
+      fi
+      echo -e "${WHITE}Push Successfully"
+      return 0
+    else
+      echo -e "${WHITE}No Changes to Push"
+      return 0
+    fi
+    echo "The folder contains files"
+  fi
 
 }
 export -f pushr
@@ -5602,7 +5592,7 @@ function pullr {
 
   if [ -n "$(git status --porcelain)" ]; then
     echo -e "${ORANGE}Repo Has Uncommited Changes"
-    pushr 0 >/dev/null 2>&1
+    pushr 0
     if [[ $? -eq 0 ]]; then
       echo -e "${GREEN}Pushed Uncommited Changes"
     else
