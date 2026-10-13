@@ -1,3 +1,38 @@
+# function rtext(){
+
+#     text_key="$1"
+#     if [[ ! -v "$text_key" || -z "$text_key" ]]; then
+#       echo "Text Key not Provided"
+#       return 1
+#     fi
+
+#     text_replace="$1"
+#     if [[ ! -v "$text_replace" || -z "$text_replace" ]]; then
+#       echo "Text Replace not Provided"
+#       return 2
+#     fi
+
+#     source_path=$3
+#     if [[ ! -v "$source_path" || -z "$source_path" ]]; then
+#         source_path=$(pwd)
+#         if ! is_nepi_path ${source_folder}; then
+#             echo "Path not Provided"
+#             return 3
+#         fi
+#     fi
+
+#     if [[ -d "$source_path" || -f "$source_path" || -L "$source_path" ]]; then
+#         ftext ${text_key}
+
+#     else
+#       echo "Path not found: ${source_path}"
+#       return 4
+#     fi
+# }
+# export -f rtext
+
+
+
 
 
 grep -r ros_ ./ > search
@@ -7,6 +42,54 @@ find . -type f -exec perl -i -pe 's|str2replace|replace_str|g' {} +
 
 Example
 
-find . -type f -exec perl -i -pe 's|custom_stereo|stereo_cam|g' {} +
+find . -type f -exec perl -i -pe 's|log_name = log_name| |g' {} +
+find . -type f -exec perl -i -pe 's/, log_name_list = \[\]//g' {} +
+find . -type f -exec perl -i -pe 's/  log_name_list = \[\]//g' {} +
+find . -type f -exec perl -i -pe "s/, log_name_list = log_name_list//g" {} +
 
 
+
+find . -type f -exec perl -i -pe "s/log_name = None,//g" {} +
+find . -type f -exec perl -i -pe "s/= self.log_name_list//g" {} +
+
+find . -type f -exec perl -i -pe "s/^\s*self\.log_name_list = copy\.deepcopy\(log_name_list\)\n?//g" {} +
+find . -type f -exec perl -i -ne 'print unless /self\.log_name_list\.append\(self\.class_name\)/' {} +
+
+find . -type f -exec perl -i -pe "s/log_name = self.class_name//g" {} +
+find . -type f -exec perl -i -pe "s/log_name=class_name//g" {} +
+find . -type f -exec perl -i -pe "s/log_name = self.log_name//g" {} +
+
+find . -type f -exec perl -i.bak -pe "s/log_name_list \)//g"  {} +
+
+find . -type f -exec perl -i -ne 'print unless /if log_name is not None:/'  {} +
+
+find . -type f -exec perl -i -ne 'print unless /self\.log_name_list\.append\(log_name\)/'  {} +
+
+find . -type f -exec perl -i -pe "s/log_name = nepi_utils\.get_clean_name\(log_name\)\n?//" {} +
+
+find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(controls_name\)\s*\n?//g" {} +
+find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(data_name\)\s*\n?//g" {} +
+find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(settings_name\)\s*\n?//g" {} +
+find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(process_name\)\s*\n?//g" {} +
+
+find . -type f -exec perl -i -ne 'print unless /log_name_list = \[self\.node_name\]/'  {} +
+
+find . -type f -exec perl -i -pe "s/, log_name_list//g" {} +
+
+find . -type f -exec perl -i -pe "s/, log_name_list = None//g" {} +
+find . -type f -exec perl -i -pe "s/,log_name_list = None//g" {} +
+find . -type f -exec perl -i -pe "s/log_name_list = None//g" {} +
+find . -type f -exec perl -i -pe "s/, log_name_list = None//g" {} +
+find . -type f -exec perl -i -pe 's/log_name_list ,//g' {} +
+find . -type f -exec perl -i -pe 's/log_name_list,//g' {} +
+
+find . -type f -exec perl -i -pe "s/, log_name_list//g" {} +
+
+find . -type f -exec perl -i -pe "s/, log_name = None//g" {} +
+
+find . -type f -exec perl -i -pe "s/log_name = data_product,//g" {} +
+
+find . -type f -exec perl -i -pe "s/log_name,//g" {} +
+
+
+self.log_name + ": 
