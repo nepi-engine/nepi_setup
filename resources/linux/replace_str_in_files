@@ -43,53 +43,7 @@ find . -type f -exec perl -i -pe 's|str2replace|replace_str|g' {} +
 Example
 
 find . -type f -exec perl -i -pe 's|log_name = log_name| |g' {} +
-find . -type f -exec perl -i -pe 's/, log_name_list = \[\]//g' {} +
-find . -type f -exec perl -i -pe 's/  log_name_list = \[\]//g' {} +
-find . -type f -exec perl -i -pe "s/, log_name_list = log_name_list//g" {} +
-
-
-
-find . -type f -exec perl -i -pe "s/log_name = None,//g" {} +
-find . -type f -exec perl -i -pe "s/= self.log_name_list//g" {} +
-
-find . -type f -exec perl -i -pe "s/^\s*self\.log_name_list = copy\.deepcopy\(log_name_list\)\n?//g" {} +
-find . -type f -exec perl -i -ne 'print unless /self\.log_name_list\.append\(self\.class_name\)/' {} +
-
-find . -type f -exec perl -i -pe "s/log_name = self.class_name//g" {} +
-find . -type f -exec perl -i -pe "s/log_name=class_name//g" {} +
-find . -type f -exec perl -i -pe "s/log_name = self.log_name//g" {} +
-
-find . -type f -exec perl -i.bak -pe "s/log_name_list \)//g"  {} +
-
-find . -type f -exec perl -i -ne 'print unless /if log_name is not None:/'  {} +
-
-find . -type f -exec perl -i -ne 'print unless /self\.log_name_list\.append\(log_name\)/'  {} +
-
-find . -type f -exec perl -i -pe "s/log_name = nepi_utils\.get_clean_name\(log_name\)\n?//" {} +
-
-find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(controls_name\)\s*\n?//g" {} +
-find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(data_name\)\s*\n?//g" {} +
-find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(settings_name\)\s*\n?//g" {} +
-find . -type f -exec perl -i -pe "s/^\s*log_name = nepi_utils\.get_clean_name\(process_name\)\s*\n?//g" {} +
-
-find . -type f -exec perl -i -ne 'print unless /log_name_list = \[self\.node_name\]/'  {} +
-
-find . -type f -exec perl -i -pe "s/, log_name_list//g" {} +
-
-find . -type f -exec perl -i -pe "s/, log_name_list = None//g" {} +
-find . -type f -exec perl -i -pe "s/,log_name_list = None//g" {} +
-find . -type f -exec perl -i -pe "s/log_name_list = None//g" {} +
-find . -type f -exec perl -i -pe "s/, log_name_list = None//g" {} +
-find . -type f -exec perl -i -pe 's/log_name_list ,//g' {} +
-find . -type f -exec perl -i -pe 's/log_name_list,//g' {} +
-
-find . -type f -exec perl -i -pe "s/, log_name_list//g" {} +
-
-find . -type f -exec perl -i -pe "s/, log_name = None//g" {} +
-
-find . -type f -exec perl -i -pe "s/log_name = data_product,//g" {} +
-
-find . -type f -exec perl -i -pe "s/log_name,//g" {} +
-
+find . -type f -exec perl -i -pe 's/from nepi_sdk\.nepi_sdk import logger as Logger\n?//g' {} +
+find . -type f -exec perl -pi -e 's/logger = Logger\( \)/logger = nepi_sdk.sdk_logger/g' {} +
 
 self.log_name + ": 
