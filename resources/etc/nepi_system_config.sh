@@ -185,6 +185,7 @@ function update_current_config() {
         export NEPI_ALIAS_IP_1='NONE'
         export NEPI_ALIAS_IP_2='NONE'
         export NEPI_ALIAS_IP_3='NONE'
+        export NEPI_ALIAS_IP_4='NONE'
         export NEPI_ROS_IP=$NEPI_STATIC_IP
         export NEPI_NTP_IP='NONE'
     fi
@@ -201,6 +202,7 @@ function update_current_config() {
     CURRENT_NEPI_ALIAS_IP_1=$(fix_ipv4_netmask $NEPI_ALIAS_IP_1)
     CURRENT_NEPI_ALIAS_IP_2=$(fix_ipv4_netmask $NEPI_ALIAS_IP_2)
     CURRENT_NEPI_ALIAS_IP_3=$(fix_ipv4_netmask $NEPI_ALIAS_IP_3)
+    CURRENT_NEPI_ALIAS_IP_4=$(fix_ipv4_netmask $NEPI_ALIAS_IP_4)
     CURRENT_NEPI_NTP_IP="$NEPI_NTP_IP"
     CURRENT_NEPI_ROS_IP="$NEPI_ROS_IP"
     CURRENT_NEPI_FS_AB="$NEPI_FS_AB"
@@ -251,6 +253,7 @@ function print_current_config(){
     echo "NEPI_ALIAS_IP_1: ${CURRENT_NEPI_ALIAS_IP_1}"
     echo "NEPI_ALIAS_IP_2: ${CURRENT_NEPI_ALIAS_IP_2}"
     echo "NEPI_ALIAS_IP_3: ${CURRENT_NEPI_ALIAS_IP_3}"
+    echo "NEPI_ALIAS_IP_4: ${CURRENT_NEPI_ALIAS_IP_4}"
     echo "NEPI_NTP_IP: ${CURRENT_NEPI_NTP_IP}"
     echo "NEPI_ROS_IP: ${CURRENT_NEPI_ROS_IP}"
     echo "NEPI_FS_AB: ${CURRENT_NEPI_FS_AB}"
@@ -277,6 +280,7 @@ function udpate_config_file(){
     update_yaml_value "NEPI_ALIAS_IP_1" $CURRENT_NEPI_ALIAS_IP_1 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_2" $CURRENT_NEPI_ALIAS_IP_2 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ALIAS_IP_3" $CURRENT_NEPI_ALIAS_IP_3 $SYSTEM_SYS_CONFIG_FILE
+    update_yaml_value "NEPI_ALIAS_IP_4" $CURRENT_NEPI_ALIAS_IP_4 $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_NTP_IP" $CURRENT_NEPI_NTP_IP $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_ROS_IP" ${CURRENT_NEPI_STATIC_IP%%/*} $SYSTEM_SYS_CONFIG_FILE
     update_yaml_value "NEPI_FS_AB" $CURRENT_NEPI_FS_AB $SYSTEM_SYS_CONFIG_FILE
@@ -500,7 +504,7 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
         options=(   "VIEW ALL SETTINGS" "Update NEPI_USER_PW" "Update NEPI_HOST_PW" "Update NEPI_ADMIN_PW" \
                             "Update NEPI_DEVICE_ID" "Update NEPI_DEVICE_MD" "Update NEPI_DEVICE_SN" \
                             "Update NEPI_WIRED_INTERFACE" "Update NEPI_STATIC_IP" "Update NEPI_GATEWAY_IP" \
-                            "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_NTP_IP" \
+                            "Update NEPI_ALIAS_IP_1" "Update NEPI_ALIAS_IP_2"  "Update NEPI_ALIAS_IP_3" "Update NEPI_ALIAS_IP_4" "Update NEPI_NTP_IP" \
                             "Update NEPI_FS_AB" "Update NEPI_IMPORT_PATH" "Update NEPI_EXPORT_PATH" "Update NEPI_SSH_KEY"\
                             "CONNECT WIFI" \
                             "FACTORY RESET" "APPLY SETTINGS" )
@@ -682,6 +686,20 @@ if [ -f "$SYSTEM_SYS_CONFIG_FILE" ]; then
                                 USER_INPUT=fix_ipv4_netmask "$USER_INPUT"
                                 if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
                                     CURRENT_NEPI_ALIAS_IP_3=$USER_INPUT
+                                    echo ""
+                                    break # Exit the select statement, re-display menu
+                                else
+                                    echo "Not A Valid IP/Netmask Format"
+                                fi
+                                ;;
+                            "Update NEPI_ALIAS_IP_4")
+                                read -p $'\n'"Enter a new Alias IP Address/Netmask, or Empty Line for None: " USER_INPUT
+                                if [[ "${USER_INPUT}" == "" ]]; then
+                                    USER_INPUT=None
+                                fi
+                                USER_INPUT=$(fix_ipv4_netmask "$USER_INPUT")
+                                if is_valid_ipv4_netmask "$USER_INPUT" || [[ "${USER_INPUT}" == "None" ]]; then
+                                    CURRENT_NEPI_ALIAS_IP_4=$USER_INPUT
                                     echo ""
                                     break # Exit the select statement, re-display menu
                                 else
