@@ -91,6 +91,7 @@ echo ""
         export NEPI_ALIAS_IP_1='NONE'
         export NEPI_ALIAS_IP_2='NONE'
         export NEPI_ALIAS_IP_3='NONE'
+        export NEPI_ALIAS_IP_4='NONE'
         export NEPI_ROS_IP=$NEPI_STATIC_IP
         export NEPI_NTP_IP='NONE'
     fi

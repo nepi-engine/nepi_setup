@@ -1,7 +1,12 @@
 
+
 ntag=3.4.0-RC1
 
-# Tag the repo
+#############################
+# Tag the repo only
 git tag -a $ntag -m "${ntag}"
-#To create a release in github
+
+
+###########################
+#Create a zipped release in github 
 git push origin $ntag
