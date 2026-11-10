@@ -147,6 +147,7 @@ function nepibldc(){
 # NEPI build shortcuts
 function codebld(){
 sudo -v
+nepistop
 run_folder=$(pwd)
 cd $NEPI_BUILD_REPO_FOLDER
 source ./build_nepi_code.sh
