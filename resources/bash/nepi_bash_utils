@@ -5408,7 +5408,17 @@ function pushr(){
 
     current_branch=$(git branch --show-current)
     repo_status=$(git status --porcelain)
-    if [[ -n $repo_status || -z $current_branch ]]; then
+    # Commits already made but not yet pushed count as changes too. Checking
+    # only for uncommitted changes printed "No Changes to Push" for a clean repo
+    # that was ahead of its remote, so its commits never left the machine while
+    # the superproject went on to push a pointer to them (an empty
+    # nepi_drivers in the 3.3.0 tag; nepi_apps nearly again 2026-11-10).
+    ahead_count=0
+    if [[ -n $current_branch ]] && git rev-parse --abbrev-ref @{upstream} >/dev/null 2>&1; then
+      ahead_count=$(git rev-list --count @{upstream}..HEAD 2>/dev/null)
+      ahead_count=${ahead_count:-0}
+    fi
+    if [[ -n $repo_status || -z $current_branch || $ahead_count -gt 0 ]]; then
 
 
       g_name=$(git config user.name)
@@ -5420,12 +5430,29 @@ function pushr(){
           current_branch=$(git branch --show-current)
       else
           #echo "HEAD is DETACHED!"
-          if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then   
+          # The commit above landed on the detached HEAD. Bring it onto the
+          # branch after the checkout, or it is left behind and the working
+          # tree silently reverts to the branch (2026-11-10: a day of edits in
+          # three submodules vanished from main this way, unpushed).
+          detached_sha=$(git rev-parse HEAD)
+          if [[ ("$(pwd)" == "${NEPI_REPO_FOLDER}"  || "$(pwd)" == "${NEPI_REPO_FOLDER}/src") ]]; then
               git checkout develop
           else
               git checkout main
           fi
           current_branch=$(git branch --show-current)
+          if [[ -n $current_branch ]]; then
+            git merge --ff-only "$detached_sha" >/dev/null 2>&1
+            if [[ $? -ne 0 ]]; then
+              # Go back to the commit so a rerun sees the same detached state
+              # and fails again, instead of finding a clean branch to "push"
+              git checkout -q "$detached_sha" >/dev/null 2>&1
+              echo -e "${RED}Commit ${detached_sha:0:7} was made on a detached HEAD and cannot fast-forward onto ${current_branch}"
+              echo -e "${WHITE} -- Merge it by hand (git checkout ${current_branch} && git merge ${detached_sha:0:7}), then rerun. Not pushing."
+              echo -e "${WHITE}"
+              return 1
+            fi
+          fi
       fi
 
       if [[ -z $current_branch ]]; then
@@ -5445,6 +5472,8 @@ function pushr(){
       find ./ -type d -name "__pycache__" -exec sudo rm -rf {} +
 
       echo -e "${WHITE}${repo_status}"
+      # Name the commits going up, so already-committed work is visible too
+      git log --oneline @{upstream}..HEAD 2>/dev/null
       git push #origin HEAD:$current_branch
       if [[  $? -eq 0 ]]; then
           echo -e "${YELLOW}Pushed Merged repo ${PWD##*/}"
