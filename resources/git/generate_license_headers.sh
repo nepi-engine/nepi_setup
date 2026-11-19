@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# Copyright (c) 2025 Numurus <https://www.numurus.com>.
+#
+# This file is part of nepi setup tools (nepi_setup) repo
+# (see https://github.com/nepi-engine/nepi_setup)
+#
+# License: NEPI Setup Tools and NEPI Docker Images created or installed with NEPI Setup Tools
+# are licensed under the "Numurus Software License",
+# which can be found at: <https://numurus.com/wp-content/uploads/Numurus-Software-License-Terms.pdf>
+#
+# Redistributions in source code must retain this top-level comment block.
+# Plagiarizing this software to sidestep the license obligations is illegal.
+#
+# Contact Information:
+# ====================
+# - mailto:nepi@numurus.com
+#
 
 # Leverage licenseheaders Python module to update license headers
 # Requires licenseheaders is on python3 path (e.g., pip3 install licenseheaders) 

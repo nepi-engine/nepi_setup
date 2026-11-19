@@ -1,4 +1,22 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) 2026 Numurus <https://www.numurus.com>.
+#
+# This file is part of nepi setup tools (nepi_setup) repo
+# (see https://github.com/nepi-engine/nepi_setup)
+#
+# License: NEPI Setup Tools and NEPI Docker Images created or installed with NEPI Setup Tools
+# are licensed under the "Numurus Software License",
+# which can be found at: <https://numurus.com/wp-content/uploads/Numurus-Software-License-Terms.pdf>
+#
+# Redistributions in source code must retain this top-level comment block.
+# Plagiarizing this software to sidestep the license obligations is illegal.
+#
+# Contact Information:
+# ====================
+# - mailto:nepi@numurus.com
+#
+
 """Raise cmake_minimum_required() to the floor CMake 4.x still accepts.
 
 CMake 4.0 removed compatibility with cmake_minimum_required(VERSION <3.5) and
