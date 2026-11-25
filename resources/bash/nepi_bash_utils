@@ -5330,6 +5330,16 @@ cd $run_folder
 }
 
 ## NEPI deploy complete
+function nepidpll {
+sudo -v
+run_folder=$(pwd)
+cd $NEPI_REPO_FOLDER
+source ./deploy_nepi_complete.sh
+source ./deploy_nepi_live.sh
+cd $run_folder
+}
+
+## NEPI deploy complete
 function nepidplc {
 run_folder=$(pwd)
 cd $NEPI_REPO_FOLDER
@@ -5991,6 +6001,7 @@ nepigithubdev = Check and Setup a GitHub SSH key for your GitHub account and clo
 nepiclone = Clone the latest NEPI source-code repo
 nepiclonedev = Clone the latest NEPI Development branch source-code repo
 nepidpl = Deploy nepi complete to nepi device
+nepidpll = Deploy nepi complete to nepi device along with live updates
 nepidplc = Clear NEPi source and system config folders. Deploy nepi complete to nepi device
 nepidl = Deploy nepi python scripts to running NEPI container
 gitmain = Change to main branch in current repo or submodule folder
